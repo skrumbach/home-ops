@@ -72,9 +72,11 @@ After the apply that creates (or rotates) the Grafana provider, and before the
 Grafana change merges:
 
 ```bash
-CSEC=$(tofu -chdir=terraform/authentik output -raw grafana_client_secret)
-op item create --vault Homelab --category login --title grafana-oidc \
-  "client-secret[password]=$CSEC"
+cd terraform/authentik   # vals needs secrets.vals.yaml for the state-bucket keys
+out() { mise exec -- vals exec -i -f secrets.vals.yaml -- tofu output -raw "$1"; }
+CSEC=$(out grafana_client_secret); [ -n "$CSEC" ] || exit 1
+env -u OP_SERVICE_ACCOUNT_TOKEN op item create --vault Homelab --category password \
+  --title grafana-oidc "client-secret[password]=$CSEC"
 ```
 
 On rotation use `op item edit`. ExternalSecret `monitoring/grafana-oidc`
@@ -82,6 +84,23 @@ refreshes hourly and reloader restarts Grafana on a change. The `envFrom` is
 optional, so without the item Grafana runs with only the local login. Reloader
 does not fire when the Secret is first created: an item added after merge
 needs one Grafana restart.
+
+## Copy the generated renovate-operator secrets to 1Password
+
+After the apply that creates (or rotates) the renovate-operator provider:
+
+```bash
+cd terraform/authentik
+out() { mise exec -- vals exec -i -f secrets.vals.yaml -- tofu output -raw "$1"; }
+CSEC=$(out renovate_operator_client_secret); SSEC=$(out renovate_operator_session_secret)
+[ -n "$CSEC" ] && [ -n "$SSEC" ] || exit 1
+env -u OP_SERVICE_ACCOUNT_TOKEN op item create --vault Homelab --category password \
+  --title renovate-operator-oidc "client-secret[password]=$CSEC" "session-secret[password]=$SSEC"
+```
+
+On rotation use `op item edit` instead. The ExternalSecret refreshes hourly and
+reloader restarts the operator. The item must exist before the HelmRelease
+enables `auth.oidc`, or the pod cannot start (`secretKeyRef`).
 
 ## Push a generated LiteLLM client to the cluster
 
