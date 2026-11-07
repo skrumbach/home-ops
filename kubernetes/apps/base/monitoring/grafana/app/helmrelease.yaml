@@ -387,11 +387,11 @@ spec:
               value: Prometheus
 
         envoy-gateway:
-          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.3/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json
+          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.10.0/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json
           datasource: Prometheus
 
         envoy-proxy:
-          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.3/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
+          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.10.0/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
           datasource: Prometheus
 
       monitoring:
