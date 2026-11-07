@@ -70,7 +70,9 @@ spec:
               protocol: TCP
             # Non-Ceph: plain-HTTP, unauthenticated metrics on the node IP. The only reader is
             # the Prometheus pod, whose source is its pod (or a node) identity, never `world`;
-            # 9283/9926 above are scraped the same way and stay up. Chart-default ports.
+            # 9283/9926 above are scraped the same way and stay up. Each listener port is
+            # pinned explicitly (cilium and kube-prometheus-stack values, Talos template), and
+            # scripts/ci/hostpolicy-ceph-selector-test.py fails if a pin leaves this list.
             # etcd listen-metrics-urls (talos/machineconfig.yaml.j2), job kube-etcd.
             - port: "2381"
               protocol: TCP

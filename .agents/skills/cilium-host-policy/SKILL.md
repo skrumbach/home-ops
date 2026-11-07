@@ -12,6 +12,7 @@ description: "Read before adding or editing any CiliumClusterwideNetworkPolicy, 
 3. **Do not trust the policy until both halves of the bpf gate hold on every node.** Deny rows for the denied ports, and `Allow Ingress ANY` still present. Missing Deny means the policy is inert and Ceph and the metrics ports are still LAN-exposed. Missing Allow means the host is in default-deny: roll back before debugging. [gates.md](references/gates.md)
 4. **Ceph daemons are host-network.** `spec.network.provider: host`. A `NetworkPolicy` or `CiliumNetworkPolicy` in `rook-ceph` does not apply to them. Host policy is the layer that can.
 5. **The only live host policy is `cilium/app/hostpolicy-ceph.yaml`.** `enableDefaultDeny` is false in both directions. `policyAuditMode` is false and `hostFirewall.enabled` is true, so it enforces. Do not add a second host policy that omits tripwire 1.
+6. **Every metrics port the policy world-denies is pinned where its listener is set, never left to a chart default.** Cilium `prometheus.port`, `operator.prometheus.port`, `envoy.prometheus.port`, `hubble.metrics.port`; kube-prometheus-stack `prometheus-node-exporter.service.port`; Talos etcd `listen-metrics-urls`. A chart bump that moves a default would reopen it to the LAN. Change the pin and the policy's `toPorts` together; the selector gate fails otherwise.
 
 ## Where things live
 
@@ -22,7 +23,7 @@ description: "Read before adding or editing any CiliumClusterwideNetworkPolicy, 
 | Chart tag | `kubernetes/apps/base/kube-system/cilium/app/ocirepository.yaml` |
 | Two-way gate and rollback | [gates.md](references/gates.md) |
 | Why the selector and the policy look the way they do | [evidence.md](references/evidence.md) |
-| Selector gate | `scripts/ci/hostpolicy-ceph-selector-test.py` |
+| Selector, deny-list and metrics-port-pin gate | `scripts/ci/hostpolicy-ceph-selector-test.py` |
 
 ## Procedures
 
