@@ -19,3 +19,11 @@ output "litellm_oidc_endpoints" {
     userinfo      = "https://auth.${var.cluster_domain}/application/o/userinfo/"
   }
 }
+
+# Generated Grafana client secret. Copy once into 1Password Homelab/grafana-oidc (field
+# client-secret). Skill `authentik-terraform` references/apply-runbook.md.
+output "grafana_client_secret" {
+  description = "OAuth2 client_secret generated for the Grafana provider"
+  value       = random_password.grafana_client_secret.result
+  sensitive   = true
+}

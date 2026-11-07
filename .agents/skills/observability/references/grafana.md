@@ -24,6 +24,18 @@ Do not reintroduce `kind: GrafanaDashboard` or a grafana-operator HelmRelease.
 Dashboards that Grafana actually loads are sidecar ConfigMaps (label
 `grafana_dashboard: "1"`) or `url:` entries on the Grafana HelmRelease.
 
+## Authentik SSO
+
+`auth.generic_oauth` against the `grafana` provider
+(`terraform/authentik/grafana.tofu`). Only `authentik Admins` sign in, as
+`GrafanaAdmin`; `role_attribute_strict` denies everyone else rather than
+landing them as Viewer. SSO users live in the emptyDir DB and are recreated
+on their next login after a restart. The local admin form stays: it is the
+break-glass path and `grafana-sa-provisioner` logs in through `POST /login`.
+The client secret reaches Grafana as env `GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET`
+(ExternalSecret `grafana-oidc`), never as a variable-expansion token in
+`grafana.ini`.
+
 ## Datasource and chart-entry traps
 
 - The Prometheus datasource carries `timeInterval: 1m`, matching the 1m

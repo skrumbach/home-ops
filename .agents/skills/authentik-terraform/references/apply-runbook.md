@@ -66,6 +66,23 @@ Then confirm ExtAuth still redirects and the server pod is Ready.
 LiteLLM provider, application, scope mapping and invalidation flow. There is
 no live-cluster case for it.
 
+## Copy the generated Grafana secret to 1Password
+
+After the apply that creates (or rotates) the Grafana provider, and before the
+Grafana change merges:
+
+```bash
+CSEC=$(tofu -chdir=terraform/authentik output -raw grafana_client_secret)
+op item create --vault Homelab --category login --title grafana-oidc \
+  "client-secret[password]=$CSEC"
+```
+
+On rotation use `op item edit`. ExternalSecret `monitoring/grafana-oidc`
+refreshes hourly and reloader restarts Grafana on a change. The `envFrom` is
+optional, so without the item Grafana runs with only the local login. Reloader
+does not fire when the Secret is first created: an item added after merge
+needs one Grafana restart.
+
 ## Push a generated LiteLLM client to the cluster
 
 OpenTofu cannot write Kubernetes. After an apply that rotates the LiteLLM
