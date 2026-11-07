@@ -84,8 +84,9 @@ every one is byte-checked against it by CI, so they cannot drift silently.
 | `duration_check` | `flow-nodes/duration_check.js` | Guard 2: duration must match |
 | `hdr_survival` | `flow-nodes/hdr_survival.js` | Guard 3: HDR must survive |
 | `lang22` `lang23` `lang24` `rx_lang` | `flow-nodes/langfilter.js` | Keep English, German and untagged audio; keep all unless a kept track is a main soundtrack (not commentary/description); when audio is dropped, English (else the first kept main track) becomes the only default; subtitles untouched |
-| `rx_dv` `rx_snapshot` `rx_sub` `rx_duration` `rx_hdr` | `dv_check.js`, `snapshot.js`, `subconform.js`, `duration_check.js`, `hdr_survival.js` | Same bodies on the AV1 remux path (`rx_dv` output 1, DV, dead-ends) |
-| `rx_verify` | `flow-nodes/remux_verify.js` | Remux guard: video/subtitle counts unchanged, audio = what the filter kept, still AV1, smaller than source |
+| `rx_dv` `rx_sub` | `dv_check.js`, `subconform.js` | Same bodies on the AV1 remux path (`rx_dv` output 1, DV, dead-ends) |
+| `rx_snapshot` | `flow-nodes/remux_snapshot.js` | Source size, the video track's own duration, and which HDR side data the source has |
+| `rx_verify` | `flow-nodes/remux_verify.js` | Remux guard: video/subtitle counts unchanged, audio = what the filter kept, still AV1, not larger than source, video-track duration within 0.5%, every HDR side-data kind the source had |
 
 The three `cargs2X` bodies are generated from `cargs_template.js` by
 substituting `__LABEL__` / `__QUALITY__` / `__HDR__`:
@@ -104,11 +105,15 @@ The three `sub2X` bodies are byte-identical to `subconform.js`.
 (nothing to drop) both continue to the encoder, output 3 (no `ffmpegCommand`)
 dead-ends. Files that are already AV1 (`guard_home` output 1) take a copy-only
 path, `rx_dv -> rx_snapshot -> rx_start -> rx_cont -> rx_sub -> rx_lang -> rx_exec ->
-rx_verify -> rx_duration -> rx_hdr -> replace`, with no video encoder (Dolby Vision files stop at `rx_dv`): only a
+rx_verify -> replace`, with no video encoder (Dolby Vision files stop at `rx_dv`): only a
 file that loses audio reaches `rx_exec`; output 2 ("nothing to drop") ends the
 job without writing. Dropping audio is permanent (Replace overwrites the only
 copy), so existing AV1 files are requeued deliberately: one canary, check it in
-Plex, then 10, then the rest; never a bulk requeue.
+Plex, then 10, then the rest; never a bulk requeue. The encode-path duration
+and HDR guards are not on this path: they compare the container duration (a
+dropped audio track longer than the film shortens it legitimately) and demand
+content light level even when the source has none, which failed correct
+remuxes of Super Mario Bros. and Spectre on 2026-11-07.
 
 `cargs2X` also carries the VA-API probe: when the chosen encoder is `av1_qsv`
 it runs `vainfo` on `/dev/dri/renderD129` and throws `VA-API probe FAILED`
@@ -171,9 +176,9 @@ each guard by a string only it can emit, in a real job report:
 | 4K CPU guard | `AV1 tuning: 4K CPU guard` |
 | `size_check` / `duration_check` / `hdr_survival` | `Size check:` / `Duration check:` / `HDR survival:` |
 | `lang2X` / `rx_lang` | `Audio language filter: in a=` |
-| `rx_verify` | `Remux guard: v=` |
+| `rx_snapshot` / `rx_verify` | `Remux snapshot:` / `Remux guard: v=` |
 
-Structural check that the document itself is intact (51 nodes, 79 edges, 22 `customFunction`, and no
+Structural check that the document itself is intact (49 nodes, 77 edges, 20 `customFunction`, and no
 `customFunction` left on the dead `inputsDB.function` key):
 
 ```bash

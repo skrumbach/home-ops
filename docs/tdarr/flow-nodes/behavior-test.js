@@ -582,41 +582,67 @@ async function testLangfilter() {
   }
 }
 
-// --- 3c. remux guard ---
+// --- 3c. remux snapshot + guard ---
 async function testRemuxVerify() {
-  log('\n== remux_verify ==');
+  log('\n== remux_snapshot + remux_verify ==');
+  const snapNode = loadModule(path.join(NODES, 'remux_snapshot.js'));
   const node = loadModule(path.join(NODES, 'remux_verify.js'));
-  const probe = (vcodec, nAudio, nSubs, art) => {
-    const st = [{ codec_type: 'video', codec_name: vcodec }];
-    if (art) st.push({ codec_type: 'video', codec_name: 'mjpeg', disposition: { attached_pic: 1 } });
+  const MD = { side_data_type: 'Mastering display metadata' };
+  const CLL = { side_data_type: 'Content light level metadata' };
+  const vid = (dur, sd, codec) => ({ codec_type: 'video', codec_name: codec || 'av1', tags: { DURATION: dur }, side_data_list: sd || [] });
+  const probe = (v, nAudio, nSubs, extra) => {
+    const st = [v];
+    for (const e of extra || []) st.push(e);
     for (let i = 0; i < nAudio; i += 1) st.push({ codec_type: 'audio', codec_name: 'eac3' });
     for (let i = 0; i < nSubs; i += 1) st.push({ codec_type: 'subtitle', codec_name: 'subrip' });
-    return { streams: st, format: { duration: '100.0' } };
+    return { streams: st, format: { duration: '5603.712' } };
   };
-  const user = { sourceSize: 40000, expectVideo: 1, expectAudio: 3, expectSubtitle: 2 };
+  // Snapshot: video duration from the DURATION tag, not the container (Super
+  // Mario Bros.: a dropped Hindi track ran 59 s longer than the film), and HDR
+  // kinds from the source (Spectre: mastering, no CLL).
+  const logs0 = [];
+  const sv = { user: { expectVideo: 1, expectAudio: 3, expectSubtitle: 2 } };
+  await runNode(snapNode, {
+    inputFileObj: { _id: '/nonexistent/src.mkv', file_size: 40000, ffProbeData: probe(vid('01:32:24.956000000', [MD]), 21, 2) },
+    variables: sv, jobLog: (x) => logs0.push(String(x)),
+  });
+  log(`  snapshot: ${logs0[0]}`);
+  assert.ok(Math.abs(sv.user.sourceVideoDuration - 5544.956) < 0.01, 'video duration from tag');
+  assert.strictEqual(sv.user.sourceDuration, 5603.712);
+  assert.strictEqual(sv.user.sourceHdrMaster, true);
+  assert.strictEqual(sv.user.sourceHdrCll, false);
+  assert.ok(logs0[0].startsWith('Remux snapshot: '));
+
+  const user = Object.assign({ sourceSize: 40000 }, sv.user);
   const run = async (ffProbeData, size, u) => {
     const logs = [];
     const r = await runNode(node, {
-      inputFileObj: { _id: 'out.mkv', file_size: size, ffProbeData },
+      inputFileObj: { _id: '/nonexistent/out.mkv', file_size: size, ffProbeData },
       variables: { user: Object.assign({}, u || user) },
       jobLog: (x) => logs.push(String(x)),
     });
     return { out: r.outputNumber, logs };
   };
-  const ok = await run(probe('av1', 3, 2, true), 30000);
+  const art = { codec_type: 'video', codec_name: 'mjpeg', disposition: { attached_pic: 1 } };
+  const ok = await run(probe(vid('01:32:24.956000000', [MD]), 3, 2, [art]), 30000);
   log(`  pass: out=${ok.out} logs=${JSON.stringify(ok.logs)}`);
-  assert.strictEqual(ok.out, 1, 'cover art does not count as video');
+  assert.strictEqual(ok.out, 1, 'shorter container, same video track, master kept, no CLL in source: pass');
   assert.ok(ok.logs[0].startsWith('Remux guard: v=1/1 a=3/3 s=2/2'));
-  assert.strictEqual((await run(probe('av1', 4, 2), 30000)).out, 2, 'audio count mismatch fails');
-  assert.strictEqual((await run(probe('av1', 3, 1), 30000)).out, 2, 'lost subtitle fails');
-  assert.strictEqual((await run(probe('hevc', 3, 2), 30000)).out, 2, 'non-AV1 output fails');
-  assert.strictEqual((await run(probe('av1', 3, 2), 40001)).out, 2, 'larger than source fails');
-  assert.strictEqual((await run(probe('av1', 3, 2), 40000)).out, 1, 'equal size (tiny track, mkv overhead) passes');
-  assert.strictEqual((await run(probe('av1', 3, 2), 3000)).out, 2, 'under 10% fails');
-  assert.strictEqual((await run(probe('av1', 3, 2), 30000, { sourceSize: 40000 })).out, 2, 'no expectation fails');
-  assert.strictEqual((await run(probe('av1', 0, 2), 30000, Object.assign({}, user, { expectAudio: 0 }))).out, 2, 'no audio fails');
+  const F = async (pd, size, u, why) => assert.strictEqual((await run(pd, size, u)).out, 2, why);
+  await F(probe(vid('01:32:24.956000000', [MD]), 4, 2), 30000, null, 'audio count mismatch fails');
+  await F(probe(vid('01:32:24.956000000', [MD]), 3, 1), 30000, null, 'lost subtitle fails');
+  await F(probe(vid('01:32:24.956000000', [MD], 'hevc'), 3, 2), 30000, null, 'non-AV1 output fails');
+  await F(probe(vid('01:32:24.956000000', [MD]), 3, 2), 40001, null, 'larger than source fails');
+  await F(probe(vid('01:32:24.956000000', [MD]), 3, 2), 3000, null, 'under 10% fails');
+  await F(probe(vid('01:20:00.000000000', [MD]), 3, 2), 30000, null, 'video duration drift fails');
+  await F(probe(vid('01:32:24.956000000', []), 3, 2), 30000, null, 'lost mastering metadata fails');
+  await F(probe(vid('01:32:24.956000000', [MD]), 3, 2), 30000, Object.assign({}, user, { sourceHdrCll: true }), 'lost CLL fails when the source had it');
+  await F(probe(vid('01:32:24.956000000', [MD]), 3, 2), 30000, { sourceSize: 40000 }, 'no snapshot/expectation fails');
+  await F(probe(vid('01:32:24.956000000', [MD]), 0, 2), 30000, Object.assign({}, user, { expectAudio: 0 }), 'no audio fails');
+  assert.strictEqual((await run(probe(vid('01:32:24.956000000', [MD]), 3, 2), 40000)).out, 1, 'equal size (tiny track, mkv overhead) passes');
+  const sdr = Object.assign({}, user, { sourceHdrMaster: false, sourceHdrCll: false });
+  assert.strictEqual((await run(probe(vid('01:32:24.956000000', []), 3, 2), 30000, sdr)).out, 1, 'SDR source needs no HDR data');
 }
-
 
 async function testFlowContract() {
   log('\n== flow contract (after vs before) ==');
@@ -677,8 +703,7 @@ async function testFlowContract() {
   // failure dead-ends before Replace.
   // [node, handle that continues]; rx_dv continues on output 2 (NOT DV), DV files dead-end.
   const chain = [['guard_home', '1'], ['rx_dv', '2'], ['rx_snapshot', '1'], ['rx_start', '1'], ['rx_cont', '1'],
-    ['rx_sub', '1'], ['rx_lang', '1'], ['rx_exec', '1'], ['rx_verify', '1'], ['rx_duration', '1'], ['rx_hdr', '1'],
-    ['replace', null]];
+    ['rx_sub', '1'], ['rx_lang', '1'], ['rx_exec', '1'], ['rx_verify', '1'], ['replace', null]];
   for (let i = 0; i < chain.length - 1; i += 1) {
     const [id, h] = chain[i];
     const out = after.flowEdges.filter(e => e.source === id);
@@ -891,13 +916,13 @@ function testDocsContract() {
 
 // --- 6. every customFunction node source is byte-identical to the flow artifact ---
 // The runbook (docs/tdarr/README.md) promises these cannot drift. Make that true:
-// each of the 22 customFunction bodies must equal its committed source file, or
+// each of the 20 customFunction bodies must equal its committed source file, or
 // the template instantiation for the generated ones.
 function testNodeSources() {
   log('\n== node sources vs flow artifact ==');
   const flow = JSON.parse(fs.readFileSync(path.join(FLOW_DIR, 'flow-movies_av1_nvenc_v1.after.json'), 'utf8'));
   const cf = flow.flowPlugins.filter(n => n.pluginName === 'customFunction');
-  assert.strictEqual(cf.length, 22, 'expected 22 customFunction nodes');
+  assert.strictEqual(cf.length, 20, 'expected 20 customFunction nodes');
 
   const read = (f) => fs.readFileSync(path.join(NODES, f), 'utf8');
   const template = read('cargs_template.js');
@@ -914,10 +939,8 @@ function testNodeSources() {
     duration_check: 'duration_check.js',
     hdr_survival: 'hdr_survival.js',
     rx_dv: 'dv_check.js',
-    rx_snapshot: 'snapshot.js',
+    rx_snapshot: 'remux_snapshot.js',
     rx_verify: 'remux_verify.js',
-    rx_duration: 'duration_check.js',
-    rx_hdr: 'hdr_survival.js',
   };
   const subconform = read('subconform.js');
 

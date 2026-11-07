@@ -63,6 +63,6 @@ reverts those rows to defaults while the pod stays green.
 - Behavioural, not by reading the flow: a job report must contain
   `Scope guard: library=`, `Stream conform: in v=`, `Audio language filter: in a=`,
   then `AV1 tuning: encoder="` and `Size check:` / `Duration check:` / `HDR survival:`
-  (encode) or `Remux guard: v=` / `Duration check:` / `HDR survival:` (AV1 remux).
+  (encode) or `Remux snapshot:` / `Remux guard: v=` (AV1 remux).
 - Library rows: Series `j5g_Es7sD` has `processTranscodes` false; Movies AV1
   `gEUZf7Nx6` has it true. Health checks and scanning stay on for Series.
