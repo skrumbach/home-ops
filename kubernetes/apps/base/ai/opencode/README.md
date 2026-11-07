@@ -15,6 +15,10 @@ caller, including Hermes. Never a provider key. Skill `litellm-proxy`.
 `GITHUB_TOKEN` reuses the `hermes` 1Password item field
 `HOMELAB_GH_TOKEN` (`public_repo`, read and write). No new item.
 
+`OPENCODE_PASSWORD` is 1Password item `opencode` (vault `Homelab`),
+the server password (user `opencode`). Without it each start makes a
+random one and logs it; rotating it signs out every session.
+
 Namespace `ai` is already on the Authentik ReferenceGrant. A new
 hostname still needs a real login after merge before treating the route
 as covered. Skill `networking` for that inference. Do not add a second
