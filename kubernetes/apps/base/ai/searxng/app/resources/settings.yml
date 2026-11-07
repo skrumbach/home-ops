@@ -23,6 +23,11 @@ search:
 engines:
   - name: wolframalpha
     disabled: false
+  # Tor-only engines: there is no Tor proxy, so they fail to register.
+  - name: ahmia
+    inactive: true
+  - name: torch
+    inactive: true
 
 general:
   instance_name: home-ops Search
