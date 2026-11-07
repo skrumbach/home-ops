@@ -90,6 +90,9 @@ spec:
       redis:
         host: authentik-dragonfly.security.svc.cluster.local
       session_storage: db
+      web:
+        # AUTHENTIK_WEB__BASE_URL seeds the Base URL system setting only while it is empty; 2026.11 refuses to start without one. Skill `authentik-terraform`.
+        base_url: https://auth.${SECRET_DOMAIN}
       worker:
         concurrency: 4
     prometheus:

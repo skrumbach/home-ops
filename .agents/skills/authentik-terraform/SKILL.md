@@ -51,9 +51,10 @@ outpost. `postgresql.enabled: false`; the DB is `postgres-18`.
    on `kubernetes/apps/base/security/authentik/app/referencegrant.yaml` or the
    SecurityPolicy's backendRef resolves to nothing. An unauthenticated 302 to
    login is host-agnostic and does not prove that host is covered.
-7. **Set the Authentik Base URL system setting before the 2026.11 line.**
-   It is optional on 2026.8 and mandatory in 2026.11. 2026.6 and 2026.7 are
-   not release lines. [upgrade-checklist.md](references/upgrade-checklist.md)
+7. **Confirm the Authentik Base URL system setting before the 2026.11 line.**
+   Optional on 2026.8; 2026.11 will not start without it. The HelmRelease
+   seeds it, OpenTofu cannot manage it. 2026.6 and 2026.7 are not release
+   lines. [upgrade-checklist.md](references/upgrade-checklist.md)
 8. **Never seed `litellm-sso-credentials` with client-side `kubectl apply`.**
    The value lands in `last-applied-configuration`. `kubectl create`, or
    server-side apply. Skill `secrets-1password`.
