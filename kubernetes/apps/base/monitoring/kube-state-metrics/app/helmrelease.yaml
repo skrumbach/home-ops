@@ -12,6 +12,13 @@ spec:
   values:
     fullnameOverride: kube-state-metrics
 
+    # Was BestEffort (first evicted under node pressure). Live working set ~74Mi; no memory
+    # limit on purpose so a sharded/large cluster is never OOM-killed by a limit.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 128Mi
+
     prometheus:
       monitor:
         enabled: true
