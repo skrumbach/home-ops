@@ -41,6 +41,13 @@ spec:
               MATTER_SERVER__PORT: &wsPort 5580
               MATTER_SERVER__APPLICATION_URL: &host matter.${SECRET_DOMAIN}
               MATTER_SERVER__LOG_LEVEL: info
+            # 30d max working set 109Mi (2026-11-07)
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 256Mi
     service:
       matter-server:
         controller: matter-server
