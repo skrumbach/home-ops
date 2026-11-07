@@ -50,6 +50,7 @@ spec:
     resources:
       requests:
         cpu: 50m
-        memory: 256Mi
+        # per-pod 14d median ~370-390Mi, 30d max 1.67Gi (2026-11-07)
+        memory: 512Mi
       limits:
         memory: 2Gi
