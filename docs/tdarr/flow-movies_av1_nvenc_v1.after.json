@@ -583,6 +583,198 @@
         "x": 2120,
         "y": 1290
       }
+    },
+    {
+      "name": "Audio language filter (eng+ger)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Audio language filter (English + German)\"\n// Place: AFTER Conform streams for mkv, BEFORE Set Video Encoder (encode paths)\n//        or BEFORE Execute (AV1 remux path).\n// Output 1 -> dropped at least one audio track (continue)\n// Output 2 -> nothing to drop (encode paths: continue; remux path: dead end, file untouched)\n// Output 3 -> FAIL (dead end, nothing written)\n//\n// Why this exists: the captain keeps English (primary) and German (secondary)\n// audio. Plex decodes every audio track for loudness analysis, and 4K files\n// with 10-20 dubbed tracks OOM-killed it nightly (2026-11). Audio only:\n// subtitle tracks are never touched here. Untagged tracks (und, empty, mul,\n// zxx) always stay. Nothing is dropped unless at least one kept track is a\n// main soundtrack (not commentary or audio description, by disposition or\n// title): a French film with only an English commentary keeps every track.\n// If the default-flagged track is dropped, the first kept English main track\n// (else the first kept main track) becomes the default.\n\nconst KEEP = { eng: true, ger: true };\nconst KEEP_UNTAGGED = ['', 'und', 'unk', 'mul', 'zxx'];\nconst ALIASES = {\n  en: 'eng', eng: 'eng', english: 'eng',\n  de: 'ger', ger: 'ger', deu: 'ger', german: 'ger',\n};\n\n// Commentary / audio description (EN + DE titles); never counted as a main track.\nconst NOT_MAIN = /comment|kommentar|descri|deskript|h\\u00f6rfilm|horfilm|narrat|\\bad\\b|\\bdvs\\b/i;\n\nfunction isMain(s) {\n  const d = s.disposition || {};\n  if (Number(d.comment || 0) === 1 || Number(d.visual_impaired || 0) === 1) return false;\n  return !NOT_MAIN.test(String((s.tags || {}).title || (s.tags || {}).TITLE || ''));\n}\n\nfunction langOf(s) {\n  const tags = s.tags || {};\n  const raw = String(tags.language || tags.LANGUAGE || '').trim().toLowerCase();\n  const base = raw.split(/[-_]/)[0];\n  if (KEEP_UNTAGGED.indexOf(base) !== -1) return '';\n  return ALIASES[base] || base;\n}\n\nmodule.exports = async (args) => {\n  const cmd = args.variables && args.variables.ffmpegCommand;\n  if (!cmd || !Array.isArray(cmd.streams)) {\n    args.jobLog('Audio language filter: ffmpegCommand not initialised - FAIL (will not write)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 3, variables: args.variables };\n  }\n\n  const audio = cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === 'audio');\n  const keep = audio.filter((s) => {\n    const l = langOf(s);\n    return l === '' || KEEP[l] === true;\n  });\n  const langs = audio.map((s) => langOf(s) || 'und').join(',');\n\n  const count = (type) => cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === type).length;\n  args.variables.user = args.variables.user || {};\n  const user = args.variables.user;\n\n  const keepMain = keep.filter(isMain);\n  if (audio.length === 0 || keepMain.length === 0 || keep.length === audio.length) {\n    const why = audio.length === 0 ? 'no audio'\n      : keep.length === audio.length ? 'nothing to drop'\n        : keep.length === 0 ? 'no English/German/untagged audio, kept all'\n          : 'kept tracks are only commentary/description, kept all';\n    args.jobLog('Audio language filter: in a=' + audio.length + ' [' + langs + '] | ' + why);\n    user.expectAudio = audio.length;\n    user.expectVideo = count('video');\n    user.expectSubtitle = count('subtitle');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  }\n\n  let dropped = 0;\n  for (const s of audio) {\n    if (keep.indexOf(s) === -1) {\n      s.removed = true;\n      dropped += 1;\n    }\n  }\n  const isDefault = (s) => Number((s.disposition || {}).default || 0) === 1;\n  let defaultNote = '';\n  if (audio.some(isDefault) && !keep.some(isDefault)) {\n    const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];\n    pick.outputArgs.push('-disposition:{outputIndex}', 'default');\n    defaultNote = ' default->' + (langOf(pick) || 'und');\n  }\n\n  args.jobLog(\n    'Audio language filter: in a=' + audio.length + ' [' + langs + '] | kept=' + keep.length +\n      ' dropped=' + dropped + defaultNote,\n  );\n  user.expectAudio = keep.length;\n  user.expectVideo = count('video');\n  user.expectSubtitle = count('subtitle');\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "lang22",
+      "position": {
+        "x": 2180,
+        "y": 880
+      }
+    },
+    {
+      "name": "Audio language filter (eng+ger)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Audio language filter (English + German)\"\n// Place: AFTER Conform streams for mkv, BEFORE Set Video Encoder (encode paths)\n//        or BEFORE Execute (AV1 remux path).\n// Output 1 -> dropped at least one audio track (continue)\n// Output 2 -> nothing to drop (encode paths: continue; remux path: dead end, file untouched)\n// Output 3 -> FAIL (dead end, nothing written)\n//\n// Why this exists: the captain keeps English (primary) and German (secondary)\n// audio. Plex decodes every audio track for loudness analysis, and 4K files\n// with 10-20 dubbed tracks OOM-killed it nightly (2026-11). Audio only:\n// subtitle tracks are never touched here. Untagged tracks (und, empty, mul,\n// zxx) always stay. Nothing is dropped unless at least one kept track is a\n// main soundtrack (not commentary or audio description, by disposition or\n// title): a French film with only an English commentary keeps every track.\n// If the default-flagged track is dropped, the first kept English main track\n// (else the first kept main track) becomes the default.\n\nconst KEEP = { eng: true, ger: true };\nconst KEEP_UNTAGGED = ['', 'und', 'unk', 'mul', 'zxx'];\nconst ALIASES = {\n  en: 'eng', eng: 'eng', english: 'eng',\n  de: 'ger', ger: 'ger', deu: 'ger', german: 'ger',\n};\n\n// Commentary / audio description (EN + DE titles); never counted as a main track.\nconst NOT_MAIN = /comment|kommentar|descri|deskript|h\\u00f6rfilm|horfilm|narrat|\\bad\\b|\\bdvs\\b/i;\n\nfunction isMain(s) {\n  const d = s.disposition || {};\n  if (Number(d.comment || 0) === 1 || Number(d.visual_impaired || 0) === 1) return false;\n  return !NOT_MAIN.test(String((s.tags || {}).title || (s.tags || {}).TITLE || ''));\n}\n\nfunction langOf(s) {\n  const tags = s.tags || {};\n  const raw = String(tags.language || tags.LANGUAGE || '').trim().toLowerCase();\n  const base = raw.split(/[-_]/)[0];\n  if (KEEP_UNTAGGED.indexOf(base) !== -1) return '';\n  return ALIASES[base] || base;\n}\n\nmodule.exports = async (args) => {\n  const cmd = args.variables && args.variables.ffmpegCommand;\n  if (!cmd || !Array.isArray(cmd.streams)) {\n    args.jobLog('Audio language filter: ffmpegCommand not initialised - FAIL (will not write)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 3, variables: args.variables };\n  }\n\n  const audio = cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === 'audio');\n  const keep = audio.filter((s) => {\n    const l = langOf(s);\n    return l === '' || KEEP[l] === true;\n  });\n  const langs = audio.map((s) => langOf(s) || 'und').join(',');\n\n  const count = (type) => cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === type).length;\n  args.variables.user = args.variables.user || {};\n  const user = args.variables.user;\n\n  const keepMain = keep.filter(isMain);\n  if (audio.length === 0 || keepMain.length === 0 || keep.length === audio.length) {\n    const why = audio.length === 0 ? 'no audio'\n      : keep.length === audio.length ? 'nothing to drop'\n        : keep.length === 0 ? 'no English/German/untagged audio, kept all'\n          : 'kept tracks are only commentary/description, kept all';\n    args.jobLog('Audio language filter: in a=' + audio.length + ' [' + langs + '] | ' + why);\n    user.expectAudio = audio.length;\n    user.expectVideo = count('video');\n    user.expectSubtitle = count('subtitle');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  }\n\n  let dropped = 0;\n  for (const s of audio) {\n    if (keep.indexOf(s) === -1) {\n      s.removed = true;\n      dropped += 1;\n    }\n  }\n  const isDefault = (s) => Number((s.disposition || {}).default || 0) === 1;\n  let defaultNote = '';\n  if (audio.some(isDefault) && !keep.some(isDefault)) {\n    const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];\n    pick.outputArgs.push('-disposition:{outputIndex}', 'default');\n    defaultNote = ' default->' + (langOf(pick) || 'und');\n  }\n\n  args.jobLog(\n    'Audio language filter: in a=' + audio.length + ' [' + langs + '] | kept=' + keep.length +\n      ' dropped=' + dropped + defaultNote,\n  );\n  user.expectAudio = keep.length;\n  user.expectVideo = count('video');\n  user.expectSubtitle = count('subtitle');\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "lang23",
+      "position": {
+        "x": 2180,
+        "y": 280
+      }
+    },
+    {
+      "name": "Audio language filter (eng+ger)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Audio language filter (English + German)\"\n// Place: AFTER Conform streams for mkv, BEFORE Set Video Encoder (encode paths)\n//        or BEFORE Execute (AV1 remux path).\n// Output 1 -> dropped at least one audio track (continue)\n// Output 2 -> nothing to drop (encode paths: continue; remux path: dead end, file untouched)\n// Output 3 -> FAIL (dead end, nothing written)\n//\n// Why this exists: the captain keeps English (primary) and German (secondary)\n// audio. Plex decodes every audio track for loudness analysis, and 4K files\n// with 10-20 dubbed tracks OOM-killed it nightly (2026-11). Audio only:\n// subtitle tracks are never touched here. Untagged tracks (und, empty, mul,\n// zxx) always stay. Nothing is dropped unless at least one kept track is a\n// main soundtrack (not commentary or audio description, by disposition or\n// title): a French film with only an English commentary keeps every track.\n// If the default-flagged track is dropped, the first kept English main track\n// (else the first kept main track) becomes the default.\n\nconst KEEP = { eng: true, ger: true };\nconst KEEP_UNTAGGED = ['', 'und', 'unk', 'mul', 'zxx'];\nconst ALIASES = {\n  en: 'eng', eng: 'eng', english: 'eng',\n  de: 'ger', ger: 'ger', deu: 'ger', german: 'ger',\n};\n\n// Commentary / audio description (EN + DE titles); never counted as a main track.\nconst NOT_MAIN = /comment|kommentar|descri|deskript|h\\u00f6rfilm|horfilm|narrat|\\bad\\b|\\bdvs\\b/i;\n\nfunction isMain(s) {\n  const d = s.disposition || {};\n  if (Number(d.comment || 0) === 1 || Number(d.visual_impaired || 0) === 1) return false;\n  return !NOT_MAIN.test(String((s.tags || {}).title || (s.tags || {}).TITLE || ''));\n}\n\nfunction langOf(s) {\n  const tags = s.tags || {};\n  const raw = String(tags.language || tags.LANGUAGE || '').trim().toLowerCase();\n  const base = raw.split(/[-_]/)[0];\n  if (KEEP_UNTAGGED.indexOf(base) !== -1) return '';\n  return ALIASES[base] || base;\n}\n\nmodule.exports = async (args) => {\n  const cmd = args.variables && args.variables.ffmpegCommand;\n  if (!cmd || !Array.isArray(cmd.streams)) {\n    args.jobLog('Audio language filter: ffmpegCommand not initialised - FAIL (will not write)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 3, variables: args.variables };\n  }\n\n  const audio = cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === 'audio');\n  const keep = audio.filter((s) => {\n    const l = langOf(s);\n    return l === '' || KEEP[l] === true;\n  });\n  const langs = audio.map((s) => langOf(s) || 'und').join(',');\n\n  const count = (type) => cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === type).length;\n  args.variables.user = args.variables.user || {};\n  const user = args.variables.user;\n\n  const keepMain = keep.filter(isMain);\n  if (audio.length === 0 || keepMain.length === 0 || keep.length === audio.length) {\n    const why = audio.length === 0 ? 'no audio'\n      : keep.length === audio.length ? 'nothing to drop'\n        : keep.length === 0 ? 'no English/German/untagged audio, kept all'\n          : 'kept tracks are only commentary/description, kept all';\n    args.jobLog('Audio language filter: in a=' + audio.length + ' [' + langs + '] | ' + why);\n    user.expectAudio = audio.length;\n    user.expectVideo = count('video');\n    user.expectSubtitle = count('subtitle');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  }\n\n  let dropped = 0;\n  for (const s of audio) {\n    if (keep.indexOf(s) === -1) {\n      s.removed = true;\n      dropped += 1;\n    }\n  }\n  const isDefault = (s) => Number((s.disposition || {}).default || 0) === 1;\n  let defaultNote = '';\n  if (audio.some(isDefault) && !keep.some(isDefault)) {\n    const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];\n    pick.outputArgs.push('-disposition:{outputIndex}', 'default');\n    defaultNote = ' default->' + (langOf(pick) || 'und');\n  }\n\n  args.jobLog(\n    'Audio language filter: in a=' + audio.length + ' [' + langs + '] | kept=' + keep.length +\n      ' dropped=' + dropped + defaultNote,\n  );\n  user.expectAudio = keep.length;\n  user.expectVideo = count('video');\n  user.expectSubtitle = count('subtitle');\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "lang24",
+      "position": {
+        "x": 2180,
+        "y": 1380
+      }
+    },
+    {
+      "name": "Snapshot source metadata (remux)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Snapshot source metadata\"\n// Place: AFTER guard_home + dv_check, BEFORE is_hevc / is_av1.\n// Purpose: Captures source file size, duration, and HDR status into args.variables\n//          so post-encode guards can compare against original (args.inputFileObj\n//          gets mutated by ffmpegCommandExecute to point at the encoded output).\n\nmodule.exports = async (args) => {\n  const streams = (args.inputFileObj.ffProbeData || {}).streams || [];\n  const videoStream = streams.find((s) => s.codec_type === 'video') || {};\n  const fmt = (args.inputFileObj.ffProbeData || {}).format || {};\n\n  args.variables = args.variables || {};\n  args.variables.user = args.variables.user || {};\n\n  args.variables.user.sourceSize = args.inputFileObj.file_size;\n  args.variables.user.sourceDuration = parseFloat(fmt.duration || 0);\n  args.variables.user.sourceWasHDR = (videoStream.color_transfer || '') === 'smpte2084';\n\n  args.jobLog(\n    `Snapshot: size=${(args.variables.user.sourceSize / 1024).toFixed(2)}GiB ` +\n      `duration=${args.variables.user.sourceDuration.toFixed(1)}s ` +\n      `HDR=${args.variables.user.sourceWasHDR}`,\n  );\n\n  return {\n    outputFileObj: args.inputFileObj,\n    outputNumber: 1,\n    variables: args.variables,\n  };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_snapshot",
+      "position": {
+        "x": 0,
+        "y": -250
+      }
+    },
+    {
+      "name": "Begin (AV1 remux)",
+      "sourceRepo": "Community",
+      "pluginName": "ffmpegCommandStart",
+      "version": "1.0.0",
+      "inputsDB": {},
+      "fpEnabled": true,
+      "id": "rx_start",
+      "position": {
+        "x": 250,
+        "y": -250
+      }
+    },
+    {
+      "name": "Set Container mkv (AV1 remux)",
+      "sourceRepo": "Community",
+      "pluginName": "ffmpegCommandSetContainer",
+      "version": "1.0.0",
+      "inputsDB": {
+        "container": "mkv",
+        "forceConform": "false"
+      },
+      "fpEnabled": true,
+      "id": "rx_cont",
+      "position": {
+        "x": 500,
+        "y": -250
+      }
+    },
+    {
+      "name": "Conform streams for mkv",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Conform streams for matroska (convert, do not drop)\"\n// Place: AFTER Set Container mkv, BEFORE Set Video Encoder.\n// Output 1 -> continue\n// Output 2 -> FAIL (dead end, nothing encoded)\n//\n// Why this exists: matroska cannot mux mov_text, and Tdarr's own\n// `forceConform` option DELETES those streams (1-46 subtitle tracks on the\n// parked 4K masters). This converts them to subrip instead, so every track\n// survives, and drops only the streams matroska genuinely cannot carry and\n// which have no text equivalent.\n\nmodule.exports = async (args) => {\n  const cmd = args.variables && args.variables.ffmpegCommand;\n  if (!cmd || !Array.isArray(cmd.streams)) {\n    args.jobLog('Stream conform: ffmpegCommand not initialised - FAIL (will not encode)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  }\n\n  const UNMUXABLE = ['bin_data', 'timed_id3', 'eia_608'];\n  const before = { video: 0, audio: 0, subtitle: 0, other: 0 };\n  let convertedSubs = 0;\n  let droppedData = 0;\n  let droppedArt = 0;\n\n  for (let i = 0; i < cmd.streams.length; i += 1) {\n    const s = cmd.streams[i];\n    if (s.removed) continue;\n    const type = String(s.codec_type || '');\n    const name = String(s.codec_name || '').toLowerCase();\n    if (before[type] === undefined) before.other += 1; else before[type] += 1;\n\n    // matroska has no mov_text mapping. Convert to subrip, never delete.\n    if (type === 'subtitle' && name === 'mov_text') {\n      s.outputArgs.push('-c:{outputIndex}', 'srt');\n      convertedSubs += 1;\n      continue;\n    }\n\n    // No text equivalent and matroska cannot carry them.\n    if (type === 'data' || UNMUXABLE.indexOf(name) !== -1) {\n      s.removed = true;\n      droppedData += 1;\n      continue;\n    }\n\n    // Cover art with no dimensions -> matroska \"dimensions not set\".\n    // Drop only the broken art stream; valid art (e.g. 600x900) is kept.\n    // ffmpegCommandStart rewrites attached_pic streams to codec_type\n    // 'attachment', so cover art arrives as 'attachment', not 'video'\n    // (Amelie: eight 0x0 mjpeg counted as other=8, none dropped).\n    if ((type === 'video' || type === 'attachment') && name === 'mjpeg') {\n      const w = Number(s.width || 0);\n      const h = Number(s.height || 0);\n      if (!w || !h) {\n        s.removed = true;\n        droppedArt += 1;\n        continue;\n      }\n    }\n  }\n\n  args.jobLog(\n    'Stream conform: in v=' + before.video + ' a=' + before.audio +\n      ' s=' + before.subtitle + ' other=' + before.other +\n      ' | mov_text->srt=' + convertedSubs +\n      ' droppedData=' + droppedData + ' dropped0x0Art=' + droppedArt,\n  );\n\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_sub",
+      "position": {
+        "x": 750,
+        "y": -250
+      }
+    },
+    {
+      "name": "Audio language filter (eng+ger)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Audio language filter (English + German)\"\n// Place: AFTER Conform streams for mkv, BEFORE Set Video Encoder (encode paths)\n//        or BEFORE Execute (AV1 remux path).\n// Output 1 -> dropped at least one audio track (continue)\n// Output 2 -> nothing to drop (encode paths: continue; remux path: dead end, file untouched)\n// Output 3 -> FAIL (dead end, nothing written)\n//\n// Why this exists: the captain keeps English (primary) and German (secondary)\n// audio. Plex decodes every audio track for loudness analysis, and 4K files\n// with 10-20 dubbed tracks OOM-killed it nightly (2026-11). Audio only:\n// subtitle tracks are never touched here. Untagged tracks (und, empty, mul,\n// zxx) always stay. Nothing is dropped unless at least one kept track is a\n// main soundtrack (not commentary or audio description, by disposition or\n// title): a French film with only an English commentary keeps every track.\n// If the default-flagged track is dropped, the first kept English main track\n// (else the first kept main track) becomes the default.\n\nconst KEEP = { eng: true, ger: true };\nconst KEEP_UNTAGGED = ['', 'und', 'unk', 'mul', 'zxx'];\nconst ALIASES = {\n  en: 'eng', eng: 'eng', english: 'eng',\n  de: 'ger', ger: 'ger', deu: 'ger', german: 'ger',\n};\n\n// Commentary / audio description (EN + DE titles); never counted as a main track.\nconst NOT_MAIN = /comment|kommentar|descri|deskript|h\\u00f6rfilm|horfilm|narrat|\\bad\\b|\\bdvs\\b/i;\n\nfunction isMain(s) {\n  const d = s.disposition || {};\n  if (Number(d.comment || 0) === 1 || Number(d.visual_impaired || 0) === 1) return false;\n  return !NOT_MAIN.test(String((s.tags || {}).title || (s.tags || {}).TITLE || ''));\n}\n\nfunction langOf(s) {\n  const tags = s.tags || {};\n  const raw = String(tags.language || tags.LANGUAGE || '').trim().toLowerCase();\n  const base = raw.split(/[-_]/)[0];\n  if (KEEP_UNTAGGED.indexOf(base) !== -1) return '';\n  return ALIASES[base] || base;\n}\n\nmodule.exports = async (args) => {\n  const cmd = args.variables && args.variables.ffmpegCommand;\n  if (!cmd || !Array.isArray(cmd.streams)) {\n    args.jobLog('Audio language filter: ffmpegCommand not initialised - FAIL (will not write)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 3, variables: args.variables };\n  }\n\n  const audio = cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === 'audio');\n  const keep = audio.filter((s) => {\n    const l = langOf(s);\n    return l === '' || KEEP[l] === true;\n  });\n  const langs = audio.map((s) => langOf(s) || 'und').join(',');\n\n  const count = (type) => cmd.streams.filter((s) => !s.removed && String(s.codec_type || '') === type).length;\n  args.variables.user = args.variables.user || {};\n  const user = args.variables.user;\n\n  const keepMain = keep.filter(isMain);\n  if (audio.length === 0 || keepMain.length === 0 || keep.length === audio.length) {\n    const why = audio.length === 0 ? 'no audio'\n      : keep.length === audio.length ? 'nothing to drop'\n        : keep.length === 0 ? 'no English/German/untagged audio, kept all'\n          : 'kept tracks are only commentary/description, kept all';\n    args.jobLog('Audio language filter: in a=' + audio.length + ' [' + langs + '] | ' + why);\n    user.expectAudio = audio.length;\n    user.expectVideo = count('video');\n    user.expectSubtitle = count('subtitle');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  }\n\n  let dropped = 0;\n  for (const s of audio) {\n    if (keep.indexOf(s) === -1) {\n      s.removed = true;\n      dropped += 1;\n    }\n  }\n  const isDefault = (s) => Number((s.disposition || {}).default || 0) === 1;\n  let defaultNote = '';\n  if (audio.some(isDefault) && !keep.some(isDefault)) {\n    const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];\n    pick.outputArgs.push('-disposition:{outputIndex}', 'default');\n    defaultNote = ' default->' + (langOf(pick) || 'und');\n  }\n\n  args.jobLog(\n    'Audio language filter: in a=' + audio.length + ' [' + langs + '] | kept=' + keep.length +\n      ' dropped=' + dropped + defaultNote,\n  );\n  user.expectAudio = keep.length;\n  user.expectVideo = count('video');\n  user.expectSubtitle = count('subtitle');\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_lang",
+      "position": {
+        "x": 1000,
+        "y": -250
+      }
+    },
+    {
+      "name": "Execute (AV1 remux)",
+      "sourceRepo": "Community",
+      "pluginName": "ffmpegCommandExecute",
+      "version": "1.0.0",
+      "inputsDB": {},
+      "fpEnabled": true,
+      "id": "rx_exec",
+      "position": {
+        "x": 1250,
+        "y": -250
+      }
+    },
+    {
+      "name": "Remux guard: streams and size",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Remux guard: streams and size\"\n// Place: AFTER Execute on the AV1 remux path, BEFORE the duration and HDR guards.\n// Output 1 -> Pass\n// Output 2 -> Fail (dead end, source NOT replaced)\n// Purpose: a copy-only remux that drops audio must keep every video and\n//          subtitle stream, end with exactly the audio count the language\n//          filter kept, still be AV1, and be no larger than the source. The\n//          encode-path size check (>=95% fails) does not fit a remux, where\n//          the saving is only the dropped audio.\n\nmodule.exports = async (args) => {\n  const snap = (args.variables && args.variables.user) || {};\n  const streams = (args.inputFileObj.ffProbeData || {}).streams || [];\n  // Cover art probes as video with disposition.attached_pic; the filter counted it as an attachment.\n  const isArt = (s) => Number((s.disposition || {}).attached_pic || 0) === 1;\n  const count = (type) => streams.filter((s) => String(s.codec_type || '') === type && !isArt(s)).length;\n  const out = { video: count('video'), audio: count('audio'), subtitle: count('subtitle') };\n  const want = { video: snap.expectVideo, audio: snap.expectAudio, subtitle: snap.expectSubtitle };\n  const inputBytes = snap.sourceSize;\n  const outputBytes = args.inputFileObj.file_size;\n  const fail = (why) => {\n    args.jobLog('Remux guard: FAIL - ' + why + ' (will not replace)');\n    return { outputFileObj: args.inputFileObj, outputNumber: 2, variables: args.variables };\n  };\n\n  if (!inputBytes || want.audio === undefined || want.video === undefined || want.subtitle === undefined) {\n    return fail('no source snapshot or language-filter expectation');\n  }\n\n  args.jobLog(\n    'Remux guard: v=' + out.video + '/' + want.video + ' a=' + out.audio + '/' + want.audio +\n      ' s=' + out.subtitle + '/' + want.subtitle + ' size=' + (inputBytes / 1024).toFixed(2) +\n      'GiB -> ' + (outputBytes / 1024).toFixed(2) + 'GiB',\n  );\n\n  if (out.video !== want.video || out.audio !== want.audio || out.subtitle !== want.subtitle) {\n    return fail('stream counts differ from the expectation');\n  }\n  if (out.audio < 1) return fail('output has no audio');\n  const video = streams.find((s) => String(s.codec_type || '') === 'video' && !isArt(s)) || {};\n  if (String(video.codec_name || '').toLowerCase() !== 'av1') return fail('output video is not AV1');\n  if (!outputBytes || outputBytes > inputBytes) return fail('output larger than source');\n  if (outputBytes < inputBytes * 0.1) return fail('output suspiciously small (<10% of source)');\n\n  return { outputFileObj: args.inputFileObj, outputNumber: 1, variables: args.variables };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_verify",
+      "position": {
+        "x": 1500,
+        "y": -250
+      }
+    },
+    {
+      "name": "Guard 2: Duration integrity (remux)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Guard 2: Duration integrity\"\n// Place: AFTER size check.\n// Output 1 \u00e2\u2020\u2019 Pass\n// Output 2 \u00e2\u2020\u2019 Fail (truncated or corrupt output)\n// Purpose: Catches encodes that crashed mid-way and produced a truncated file.\n//          Allows up to 0.5% duration drift (rounding/container differences).\n\nmodule.exports = async (args) => {\n  const snap = (args.variables && args.variables.user) || {};\n  const inDur = snap.sourceDuration;\n\n  const fmt = (args.inputFileObj.ffProbeData || {}).format || {};\n  const outDur = parseFloat(fmt.duration || 0);\n\n  if (!inDur) {\n    args.jobLog('Duration check: no source snapshot \u00e2\u20ac\u201d PASS (skipping)');\n    return {\n      outputFileObj: args.inputFileObj,\n      outputNumber: 1,\n      variables: args.variables,\n    };\n  }\n\n  if (!outDur) {\n    args.jobLog('Duration check: cannot read output duration \u00e2\u20ac\u201d FAIL');\n    return {\n      outputFileObj: args.inputFileObj,\n      outputNumber: 2,\n      variables: args.variables,\n    };\n  }\n\n  const ratio = outDur / inDur;\n  args.jobLog(\n    `Duration check: ${inDur.toFixed(1)}s \u00e2\u2020\u2019 ${outDur.toFixed(1)}s (${(ratio * 100).toFixed(2)}%)`,\n  );\n\n  if (ratio < 0.995 || ratio > 1.005) {\n    args.jobLog('Duration check: FAIL \u00e2\u20ac\u201d duration drift > 0.5%');\n    return {\n      outputFileObj: args.inputFileObj,\n      outputNumber: 2,\n      variables: args.variables,\n    };\n  }\n\n  return {\n    outputFileObj: args.inputFileObj,\n    outputNumber: 1,\n    variables: args.variables,\n  };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_duration",
+      "position": {
+        "x": 1750,
+        "y": -250
+      }
+    },
+    {
+      "name": "Guard 3: HDR metadata survived (remux)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Guard 3: HDR metadata survived\"\n// Place: AFTER duration check, BEFORE rename.\n// Output 1 \u00e2\u2020\u2019 Pass (continue to rename \u00e2\u2020\u2019 replace)\n// Output 2 \u00e2\u2020\u2019 Fail (HDR side data was lost in encode, source NOT replaced)\n// Purpose: Ensures mastering display + content light level survived the QSV pipeline.\n//          SDR sources pass through automatically (no HDR to check).\n\nmodule.exports = async (args) => {\n  const snap = (args.variables && args.variables.user) || {};\n\n  if (!snap.sourceWasHDR) {\n    args.jobLog('HDR survival: source was SDR \u00e2\u20ac\u201d PASS (no HDR check needed)');\n    return {\n      outputFileObj: args.inputFileObj,\n      outputNumber: 1,\n      variables: args.variables,\n    };\n  }\n\n  // First check stream-level side data (fast, already in ffProbeData)\n  const streams = (args.inputFileObj.ffProbeData || {}).streams || [];\n  const videoStream = streams.find((s) => s.codec_type === 'video') || {};\n  const streamSd = videoStream.side_data_list || [];\n\n  let hasMaster = streamSd.some((x) =>\n    (x.side_data_type || '').toLowerCase().includes('mastering'),\n  );\n  let hasCLL = streamSd.some((x) =>\n    (x.side_data_type || '').toLowerCase().includes('content light'),\n  );\n\n  // Fall back to frame-level probe if stream-level didn't have it\n  if (!hasMaster || !hasCLL) {\n    try {\n      const { execSync } = require('child_process');\n      const out = execSync(\n        `ffprobe -v error -select_streams v:0 -read_intervals \"%+#1\" ` +\n          `-show_frames -show_entries frame=side_data_list -of json ` +\n          `\"${args.inputFileObj._id}\"`,\n        { maxBuffer: 10 * 1024 * 1024 },\n      ).toString();\n      const frameSd = ((JSON.parse(out).frames || [])[0] || {}).side_data_list || [];\n      hasMaster =\n        hasMaster ||\n        frameSd.some((x) => (x.side_data_type || '').toLowerCase().includes('mastering'));\n      hasCLL =\n        hasCLL ||\n        frameSd.some((x) => (x.side_data_type || '').toLowerCase().includes('content light'));\n    } catch (e) {\n      args.jobLog(`HDR survival: frame-level ffprobe failed (${e.message})`);\n    }\n  }\n\n  args.jobLog(`HDR survival: mastering=${hasMaster} cll=${hasCLL}`);\n\n  if (!hasMaster || !hasCLL) {\n    args.jobLog('HDR survival: FAIL \u00e2\u20ac\u201d HDR side data missing from output');\n    return {\n      outputFileObj: args.inputFileObj,\n      outputNumber: 2,\n      variables: args.variables,\n    };\n  }\n\n  return {\n    outputFileObj: args.inputFileObj,\n    outputNumber: 1,\n    variables: args.variables,\n  };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_hdr",
+      "position": {
+        "x": 2000,
+        "y": -250
+      }
+    },
+    {
+      "name": "DV Detect (AV1 remux: DV is skipped)",
+      "sourceRepo": "Community",
+      "pluginName": "customFunction",
+      "version": "1.0.0",
+      "inputsDB": {
+        "code": "// Node: \"Is Dolby Vision? (P5 + P7)\"\n// Place: AFTER guard_home, BEFORE snapshot.\n// Output 1 \u00e2\u2020\u2019 IS DV (skip, dead-end)\n// Output 2 \u00e2\u2020\u2019 NOT DV (continue)\n// Purpose: Catches single-layer DV (Profile 5) via codec_tag_string AND\n//          dual-layer DV (Profile 7, common on UHD discs) via side_data_list.\n\nmodule.exports = async (args) => {\n  const streams = (args.inputFileObj.ffProbeData || {}).streams || [];\n  const videoStream = streams.find((s) => s.codec_type === 'video') || {};\n\n  // Profile 5: codec tag tells us\n  const tag = (videoStream.codec_tag_string || '').toLowerCase();\n  const profile5 = ['dvhe', 'dvh1', 'dvh11', 'dvav', 'dav1'].some((t) => tag.includes(t));\n\n  // Profile 7: signaled via stream side data\n  const sideData = videoStream.side_data_list || [];\n  const profile7 = sideData.some((sd) =>\n    (sd.side_data_type || '').toLowerCase().includes('dovi'),\n  );\n\n  const isDV = profile5 || profile7;\n  args.jobLog(\n    `DV detect: codec_tag=\"${videoStream.codec_tag_string || ''}\" ` +\n      `p5=${profile5} p7=${profile7} \u00e2\u2020\u2019 ${isDV ? 'IS DV (skip)' : 'NOT DV (continue)'}`,\n  );\n\n  return {\n    outputFileObj: args.inputFileObj,\n    outputNumber: isDV ? 1 : 2,\n    variables: args.variables,\n  };\n};\n"
+      },
+      "fpEnabled": true,
+      "id": "rx_dv",
+      "position": {
+        "x": -250,
+        "y": -250
+      }
     }
   ],
   "flowEdges": [
@@ -1002,23 +1194,142 @@
     {
       "source": "sub22",
       "sourceHandle": "1",
+      "target": "lang22",
+      "targetHandle": null,
+      "id": "e_sub22_1_lang22"
+    },
+    {
+      "source": "lang22",
+      "sourceHandle": "1",
       "target": "enc22",
       "targetHandle": null,
-      "id": "e_sub22_to_enc22"
+      "id": "e_lang22_1_enc22"
+    },
+    {
+      "source": "lang22",
+      "sourceHandle": "2",
+      "target": "enc22",
+      "targetHandle": null,
+      "id": "e_lang22_2_enc22"
     },
     {
       "source": "sub23",
       "sourceHandle": "1",
+      "target": "lang23",
+      "targetHandle": null,
+      "id": "e_sub23_1_lang23"
+    },
+    {
+      "source": "lang23",
+      "sourceHandle": "1",
       "target": "enc23",
       "targetHandle": null,
-      "id": "e_sub23_to_enc23"
+      "id": "e_lang23_1_enc23"
+    },
+    {
+      "source": "lang23",
+      "sourceHandle": "2",
+      "target": "enc23",
+      "targetHandle": null,
+      "id": "e_lang23_2_enc23"
     },
     {
       "source": "sub24",
       "sourceHandle": "1",
+      "target": "lang24",
+      "targetHandle": null,
+      "id": "e_sub24_1_lang24"
+    },
+    {
+      "source": "lang24",
+      "sourceHandle": "1",
       "target": "enc24",
       "targetHandle": null,
-      "id": "e_sub24_to_enc24"
+      "id": "e_lang24_1_enc24"
+    },
+    {
+      "source": "lang24",
+      "sourceHandle": "2",
+      "target": "enc24",
+      "targetHandle": null,
+      "id": "e_lang24_2_enc24"
+    },
+    {
+      "source": "guard_home",
+      "sourceHandle": "1",
+      "target": "rx_dv",
+      "targetHandle": null,
+      "id": "e_guard_home_1_rx_dv"
+    },
+    {
+      "source": "rx_snapshot",
+      "sourceHandle": "1",
+      "target": "rx_start",
+      "targetHandle": null,
+      "id": "e_rx_snapshot_1_rx_start"
+    },
+    {
+      "source": "rx_start",
+      "sourceHandle": "1",
+      "target": "rx_cont",
+      "targetHandle": null,
+      "id": "e_rx_start_1_rx_cont"
+    },
+    {
+      "source": "rx_cont",
+      "sourceHandle": "1",
+      "target": "rx_sub",
+      "targetHandle": null,
+      "id": "e_rx_cont_1_rx_sub"
+    },
+    {
+      "source": "rx_sub",
+      "sourceHandle": "1",
+      "target": "rx_lang",
+      "targetHandle": null,
+      "id": "e_rx_sub_1_rx_lang"
+    },
+    {
+      "source": "rx_lang",
+      "sourceHandle": "1",
+      "target": "rx_exec",
+      "targetHandle": null,
+      "id": "e_rx_lang_1_rx_exec"
+    },
+    {
+      "source": "rx_exec",
+      "sourceHandle": "1",
+      "target": "rx_verify",
+      "targetHandle": null,
+      "id": "e_rx_exec_1_rx_verify"
+    },
+    {
+      "source": "rx_verify",
+      "sourceHandle": "1",
+      "target": "rx_duration",
+      "targetHandle": null,
+      "id": "e_rx_verify_1_rx_duration"
+    },
+    {
+      "source": "rx_duration",
+      "sourceHandle": "1",
+      "target": "rx_hdr",
+      "targetHandle": null,
+      "id": "e_rx_duration_1_rx_hdr"
+    },
+    {
+      "source": "rx_hdr",
+      "sourceHandle": "1",
+      "target": "replace",
+      "targetHandle": null,
+      "id": "e_rx_hdr_1_replace"
+    },
+    {
+      "source": "rx_dv",
+      "sourceHandle": "2",
+      "target": "rx_snapshot",
+      "targetHandle": null,
+      "id": "e_rx_dv_2_rx_snapshot"
     }
   ],
   "isUiLocked": false

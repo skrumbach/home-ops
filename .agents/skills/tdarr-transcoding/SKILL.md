@@ -31,7 +31,11 @@ reverts those rows to defaults while the pod stays green.
    encodes DV files. `av1_qsv` drops the RPU; the encoder that keeps it is
    the one the 4K guard refuses. Do not close that edge while editing the
    flow. [masters.md](references/masters.md)
-6. **Never bulk-requeue.** Tdarr rewrites the source in place. The flow
+6. **Audio is filtered to English + German** (untagged kept; all kept if
+   neither exists; subtitles untouched) on every encode and on a copy-only
+   remux path for files already AV1. Dropped tracks are gone for good, so
+   requeue AV1 files as a canary, then 10, then the rest. `docs/tdarr/README.md`.
+7. **Never bulk-requeue.** Tdarr rewrites the source in place. The flow
    restore input is `docs/tdarr/flow-movies_av1_nvenc_v1.after.json`, never a
    `before.json`. Node sources under `docs/tdarr/flow-nodes/` are not restore
    inputs. Do not edit that directory; CI byte-checks it.
@@ -57,7 +61,8 @@ reverts those rows to defaults while the pod stays green.
 
 - `python3 scripts/ci/tdarr-flow-nodes-test.py` (runs `docs/tdarr/flow-nodes/behavior-test.js`).
 - Behavioural, not by reading the flow: a job report must contain
-  `Scope guard: library=`, `Stream conform: in v=`, `AV1 tuning: encoder="`,
-  and `Size check:` / `Duration check:` / `HDR survival:`.
+  `Scope guard: library=`, `Stream conform: in v=`, `Audio language filter: in a=`,
+  then `AV1 tuning: encoder="` and `Size check:` / `Duration check:` / `HDR survival:`
+  (encode) or `Remux guard: v=` / `Duration check:` / `HDR survival:` (AV1 remux).
 - Library rows: Series `j5g_Es7sD` has `processTranscodes` false; Movies AV1
   `gEUZf7Nx6` has it true. Health checks and scanning stay on for Series.
