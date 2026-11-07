@@ -40,6 +40,7 @@ EXPECTED_GATE = {
     "kopiur-stage3-test.py",
     "kopiur-stage5-test.py",
     "kromgo-public-config-test.py",
+    "overlay-patches-test.py",  # owner-approved 2026-11-07: also guards the authentik no-rollback opt-out (#2480)
     "pvc-mover-readable-check-test.py",
     "pvc-writable-check-test.py",
     "volsync-retired-expiry-test.py",

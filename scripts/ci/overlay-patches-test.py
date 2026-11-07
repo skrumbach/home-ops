@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ci: gate
 """No Flux Kustomization under kubernetes/apps/main declares spec.patches.
 
 Prevents: a per-app patch that renders in Git but never reaches the cluster.
