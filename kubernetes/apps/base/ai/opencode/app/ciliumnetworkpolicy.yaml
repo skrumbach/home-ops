@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: opencode
+spec:
+  # Ingress fence only: opencode serves an agent with model-directed bash and a GitHub write token on
+  # 0.0.0.0:4096 with no OPENCODE_SERVER_PASSWORD. Egress stays open (GitHub, npm, LiteLLM, toolhive).
+  # Residual exposure: the toPorts-free reply rules below (LiteLLM, envoy-internal) admit every port on
+  # the pod, not only replies (cilium/cilium#47913), so a compromised LiteLLM or envoy-internal peer can
+  # reach :4096 unauthenticated. The real fix is OPENCODE_SERVER_PASSWORD in entrypoint.sh. Skill `networking`.
+  # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
+  # The controller label keeps any other pod in ns ai out of this selector.
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: opencode
+      app.kubernetes.io/controller: opencode
+  ingress:
+    # kubelet tcpSocket probes on :4096 come from the local host.
+    - fromEntities:
+        - host
+    # The opencode HTTPRoute (envoy-internal only, Authentik ext-auth at Envoy). Gatus probes through it too.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "4096"
+              protocol: TCP
+    # Replies from every in-cluster peer opencode connects to as a client. No toPorts: a same-node
+    # Service reply arrives with the ClusterIP or LB IP as source after reverse NAT and is re-checked
+    # here. LiteLLM :4000 (providers litellm and litellm-projects), the ToolHive MCP gateway through
+    # the envoy-internal LoadBalancer IP (the LAN mcp route). The envoy-internal entry here is also
+    # the reply path for the route rule above. Skill `networking` references/dns-ownership.md.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: litellm
+            app.kubernetes.io/instance: litellm
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+    # DNS replies from CoreDNS. No toPorts on purpose: a reply lands on an ephemeral port, never 53.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
