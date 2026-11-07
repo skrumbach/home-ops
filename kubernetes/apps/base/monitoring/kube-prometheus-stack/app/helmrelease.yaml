@@ -163,7 +163,7 @@ spec:
             name: alertmanager
             port: 9093
             apiVersion: v2
-        enableAdminAPI: true
+        enableAdminAPI: false
         enableFeatures:
           - auto-gomaxprocs
           - memory-snapshot-on-shutdown
@@ -171,7 +171,9 @@ spec:
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
         replicas: 1
-        replicaExternalLabelName: "__replica__" # must match with thanos value `.query.replicaLabel[0]`
+        # Adds an external label `__replica__` to every series. No Thanos Query runs in this
+        # cluster; removing this value would add a `prometheus_replica` label to every alert.
+        replicaExternalLabelName: "__replica__"
         resources:
           requests:
             cpu: 100m
