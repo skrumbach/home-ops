@@ -30,7 +30,8 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
+  # Covers the 30 min startup probe budget (helmrelease.yaml startup failureThreshold 60 x 30s).
+  timeout: 30m
   postBuild:
     substituteFrom:
       - name: cluster-secrets

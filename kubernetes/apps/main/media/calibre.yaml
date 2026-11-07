@@ -12,6 +12,10 @@ spec:
       namespace: system
     - name: keda
       namespace: monitoring
+    - name: onepassword-store
+      namespace: security
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app

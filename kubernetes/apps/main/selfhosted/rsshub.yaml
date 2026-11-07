@@ -67,6 +67,8 @@ spec:
       namespace: security
     - name: dragonfly-operator
       namespace: database
+    - name: intel-device-plugin-gpu
+      namespace: system
   targetNamespace: *namespace
   timeout: 5m
   wait: false
