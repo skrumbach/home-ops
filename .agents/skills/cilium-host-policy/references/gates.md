@@ -29,7 +29,7 @@ On each cilium pod, resolve the host endpoint (identity labels contain `reserved
 
 Both must hold on all three nodes:
 
-1. **Deny rows exist** for the Ceph ports in the policy (`fromEntities: world` expands to `reserved:world`, `world-ipv4`, and `world-ipv6`; Cilium 1.20 adds `reserved:aggregate-world`, so each port appears four times, 60 rows here). 1.20 also lists `Allow Ingress reserved:aggregate-*` rows; the gate row is still `Allow Ingress ANY ANY`. No Deny rows means the selector matched nothing. The CCNP status still says Valid. `policy-enabled` on the host endpoint is `none`.
+1. **Deny rows exist** for the ports in the policy (`fromEntities: world` expands to `reserved:world`, `world-ipv4`, and `world-ipv6`; Cilium 1.20 adds `reserved:aggregate-world`, so each single port appears four times and a range once per aligned chunk per entity: 60 rows measured for the Ceph ports alone; 2381 and 9100 add 4 each, 9962-9965 adds 8). 1.20 also lists `Allow Ingress reserved:aggregate-*` rows; the gate row is still `Allow Ingress ANY ANY`. No Deny rows means the selector matched nothing. The CCNP status still says Valid. `policy-enabled` on the host endpoint is `none`.
 2. **`Allow Ingress ANY` is still there.** Its absence means `enableDefaultDeny` took effect. Roll back.
 
 ```bash
@@ -40,7 +40,7 @@ That status is not the gate.
 
 ## Management plane
 
-From a host that is not a node: `kubectl get --raw='/readyz'`, `kubectl -n kube-system get nodes`, and `nc -vz 10.10.10.11 50000` (talos-2 is `.12`, talos-3 is `.13`). Then confirm the denied Ceph ports fail from that same non-node host while RGW (`s3`) and Prometheus still work. The port list is the policy's `toPorts`, not a copy kept here.
+From a host that is not a node: `kubectl get --raw='/readyz'`, `kubectl -n kube-system get nodes`, and `nc -vz 10.10.10.11 50000` (talos-2 is `.12`, talos-3 is `.13`). Then confirm the denied ports fail from that same non-node host while RGW (`s3`) still works and Prometheus `up` stays 1 for the jobs scraping denied ports on node IPs (`rook-ceph-exporter`, `rook-ceph-mgr`, `kube-etcd`, `node-exporter`, `cilium-agent`, `cilium-operator`, `hubble-metrics`). The port list is the policy's `toPorts`, not a copy kept here.
 
 ## Rollback
 
