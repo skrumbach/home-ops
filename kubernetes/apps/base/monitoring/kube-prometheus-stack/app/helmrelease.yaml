@@ -76,8 +76,38 @@ spec:
     kubeControllerManager:
       enabled: false
 
+    # Talos runs etcd as a host service, not a pod, and serves its metrics as plain http on
+    # :2381 (`listen-metrics-urls` in talos/machineconfig.yaml.j2). Scrape the node IPs,
+    # never the VIP. The chart's default serviceMonitor.authorization is a Bearer header with
+    # the Prometheus ServiceAccount token; `null` stops it being sent in cleartext to etcd.
+    # Inert chart rule: etcdGRPCRequestsSlow needs grpc_server_handling_seconds, which etcd
+    # only exports with `metrics: extensive` (Talos runs the default `basic`).
     kubeEtcd:
-      enabled: false
+      enabled: true
+      endpoints: ["10.10.10.11", "10.10.10.12", "10.10.10.13"]
+      service:
+        port: 2381
+        targetPort: 2381
+      serviceMonitor:
+        scheme: http
+        authorization: null
+        # Node name as instance, matching node-exporter, so alerts can say instance="talos-1".
+        relabelings:
+          - action: replace
+            sourceLabels: ["__address__"]
+            regex: 10\.10\.10\.11:\d+
+            targetLabel: instance
+            replacement: talos-1
+          - action: replace
+            sourceLabels: ["__address__"]
+            regex: 10\.10\.10\.12:\d+
+            targetLabel: instance
+            replacement: talos-2
+          - action: replace
+            sourceLabels: ["__address__"]
+            regex: 10\.10\.10\.13:\d+
+            targetLabel: instance
+            replacement: talos-3
 
     kubelet:
       enabled: true
