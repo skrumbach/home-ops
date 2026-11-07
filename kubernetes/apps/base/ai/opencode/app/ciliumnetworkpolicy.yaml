@@ -6,10 +6,10 @@ metadata:
   name: opencode
 spec:
   # Ingress fence only: opencode serves an agent with model-directed bash and a GitHub write token on
-  # 0.0.0.0:4096 with no OPENCODE_SERVER_PASSWORD. Egress stays open (GitHub, npm, LiteLLM, toolhive).
+  # 0.0.0.0:4096, behind OPENCODE_PASSWORD (ExternalSecret). Egress stays open (GitHub, npm, LiteLLM, toolhive).
   # Residual exposure: the toPorts-free reply rules below (LiteLLM, envoy-internal) admit every port on
   # the pod, not only replies (cilium/cilium#47913), so a compromised LiteLLM or envoy-internal peer can
-  # reach :4096 unauthenticated. The real fix is OPENCODE_SERVER_PASSWORD in entrypoint.sh. Skill `networking`.
+  # reach :4096, where the server password is the remaining guard. Skill `networking`.
   # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
   # The controller label keeps any other pod in ns ai out of this selector.
   endpointSelector:
