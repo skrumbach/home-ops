@@ -23,6 +23,8 @@ spec:
                 evictFailedBarePods: true
                 evictLocalStoragePods: false
                 evictSystemCriticalPods: false
+                # Only evict when another node fits the pod's requests, affinity and taints.
+                nodeFit: true
             - name: LowNodeUtilization
               args:
                 metricsUtilization:

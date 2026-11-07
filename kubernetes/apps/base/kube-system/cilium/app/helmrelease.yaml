@@ -44,8 +44,6 @@ spec:
         limits:
           memory: 128Mi
     cgroup:
-      automount:
-        enabled: false
       # The mount-cgroup init container takes its resources from
       # cgroup.autoMount.resources (NOT initResources) — requests==limits
       # needed here too for pod-level Guaranteed QoS.

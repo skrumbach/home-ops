@@ -31,7 +31,9 @@ spec:
                   name: cloudflare-tunnel-secret
             args: ["tunnel", "run"]
             probes:
-              liveness: &probes
+              # Liveness is lenient: a restart drops every tunnel connection, so only a
+              # sustained /ready failure (about 10 minutes) should trigger one.
+              liveness:
                 enabled: true
                 custom: true
                 spec:
@@ -39,10 +41,20 @@ spec:
                     path: /ready
                     port: &port 8080
                   initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 20
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ready
+                    port: *port
+                  initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
