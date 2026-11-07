@@ -533,7 +533,7 @@ spec:
       GF_FEATURE_TOGGLES_ENABLE: publicDashboards
       GF_LOG_MODE: console
       GF_NEWS_NEWS_FEED_ENABLED: false
-      GF_SECURITY_COOKIE_SAMESITE: grafana
+      GF_SECURITY_COOKIE_SAMESITE: lax
       GF_SERVER_ROOT_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
 
     grafana.ini:
@@ -541,11 +541,6 @@ spec:
         check_for_updates: false
         check_for_plugin_updates: false
         reporting_enabled: false
-      auth.anonymous:
-        enabled: true
-        org_id: 1
-        org_name: Main Org.
-        org_role: Viewer
       dashboards:
         default_home_dashboard_path: /var/lib/grafana/dashboards/default/home-dashboard.json
       news:
