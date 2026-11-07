@@ -78,6 +78,10 @@ ALLOWED_REMOVALS: dict[tuple[str, str], str] = {
         "# yaml-language-server: $schema=https://raw.githubusercontent.com/kashalls/kromgo/main/config.schema.json",
     ): "kromgo moved to home-operations/kromgo; the schema line now points at its 0.16 config.schema.json.",
     (
+        "kubernetes/apps/base/kube-system/multus/networks/iot.yaml",
+        "# yaml-language-server: $schema=https://raw.githubusercontent.com/k8snetworkplumbingwg/network-attachment-definition-client/refs/tags/v1.7.5/artifacts/networks-crd.yaml",
+    ): "Schema line moved from raw GitHub to kubernetes-schemas.pages.dev, the same URL vpn.yaml uses (manifest hygiene, deep-scan row 316).",
+    (
         ".renovate/customManagers.json5",
         "// # renovate: datasource=github-releases depName=k3s-io/k3s",
     ): "Example comments deleted with the local annotated-dependency customManager: the base preset github>home-operations/renovate-presets#11.0.0 now owns that manager.",

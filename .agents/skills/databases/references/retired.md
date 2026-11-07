@@ -20,7 +20,7 @@ deletion step below has run. Same shape as skill `ai-stack`
 | In-cluster Secrets `falkordb-secret`, `ducklake-secret`, `ducklake-db-password` | deleted (ESO `Owner`) | values live in 1Password | none |
 | DNS `falkordb`, `falkordb-browser` (UniFi) | removed by unifi-dns `policy: sync` | none | check for hand-made leftovers with no TXT twin |
 | LB IP `10.50.0.24` | released, free in the BGP pool | none | none |
-| Authentik ReferenceGrant `database` entry | unchanged, no consumer now | harmless; the file is under `security/` | optional separate issue |
+| Authentik ReferenceGrant `database` entry | removed (no consumer) | none | none |
 
 The expected alert after the prune is `KopiurPolicyVanished` (warning) for
 `database/falkordb-ceph` and `database/falkordb-r2`. It clears about 24 hours later.

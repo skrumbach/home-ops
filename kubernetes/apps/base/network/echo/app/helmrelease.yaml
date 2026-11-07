@@ -73,7 +73,7 @@ spec:
           gethomepage.dev/name: "Echo Server"
           gethomepage.dev/icon: si-codemirror
           gethomepage.dev/description: "HTTP/HTTPS Echo Server"
-          gethomepage.dev/href: "https://echo-server.${SECRET_DOMAIN}"
+          gethomepage.dev/href: "https://echo.${SECRET_DOMAIN}"
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
