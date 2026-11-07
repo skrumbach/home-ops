@@ -27,3 +27,17 @@ output "grafana_client_secret" {
   value       = random_password.grafana_client_secret.result
   sensitive   = true
 }
+
+# Generated renovate-operator credentials. Copy once into 1Password Homelab/renovate-operator-oidc
+# (fields client-secret, session-secret). Skill `authentik-terraform` references/apply-runbook.md.
+output "renovate_operator_client_secret" {
+  description = "OAuth2 client_secret generated for the renovate-operator provider"
+  value       = random_password.renovate_operator_client_secret.result
+  sensitive   = true
+}
+
+output "renovate_operator_session_secret" {
+  description = "Session cookie key for the renovate-operator UI"
+  value       = random_password.renovate_operator_session_secret.result
+  sensitive   = true
+}

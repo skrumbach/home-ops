@@ -11,6 +11,7 @@ OpenTofu resources:
 | Proxy provider `sklab-externel-auth-provider` | imported. Live spelling is `externel`. Renaming it is a live rename of the ExtAuth provider. `mode = forward_domain`, `skip_path_regex = ""` |
 | LiteLLM provider, application, `litellm_role` scope mapping, LiteLLM-only invalidation flow | created in `litellm.tofu`. `client_secret` is generated. `grant_types = ["authorization_code"]` |
 | Grafana provider and application | created in `grafana.tofu`. Confidential; literal `client_id = grafana`, generated `client_secret` copied once into 1Password `Homelab/grafana-oidc`. `grant_types` adds `refresh_token` and the provider maps `offline_access` (Grafana `use_refresh_token`) |
+| Renovate Operator provider and application | created in `renovate-operator.tofu`. Confidential; literal `client_id = renovate-operator`, generated `client_secret` and UI session key copied once into 1Password `Homelab/renovate-operator-oidc` |
 | Home Assistant provider and application | created in `home-assistant.tofu`. Public client + PKCE, no secret, literal `client_id = home-assistant` repeated in the HA ConfigMap |
 
 `open-webui` was removed from Authentik and from the stack (`tofu state rm`).
