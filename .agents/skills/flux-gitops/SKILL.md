@@ -91,6 +91,9 @@ flux-instance HelmRelease sets `values.instance.sync.path`.
     Database its `vector` extension. Wrap the shared path in a base
     kustomization and patch there (`base/database/surrealdb/backup`,
     `base/ai/litellm-pgvector/db`). Gate: `scripts/ci/overlay-patches-test.py`.
+    The HelmRelease defaults target `home-ops.io/helm-remediation notin
+    (manual)`: a HelmRelease with that label (authentik, one-way migrations)
+    gets none of them and must set its own CRD, install and upgrade policy.
 
 ## Where things live
 

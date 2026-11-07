@@ -18,6 +18,12 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: authentik
+  # Opts out of the cluster-apps HelmRelease defaults (kubernetes/clusters/main/apps.yaml),
+  # so install/upgrade below are the whole policy. Migrations are one-way: a rollback runs
+  # the old server on the migrated schema. A failed upgrade stalls for a human (no retry,
+  # no rollback). Skill `authentik-terraform` upgrade-checklist.md.
+  labels:
+    home-ops.io/helm-remediation: manual
 spec:
   chartRef:
     kind: OCIRepository
@@ -25,14 +31,21 @@ spec:
   interval: 30m
   timeout: 20m
   install:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
     timeout: 20m
     remediation:
       retries: 3
   upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RemediateOnFailure
     timeout: 20m
     cleanupOnFail: true
     remediation:
-      retries: 3
+      retries: 0
+      remediateLastFailure: false
   values:
     global:
       deploymentAnnotations:

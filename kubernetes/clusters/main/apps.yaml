@@ -21,6 +21,9 @@ spec:
   # This merge REPLACES each child's spec.patches (the list has no merge key), so an
   # overlay patch is silently dropped: put it in the base kustomization the child's
   # path builds. Gate: scripts/ci/overlay-patches-test.py. Skill `flux-gitops`.
+  # A HelmRelease labelled home-ops.io/helm-remediation=manual skips the
+  # HelmRelease defaults (rollback remediation) and sets its own: authentik,
+  # whose one-way migrations make a rollback an outage.
   patches:
     - # Add Kustomization defaults for all child Kustomizations
       patch: |-
@@ -55,6 +58,7 @@ spec:
               target:
                 group: helm.toolkit.fluxcd.io
                 kind: HelmRelease
+                labelSelector: home-ops.io/helm-remediation notin (manual)
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization

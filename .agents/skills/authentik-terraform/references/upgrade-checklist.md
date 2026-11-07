@@ -11,6 +11,16 @@ CNPG `database/postgres-18` `Ready`, `ContinuousArchiving` and a recent
 successful `Backup` before the bump. The bundled Bitnami postgres subchart is
 disabled here. Its image bump is irrelevant.
 
+## When an upgrade fails
+
+Label `home-ops.io/helm-remediation: manual` opts the HelmRelease out of the
+`cluster-apps` rollback defaults; `upgrade.remediation.retries: 0` leaves a failed
+upgrade `Stalled` on the new chart. Roll forward: fix it in Git (a new generation
+retries) or `flux reconcile hr authentik -n security --reset`. Never `helm rollback`
+after migrations ran; going back is the old tag plus a pre-bump `authentik` database
+(PITR into a scratch Cluster, `pg_dump`, restore into `postgres-18`; skill
+`databases` `cnpg.md` "Restore shape"), never a shared-cluster rebuild.
+
 ## Before 2026.11
 
 The Base URL system setting (API field `base_url`) is optional on 2026.8. On
