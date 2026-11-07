@@ -134,7 +134,6 @@
     {
       // MUST stay after the blanket minor rule. CalVer: 2026.8 -> 2026.11 is a "minor", i.e. a new release line with one-way migrations. Patches stay automerged. Skill `authentik-terraform` references/upgrade-checklist.md.
       description: "Never auto merge Authentik release lines - each one runs one-way Django migrations and has a pre-upgrade checklist",
-      matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/goauthentik/helm-charts/authentik"],
       matchUpdateTypes: ["minor", "major"],
       automerge: false,
