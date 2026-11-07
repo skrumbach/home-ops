@@ -132,6 +132,9 @@ CREATED_RESOURCE_ADDRS = frozenset(
         "random_password.litellm_client_secret",
         "authentik_provider_oauth2.home_assistant",
         "authentik_application.home_assistant",
+        "authentik_provider_oauth2.grafana",
+        "authentik_application.grafana",
+        "random_password.grafana_client_secret",
     }
 )
 
@@ -520,6 +523,25 @@ def test_stack_hcl_model() -> dict[str, Any]:
                     raise Failure(
                         f"litellm redirect URI must target litellm host: {uris!r}"
                     )
+            continue
+        if name == "grafana":
+            # Created confidential client: generated secret, literal client_id, explicit grants.
+            # refresh_token is required because Grafana runs with use_refresh_token.
+            if "client_secret" not in block:
+                raise Failure("grafana provider must declare generated client_secret")
+            grants = [_strip_quotes(str(g)) for g in block.get("grant_types") or []]
+            if not {"authorization_code", "refresh_token"} <= set(grants):
+                raise Failure(
+                    "created grafana provider must declare grant_types "
+                    f"authorization_code + refresh_token, got {grants!r}"
+                )
+            mappings = str(block.get("property_mappings") or "")
+            if "data.authentik_property_mapping_provider_scope.offline_access.ids" not in mappings:
+                raise Failure("grafana provider must map offline_access (refresh tokens)")
+            if "/login/generic_oauth" not in json.dumps(
+                block.get("allowed_redirect_uris") or []
+            ):
+                raise Failure("grafana redirect URI must end with /login/generic_oauth")
             continue
         if name == "home_assistant":
             # Created public client (PKCE): no secret, grant_types explicit.

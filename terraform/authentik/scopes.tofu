@@ -18,6 +18,14 @@ data "authentik_property_mapping_provider_scope" "oauth2_default" {
   ]
 }
 
+# offline_access: Authentik issues a refresh token only when this scope is mapped and requested.
+# Grafana alone needs it (grafana.tofu, use_refresh_token).
+data "authentik_property_mapping_provider_scope" "offline_access" {
+  managed_list = [
+    "goauthentik.io/providers/oauth2/scope-offline_access",
+  ]
+}
+
 # The proxy provider additionally carries the entitlements and proxy scopes.
 data "authentik_property_mapping_provider_scope" "proxy_default" {
   managed_list = [
