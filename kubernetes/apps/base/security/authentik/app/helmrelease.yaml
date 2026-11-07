@@ -94,7 +94,8 @@ spec:
         # AUTHENTIK_WEB__BASE_URL seeds the Base URL system setting only while it is empty; 2026.11 refuses to start without one. Skill `authentik-terraform`.
         base_url: https://auth.${SECRET_DOMAIN}
       worker:
-        concurrency: 4
+        # Replaces the deprecated worker.concurrency (1:1: Dramatiq threads per worker process; processes stays at its default of 1).
+        threads: 4
     prometheus:
       rules:
         # Leave the chart rule bundle enabled. rules.enabled is all-or-nothing, and disabling it drops the rules that do fire. Several shipped rules name metrics this server does not emit; they cannot false-fire.

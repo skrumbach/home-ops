@@ -33,6 +33,8 @@ Base URL, or with an admin token:
 `curl -s -H "Authorization: Bearer $TOKEN" https://auth.${SECRET_DOMAIN}/api/v3/admin/settings/ | jq -r .base_url`.
 Empty means set it there and save.
 
+Done before 2026.11: `authentik.worker.concurrency` (deprecated, warned in logs) became `authentik.worker.threads: 4`, same value, 1:1.
+
 Renovate never automerges an Authentik release line (`.renovate/autoMerge.json5`).
 
 ## Trusted proxies
