@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumclusterwidenetworkpolicy_v2.json
-# Subtractive host firewall for Ceph's host-netns ports. enableDefaultDeny stays false in both directions. Removing it, or adding another nodeSelector CCNP that defaults deny on, locks the nodes out: default-deny is OR-ed across policies.
+# Subtractive host firewall for host-netns ports: Ceph, plus unauthenticated etcd/node/Cilium metrics (the name predates those). enableDefaultDeny stays false in both directions. Removing it, or adding another nodeSelector CCNP that defaults deny on, locks the nodes out: default-deny is OR-ed across policies.
 # fromEntities world does not match host, remote-node, or pods. Enforcing while policyAuditMode is false. Rollback: set policyAuditMode true, or delete this policy.
 # Skill `cilium-host-policy`.
 apiVersion: cilium.io/v2
@@ -9,7 +9,8 @@ metadata:
   name: ceph-lan-isolation
 spec:
   description: >-
-    Deny non-cluster (world) access to host-network Ceph daemon ports.
+    Deny non-cluster (world) access to host-network Ceph daemon ports and
+    unauthenticated host-network metrics ports (etcd, node-exporter, Cilium).
     Subtractive only - enableDefaultDeny is false in both directions so the
     host endpoint never enters default-deny and management access cannot break.
   # Host-endpoint labels are not node labels. kubernetes.io/os and kubernetes.io/hostname are stripped, so a selector on them is accepted and matches nothing. control-plane covers all three nodes today.
@@ -66,4 +67,18 @@ spec:
             # the 7300 upstream default). No ephemeral or NodePort range overlaps it.
             - port: "6800"
               endPort: 7568
+              protocol: TCP
+            # Non-Ceph: plain-HTTP, unauthenticated metrics on the node IP. The only reader is
+            # the Prometheus pod, whose source is its pod (or a node) identity, never `world`;
+            # 9283/9926 above are scraped the same way and stay up. Chart-default ports.
+            # etcd listen-metrics-urls (talos/machineconfig.yaml.j2), job kube-etcd.
+            - port: "2381"
+              protocol: TCP
+            # node-exporter (hostNetwork DaemonSet).
+            - port: "9100"
+              protocol: TCP
+            # cilium-agent, cilium-operator, cilium-envoy, hubble metrics. Hubble peer
+            # 4244 and cilium-health 4240 are not metrics and stay open.
+            - port: "9962"
+              endPort: 9965
               protocol: TCP

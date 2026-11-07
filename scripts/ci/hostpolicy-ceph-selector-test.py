@@ -106,6 +106,10 @@ EXPECTED_DENY_PORTS = {
     ("7000", None),
     ("8443", None),
     ("6800", 7568),
+    # Non-Ceph unauthenticated host-netns metrics: etcd, node-exporter, Cilium/Hubble.
+    ("2381", None),
+    ("9100", None),
+    ("9962", 9965),
 }
 
 
