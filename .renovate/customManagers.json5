@@ -15,5 +15,15 @@
       ],
       datasourceTemplate: "npm",
     },
+    {
+      // A bare oci:// artifact URL is matched directly here instead of the # renovate: annotation form.
+      description: "Flux distribution artifact in the flux-instance HelmRelease",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)flux-system/flux-instance/app/helmrelease\\.yaml$/"],
+      matchStrings: [
+        "artifact:\\s*oci://(?<depName>[^:\\s]+):(?<currentValue>[^\\s]+)",
+      ],
+      datasourceTemplate: "docker",
+    },
   ],
 }

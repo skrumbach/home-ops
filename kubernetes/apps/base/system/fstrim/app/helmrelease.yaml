@@ -21,6 +21,9 @@ spec:
           # A run can outlast its window when many blocks were never discarded.
           concurrencyPolicy: Forbid
           backoffLimit: 0
+          # Forbid plus a hung run would block every later run silently. 3h matches
+          # the FstrimJobFailed for: window in prometheusrule.yaml.
+          activeDeadlineSeconds: 10800
 
         pod:
           hostNetwork: true

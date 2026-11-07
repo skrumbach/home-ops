@@ -26,6 +26,7 @@ spec:
   values:
     instance:
       distribution:
+        # Bumped by the custom manager in .renovate/customManagers.json5 (flux-operator group).
         artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests:v0.62.1
         version: 2.x
       cluster:
