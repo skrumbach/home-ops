@@ -77,11 +77,8 @@ spec:
               # /config is the esphome-config claim, so known_hosts persists across restarts.
               # git runs this string through a shell, so mkdir creates .ssh on first use.
               GIT_SSH_COMMAND: "mkdir -p /config/.ssh && ssh -o UserKnownHostsFile=/config/.ssh/known_hosts -o StrictHostKeyChecking=accept-new"
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
+            # No allowPrivilegeEscalation: false / drop ALL here: the image's setuid fixuid
+            # remaps coder to the pod UID at start; without it HOME is / and code-server exits.
             resources:
               requests:
                 cpu: 10m
