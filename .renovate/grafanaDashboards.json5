@@ -32,7 +32,8 @@
       datasourceTemplate: "git-refs",
     },
     {
-      // Same depName and datasource as the flux OCIRepository dep, so both land in the one envoy-gateway branch and the boards match the controller.
+      // Same depName as the flux OCIRepository dep (one branch). The packageName copies the preset's mirror.gcr.io -> docker.io registryAlias, which
+      // regex managers ignore: on mirror.gcr.io (no timestamps) the boards skipped the 3-day release age the chart waits out on Docker Hub, and the branch dropped the chart (#2475).
       description: "Envoy Gateway dashboards pinned to the deployed gateway-helm chart tag",
       customType: "regex",
       managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana/app/helmrelease\\.yaml$/"],
@@ -40,10 +41,19 @@
         "url: https://raw\\.githubusercontent\\.com/envoyproxy/gateway/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/\\S+\\.json",
       ],
       depNameTemplate: "mirror.gcr.io/envoyproxy/gateway-helm",
+      packageNameTemplate: "docker.io/envoyproxy/gateway-helm",
       datasourceTemplate: "docker",
     },
   ],
   packageRules: [
+    {
+      // Docker Hub tags every chart twice (1.10.0, v1.10.0) and docker versioning ranks them equal, so the chart could take 1.10.0 while the
+      // board URLs need GitHub's v1.10.0. Only v-tags are versions here, for the chart and the boards alike.
+      description: "gateway-helm chart and Envoy Gateway dashboards move to the same v-prefixed tag",
+      matchDatasources: ["docker"],
+      matchDepNames: ["mirror.gcr.io/envoyproxy/gateway-helm"],
+      versioning: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
     {
       addLabels: ["renovate/grafana-dashboard"],
       automerge: true,

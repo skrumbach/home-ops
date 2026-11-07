@@ -76,6 +76,12 @@ manual-dispatch only (no schedule, no `push` trigger), so it never runs beside t
     newly pinned workload rolls once with the same image. Digests live in
     `tag: x@sha256:...`; never use app-template's separate `digest:` field
     alongside (it renders a double `@sha256` and the kubelet rejects it).
+14. **A regex customManager ignores the preset's `mirror.gcr.io` -> `docker.io`
+    `registryAliases`.** To share a branch with a flux/kubernetes dep, copy the
+    depName and the aliased `packageNameTemplate`, and give both one versioning
+    (a `matchDepNames` packageRule), or the deps see different release ages and
+    Renovate drops the pending one from the branch (#2475: Envoy Gateway boards
+    bumped, chart left behind).
 
 ## Where things live
 
