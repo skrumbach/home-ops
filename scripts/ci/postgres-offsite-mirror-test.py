@@ -10,8 +10,10 @@ Static checks:
   - the CronJob is live (suspend: false);
   - SERVER_NAME is the Cluster's WAL-archiver serverName, ARCHIVE_BUCKET and the
     LAN endpoint match the ObjectStore the archiver writes to;
-  - the script copies (never sync/move/purge/--delete-*), refuses a source with
-    no base backup, and prunes by R2 upload time (--use-server-modtime);
+  - the script runs under `set -eu`, copies (never sync/move/purge/--delete-*),
+    exits 1 on a source with no base backup and on a prune over PRUNE_CEILING
+    (checked before `rclone delete`), and prunes by R2 upload time
+    (--use-server-modtime);
   - every shell `${`/`$(` is Flux-escaped (`$${`/`$$(`);
   - every R2 secretKeyRef key is produced by the ExternalSecret;
   - prometheusrule.yaml is wired into the kustomization.
@@ -19,7 +21,7 @@ Static checks:
 Behaviour (`promtool test rules`) of PostgresOffsiteMirrorStale:
   - never succeeded (no series)          -> fires after for: 2h
   - hourly successes                     -> silent
-  - successes stop                       -> pending at 5h, firing at 6h+
+  - successes stop                       -> pending from 4h, firing from 6h
 """
 
 from __future__ import annotations
@@ -99,9 +101,19 @@ def static_checks() -> dict:
     check(re.search(r"\brclone copy\b", code) is not None, "script must `rclone copy`")
     for banned in (r"\brclone sync\b", r"\brclone move\b", r"\brclone purge\b", r"--delete-"):
         check(re.search(banned, code) is None, f"script must not use {banned!r}")
+    check(code.lstrip().startswith("set -eu"), "script must start with `set -eu` (a failed copy must stop the prune)")
+    # The guard: list base/*/backup.info into a file, then `exit 1` when it is empty.
+    guard = re.search(
+        r'rclone lsf [^\n]*--include "/\*/backup\.info" \\\n\s*"\$\$\{SRC\}/base" >(\S+)\n'
+        r"\s*if \[ ! -s \1 \]; then\n[^\n]*\n\s*exit 1\n",
+        code,
+    )
+    check(guard is not None, "script must exit 1 when the source lists no base/*/backup.info")
+    ceiling = re.search(r'if \[ "\$\$\{CANDIDATES\}" -gt "\$\$\{PRUNE_CEILING\}" \]; then\n[^\n]*\n\s*exit 1\n', code)
+    check(ceiling is not None, "script must exit 1 when prune candidates exceed PRUNE_CEILING")
     check(
-        re.search(r'rclone lsf [^\n]*--include "/base/\*/backup\.info"', code) is not None,
-        "script must refuse a source with no base/*/backup.info",
+        guard.start() < code.find("rclone copy") and ceiling.start() < code.find("rclone delete"),
+        "the source guard must precede the copy and the ceiling check must precede rclone delete",
     )
     # Each rclone invocation including its `\`-continued lines.
     calls = [m.group(0) for m in re.finditer(r"rclone (?:[^\n]*\\\n)*[^\n]*", code)]

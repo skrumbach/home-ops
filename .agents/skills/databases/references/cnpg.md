@@ -142,7 +142,8 @@ externalClusters:
 
 A rebuild (the Cluster and its PVCs gone) also needs, in the same commit, the WAL
 archiver's `plugins[].parameters.serverName` bumped to `postgres18-v3`, and the off-site
-mirror's `SERVER_NAME` with it (`scripts/ci/postgres-offsite-mirror-test.py`). The recovered
+mirror's `SERVER_NAME` with it (`scripts/ci/postgres-offsite-mirror-test.py`); the old R2
+prefix is then never pruned (`offsite-mirror/README.md`). The recovered
 primary refuses to archive into the non-empty v2 archive, so `ContinuousArchiving` stays
 False until it is bumped. After the restore, point `recovery.source` and the
 `externalClusters` entry at v3 for the next generation. Point-in-time:

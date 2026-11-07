@@ -146,8 +146,9 @@ spec:
 
                   # A wiped or mis-pointed source copies nothing and exits 0, so the age prune below would empty R2
                   # over 35d while every run succeeded. A live archive always holds a base backup: refuse without one.
-                  rclone lsf --files-only --recursive --include "/base/*/backup.info" \
-                    "$${SRC}" >/tmp/offsite-source-backups.list
+                  # --max-depth 2 under base/ lists only the backup folders, never the WAL stream.
+                  rclone lsf --files-only --recursive --max-depth 2 --include "/*/backup.info" \
+                    "$${SRC}/base" >/tmp/offsite-source-backups.list
                   if [ ! -s /tmp/offsite-source-backups.list ]; then
                     echo "postgres-offsite-mirror: REFUSING - no base/*/backup.info under $${SRC}" >&2
                     exit 1
@@ -156,8 +157,10 @@ spec:
                   # COPY-ONLY: `rclone copy` never deletes on the destination. It must NEVER become `rclone sync`
                   # and no --delete-* flag may be added, or CNPG's 30d LAN-side deletions and any LAN wipe would
                   # propagate and the off-site copy would stop being a backup. --s3-no-check-bucket keeps the R2 token object-only.
+                  # --size-only: barman objects are write-once, so a size match needs no per-object HEAD on either side.
                   rclone copy "$${SRC}" "$${DST}" \
                     --fast-list \
+                    --size-only \
                     --transfers 4 \
                     --checkers 8 \
                     --retries 3 \

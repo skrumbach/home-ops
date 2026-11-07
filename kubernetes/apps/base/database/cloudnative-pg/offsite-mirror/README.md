@@ -65,9 +65,13 @@ this CronJob in the same commit, or the mirror keeps copying the old path and su
 R2 holds about 35d of the archive: LAN's 30d recovery window plus 5d, roughly 360 WAL
 segments a day plus the daily bzip2 base backups. Growth is bounded by the prune, not by
 the LAN. Plain copy with no prune would grow without bound; `sync` would be bounded but
-mirrors every deletion and wipe. Each hourly run lists both sides and `HEAD`s source and
-destination objects to compare mtimes, which is R2 Class B operations and the main
-running cost besides storage.
+mirrors every deletion and wipe. Each hourly run lists both sides (R2 Class B operations)
+and compares by size only (`--size-only`: barman objects are write-once), so it makes no
+per-object `HEAD`. The source guard lists only `base/`, never the WAL stream.
+
+**A `serverName` bump strands the old R2 prefix.** The copy and the prune cover
+`SERVER_NAME` only. Once the mirror moves to `postgres18-v3`, nothing ever expires
+`postgres18-v2/` in R2. Delete it by hand once the new archive has its own 35d of history.
 
 ## Reading the off-site recovery point
 
