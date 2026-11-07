@@ -17,9 +17,8 @@ A `Cluster` has one live barman store. A second `ScheduledBackup` that names
 another `barmanObjectName` is accepted, runs, reports completed, and writes
 to the original store (cloudnative-pg#7778, closed as not planned). The
 off-site copy is a mirror of the archive, not a second destination:
-`offsite-mirror/README.md`. That CronJob ships `suspend: true` until the
-`cloudflare-r2` 1Password item exists. Un-suspending it is a deliberate
-follow-up, not a side effect of editing the cluster.
+`offsite-mirror/README.md`. That hourly CronJob copies the archive to R2 (live since
+D1; `PostgresOffsiteMirrorStale` covers it). Its `SERVER_NAME` must follow the archiver's.
 
 Current archive: `destinationPath: s3://home-ops-postgres-cluster/` on the NAS
 MinIO (not Ceph RGW), `serverName: postgres18-v2`, retention `30d`. Increment
@@ -142,7 +141,8 @@ externalClusters:
 ```
 
 A rebuild (the Cluster and its PVCs gone) also needs, in the same commit, the WAL
-archiver's `plugins[].parameters.serverName` bumped to `postgres18-v3`. The recovered
+archiver's `plugins[].parameters.serverName` bumped to `postgres18-v3`, and the off-site
+mirror's `SERVER_NAME` with it (`scripts/ci/postgres-offsite-mirror-test.py`). The recovered
 primary refuses to archive into the non-empty v2 archive, so `ContinuousArchiving` stays
 False until it is bumped. After the restore, point `recovery.source` and the
 `externalClusters` entry at v3 for the next generation. Point-in-time:

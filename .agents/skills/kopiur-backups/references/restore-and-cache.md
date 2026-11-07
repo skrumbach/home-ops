@@ -187,5 +187,5 @@ settings. `database/surrealdb` uses a `SnapshotPolicy` hook for that reason
 ([onboarding.md](onboarding.md)).
 
 CloudNativePG is not a kopiur volume. One barman destination per `Cluster`.
-Off-site is the suspended mirror in
+Off-site is the hourly R2 mirror in
 `kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/`.

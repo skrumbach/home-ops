@@ -84,8 +84,8 @@ Comments that name an older tag are stale.
     healthy.
 15. **CloudNativePG has one live barman destination per `Cluster`.** A second
     `ScheduledBackup` with its own `barmanObjectName` reports completed and
-    writes to the original store (cloudnative-pg#7778). The off-site copy is a
-    suspended `rclone copy` mirror, never `sync`.
+    writes to the original store (cloudnative-pg#7778). The off-site copy is an
+    hourly `rclone copy` mirror to R2, never `sync`.
     `kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`.
 16. **Full-cluster restore from r2** is
     [full-cluster-restore-r2.md](references/full-cluster-restore-r2.md). Do not invent a
