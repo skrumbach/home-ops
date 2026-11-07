@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./servicemonitor.yaml
+  - ./securitypolicy.yaml
 configMapGenerator:
   - name: alertmanager
     files:

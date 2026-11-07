@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Gates the whole esphome route: the /code/ editor runs code-server with --auth none and the
+# dashboard has no login of its own either. The forward_domain proxy provider covers every host,
+# so no Authentik change is needed; the cross-namespace backendRef needs the home-automation entry
+# in security/allow-authentik-access. Skill authentik-terraform.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: esphome-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: esphome
+  extAuth:
+    headersToExtAuth:
+      - cookie
+      - authorization
+      - x-forwarded-for
+      - x-forwarded-host
+      - x-forwarded-proto
+      - x-forwarded-uri
+    http:
+      backendRefs:
+        - name: ak-outpost-authentik-embedded-outpost
+          namespace: security
+          port: 9000
+      path: /outpost.goauthentik.io/auth/envoy
+      headersToBackend:
+        - set-cookie
+        - authorization
+        - x-authentik-username
+        - x-authentik-email
+        - x-authentik-name
+        - x-authentik-uid

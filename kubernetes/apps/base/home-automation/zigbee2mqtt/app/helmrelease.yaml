@@ -203,8 +203,10 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `code` only.
         rules:
-          - matches:
+          - name: code
+            matches:
               - path:
                   type: PathPrefix
                   value: /code/
@@ -217,6 +219,7 @@ spec:
             backendRefs:
               - name: zigbee2mqtt
                 port: 12321
-          - backendRefs:
+          - name: app
+            backendRefs:
               - name: zigbee2mqtt
                 port: *httpPort
