@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/service.json
 # Standalone LoadBalancer exposing the Tdarr node-connection port (8266) on the
 # LAN so an external Tdarr_Node (e.g. a Windows PC outside the cluster) can
 # connect. Kept separate from the app-template `service:` block on purpose:

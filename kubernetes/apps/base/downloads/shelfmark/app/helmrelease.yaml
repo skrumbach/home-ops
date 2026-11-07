@@ -24,7 +24,7 @@ spec:
         runAsGroup: 2000
         fsGroup: 2000
         fsGroupChangePolicy: OnRootMismatch
-        runAsNonRoot: false
+        runAsNonRoot: true
         seccompProfile: {type: RuntimeDefault}
     controllers:
       shelfmark:
@@ -153,7 +153,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/icon: calibre-web.png
           gethomepage.dev/name: *app
-          gethomepage.dev/group: media
+          gethomepage.dev/group: Downloads
           gatus.home-operations.com/endpoint: |-
             url: https://books.${SECRET_DOMAIN}/api/health
             conditions:

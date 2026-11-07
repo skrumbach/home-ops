@@ -32,8 +32,9 @@ One provider, `forward_domain`, `external_host` `https://auth.${SECRET_DOMAIN}`,
 - `ai/hermes` (the `hermes-code` browser terminal)
 - `flux-system/headlamp`
 
-ReferenceGrant `allow-authentik-access` allows `from` six namespaces (the five above and
-`database`, which has no consumer since `database/falkordb` was retired, #2201) to
+ReferenceGrant `allow-authentik-access` allows `from` only the namespaces with a live
+ExtAuth SecurityPolicy: `ai`, `flux-system`, `home-automation`, `kube-system`, `network`
+(the `database` and `monitoring` entries were dropped, no consumer) to
 Service `ak-outpost-authentik-embedded-outpost`. A SecurityPolicy in a new
 namespace is accepted and then resolves its backend to nothing until the
 grant lists that namespace.

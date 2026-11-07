@@ -104,7 +104,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/icon: calibre-web.png
           gethomepage.dev/name: *app
-          gethomepage.dev/group: media
+          gethomepage.dev/group: Media
           gatus.home-operations.com/endpoint: |-
             url: https://calibre.${SECRET_DOMAIN}/login
             conditions:

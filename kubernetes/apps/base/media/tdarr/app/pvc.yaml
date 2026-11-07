@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/persistentvolumeclaim.json
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,7 +10,8 @@ spec:
   resources:
     requests:
       storage: 200Gi
-  # On `csi-rwx`: the default `csi` subvolumegroup is broken by Ceph Tentacle
-  # v20.2.1 subvolume corruption. Disposable transcode scratch. Revert to
-  # `ceph-filesystem` once a fixed Ceph release lands. Skill rook-ceph.
+  # Disposable transcode scratch on the RWX class. The default `csi`
+  # subvolumegroup is broken by Ceph Tentacle v20.2.1 subvolume corruption,
+  # so this claim stays on `ceph-filesystem-rwx` until a fixed Ceph release
+  # lands and the subvolumegroup is re-checked. Skill rook-ceph.
   storageClassName: ceph-filesystem-rwx
