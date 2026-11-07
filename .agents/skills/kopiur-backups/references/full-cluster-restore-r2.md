@@ -111,8 +111,10 @@ next unused version. Confirm on the MinIO bucket `home-ops-postgres-cluster` tha
 path holds recent WALs. Do not work around the archive check with an annotation; bump the path.
 Skill `databases` `references/cnpg.md` "Restore shape".
 
-If the MinIO NAS is lost too, Postgres has no off-site copy (the offsite mirror is suspended,
-`kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`) and is not recoverable.
+If the MinIO NAS is lost too, the only Postgres copy is the R2 mirror
+(`kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`): bucket
+`home-ops-postgres-cluster`, same `serverName` paths, up to ~1h behind. Restoring from it is
+undrilled; point the recovery `externalClusters[]` entry at the R2 endpoint and credential.
 
 ## Phase 2 - Rebuild
 

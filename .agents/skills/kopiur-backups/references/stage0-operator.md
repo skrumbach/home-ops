@@ -70,6 +70,5 @@ writes emptiness into r2 as the newest snapshot of the same identity, and
 ## Postgres is not this operator
 
 `database/cloudnative-pg` archives with barman to one destination. The off-site
-mirror CronJob is `suspend: true` until its 1Password item exists. Until that
-follow-up, postgres-18 has a single copy. Operating rules:
+mirror CronJob copies that archive to R2 hourly. Operating rules:
 `kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`.

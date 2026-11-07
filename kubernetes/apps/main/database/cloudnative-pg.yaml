@@ -244,6 +244,6 @@ spec:
   # No healthChecks and wait:false, matching the fleet's other CronJob-only
   # overlays (kubernetes/apps/main/system/pvc-writable-check.yaml): a CronJob
   # has no meaningful Ready condition, and the job's real health signal is a
-  # successful run, which belongs to the PrometheusRule follow-up recorded in
-  # the app README rather than to a Flux gate.
+  # successful run, which is offsite-mirror/prometheusrule.yaml's alert rather
+  # than a Flux gate.
   wait: false

@@ -9,9 +9,9 @@ metadata:
   labels:
     app.kubernetes.io/name: postgres-offsite-mirror
 spec:
-  # SHIPS SUSPENDED, AND UN-SUSPENDING IS THE DELIBERATE ACT THAT TURNS THE MIRROR ON.
-  # Skill `databases`.
-  suspend: true
+  # LIVE since D1 (owner-approved). Setting this back to true turns the
+  # off-site copy OFF, and PostgresOffsiteMirrorStale fires. Skill `databases`.
+  suspend: false
   # Hourly, offset from :00. The off-site WAL stream therefore lags the LAN
   # copy by up to ~1h - this is a second copy, not a second primary; the LAN
   # target remains the continuous one fed by archive_command. :25 avoids the
@@ -144,11 +144,23 @@ spec:
                   echo "postgres-offsite-mirror: start $$(date -u +%FT%TZ)"
                   echo "postgres-offsite-mirror: $${SRC} -> $${DST}"
 
+                  # A wiped or mis-pointed source copies nothing and exits 0, so the age prune below would empty R2
+                  # over 35d while every run succeeded. A live archive always holds a base backup: refuse without one.
+                  # --max-depth 2 under base/ lists only the backup folders, never the WAL stream.
+                  rclone lsf --files-only --recursive --max-depth 2 --include "/*/backup.info" \
+                    "$${SRC}/base" >/tmp/offsite-source-backups.list
+                  if [ ! -s /tmp/offsite-source-backups.list ]; then
+                    echo "postgres-offsite-mirror: REFUSING - no base/*/backup.info under $${SRC}" >&2
+                    exit 1
+                  fi
+
                   # COPY-ONLY: `rclone copy` never deletes on the destination. It must NEVER become `rclone sync`
                   # and no --delete-* flag may be added, or CNPG's 30d LAN-side deletions and any LAN wipe would
                   # propagate and the off-site copy would stop being a backup. --s3-no-check-bucket keeps the R2 token object-only.
+                  # --size-only: barman objects are write-once, so a size match needs no per-object HEAD on either side.
                   rclone copy "$${SRC}" "$${DST}" \
                     --fast-list \
+                    --size-only \
                     --transfers 4 \
                     --checkers 8 \
                     --retries 3 \
@@ -160,9 +172,10 @@ spec:
                   echo "postgres-offsite-mirror: copy complete $$(date -u +%FT%TZ)"
 
                   # INDEPENDENT age-based expiry, not a mirror of LAN deletions; `set -eu` means a failed copy aborts before it.
-                  # Ages come from the preserved source mtime (35d after ORIGINAL write); missing metadata only makes objects
-                  # look younger, the safe direction. Counted against a ceiling rather than relying on `--max-delete`.
-                  rclone lsf --files-only --recursive \
+                  # --use-server-modtime: age is time since the R2 upload, never less than since the LAN write, so an
+                  # object is kept at least 35d in R2, outlives a <35d R2 bucket lock, and needs no per-object HEAD.
+                  # Counted against a ceiling rather than relying on `--max-delete`.
+                  rclone lsf --files-only --recursive --use-server-modtime \
                     --min-age "$${OFFSITE_RETENTION}" "$${DST}" >/tmp/offsite-candidates.list
                   CANDIDATES="$$(wc -l </tmp/offsite-candidates.list | tr -d ' ')"
                   echo "postgres-offsite-mirror: $${CANDIDATES} object(s) older than $${OFFSITE_RETENTION}"
@@ -174,6 +187,7 @@ spec:
 
                   if [ "$${CANDIDATES}" -gt 0 ]; then
                     rclone delete "$${DST}" \
+                      --use-server-modtime \
                       --min-age "$${OFFSITE_RETENTION}" \
                       --s3-no-check-bucket
                   fi

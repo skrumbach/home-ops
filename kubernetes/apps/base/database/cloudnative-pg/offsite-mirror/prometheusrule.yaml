@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+# The mirror has no metrics endpoint; its health is the CronJob's last success
+# (kube-state-metrics). A single failed Job also fires the fleet KubeJobFailed.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: postgres-offsite-mirror-rules
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: postgres-offsite-mirror.rules
+      rules:
+        - alert: PostgresOffsiteMirrorStale
+          annotations:
+            description: >-
+              CronJob database/postgres-offsite-mirror (hourly) has not completed
+              successfully in over 6h, or never has, so the Cloudflare R2 copy of
+              the postgres-18 barman archive is falling behind the LAN MinIO copy.
+              Usual causes: empty or missing cloudnative-pg-r2-secret fields
+              (CreateContainerConfigError), an R2 403 (token scope or missing
+              bucket), the PRUNE_CEILING or no-base-backup refusal, MinIO
+              unreachable, or the CronJob suspended. Check
+              `kubectl -n database logs -l app.kubernetes.io/name=postgres-offsite-mirror --tail=50`.
+              Runbook: kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md.
+            summary: The postgres-18 off-site (R2) archive mirror has not succeeded in over 6h.
+          # absent() covers a CronJob that has never succeeded (kube-state-metrics
+          # emits no series until status.lastSuccessfulTime is set); not
+          # `or vector(0)`, which has no labels and never clears. 4h + for: 2h is
+          # 6h since the last success; for: 2h also outlasts a first seed run.
+          expr: |-
+            absent(kube_cronjob_status_last_successful_time{namespace="database", cronjob="postgres-offsite-mirror"})
+            or
+            (time() - kube_cronjob_status_last_successful_time{namespace="database", cronjob="postgres-offsite-mirror"}) > 14400
+          for: 2h
+          labels:
+            severity: warning

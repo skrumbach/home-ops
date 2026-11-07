@@ -24,5 +24,5 @@ rebuild-in-place shape is "Restore shape" in `references/cnpg.md`.
    cluster after no client backends remain.
 
 `barman-cloud-backup-list` needs the AWS keys from `cloudnative-pg-secret`
-passed into the postgres pod. Do not print them. The off-site mirror ships
-suspended; see `offsite-mirror/README.md`.
+passed into the postgres pod. Do not print them. The off-site mirror copies
+the archive to R2 hourly; see `offsite-mirror/README.md`.
