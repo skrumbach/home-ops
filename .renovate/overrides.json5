@@ -115,6 +115,13 @@
       versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-[a-f0-9]+$",
     },
     {
+      // searxng tags are CalVer plus a git SHA (2025.5.17-86373e7). Without this, Renovate's docker versioning cannot order them. Major is the year, so a year rollover is a major update and never automerges (autoMerge.json5 has no major rule).
+      description: "SearXNG uses CalVer YYYY.M.D-<sha> tags; regex-version them so Renovate can order them",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/searxng/searxng"],
+      versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-[0-9a-f]+$",
+    },
+    {
       // Off-range node makes `npx renovate` resolve an old release and fail the config check (#2231). Raise with Renovate's engines.node.
       description: "Keep workflow setup-node on the major Renovate's engines.node allows",
       matchManagers: ["github-actions"],

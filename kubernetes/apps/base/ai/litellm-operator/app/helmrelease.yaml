@@ -30,6 +30,10 @@ spec:
       leaderElection:
         enabled: true
 
+    # Explicit so a chart-default flip cannot silently drop the admission webhook (failurePolicy Fail for every LiteLLM kind).
+    webhook:
+      enabled: true
+
     # LLMKube is not installed here; a chart-default flip must not mint undeclared LiteLLMModels.
     llmkube:
       autoRegister: false

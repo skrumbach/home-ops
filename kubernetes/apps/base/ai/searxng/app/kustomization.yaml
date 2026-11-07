@@ -7,6 +7,9 @@ configMapGenerator:
     name: searxng-configmap
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    # settings.yml and limiter.toml carry no Flux variables. Keep them out of postBuild substitution so a future literal ${...} cannot fail the Kustomization.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 kind: Kustomization
 namespace: ai
 patches:
