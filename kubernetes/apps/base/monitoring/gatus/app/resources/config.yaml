@@ -135,6 +135,28 @@ endpoints:
     conditions:
       - "[CONNECTED] == true"
 
+  # Database TCP connects. These were ConfigMaps with gatus.io/enabled, which the
+  # sidecar never loads (it watches Services, Gateways and HTTPRoutes only). Skill
+  # observability. group database is not external/connectivity, so GatusServiceDown covers it.
+  - name: postgres-18
+    group: database
+    url: tcp://postgres-18-rw.database.svc.cluster.local:5432
+    interval: 1m
+    ui:
+      hide-url: true
+    conditions:
+      - "[CONNECTED] == true"
+
+  # emqx-listeners is the MQTT listener Service. The emqx NetworkPolicy admits 1883 from any pod.
+  - name: emqx
+    group: database
+    url: tcp://emqx-listeners.database.svc.cluster.local:1883
+    interval: 1m
+    ui:
+      hide-url: true
+    conditions:
+      - "[CONNECTED] == true"
+
 metrics: true
 
 ui:

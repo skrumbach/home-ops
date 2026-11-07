@@ -9,6 +9,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  # ServiceMonitor CRDs must exist before the chart installs.
+  dependsOn:
+    - name: prometheus-operator-crds
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/keda/app
   prune: true

@@ -27,7 +27,7 @@ spec:
             severity: warning
         - alert: PromtailFileLagging
           annotations:
-            message: "Promtail {{ $labels.pod }} has files lagging more than 1 hour."
+            message: "Promtail {{ $labels.pod }} has files lagging more than 1 GB unread."
           expr: |
             promtail_file_bytes_total - promtail_read_bytes_total > 1e9
           for: 15m
