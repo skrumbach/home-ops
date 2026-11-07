@@ -83,6 +83,9 @@ every one is byte-checked against it by CI, so they cannot drift silently.
 | `size_check` | `flow-nodes/size_check.js` | Guard 1: output must be materially smaller |
 | `duration_check` | `flow-nodes/duration_check.js` | Guard 2: duration must match |
 | `hdr_survival` | `flow-nodes/hdr_survival.js` | Guard 3: HDR must survive |
+| `lang22` `lang23` `lang24` `rx_lang` | `flow-nodes/langfilter.js` | Keep English, German and untagged audio; keep all unless a kept track is a main soundtrack (not commentary/description); when audio is dropped, English (else the first kept main track) becomes the only default; subtitles untouched |
+| `rx_dv` `rx_snapshot` `rx_sub` `rx_duration` `rx_hdr` | `dv_check.js`, `snapshot.js`, `subconform.js`, `duration_check.js`, `hdr_survival.js` | Same bodies on the AV1 remux path (`rx_dv` output 1, DV, dead-ends) |
+| `rx_verify` | `flow-nodes/remux_verify.js` | Remux guard: video/subtitle counts unchanged, audio = what the filter kept, still AV1, smaller than source |
 
 The three `cargs2X` bodies are generated from `cargs_template.js` by
 substituting `__LABEL__` / `__QUALITY__` / `__HDR__`:
@@ -94,6 +97,18 @@ substituting `__LABEL__` / `__QUALITY__` / `__HDR__`:
 | `cargs24` | cq28 SDR | 28 | false |
 
 The three `sub2X` bodies are byte-identical to `subconform.js`.
+
+### Audio language filter and the AV1 remux path (2026-11)
+
+`lang2X` sits between `sub2X` and `enc2X`: outputs 1 (dropped audio) and 2
+(nothing to drop) both continue to the encoder, output 3 (no `ffmpegCommand`)
+dead-ends. Files that are already AV1 (`guard_home` output 1) take a copy-only
+path, `rx_dv -> rx_snapshot -> rx_start -> rx_cont -> rx_sub -> rx_lang -> rx_exec ->
+rx_verify -> rx_duration -> rx_hdr -> replace`, with no video encoder (Dolby Vision files stop at `rx_dv`): only a
+file that loses audio reaches `rx_exec`; output 2 ("nothing to drop") ends the
+job without writing. Dropping audio is permanent (Replace overwrites the only
+copy), so existing AV1 files are requeued deliberately: one canary, check it in
+Plex, then 10, then the rest; never a bulk requeue.
 
 `cargs2X` also carries the VA-API probe: when the chosen encoder is `av1_qsv`
 it runs `vainfo` on `/dev/dri/renderD129` and throws `VA-API probe FAILED`
@@ -107,7 +122,7 @@ than a dead-end output because a dead end finalises the job "Not required".
 These carry no code, only settings, and a rebuild resets them to plugin
 defaults. The load-bearing ones are `cont2X` (`forceConform` **must** stay
 `false` - `true` deletes subtitle tracks), `enc2X` (`hardwareType: qsv`), and
-`guard_home` (`codec: av1`, i.e. "already AV1, skip").
+`guard_home` (`codec: av1`, i.e. "already AV1": output 1 is the remux path).
 
 | Node | Plugin | Settings |
 |---|---|---|
@@ -118,12 +133,14 @@ defaults. The load-bearing ones are `cont2X` (`forceConform` **must** stay
 | `cont22` | `ffmpegCommandSetContainer` | `{"container": "mkv", "forceConform": "false"}` |
 | `cont23` | `ffmpegCommandSetContainer` | `{"container": "mkv", "forceConform": "false"}` |
 | `cont24` | `ffmpegCommandSetContainer` | `{"container": "mkv", "forceConform": "false"}` |
+| `rx_cont` | `ffmpegCommandSetContainer` | `{"container": "mkv", "forceConform": "false"}` |
 | `enc22` | `ffmpegCommandSetVideoEncoder` | `{"ffmpegPreset": "slow", "ffmpegPresetEnabled": "false", "ffmpegQuality": "22", "ffmpegQu...` |
 | `enc23` | `ffmpegCommandSetVideoEncoder` | `{"ffmpegPreset": "slow", "ffmpegPresetEnabled": "false", "ffmpegQuality": "23", "ffmpegQu...` |
 | `enc24` | `ffmpegCommandSetVideoEncoder` | `{"ffmpegPreset": "slow", "ffmpegPresetEnabled": "false", "ffmpegQuality": "24", "ffmpegQu...` |
 | `exec22` | `ffmpegCommandExecute` | (defaults) |
 | `exec23` | `ffmpegCommandExecute` | (defaults) |
 | `exec24` | `ffmpegCommandExecute` | (defaults) |
+| `rx_exec` | `ffmpegCommandExecute` | (defaults; stream copy, no encoder node on this path) |
 | `guard_home` | `checkVideoCodec` | `{"codec": "av1"}` |
 | `hdr_1080` | `checkHdr` | (defaults) |
 | `hdr_4k` | `checkHdr` | (defaults) |
@@ -137,6 +154,7 @@ defaults. The load-bearing ones are `cont2X` (`forceConform` **must** stay
 | `start22` | `ffmpegCommandStart` | (defaults) |
 | `start23` | `ffmpegCommandStart` | (defaults) |
 | `start24` | `ffmpegCommandStart` | (defaults) |
+| `rx_start` | `ffmpegCommandStart` | (defaults) |
 
 ## Verify - behaviourally, never by reading
 
@@ -152,8 +170,10 @@ each guard by a string only it can emit, in a real job report:
 | `cargs2X` encoder-aware | `AV1 tuning: encoder="` |
 | 4K CPU guard | `AV1 tuning: 4K CPU guard` |
 | `size_check` / `duration_check` / `hdr_survival` | `Size check:` / `Duration check:` / `HDR survival:` |
+| `lang2X` / `rx_lang` | `Audio language filter: in a=` |
+| `rx_verify` | `Remux guard: v=` |
 
-Structural check that the document itself is intact (38 nodes, 62 edges, and no
+Structural check that the document itself is intact (51 nodes, 79 edges, 22 `customFunction`, and no
 `customFunction` left on the dead `inputsDB.function` key):
 
 ```bash

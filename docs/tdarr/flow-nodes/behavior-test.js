@@ -463,6 +463,161 @@ async function testCargsBody() {
 }
 
 // --- 4. after-flow contract: code keys + edges fail-closed for scope ---
+// --- 3b. audio language filter (English + German) ---
+async function testLangfilter() {
+  log('\n== langfilter ==');
+  const node = loadModule(path.join(NODES, 'langfilter.js'));
+  const run = async (specs) => {
+    const streams = mkStreams(specs);
+    const logs = [];
+    const variables = { ffmpegCommand: { streams }, user: { sourceSize: 1000 } };
+    const r = await runNode(node, { inputFileObj: { _id: 'synthetic' }, variables, jobLog: (x) => logs.push(String(x)) });
+    const audioKept = streams.filter(x => x.codec_type === 'audio' && !x.removed).map(x => (x.tags || {}).language || 'und');
+    return { r, streams, logs, audioKept, user: r.variables.user };
+  };
+  const a = (language, codec) => ({ codec_type: 'audio', codec_name: codec || 'eac3', tags: language === null ? {} : { language } });
+  const v = { codec_type: 'video', codec_name: 'av1', width: 3840, height: 2160 };
+
+  // Spectre-shaped: 11 audio, 2 English + 1 German survive; subtitles untouched.
+  {
+    const t = await run([v, a('eng', 'dts'), a('eng', 'ac3'), a('fre', 'dts'), a('ger', 'dts'), a('ita', 'dts'),
+      a('spa', 'dts'), a('spa', 'ac3'), a('cze', 'ac3'), a('hun', 'ac3'), a('pol', 'ac3'), a('jpn', 'dts'),
+      { codec_type: 'subtitle', codec_name: 'subrip', tags: { language: 'fre' } },
+      { codec_type: 'subtitle', codec_name: 'subrip', tags: { language: 'eng' } }]);
+    log(`  spectre: out=${t.r.outputNumber} kept=${t.audioKept} log=${t.logs[0]}`);
+    assert.strictEqual(t.r.outputNumber, 1);
+    assert.deepStrictEqual(t.audioKept, ['eng', 'eng', 'ger']);
+    assert.strictEqual(t.streams.filter(x => x.codec_type === 'subtitle' && !x.removed).length, 2, 'subtitles untouched');
+    assert.strictEqual(t.streams.find(x => x.codec_type === 'video').removed, false);
+    assert.strictEqual(t.user.expectAudio, 3);
+    assert.strictEqual(t.user.expectVideo, 1);
+    assert.strictEqual(t.user.expectSubtitle, 2);
+    assert.strictEqual(t.user.sourceSize, 1000, 'snapshot variables survive');
+    assert.ok(t.logs[0].startsWith('Audio language filter: in a=11'), 'log phrase');
+  }
+  // Aliases and BCP-47 tags count as English/German; untagged audio always stays.
+  {
+    const t = await run([v, a('en-US'), a('deu'), a('de-DE'), a('English'), a(null), a('und'), a('rus')]);
+    log(`  aliases: out=${t.r.outputNumber} kept=${t.audioKept}`);
+    assert.strictEqual(t.r.outputNumber, 1);
+    assert.strictEqual(t.audioKept.length, 6);
+    assert.strictEqual(t.streams.filter(x => x.removed).length, 1);
+  }
+  // No English, German or untagged audio: nothing dropped, output 2.
+  {
+    const t = await run([v, a('jpn'), a('jpn', 'flac')]);
+    log(`  no eng/ger: out=${t.r.outputNumber} log=${t.logs[0]}`);
+    assert.strictEqual(t.r.outputNumber, 2);
+    assert.strictEqual(t.streams.filter(x => x.removed).length, 0);
+    assert.ok(t.logs[0].includes('kept all'));
+    assert.strictEqual(t.user.expectAudio, 2);
+  }
+  // Kept tracks are only commentary / audio description: keep everything (the
+  // film's real audio must never be dropped). By title and by disposition.
+  {
+    const c = (title) => ({ codec_type: 'audio', codec_name: 'ac3', tags: { language: 'eng', title } });
+    for (const extra of [c('Director\'s Commentary'), c('Audio Description'), c('Kommentar'),
+      { codec_type: 'audio', codec_name: 'ac3', tags: { language: 'eng' }, disposition: { comment: 1 } }]) {
+      const t = await run([v, a('fre', 'dts'), extra]);
+      log(`  commentary-only keep (${JSON.stringify(extra.tags.title || extra.disposition)}): out=${t.r.outputNumber}`);
+      assert.strictEqual(t.r.outputNumber, 2);
+      assert.strictEqual(t.streams.filter(x => x.removed).length, 0);
+      assert.ok(t.logs[0].includes('only commentary/description'));
+    }
+    // A main English track plus an English commentary: the commentary stays, foreign dubs go.
+    const t = await run([v, a('eng'), c('Commentary'), a('fre'), a('ita')]);
+    assert.strictEqual(t.r.outputNumber, 1);
+    assert.strictEqual(t.user.expectAudio, 2);
+  }
+  // Whenever audio is dropped, the first kept English main track becomes the
+  // only default; Execute still stream-copies it (-disposition is copy-compatible).
+  {
+    const fre = Object.assign(a('fre', 'dts'), { disposition: { default: 1 } });
+    const t = await run([v, fre, a('ger', 'ac3'), a('eng', 'eac3')]);
+    const eng0 = t.streams[3];
+    log(`  default move: out=${t.r.outputNumber} eng.args=${JSON.stringify(eng0.outputArgs)} log=${t.logs[0]}`);
+    assert.strictEqual(t.r.outputNumber, 1);
+    assert.deepStrictEqual(eng0.outputArgs, ['-disposition:{outputIndex}', '+default'], 'English is primary');
+    assert.deepStrictEqual(t.streams[2].outputArgs, []);
+    assert.ok(t.logs[0].endsWith('default->eng'));
+    // Original language (Chinese) default with English and German dubs: Chinese
+    // goes, a kept German default is cleared, English becomes the only default.
+    const zh = Object.assign(a('chi'), { disposition: { default: 1 } });
+    const de = Object.assign(a('ger'), { disposition: { default: 1 } });
+    const t4 = await run([v, zh, de, a('eng'), { codec_type: 'audio', codec_name: 'ac3', tags: { language: 'eng', title: 'Commentary' } }]);
+    assert.strictEqual(t4.r.outputNumber, 1);
+    assert.strictEqual(t4.streams[1].removed, true, 'original language dropped');
+    assert.deepStrictEqual(t4.streams[2].outputArgs, ['-disposition:{outputIndex}', '-default']);
+    assert.deepStrictEqual(t4.streams[3].outputArgs, ['-disposition:{outputIndex}', '+default']);
+    assert.deepStrictEqual(t4.streams[4].outputArgs, [], 'commentary never becomes default');
+    // Without an English main track the first kept main track (German) gets it.
+    const t3 = await run([v, Object.assign(a('fre'), { disposition: { default: 1 } }), a('ger')]);
+    assert.deepStrictEqual(t3.streams[2].outputArgs, ['-disposition:{outputIndex}', '+default']);
+    // English already the only default: no disposition args at all.
+    const eng = Object.assign(a('eng'), { disposition: { default: 1 } });
+    const t2 = await run([v, a('fre'), eng]);
+    assert.deepStrictEqual(t2.streams[2].outputArgs, []);
+    assert.ok(!t2.logs[0].includes('default->'));
+  }
+  // Only English and German: nothing to drop, output 2.
+  {
+    const t = await run([v, a('eng'), a('ger')]);
+    assert.strictEqual(t.r.outputNumber, 2);
+    assert.ok(t.logs[0].includes('nothing to drop'));
+  }
+  // A stream an earlier node already removed is neither counted nor revived.
+  {
+    const specs = [v, a('eng'), Object.assign(a('fre'), { removed: true }), a('ita')];
+    const t = await run(specs);
+    assert.strictEqual(t.r.outputNumber, 1);
+    assert.strictEqual(t.user.expectAudio, 1);
+    assert.ok(t.logs[0].startsWith('Audio language filter: in a=2'));
+  }
+  // Fail closed without an ffmpegCommand: output 3, nothing touched.
+  {
+    const logs = [];
+    const r = await runNode(node, { inputFileObj: { _id: 'x' }, variables: {}, jobLog: (x) => logs.push(x) });
+    log(`  no-ffmpegCommand: out=${r.outputNumber}`);
+    assert.strictEqual(r.outputNumber, 3);
+  }
+}
+
+// --- 3c. remux guard ---
+async function testRemuxVerify() {
+  log('\n== remux_verify ==');
+  const node = loadModule(path.join(NODES, 'remux_verify.js'));
+  const probe = (vcodec, nAudio, nSubs, art) => {
+    const st = [{ codec_type: 'video', codec_name: vcodec }];
+    if (art) st.push({ codec_type: 'video', codec_name: 'mjpeg', disposition: { attached_pic: 1 } });
+    for (let i = 0; i < nAudio; i += 1) st.push({ codec_type: 'audio', codec_name: 'eac3' });
+    for (let i = 0; i < nSubs; i += 1) st.push({ codec_type: 'subtitle', codec_name: 'subrip' });
+    return { streams: st, format: { duration: '100.0' } };
+  };
+  const user = { sourceSize: 40000, expectVideo: 1, expectAudio: 3, expectSubtitle: 2 };
+  const run = async (ffProbeData, size, u) => {
+    const logs = [];
+    const r = await runNode(node, {
+      inputFileObj: { _id: 'out.mkv', file_size: size, ffProbeData },
+      variables: { user: Object.assign({}, u || user) },
+      jobLog: (x) => logs.push(String(x)),
+    });
+    return { out: r.outputNumber, logs };
+  };
+  const ok = await run(probe('av1', 3, 2, true), 30000);
+  log(`  pass: out=${ok.out} logs=${JSON.stringify(ok.logs)}`);
+  assert.strictEqual(ok.out, 1, 'cover art does not count as video');
+  assert.ok(ok.logs[0].startsWith('Remux guard: v=1/1 a=3/3 s=2/2'));
+  assert.strictEqual((await run(probe('av1', 4, 2), 30000)).out, 2, 'audio count mismatch fails');
+  assert.strictEqual((await run(probe('av1', 3, 1), 30000)).out, 2, 'lost subtitle fails');
+  assert.strictEqual((await run(probe('hevc', 3, 2), 30000)).out, 2, 'non-AV1 output fails');
+  assert.strictEqual((await run(probe('av1', 3, 2), 40001)).out, 2, 'larger than source fails');
+  assert.strictEqual((await run(probe('av1', 3, 2), 40000)).out, 1, 'equal size (tiny track, mkv overhead) passes');
+  assert.strictEqual((await run(probe('av1', 3, 2), 3000)).out, 2, 'under 10% fails');
+  assert.strictEqual((await run(probe('av1', 3, 2), 30000, { sourceSize: 40000 })).out, 2, 'no expectation fails');
+  assert.strictEqual((await run(probe('av1', 0, 2), 30000, Object.assign({}, user, { expectAudio: 0 }))).out, 2, 'no audio fails');
+}
+
+
 async function testFlowContract() {
   log('\n== flow contract (after vs before) ==');
   const before = JSON.parse(fs.readFileSync(path.join(FLOW_DIR, 'flow-movies_av1_nvenc_v1.before.json'), 'utf8'));
@@ -510,9 +665,32 @@ async function testFlowContract() {
     const fromSub = after.flowEdges.filter(e => e.source === 'sub' + n);
     log(`  sub${n}: in=${JSON.stringify(toSub)} out=${JSON.stringify(fromSub)}`);
     assert.ok(toSub.some(e => e.source === 'cont' + n));
-    assert.ok(fromSub.some(e => e.target === 'enc' + n && e.sourceHandle === '1'));
+    assert.ok(fromSub.some(e => e.target === 'lang' + n && e.sourceHandle === '1'));
     assert.ok(!fromSub.some(e => e.sourceHandle === '2'), 'sub fail path dead-end');
+    // lang* sits between sub* and enc*: dropped (1) and nothing-to-drop (2) both encode, fail (3) dead-ends.
+    const fromLang = after.flowEdges.filter(e => e.source === 'lang' + n);
+    assert.deepStrictEqual(fromLang.map(e => e.sourceHandle + '>' + e.target).sort(), ['1>enc' + n, '2>enc' + n]);
   }
+
+  // AV1 files (guard_home output 1) take the copy-only remux path; only a file
+  // that loses audio (rx_lang output 1) reaches Execute, and every guard
+  // failure dead-ends before Replace.
+  // [node, handle that continues]; rx_dv continues on output 2 (NOT DV), DV files dead-end.
+  const chain = [['guard_home', '1'], ['rx_dv', '2'], ['rx_snapshot', '1'], ['rx_start', '1'], ['rx_cont', '1'],
+    ['rx_sub', '1'], ['rx_lang', '1'], ['rx_exec', '1'], ['rx_verify', '1'], ['rx_duration', '1'], ['rx_hdr', '1'],
+    ['replace', null]];
+  for (let i = 0; i < chain.length - 1; i += 1) {
+    const [id, h] = chain[i];
+    const out = after.flowEdges.filter(e => e.source === id);
+    const ok = out.some(e => e.target === chain[i + 1][0] && e.sourceHandle === h);
+    assert.ok(ok, 'remux chain ' + id + ' -' + h + '-> ' + chain[i + 1][0]);
+    if (i > 0) assert.strictEqual(out.length, 1, id + ' has only its pass edge');
+  }
+  assert.ok(!after.flowEdges.some(e => e.source === 'rx_lang' && e.sourceHandle !== '1'), 'rx_lang 2/3 dead-end');
+  assert.ok(!after.flowEdges.some(e => e.source === 'rx_dv' && e.sourceHandle === '1'), 'AV1 DV files dead-end');
+  assert.ok(!after.flowPlugins.some(p => p.id.startsWith('rx_') && p.pluginName === 'ffmpegCommandSetVideoEncoder'),
+    'remux path never sets a video encoder');
+  log('  remux chain and lang placement OK');
 
   // cargs plugin type changed from ffmpegCommandCustomArguments
   for (const id of ['cargs22', 'cargs23', 'cargs24']) {
@@ -702,7 +880,7 @@ function testDocsContract() {
 
   // forceConform disabled on after-flow Set Container rungs (executable artifact)
   const after = JSON.parse(fs.readFileSync(path.join(FLOW_DIR, 'flow-movies_av1_nvenc_v1.after.json'), 'utf8'));
-  for (const id of ['cont22', 'cont23', 'cont24']) {
+  for (const id of ['cont22', 'cont23', 'cont24', 'rx_cont']) {
     const n = after.flowPlugins.find(p => p.id === id);
     assert.ok(n, 'missing ' + id);
     assert.strictEqual(String(n.inputsDB.forceConform), 'false', id + ' forceConform must stay false');
@@ -713,13 +891,13 @@ function testDocsContract() {
 
 // --- 6. every customFunction node source is byte-identical to the flow artifact ---
 // The runbook (docs/tdarr/README.md) promises these cannot drift. Make that true:
-// each of the 12 customFunction bodies must equal its committed source file, or
+// each of the 22 customFunction bodies must equal its committed source file, or
 // the template instantiation for the generated ones.
 function testNodeSources() {
   log('\n== node sources vs flow artifact ==');
   const flow = JSON.parse(fs.readFileSync(path.join(FLOW_DIR, 'flow-movies_av1_nvenc_v1.after.json'), 'utf8'));
   const cf = flow.flowPlugins.filter(n => n.pluginName === 'customFunction');
-  assert.strictEqual(cf.length, 12, 'expected 12 customFunction nodes');
+  assert.strictEqual(cf.length, 22, 'expected 22 customFunction nodes');
 
   const read = (f) => fs.readFileSync(path.join(NODES, f), 'utf8');
   const template = read('cargs_template.js');
@@ -735,6 +913,11 @@ function testNodeSources() {
     size_check: 'size_check.js',
     duration_check: 'duration_check.js',
     hdr_survival: 'hdr_survival.js',
+    rx_dv: 'dv_check.js',
+    rx_snapshot: 'snapshot.js',
+    rx_verify: 'remux_verify.js',
+    rx_duration: 'duration_check.js',
+    rx_hdr: 'hdr_survival.js',
   };
   const subconform = read('subconform.js');
 
@@ -750,8 +933,10 @@ function testNodeSources() {
         .replace(/__HDR__/g, h);
     } else if (direct[n.id]) {
       expected = read(direct[n.id]);
-    } else if (/^sub2[234]$/.test(n.id)) {
+    } else if (/^(sub2[234]|rx_sub)$/.test(n.id)) {
       expected = subconform;
+    } else if (/^(lang2[234]|rx_lang)$/.test(n.id)) {
+      expected = read('langfilter.js');
     } else {
       throw new Error('customFunction node with no committed source: ' + n.id);
     }
@@ -765,6 +950,8 @@ function testNodeSources() {
   try {
     await testGuardScope();
     await testSubconform();
+    await testLangfilter();
+    await testRemuxVerify();
     await testCargs();
     await testFlowContract();
     testNodeSources();
