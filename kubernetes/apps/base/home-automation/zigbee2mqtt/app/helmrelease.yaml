@@ -153,11 +153,8 @@ spec:
               - --port
               - "12321"
               - /data
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
+            # No allowPrivilegeEscalation: false / drop ALL here: the image's setuid fixuid
+            # remaps coder to the pod UID at start; without it HOME is / and code-server exits.
             resources:
               requests:
                 cpu: 10m
