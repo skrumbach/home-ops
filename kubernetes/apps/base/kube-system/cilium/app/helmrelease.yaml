@@ -76,8 +76,13 @@ spec:
     enableIPv4BIGTCP: true
     endpointRoutes:
       enabled: true
+    # The four metrics ports (prometheus, operator, envoy, hubble.metrics) are pinned at the
+    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965, and
+    # scripts/ci/hostpolicy-ceph-selector-test.py fails if a pin leaves that list.
     envoy:
       enabled: false
+      prometheus:
+        port: "9964" # a string in the chart schema; the agent's embedded proxy listens here too
     # Host firewall: enforces CiliumClusterwideNetworkPolicy with a nodeSelector
     # against the *host* endpoint. Required because every Ceph daemon runs on
     # host network (CephCluster spec.network.provider: host), so pod-level
@@ -100,6 +105,7 @@ spec:
           - port-distribution
           - icmp
           - httpV2:labelsContext=source_namespace,source_workload,destination_namespace,destination_workload,traffic_direction
+        port: 9965
         serviceMonitor:
           enabled: true
         dashboards:
@@ -163,6 +169,7 @@ spec:
         enabled: false
       prometheus:
         enabled: true
+        port: 9963
         serviceMonitor:
           enabled: true
       replicas: 2
@@ -179,6 +186,7 @@ spec:
     policyAuditMode: false
     prometheus:
       enabled: true
+      port: 9962
       serviceMonitor:
         enabled: true
         trustCRDsExist: true

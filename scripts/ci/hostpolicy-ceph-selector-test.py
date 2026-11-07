@@ -11,7 +11,7 @@ CCNP nodeSelector that only matches stripped labels is accepted (VALID:True)
 but never attaches to the host endpoint (policy-enabled:none, zero Deny rows).
 The first stage-1 policy used kubernetes.io/os=linux and was inert on every node.
 
-This test does not grep source text. It:
+This test does not grep source text (except the Jinja Talos template in step 5). It:
   1. Loads the rendered CCNP as a structured object (via kubectl kustomize, or
      the source manifest if kustomize is unavailable).
   2. Implements Kubernetes label-selector matching against the *measured* host
@@ -21,6 +21,13 @@ This test does not grep source text. It:
   4. Asserts the subtractive safety contract: enableDefaultDeny ingress/egress
      are false, ingressDeny is world-only, and stage-2 enforcement is on
      (policyAuditMode false with hostFirewall still enabled).
+  5. Asserts every denied non-Ceph metrics port is pinned explicitly where its
+     listener is configured (cilium and kube-prometheus-stack HelmRelease values,
+     the Talos etcd template) and every pin is a denied port. A chart bump that
+     changes a default port cannot move a pinned listener, and a deliberate port
+     change has to update the deny list too. It checks the values key, not the
+     rendered listener: a chart that renames the key shows up as flate's "values
+     not used by the chart" and in the Renovate PR's render diff, not here.
 
 Live BPF verification (cilium-dbg bpf policy get) remains the post-merge gate in
 .agents/skills/cilium-host-policy/references/gates.md; this test catches the silent-open
@@ -30,6 +37,7 @@ selector class of failure offline.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -41,6 +49,10 @@ ROOT = Path(__file__).resolve().parents[2]
 CILIUM_APP = ROOT / "kubernetes/apps/base/kube-system/cilium/app"
 POLICY_PATH = CILIUM_APP / "hostpolicy-ceph.yaml"
 HELMRELEASE_PATH = CILIUM_APP / "helmrelease.yaml"
+KPS_HELMRELEASE_PATH = (
+    ROOT / "kubernetes/apps/base/monitoring/kube-prometheus-stack/app/helmrelease.yaml"
+)
+TALOS_MACHINECONFIG_PATH = ROOT / "talos/machineconfig.yaml.j2"
 
 # Labels Cilium's default filter drops from the host endpoint (measured).
 HOST_ENDPOINT_DROPPED_LABELS = frozenset(
@@ -96,7 +108,7 @@ BROKEN_SELECTOR: dict[str, Any] = {
     "matchLabels": {"kubernetes.io/os": "linux"},
 }
 
-EXPECTED_DENY_PORTS = {
+CEPH_DENY_PORTS = {
     ("3300", None),
     ("6789", None),
     ("80", None),
@@ -106,11 +118,34 @@ EXPECTED_DENY_PORTS = {
     ("7000", None),
     ("8443", None),
     ("6800", 7568),
-    # Non-Ceph unauthenticated host-netns metrics: etcd, node-exporter, Cilium/Hubble.
+}
+# Non-Ceph unauthenticated host-netns metrics: etcd, node-exporter, Cilium/Hubble.
+METRICS_DENY_ENTRIES = {
     ("2381", None),
     ("9100", None),
     ("9962", 9965),
 }
+EXPECTED_DENY_PORTS = CEPH_DENY_PORTS | METRICS_DENY_ENTRIES
+
+# METRICS_DENY_ENTRIES expanded. Each port needs exactly one explicit pin below
+# (never a chart default), and each pin must be a denied port.
+METRICS_DENY_PORTS = {
+    port
+    for start, end in METRICS_DENY_ENTRIES
+    for port in range(int(start), (end or int(start)) + 1)
+}
+
+# (HelmRelease, path under spec.values) for each host-netns metrics listener.
+PINNED_HELM_PORTS: list[tuple[Path, tuple[str, ...]]] = [
+    (HELMRELEASE_PATH, ("prometheus", "port")),  # cilium-agent 9962
+    (HELMRELEASE_PATH, ("operator", "prometheus", "port")),  # cilium-operator 9963
+    (HELMRELEASE_PATH, ("envoy", "prometheus", "port")),  # agent/envoy proxy 9964
+    (HELMRELEASE_PATH, ("hubble", "metrics", "port")),  # hubble metrics 9965
+    (KPS_HELMRELEASE_PATH, ("prometheus-node-exporter", "service", "port")),  # 9100
+]
+
+# Talos etcd metrics listener (a Jinja template, so matched as text).
+ETCD_METRICS_RE = re.compile(r"^\s*listen-metrics-urls:\s*http://[^\s:/]+:(\d+)\s*$", re.M)
 
 
 class Failure(Exception):
@@ -143,9 +178,41 @@ def load_policy() -> dict[str, Any]:
     return doc
 
 
-def load_helm_values() -> dict[str, Any]:
-    hr = yaml.safe_load(HELMRELEASE_PATH.read_text())
+def load_helm_values(path: Path = HELMRELEASE_PATH) -> dict[str, Any]:
+    hr = yaml.safe_load(path.read_text())
     return ((hr or {}).get("spec") or {}).get("values") or {}
+
+
+def pinned_metrics_ports(cilium_values: dict[str, Any]) -> dict[str, int]:
+    """Return {source: port} for every explicit metrics-port pin; fail if one is unset."""
+    pins: dict[str, int] = {}
+    values_by_path: dict[Path, dict[str, Any]] = {HELMRELEASE_PATH: cilium_values}
+    for path, keys in PINNED_HELM_PORTS:
+        if path not in values_by_path:
+            values_by_path[path] = load_helm_values(path)
+        node: Any = values_by_path[path]
+        for key in keys:
+            node = node.get(key) if isinstance(node, dict) else None
+        source = f"{path.relative_to(ROOT)}: spec.values.{'.'.join(keys)}"
+        assert_true(
+            node is not None,
+            f"{source} is unset: pin it at the port the host policy denies "
+            "(a chart default can move on a bump and reopen the port to the LAN)",
+        )
+        try:
+            pins[source] = int(node)
+        except (TypeError, ValueError):
+            raise Failure(f"{source} is not a port number: {node!r}") from None
+
+    talos_rel = TALOS_MACHINECONFIG_PATH.relative_to(ROOT)
+    etcd = ETCD_METRICS_RE.findall(TALOS_MACHINECONFIG_PATH.read_text())
+    assert_true(len(etcd) == 1, f"expected one etcd listen-metrics-urls in {talos_rel}, got {etcd}")
+    pins[f"{talos_rel}: etcd listen-metrics-urls"] = int(etcd[0])
+    return pins
+
+
+def is_denied(port: int, deny: set[tuple[str, int | None]]) -> bool:
+    return any(int(start) <= port <= (end or int(start)) for start, end in deny)
 
 
 def match_labels(selector: dict[str, Any] | None, labels: dict[str, str]) -> bool:
@@ -294,7 +361,21 @@ def main() -> int:
             f"deny port set mismatch:\n  got {sorted(ports)}\n  want {sorted(EXPECTED_DENY_PORTS)}",
         )
 
+        # Metrics listeners: every pin denied, every denied metrics port pinned once.
         values = load_helm_values()
+        pins = pinned_metrics_ports(values)
+        open_pins = {src: p for src, p in pins.items() if not is_denied(p, ports)}
+        assert_true(
+            not open_pins,
+            f"metrics port pinned outside the world-deny list (LAN-exposed): {open_pins}; "
+            "change hostpolicy-ceph.yaml and METRICS_DENY_ENTRIES together",
+        )
+        assert_true(
+            sorted(pins.values()) == sorted(METRICS_DENY_PORTS),
+            f"metrics pins {sorted(pins.values())} != denied metrics ports "
+            f"{sorted(METRICS_DENY_PORTS)} (each needs exactly one explicit pin)",
+        )
+
         assert_true(
             values.get("policyAuditMode") is False,
             "stage-2 requires policyAuditMode: false (enforcing after audit evidence)",
@@ -315,6 +396,7 @@ def main() -> int:
                     [{"port": p, "endPort": e} for p, e in ports],
                     key=lambda x: (x["port"], x["endPort"] or -1),
                 ),
+                "metricsPortPins": pins,
                 "policyAuditMode": values.get("policyAuditMode"),
                 "hostFirewall.enabled": host_fw.get("enabled"),
                 "brokenSelectorHostMatches": broken_host_hits,
@@ -327,7 +409,8 @@ def main() -> int:
         print(
             "OK: shipped selector matches all 3 host endpoints; "
             "broken kubernetes.io/os selector matches 0; "
-            "enableDefaultDeny false/false; policyAuditMode false (enforcing)",
+            "enableDefaultDeny false/false; policyAuditMode false (enforcing); "
+            f"{len(pins)} metrics port pins all denied",
             file=sys.stderr,
         )
         return 0

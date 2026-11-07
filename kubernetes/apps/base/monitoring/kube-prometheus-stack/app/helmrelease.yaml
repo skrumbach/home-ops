@@ -143,6 +143,10 @@ spec:
           enabled: false
 
     prometheus-node-exporter:
+      # hostNetwork listener, pinned at the chart default: cilium hostpolicy-ceph.yaml
+      # world-denies 9100 and scripts/ci/hostpolicy-ceph-selector-test.py checks it.
+      service:
+        port: 9100
       prometheus:
         monitor:
           enabled: true
