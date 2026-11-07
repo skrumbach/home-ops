@@ -79,7 +79,9 @@ spec:
                 memory: 512Mi
               limits:
                 gpu.intel.com/xe: 1
-                memory: 8Gi
+                # 8Gi OOM-looped nightly from 2026-11-03 (Plex 1.43.6): the butler's loudness analysis decodes
+                # every pending 4K TrueHD/DTS/EAC3 track at once (7 movies, about 2 s to OOM). Idle use is under 1Gi.
+                memory: 16Gi
 
     service:
       app:
