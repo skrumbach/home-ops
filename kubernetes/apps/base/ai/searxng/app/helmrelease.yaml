@@ -31,7 +31,7 @@ spec:
             env:
               SEARXNG_BASE_URL: "https://search.${SECRET_DOMAIN}"
               SEARXNG_PORT: &port 8080
-              SEARXNG_REDIS_URL: redis://searxng-dragonfly:6379
+              SEARXNG_VALKEY_URL: redis://searxng-dragonfly:6379
               UWSGI_WORKERS: "4"
               UWSGI_THREADS: "2"
             envFrom:
@@ -67,17 +67,19 @@ spec:
               capabilities:
                 drop:
                   - ALL
-                add:
-                  - CHOWN
-                  - SETGID
-                  - SETUID
-                  - DAC_OVERRIDE
             resources:
               requests:
                 cpu: 10m
                 memory: 512Mi
               limits:
                 memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 977
+        runAsGroup: 977
+        seccompProfile:
+          type: RuntimeDefault
     service:
       app:
         ports:
