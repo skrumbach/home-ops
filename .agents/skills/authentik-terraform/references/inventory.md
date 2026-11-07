@@ -27,14 +27,19 @@ One provider, `forward_domain`, `external_host` `https://auth.${SECRET_DOMAIN}`,
 - `network/echo`
 - `home-automation/home-assistant` (the `hass-code` browser terminal only; the Home Assistant
   route is not ExtAuth-gated, it signs in through the OIDC provider above)
-- `monitoring/kromgo`
+- `home-automation/esphome` (dashboard and `/code/` editor), `home-automation/zigbee2mqtt`
+  (rule `code` only; the frontend is not gated)
+- `monitoring/alertmanager`
+- `selfhosted/paperless-ngx`, `selfhosted/linkwarden` (rule `app` only; rule `api`, `/api`,
+  stays on the app's own token auth for mobile apps and the browser extension)
 - `ai/opencode`
 - `ai/hermes` (the `hermes-code` browser terminal)
 - `flux-system/headlamp`
+- `kube-system/cilium` (Hubble UI)
 
 ReferenceGrant `allow-authentik-access` allows `from` only the namespaces with a live
-ExtAuth SecurityPolicy: `ai`, `flux-system`, `home-automation`, `kube-system`, `network`
-(the `database` and `monitoring` entries were dropped, no consumer) to
+ExtAuth SecurityPolicy: `ai`, `flux-system`, `home-automation`, `kube-system`, `monitoring`,
+`network`, `selfhosted` (the `database` entry was dropped, no consumer) to
 Service `ak-outpost-authentik-embedded-outpost`. A SecurityPolicy in a new
 namespace is accepted and then resolves its backend to nothing until the
 grant lists that namespace.

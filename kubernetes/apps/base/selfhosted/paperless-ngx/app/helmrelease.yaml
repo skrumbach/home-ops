@@ -116,10 +116,13 @@ spec:
           gethomepage.dev/name: Paperless-ngx
           gethomepage.dev/icon: paperless-ngx.svg
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
+          # that /api still bypasses Authentik (a gated path would end on a 200 login page).
           gatus.home-operations.com/endpoint: |-
-            url: https://docs.${SECRET_DOMAIN}/
+            url: https://docs.${SECRET_DOMAIN}/api/ui_settings/
             conditions:
-              - "[STATUS] == 200"
+              - "[STATUS] == 401"
+              - "[BODY].detail == pat(*credentials*)"
             group: selfhosted
         hostnames:
           - "docs.${SECRET_DOMAIN}"
@@ -127,8 +130,19 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+            backendRefs:
+              - name: paperless-ngx
+                namespace: selfhosted
+                port: *port
+          - name: app
+            backendRefs:
               - name: paperless-ngx
                 namespace: selfhosted
                 port: *port

@@ -26,6 +26,14 @@ spec:
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: kube-system
+    # monitoring/alertmanager-auth (Alertmanager UI route).
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: monitoring
+    # selfhosted/paperless-ngx-auth and selfhosted/linkwarden-auth (browser UI rules only).
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: selfhosted
   to:
     - group: ""
       kind: Service

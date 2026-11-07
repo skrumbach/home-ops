@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# House auth pattern (matches home-assistant/kromgo/echo): Envoy ext_authz
+# House auth pattern (matches home-assistant/echo/headlamp): Envoy ext_authz
 # forward-auth against the Authentik embedded outpost, one Authentik-gated route
 # for the UI. No basic-auth API route: nothing here needs programmatic access.
 # See this app's README.md.

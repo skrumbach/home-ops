@@ -120,10 +120,14 @@ spec:
           gethomepage.dev/name: Linkwarden
           gethomepage.dev/icon: linkwarden.svg
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a
+          # Linkwarden body field the Authentik login page cannot match, and proves /api still
+          # bypasses Authentik.
           gatus.home-operations.com/endpoint: |-
-            url: https://links.${SECRET_DOMAIN}/
+            url: https://links.${SECRET_DOMAIN}/api/v1/logins
             conditions:
-              - "[STATUS] == any(200, 307)"
+              - "[STATUS] == 200"
+              - "has([BODY].credentialsEnabled) == true"
             group: selfhosted
         hostnames:
           - "links.${SECRET_DOMAIN}"
@@ -131,8 +135,19 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+            backendRefs:
+              - name: linkwarden
+                namespace: selfhosted
+                port: *port
+          - name: app
+            backendRefs:
               - name: linkwarden
                 namespace: selfhosted
                 port: *port

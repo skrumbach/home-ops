@@ -53,11 +53,12 @@ Host firewall policy is skill `cilium-host-policy`. ExtAuth ownership is skill
    nameserver `10.43.0.10` and `ndots:5`.
 8. **LoadBalancer IPs are pinned with `lbipam.cilium.io/ips`.** The pool is
    `10.50.0.0/24`. [bgp-unifi.md](references/bgp-unifi.md)
-9. **Every browser terminal is behind Authentik SSO.** `hermes-code` and
-   `hass-code` run code-server with `--auth none`, so the SecurityPolicy
-   (`hermes-code-auth`, `hass-code-auth`) is the only gate on the route. A new
-   code-server route needs one in the same change. The Service port stays open
-   to in-cluster callers, so this is an outer layer only.
+9. **Every browser terminal is behind Authentik SSO.** The hermes, hass,
+   esphome and zigbee2mqtt code-servers run `--auth none`, so the
+   SecurityPolicy is the only gate on the route. A new code-server route needs
+   one in the same change. Exempt an API path with a named route rule and
+   `sectionName`, never `skip_path_regex` (paperless-ngx, linkwarden). The
+   Service port stays open to in-cluster callers: an outer layer only.
 10. **Host-endpoint Cilium policy** (default-deny, selector labels, msgr ports)
    is skill `cilium-host-policy`. The manifests live next to the CNI. Do not
    edit that skill from a networking change.
