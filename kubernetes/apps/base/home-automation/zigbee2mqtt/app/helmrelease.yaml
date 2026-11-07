@@ -153,6 +153,11 @@ spec:
               - --port
               - "12321"
               - /data
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
             resources:
               requests:
                 cpu: 10m
@@ -191,6 +196,10 @@ spec:
             conditions:
               - "[STATUS] == 200"
             group: home-automation
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "Home Automation"
+          gethomepage.dev/name: zigbee2mqtt
+          gethomepage.dev/icon: zigbee2mqtt.svg
         hostnames:
           - zigbee2mqtt.${SECRET_DOMAIN}
         parentRefs:
