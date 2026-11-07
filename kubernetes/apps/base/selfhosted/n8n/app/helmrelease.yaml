@@ -35,14 +35,14 @@ spec:
 
               N8N_PERSONALIZATION_ENABLED: false
               N8N_VERSION_NOTIFICATIONS_ENABLED: false
-              N8N_DIAGONISTICS_ENABLED: false
+              N8N_DIAGNOSTICS_ENABLED: false
               N8N_HIRING_BANNER_ENABLED: false
-              N8N_USER_MANAGEMENT_DISABLED: true
               N8N_RUNNERS_ENABLED: true
 
               DB_SQLITE_VACUUM_ON_STARTUP: true
               EXECUTIONS_DATA_PRUNE: true
-              EXECUTIONS_DATA_MAX_AGE: 7
+              # EXECUTIONS_DATA_MAX_AGE is in HOURS: 168 = 7 days.
+              EXECUTIONS_DATA_MAX_AGE: 168
               EXECUTIONS_DATA_PRUNE_MAX_COUNT: 50000
               N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
               N8N_PROTOCOL: "https"
@@ -54,6 +54,11 @@ spec:
               N8N_USER_FOLDER: /config
               N8N_EMAIL_MODE: smtp
 
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
             envFrom:
               - secretRef:
                   name: n8n-secret
@@ -96,6 +101,7 @@ spec:
       # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)
       # keeps this app off it via the TaintToleration score. Skill `node-scheduling`, references/talos-3-ledger.md.
       securityContext:
+        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
