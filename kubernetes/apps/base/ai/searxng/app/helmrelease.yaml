@@ -86,6 +86,11 @@ spec:
     route:
       app:
         annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: SearXNG
+          gethomepage.dev/icon: searxng.png
+          gethomepage.dev/description: "Self-hosted metasearch"
           gatus.home-operations.com/endpoint: |-
             url: https://search.${SECRET_DOMAIN}/stats
             conditions:
