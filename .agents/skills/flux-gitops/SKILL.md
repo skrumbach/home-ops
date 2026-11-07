@@ -23,7 +23,7 @@ flux-instance HelmRelease sets `values.instance.sync.path`.
    (checked 2026-09-30, 20 live): CRDs (`toolhive-crds`),
    operators and clusters (`cloudnative-pg`, `postgres-cluster-18`,
    `dragonfly-operator`, `emqx-*`, `surrealdb`, `keda`), secret stores
-   (`external-secrets`, `onepassword-store`, `database-secrets`), `cluster-meta`,
+   (`external-secrets`, `onepassword-store`), `cluster-meta`,
    `multus-networks`, `certificates-import`, `cloudflare-dns`, `coder`. None of them includes `components/kopiur` or
    `components/volsync`, which deadlocks `wait: true`. Recount with
    `kubectl get ks -A -o json | jq '[.items[]|select(.spec.wait==true)]|length'`.

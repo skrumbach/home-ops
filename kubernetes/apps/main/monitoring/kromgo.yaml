@@ -15,10 +15,6 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
-    substitute:
-      APP: *app
-      GATUS_SUBDOMAIN: kromogo
-      GATUS_PATH: /talos_version
   prune: true
   retryInterval: 2m
   sourceRef:

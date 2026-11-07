@@ -70,6 +70,10 @@ KNOWN_UNCAPTURED: dict[str, str] = {
 # (path at HEAD, stripped functional line) -> reason. Scoped to one PR.
 ALLOWED_REMOVALS: dict[tuple[str, str], str] = {
     (
+        "kubernetes/apps/main/security/external-secrets.yaml",
+        "# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json",
+    ): "The database-secrets Kustomization document (an unused, unconditioned ClusterSecretStore) was removed; its schema line went with it.",
+    (
         "kubernetes/apps/base/monitoring/kromgo/app/resources/config.yaml",
         "# yaml-language-server: $schema=https://raw.githubusercontent.com/kashalls/kromgo/main/config.schema.json",
     ): "kromgo moved to home-operations/kromgo; the schema line now points at its 0.16 config.schema.json.",
