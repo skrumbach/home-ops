@@ -19,6 +19,29 @@
       datasourceTemplate: "custom.grafana-dashboards",
       versioningTemplate: "regex:^(?<major>\\d+)$",
     },
+    {
+      // A url: dashboard on a branch changes the board on every Grafana restart, unreviewed. Pin the commit; git-refs proposes main's HEAD.
+      description: "Grafana url: dashboards pinned to a GitHub commit",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana/app/helmrelease\\.yaml$/"],
+      matchStrings: [
+        "url: https://raw\\.githubusercontent\\.com/(?<depName>[\\w.-]+/[\\w.-]+)/(?<currentDigest>[0-9a-f]{40})/\\S+\\.json",
+      ],
+      packageNameTemplate: "https://github.com/{{{depName}}}",
+      currentValueTemplate: "main",
+      datasourceTemplate: "git-refs",
+    },
+    {
+      // Same depName and datasource as the flux OCIRepository dep, so both land in the one envoy-gateway branch and the boards match the controller.
+      description: "Envoy Gateway dashboards pinned to the deployed gateway-helm chart tag",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana/app/helmrelease\\.yaml$/"],
+      matchStrings: [
+        "url: https://raw\\.githubusercontent\\.com/envoyproxy/gateway/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/\\S+\\.json",
+      ],
+      depNameTemplate: "mirror.gcr.io/envoyproxy/gateway-helm",
+      datasourceTemplate: "docker",
+    },
   ],
   packageRules: [
     {
@@ -28,6 +51,23 @@
       commitMessageTopic: "dashboard {{depName}}",
       matchDatasources: ["custom.grafana-dashboards"],
       matchUpdateTypes: ["major"],
+      semanticCommitScope: "grafana-dashboards",
+      semanticCommitType: "chore",
+    },
+    {
+      // toolhive's main moves daily; one grouped PR a month (America/New_York, .renovaterc.json5) instead of a digest PR per commit.
+      description: "Commit-pinned Grafana url: dashboards - one grouped PR a month",
+      matchDatasources: ["git-refs"],
+      matchFileNames: ["kubernetes/apps/base/monitoring/grafana/**"],
+      groupName: "Grafana url dashboards",
+      groupSlug: "grafana-url-dashboards",
+      schedule: ["on the first day of the month"],
+      addLabels: ["renovate/grafana-dashboard"],
+      // No automerge: the point of the pin is that a board change is reviewed (compare link in the PR).
+      automerge: false,
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
       semanticCommitScope: "grafana-dashboards",
       semanticCommitType: "chore",
     },

@@ -250,15 +250,15 @@ spec:
               value: Prometheus
 
         flux-cluster:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/cluster.json
           datasource: Prometheus
 
         flux-control-plane:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
           datasource: Prometheus
 
         flux-logs:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/logs.json
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/logs.json
           # LogQL dashboard: string mode would rewrite the Loki datasource to Prometheus.
           datasource:
             - name: DS_LOKI
@@ -322,31 +322,31 @@ spec:
         # Do not duplicate them here (UID collision). Skill observability.
 
         emqx-authentication:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/authentication.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authentication.json
           datasource: Prometheus
 
         emqx-authorization:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/authorization.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authorization.json
           datasource: Prometheus
 
         emqx-client-events:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/client-events.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/client-events.json
           datasource: Prometheus
 
         emqx-messages:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/messages.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/messages.json
           datasource: Prometheus
 
         emqx-overview:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/overview.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/overview.json
           datasource: Prometheus
 
         emqx-rule-engine-count:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/rule-engine-count.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/rule-engine-count.json
           datasource: Prometheus
 
         emqx-rule-engine-rate:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/main/grafana-dashboard/template/emqx-5/rule-engine-rate.json
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/rule-engine-rate.json
           datasource: Prometheus
 
         qdrant-observatory:
@@ -367,7 +367,7 @@ spec:
 
       ai-ml:
         toolhive-mcp-gateway:
-          url: https://raw.githubusercontent.com/stacklok/toolhive/main/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
+          url: https://raw.githubusercontent.com/stacklok/toolhive/42cd9b7e497bfc77dc67a1e73037675247d405b1/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
           datasource: Prometheus
 
       media:
@@ -387,11 +387,11 @@ spec:
               value: Prometheus
 
         envoy-gateway:
-          url: https://raw.githubusercontent.com/envoyproxy/gateway/refs/heads/main/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json
+          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.3/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json
           datasource: Prometheus
 
         envoy-proxy:
-          url: https://raw.githubusercontent.com/envoyproxy/gateway/refs/heads/main/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
+          url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.3/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
           datasource: Prometheus
 
       monitoring:
