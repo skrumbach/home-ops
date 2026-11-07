@@ -132,6 +132,13 @@
       automerge: false,
     },
     {
+      // MUST stay after the blanket minor rule. CalVer: 2026.8 -> 2026.11 is a "minor", i.e. a new release line with one-way migrations. Patches stay automerged. Skill `authentik-terraform` references/upgrade-checklist.md.
+      description: "Never auto merge Authentik release lines - each one runs one-way Django migrations and has a pre-upgrade checklist",
+      matchPackageNames: ["ghcr.io/goauthentik/helm-charts/authentik"],
+      matchUpdateTypes: ["minor", "major"],
+      automerge: false,
+    },
+    {
       // MUST stay after the three blanket automerge rules. Third-party code that runs inside Home Assistant's login path, installed by the install-oidc init container. Each bump needs a new OIDC_SHA256. Skill `home-automation`.
       description: "Never auto merge hass-oidc-auth - it is Home Assistant's login provider and each bump needs a new pinned checksum",
       matchPackageNames: ["christiaangoossens/hass-oidc-auth"],
