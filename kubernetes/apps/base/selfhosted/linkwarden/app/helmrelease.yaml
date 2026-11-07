@@ -37,6 +37,13 @@ spec:
               # terminal alias with no cloud fallback: when the B70 is down tagging just fails.
               CUSTOM_OPENAI_BASE_URL: "http://litellm.ai.svc.cluster.local:4000/v1"
               OPENAI_MODEL: "chat-local"
+            securityContext:
+              allowPrivilegeEscalation: false
+              # Playwright launches Chromium with --no-sandbox by default (chromiumSandbox
+              # defaults to false), so no setuid sandbox helper or extra capability is needed.
+              capabilities:
+                drop:
+                  - ALL
             envFrom:
               - secretRef:
                   name: linkwarden-secret
@@ -79,6 +86,7 @@ spec:
       # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)
       # keeps this app off it via the TaintToleration score. Skill `node-scheduling`, references/talos-3-ledger.md.
       securityContext:
+        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
