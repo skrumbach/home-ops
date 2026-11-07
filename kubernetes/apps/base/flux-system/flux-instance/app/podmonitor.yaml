@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/podmonitor_v1.json
+# Scrapes the Flux controllers' http-prom port (8080). The grafana flux-control-plane
+# dashboard queries controller_runtime_* and workqueue_* by namespace, so no relabeling.
+# networkPolicy is false on the FluxInstance, so nothing blocks this scrape.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-system
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: flux
+  podMetricsEndpoints:
+    - port: http-prom
+      interval: 1m

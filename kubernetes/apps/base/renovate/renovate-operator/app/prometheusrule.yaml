@@ -28,7 +28,7 @@ spec:
               or vector(0)
             ) == 0
             and on()
-            sum(renovate_operator_renovatejob_suspended{renovate_job="home-ops"} offset 8h) >= 0
+            sum(renovate_operator_renovatejob_suspended{renovate_job="home-ops"}) == 0
           for: 15m
           annotations:
             summary: >-
