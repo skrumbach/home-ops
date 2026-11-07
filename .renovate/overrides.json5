@@ -27,6 +27,14 @@
       },
     },
     {
+      // tests.yaml installs litellm[proxy] on this interpreter: litellm declares requires-python <3.15 and fastuuid 0.14.0 has no cp315 wheel (checked 2026-11-07).
+      // mise only; images are judged per consumer (repo-wiki is stdlib-only). Lift once both ship 3.15 support. Skill `renovate-review`.
+      description: "Hold the mise python tool below 3.15 until litellm supports it",
+      matchManagers: ["mise"],
+      matchPackageNames: ["python"],
+      allowedVersions: "<3.15",
+    },
+    {
       // Floor >=1.93.0 or classifier_type llm is ignored. Skill `litellm-proxy` references/auto-router.md.
       description: "LiteLLM plain vX.Y.Z tags; floor >=1.93.0 for LLM classifier",
       matchDatasources: ["docker"],
