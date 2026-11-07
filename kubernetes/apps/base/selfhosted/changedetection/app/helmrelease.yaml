@@ -43,12 +43,21 @@ spec:
             # Identity 1000:1000 (from defaultPodOptions) is measured: the image default is root, every file and
             # setgid directory under /datastore is already group 1000, and it is kopiur's fleet default, so no
             # KOPIUR_PUID/PGID override is needed.
+            # List form, not map: $(BROWSER_TOKEN) expands only when BROWSER_TOKEN is defined earlier in this list.
             env:
-              PORT: &port 5000
-              USE_X_SETTINGS: 1
+              - name: BROWSER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: changedetection-browser-token
+                    key: BROWSER_TOKEN
+              - {name: PORT, value: "5000"}
+              - {name: USE_X_SETTINGS, value: "1"}
               # Apprise notification URLs carry credentials and are logged at INFO.
-              LOGGER_LEVEL: WARNING
-              PLAYWRIGHT_DRIVER_URL: ws://localhost:3000/?stealth=1&--disable-web-security=true&--user-data-dir=~/browserless-cache-123
+              - {name: LOGGER_LEVEL, value: WARNING}
+              - {name: BASE_URL, value: "https://changedetection.${SECRET_DOMAIN}"}
+              # The browser sidecar's DevTools socket is token-gated (TOKEN on `browser`); port 3000 is not in the Service.
+              - name: PLAYWRIGHT_DRIVER_URL
+                value: "ws://localhost:3000/?stealth=1&--disable-web-security=true&--user-data-dir=~/browserless-cache-123&token=$(BROWSER_TOKEN)"
             securityContext:
               allowPrivilegeEscalation: false
               # Writes Python bytecode and temp files outside /datastore.
@@ -81,6 +90,12 @@ spec:
                 drop:
                   - ALL
             env:
+              # Same Secret as main's BROWSER_TOKEN. Both containers read it at start, so a rotated Secret needs a pod restart.
+              - name: TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: changedetection-browser-token
+                    key: BROWSER_TOKEN
               - {name: SCREEN_WIDTH, value: "1920"}
               - {name: SCREEN_HEIGHT, value: "1024"}
               - {name: SCREEN_DEPTH, value: "16"}
@@ -101,7 +116,7 @@ spec:
       main:
         ports:
           http:
-            port: *port
+            port: 5000
     route:
       internal:
         annotations:
@@ -121,7 +136,7 @@ spec:
         rules:
           - backendRefs:
               - name: *app
-                port: *port
+                port: 5000
     persistence:
       config:
         enabled: true
