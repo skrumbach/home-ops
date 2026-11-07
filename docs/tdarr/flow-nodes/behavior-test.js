@@ -529,24 +529,35 @@ async function testLangfilter() {
     assert.strictEqual(t.r.outputNumber, 1);
     assert.strictEqual(t.user.expectAudio, 2);
   }
-  // Dropped default track: the first kept main track becomes default; Execute
-  // still stream-copies it (-disposition is copy-compatible in ffmpegCommandExecute).
+  // Whenever audio is dropped, the first kept English main track becomes the
+  // only default; Execute still stream-copies it (-disposition is copy-compatible).
   {
     const fre = Object.assign(a('fre', 'dts'), { disposition: { default: 1 } });
     const t = await run([v, fre, a('ger', 'ac3'), a('eng', 'eac3')]);
     const eng0 = t.streams[3];
     log(`  default move: out=${t.r.outputNumber} eng.args=${JSON.stringify(eng0.outputArgs)} log=${t.logs[0]}`);
     assert.strictEqual(t.r.outputNumber, 1);
-    assert.deepStrictEqual(eng0.outputArgs, ['-disposition:{outputIndex}', 'default'], 'English is primary');
+    assert.deepStrictEqual(eng0.outputArgs, ['-disposition:{outputIndex}', '+default'], 'English is primary');
     assert.deepStrictEqual(t.streams[2].outputArgs, []);
     assert.ok(t.logs[0].endsWith('default->eng'));
+    // Original language (Chinese) default with English and German dubs: Chinese
+    // goes, a kept German default is cleared, English becomes the only default.
+    const zh = Object.assign(a('chi'), { disposition: { default: 1 } });
+    const de = Object.assign(a('ger'), { disposition: { default: 1 } });
+    const t4 = await run([v, zh, de, a('eng'), { codec_type: 'audio', codec_name: 'ac3', tags: { language: 'eng', title: 'Commentary' } }]);
+    assert.strictEqual(t4.r.outputNumber, 1);
+    assert.strictEqual(t4.streams[1].removed, true, 'original language dropped');
+    assert.deepStrictEqual(t4.streams[2].outputArgs, ['-disposition:{outputIndex}', '-default']);
+    assert.deepStrictEqual(t4.streams[3].outputArgs, ['-disposition:{outputIndex}', '+default']);
+    assert.deepStrictEqual(t4.streams[4].outputArgs, [], 'commentary never becomes default');
     // Without an English main track the first kept main track (German) gets it.
     const t3 = await run([v, Object.assign(a('fre'), { disposition: { default: 1 } }), a('ger')]);
-    assert.deepStrictEqual(t3.streams[2].outputArgs, ['-disposition:{outputIndex}', 'default']);
-    // No move when a kept track already carries the default flag.
+    assert.deepStrictEqual(t3.streams[2].outputArgs, ['-disposition:{outputIndex}', '+default']);
+    // English already the only default: no disposition args at all.
     const eng = Object.assign(a('eng'), { disposition: { default: 1 } });
     const t2 = await run([v, a('fre'), eng]);
     assert.deepStrictEqual(t2.streams[2].outputArgs, []);
+    assert.ok(!t2.logs[0].includes('default->'));
   }
   // Only English and German: nothing to drop, output 2.
   {

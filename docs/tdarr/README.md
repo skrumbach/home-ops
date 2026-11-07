@@ -83,7 +83,7 @@ every one is byte-checked against it by CI, so they cannot drift silently.
 | `size_check` | `flow-nodes/size_check.js` | Guard 1: output must be materially smaller |
 | `duration_check` | `flow-nodes/duration_check.js` | Guard 2: duration must match |
 | `hdr_survival` | `flow-nodes/hdr_survival.js` | Guard 3: HDR must survive |
-| `lang22` `lang23` `lang24` `rx_lang` | `flow-nodes/langfilter.js` | Keep English, German and untagged audio; keep all unless a kept track is a main soundtrack (not commentary/description); move the default flag (to English first) if it was dropped; subtitles untouched |
+| `lang22` `lang23` `lang24` `rx_lang` | `flow-nodes/langfilter.js` | Keep English, German and untagged audio; keep all unless a kept track is a main soundtrack (not commentary/description); when audio is dropped, English (else the first kept main track) becomes the only default; subtitles untouched |
 | `rx_dv` `rx_snapshot` `rx_sub` `rx_duration` `rx_hdr` | `dv_check.js`, `snapshot.js`, `subconform.js`, `duration_check.js`, `hdr_survival.js` | Same bodies on the AV1 remux path (`rx_dv` output 1, DV, dead-ends) |
 | `rx_verify` | `flow-nodes/remux_verify.js` | Remux guard: video/subtitle counts unchanged, audio = what the filter kept, still AV1, smaller than source |
 

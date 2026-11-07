@@ -12,8 +12,10 @@
 // zxx) always stay. Nothing is dropped unless at least one kept track is a
 // main soundtrack (not commentary or audio description, by disposition or
 // title): a French film with only an English commentary keeps every track.
-// If the default-flagged track is dropped, the first kept English main track
-// (else the first kept main track) becomes the default.
+// Whenever audio is dropped, the first kept English main track (else the first
+// kept main track) becomes the only default, even if the old default was a
+// kept German track (captain, 2026-11-07: original languages such as Japanese
+// or Chinese go when an English/German dub exists, English is the default).
 
 const KEEP = { eng: true, ger: true };
 const KEEP_UNTAGGED = ['', 'und', 'unk', 'mul', 'zxx'];
@@ -77,11 +79,16 @@ module.exports = async (args) => {
       dropped += 1;
     }
   }
+  // +default / -default touch only the default flag (comment, forced, ... stay);
+  // both are copy-compatible in ffmpegCommandExecute, so audio is still copied.
   const isDefault = (s) => Number((s.disposition || {}).default || 0) === 1;
+  const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];
   let defaultNote = '';
-  if (audio.some(isDefault) && !keep.some(isDefault)) {
-    const pick = keepMain.find((s) => langOf(s) === 'eng') || keepMain[0];
-    pick.outputArgs.push('-disposition:{outputIndex}', 'default');
+  for (const s of keep) {
+    if (s === pick && !isDefault(s)) s.outputArgs.push('-disposition:{outputIndex}', '+default');
+    if (s !== pick && isDefault(s)) s.outputArgs.push('-disposition:{outputIndex}', '-default');
+  }
+  if (!isDefault(pick) || keep.some((s) => s !== pick && isDefault(s))) {
     defaultNote = ' default->' + (langOf(pick) || 'und');
   }
 
