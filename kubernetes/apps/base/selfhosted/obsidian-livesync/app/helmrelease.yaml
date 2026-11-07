@@ -30,12 +30,15 @@ spec:
             envFrom:
               - secretRef:
                   name: obsidian-livesync-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
             resources:
               requests:
                 cpu: 250m
                 memory: 256Mi
               limits:
-                cpu: 500m
                 memory: 512Mi
             probes:
               liveness: &probes
@@ -55,10 +58,13 @@ spec:
 
     defaultPodOptions:
       securityContext:
+        runAsNonRoot: true
         runAsUser: 5984
         runAsGroup: 5984
         fsGroup: 5984
         fsGroupChangePolicy: "OnRootMismatch"
+        seccompProfile:
+          type: RuntimeDefault
 
     service:
       app:

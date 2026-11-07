@@ -25,12 +25,17 @@ spec:
               repository: docker.io/binwiederhier/ntfy
               tag: v2.37.2@sha256:1875ddcf815c8a3c981d6d78c67a93452d0abba79b1ab9520b1f5f5238902bd7
             args: ["serve"]
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+                # listen-http defaults to :80; a non-root process needs this to bind it.
+                add: ["NET_BIND_SERVICE"]
             resources:
               requests:
                 cpu: 50m
                 memory: 64Mi
               limits:
-                cpu: 200m
                 memory: 256Mi
             probes:
               liveness: &probes
@@ -50,6 +55,7 @@ spec:
 
     defaultPodOptions:
       securityContext:
+        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000

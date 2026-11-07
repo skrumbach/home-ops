@@ -29,12 +29,15 @@ spec:
               STHOMEDIR: /var/syncthing/config
               STGUIADDRESS: 0.0.0.0:8384
               STDEFAULTFOLDER: /var/syncthing/data
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
             resources:
               requests:
                 cpu: 100m
                 memory: 256Mi
               limits:
-                cpu: 500m
                 memory: 512Mi
             probes:
               liveness: &probes
@@ -63,6 +66,7 @@ spec:
 
     defaultPodOptions:
       securityContext:
+        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
