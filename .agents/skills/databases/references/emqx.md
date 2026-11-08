@@ -45,3 +45,39 @@ The `gatus.io/enabled` ConfigMap is not a live Gatus endpoint. Skill
 
 Two cores have no split-brain quorum. That is accepted for this broker. Do
 not add a replicant tier as a drive-by.
+
+## Recovery after both cores lose power
+
+On 2026-11-08 a power cut on talos-3 left both cores in CrashLoopBackOff,
+and zigbee2mqtt crashlooped with them. Each core's Mnesia waited for tables
+it thought a peer held. The peers it waited on were cores from ReplicaSets
+that no longer existed, still listed in the cluster view. The liveness probe
+(60s initial delay, 3 x 30s) kills the container after about 2.5 minutes,
+before the wait ends.
+
+Every step below writes, so it needs the admin kubeconfig and the owner's
+OK.
+
+1. Let one core start fresh (delete its pod, or wait out its back-off). As
+   soon as the container is running, run this every ~8 seconds until each
+   table returns `yes` and the pod turns Ready:
+
+   ```bash
+   kubectl -n database exec <core-0> -c emqx -- emqx eval \
+     "[{T, mnesia:force_load_table(T)} || T <- mnesia:system_info(tables), T =/= schema]."
+   ```
+
+   Loading one table only moves the wait to the next (`cluster_rpc_mfa`,
+   `cluster_rpc_commit`). Load them all, and keep repeating within the run.
+   An exec that lands between runs fails with `container not found`.
+2. Leave the other core alone. On its next start it copies from the healthy
+   one; zigbee2mqtt reconnects after its own back-off.
+3. Remove dead cores from the cluster view, or the next power cut wedges the
+   same way. `emqx ctl cluster status` lists them under `stopped_nodes`:
+
+   ```bash
+   kubectl -n database exec <core-0> -c emqx -- emqx ctl cluster force-leave \
+     emqx@<stale-pod>.emqx-headless.database.svc.cluster.local
+   ```
+
+   Only the two pods of the current ReplicaSet belong in `running_nodes`.
