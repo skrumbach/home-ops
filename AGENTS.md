@@ -17,7 +17,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 ├── bootstrap/                  # just bootstrap stages
 ├── .agents/skills/             # one skill per subsystem (.claude/skills is a symlink)
 ├── .taskfiles/                 # task domains: 1password, k8s, flux, rook, network, actions-runner
-├── terraform/                  # OpenTofu stacks outside Flux (Authentik, UniFi)
+├── terraform/                  # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
 ├── docs/                       # tdarr harness files + pointer (docs/README.md)
 └── .renovate/                  # Renovate presets
 ```
@@ -38,6 +38,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 | Renovate | `.renovaterc.json5` + `.renovate/`; in-cluster renovate-operator is the writer (skill `renovate`) |
 | Authentik SSO | `terraform/authentik/` (skill `authentik-terraform`) |
 | UniFi network (UDM) | `terraform/unifi/` (skill `unifi-network`) |
+| TrueNAS NAS | `terraform/truenas/` (skill `truenas-nas`) |
 | AI stack | `kubernetes/apps/{main,base}/ai/` (skills `ai-stack`, `litellm-proxy`, `hermes-agent`) |
 | Gatus | `monitoring/gatus`; endpoints come from the `gatus.home-operations.com/endpoint` HTTPRoute annotation (skill `observability`) |
 | konflate | `flux-system/konflate`, read-only PR-review UI, internal route only; its README owns the write-back-off invariant |
@@ -65,7 +66,7 @@ Each is a warning needed before deciding to touch the subsystem; detail is in th
 - **`Home-Lab` and `Homelab` are different vaults; Connect cannot see `Home-Lab`, and `SecretSynced` does not mean a non-empty value.** Skill `secrets-1password`.
 - **NEVER run `find /Users/coder`, `find $HOME` or any unbounded home search.** Tools are mise-managed; `kubeconfig` and `talosconfig` are absent in fresh worktrees and that is normal - report and continue.
 - **`kubectl`/`talosctl` default to `.mise.toml`'s read-only `~/.kube/home-ops-agent` / `~/.talos/home-ops-agent`.** `Forbidden` on a write means the read-only default is in use; a missing file means the owner has not run `scripts/agent-credentials.sh`. For a write the owner has approved in the current session, prefix `KUBECONFIG=~/.kube/home-ops-admin` / `TALOSCONFIG=~/.talos/home-ops-admin` (a `HOME_OPS_*` prefix does nothing in an agent shell).
-- **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/` or `terraform/unifi/` without an explicit, current go-ahead.** A green PR is not approval. A UniFi apply can cut the cluster's VLANs; never apply it over WiFi. Skills `authentik-terraform`, `unifi-network`.
+- **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/`, `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead.** A green PR is not approval. A UniFi apply can cut the cluster's VLANs; never apply it over WiFi. Never set a TrueNAS `force_destroy`/`allow_*` opt-in unasked. Skills `authentik-terraform`, `unifi-network`, `truenas-nas`.
 - **NEVER commit without the pre-commit hooks** (`task setup-dev-env`).
 
 **Flux and CI**
@@ -145,6 +146,7 @@ Skills live in `.agents/skills/<name>/SKILL.md` (`.claude/skills` is a symlink).
 | `networking` | HTTPRoute, Gateway, SecurityPolicy, external-dns, BGP, NetworkPolicy |
 | `authentik-terraform` | `terraform/**`, Authentik SSO apps/providers, ExtAuth routes |
 | `unifi-network` | `terraform/unifi/`, UDM networks, WiFi, zone firewall, DHCP reservations, UDM DNS |
+| `truenas-nas` | `terraform/truenas/`, NAS datasets, SMB/NFS shares, NAS users, TrueNAS API keys and upgrades |
 | `kopiur-backups` | any kopiur component, CR, restore, alert or backup failure; the retired VolSync bucket and its expiry |
 | `image-generation` | generating images, the `image-generation` LiteLLM key, `/v1/images/generations` |
 | `jev-decisions` | asking Jev yes/no rule checks, choices or scores (JSONL in/out), second-opinion gates |
