@@ -374,7 +374,10 @@ def test_schema_only_tofu_path() -> dict[str, Any]:
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "Success! The configuration is valid." in proc.stdout
-    assert "OK: 1 OpenTofu stack(s) formatted and valid" in proc.stdout
+    stacks = sorted(
+        d.name for d in (ROOT / "terraform").iterdir() if d.is_dir() and any(d.glob("*.tofu"))
+    )
+    assert f"OK: {len(stacks)} OpenTofu stack(s) formatted and valid" in proc.stdout, stacks
     return {"exit": proc.returncode, "tail": proc.stdout.strip().splitlines()[-2:]}
 
 
