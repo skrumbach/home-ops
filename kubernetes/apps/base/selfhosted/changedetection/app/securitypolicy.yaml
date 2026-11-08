@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Gates the whole changedetection route: the app has no password of its own and its page shows the
+# RSS token. No consumer of /rss or /api was found (Git, Envoy access logs), so nothing is exempt.
+# A future RSS reader or API client gets a named route rule plus sectionName, never the proxy
+# provider's skip_path_regex. The cross-namespace backendRef needs the selfhosted entry in
+# security/allow-authentik-access. Skill authentik-terraform.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: changedetection-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: changedetection
+  extAuth:
+    headersToExtAuth:
+      - cookie
+      - authorization
+      - x-forwarded-for
+      - x-forwarded-host
+      - x-forwarded-proto
+      - x-forwarded-uri
+    http:
+      backendRefs:
+        - name: ak-outpost-authentik-embedded-outpost
+          namespace: security
+          port: 9000
+      path: /outpost.goauthentik.io/auth/envoy
+      headersToBackend:
+        - set-cookie
+        - authorization
+        - x-authentik-username
+        - x-authentik-email
+        - x-authentik-name
+        - x-authentik-uid

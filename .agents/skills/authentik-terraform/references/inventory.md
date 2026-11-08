@@ -29,11 +29,13 @@ One provider, `forward_domain`, `external_host` `https://auth.${SECRET_DOMAIN}`,
 - `network/echo`
 - `home-automation/home-assistant` (the `hass-code` browser terminal only; the Home Assistant
   route is not ExtAuth-gated, it signs in through the OIDC provider above)
-- `home-automation/esphome` (dashboard and `/code/` editor), `home-automation/zigbee2mqtt`
-  (rule `code` only; the frontend is not gated)
+- `home-automation/esphome`, `home-automation/zigbee2mqtt` (whole route: dashboard or
+  frontend plus the `/code/` editor)
 - `monitoring/alertmanager`
 - `selfhosted/paperless-ngx`, `selfhosted/linkwarden` (rule `app` only; rule `api`, `/api`,
   stays on the app's own token auth for mobile apps and the browser extension)
+- `selfhosted/syncthing` (GUI route only; device sync is the `sync` LoadBalancer),
+  `selfhosted/changedetection`, `selfhosted/excalidraw` (whole route)
 - `ai/opencode`
 - `ai/hermes` (the `hermes-code` browser terminal)
 - `flux-system/headlamp`

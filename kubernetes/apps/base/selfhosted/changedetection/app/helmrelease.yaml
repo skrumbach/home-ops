@@ -123,11 +123,15 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Selfhosted
           gethomepage.dev/name: *app
+          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
+          # login page. Probe the Service in-cluster instead. Skill observability.
           gatus.home-operations.com/endpoint: |-
-            url: https://changedetection.${SECRET_DOMAIN}/
+            url: http://changedetection.selfhosted.svc.cluster.local:5000/
             conditions:
               - "[STATUS] == 200"
             group: selfhosted
+            ui:
+              hide-url: true
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

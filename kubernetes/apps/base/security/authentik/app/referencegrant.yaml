@@ -30,7 +30,8 @@ spec:
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: monitoring
-    # selfhosted/paperless-ngx-auth and selfhosted/linkwarden-auth (browser UI rules only).
+    # selfhosted/paperless-ngx-auth, linkwarden-auth (browser UI rules only), syncthing-auth,
+    # changedetection-auth and excalidraw-auth.
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: selfhosted

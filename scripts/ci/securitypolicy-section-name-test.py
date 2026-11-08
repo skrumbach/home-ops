@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Every SecurityPolicy `sectionName` on an HTTPRoute names a rule that route declares.
+"""Every SecurityPolicy HTTPRoute target exists, and every `sectionName` names a rule of it.
 
-Prevents: an Authentik ExtAuth gate that silently attaches to nothing. paperless-ngx,
-linkwarden and zigbee2mqtt gate one named route rule (`app` / `code`) and leave `api` /
-`app` open. If a rule is renamed or loses its `name`, the policy targets no rule and the
-UI it was meant to gate is served without sign-in. flate renders that as valid.
+Prevents: an Authentik ExtAuth gate that silently attaches to nothing. paperless-ngx and
+linkwarden gate one named route rule (`app`) and leave `api` open. If a rule is renamed
+or loses its `name`, the policy targets no rule and the UI it was meant to gate is
+served without sign-in. A whole-route policy (esphome, syncthing, zigbee2mqtt) fails the
+same way if its target name drifts from the rendered route name. flate renders both as
+valid, and a Gatus check on the in-cluster Service stays green.
 
 Routes are read from raw HTTPRoute manifests and from app-template HelmRelease
-`values.route.<key>` in the same app directory (key == release name or `app` -> the
-release name, else `<release>-<key>`). Skill `networking`.
+`values.route.<key>` in the same app directory (`nameOverride`, else the release name
+when the release has one route, else `<release>-<key>`; matched against the live
+cluster). Skill `networking`.
 """
 
 from __future__ import annotations
@@ -41,11 +44,12 @@ def route_rules(app_dir: Path) -> dict[str, set[str]]:
             elif kind == "HelmRelease":
                 release = doc.get("metadata", {}).get("name", "")
                 values = doc.get("spec", {}).get("values") or {}
-                for key, route in (values.get("route") or {}).items():
-                    if not isinstance(route, dict):
-                        continue
+                declared = {
+                    k: v for k, v in (values.get("route") or {}).items() if isinstance(v, dict)
+                }
+                for key, route in declared.items():
                     name = route.get("nameOverride") or (
-                        release if key in ("app", release) else f"{release}-{key}"
+                        release if len(declared) == 1 else f"{release}-{key}"
                     )
                     rules = route.get("rules") or []
                     routes[name] = {r.get("name") for r in rules if r.get("name")}
@@ -61,7 +65,7 @@ def main() -> int:
                 continue
             for ref in doc.get("spec", {}).get("targetRefs") or []:
                 section = ref.get("sectionName")
-                if ref.get("kind") != "HTTPRoute" or not section:
+                if ref.get("kind") != "HTTPRoute":
                     continue
                 checked += 1
                 rules = route_rules(path.parents[1] if path.parent.name == "app" else path.parent)
@@ -69,7 +73,7 @@ def main() -> int:
                 rel = path.relative_to(ROOT)
                 if route not in rules:
                     failures.append(f"{rel}: HTTPRoute {route} not found next to the policy")
-                elif section not in rules[route]:
+                elif section and section not in rules[route]:
                     failures.append(
                         f"{rel}: sectionName {section} is not a rule of {route} "
                         f"(rules: {sorted(rules[route]) or 'none named'})"
