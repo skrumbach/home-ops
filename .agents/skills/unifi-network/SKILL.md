@@ -23,8 +23,9 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
    the `allow_bgp*` / `k8s*` / `Allow-Pods-*` policies and the `Server [Talos]`
    / `k8s-01` zones. A plan line touching any of these needs a reason before
    anything else.
-3. **Not in this stack, on purpose:** the USW Pro Aggregation ports (its 7
-   LACP groups carry the Talos bonds), disabled ports, BGP (an
+3. **Not in this stack, on purpose:** the Talos bonds (Aggregation LAGs 5+6,
+   7+8, 9+10: inline `custom` VLAN mode, which terrifi device_ports cannot
+   represent yet), Aggregation 15+16, disabled ports, BGP (an
    uploaded FRR file, enabled as `home-ops`), order of single-policy zone pairs, built-in zones
    and policies, WANs, the One-Click VPN and NordVPN clients, the guest
    network, firewall groups, Protect, and the ~90 clients without a fixed
