@@ -10,25 +10,13 @@
 resource "unifi_network" "unifi_managment" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.0.10.100"
     stop                = "10.0.10.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "unifi.sklab.dev"
   enabled         = true
@@ -70,12 +58,9 @@ resource "unifi_network" "k8s_01" {
       server   = "10.10.0.40"
     }
     conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
+    enabled           = true
+    gateway_enabled   = false
+    leasetime         = "24h0m0s"
     ntp = {
       enabled = true
       servers = ["10.10.10.1"]
@@ -84,9 +69,6 @@ resource "unifi_network" "k8s_01" {
     stop                = "10.10.10.254"
     tftp_server         = "10.10.0.40"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "sklab.dev"
   enabled         = true
@@ -126,25 +108,13 @@ resource "unifi_network" "k8s_01" {
 resource "unifi_network" "home_ops_pods" {
   auto_scale = true
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.42.0.46"
     stop                = "10.42.255.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   enabled         = false
   gateway_type    = "default"
@@ -179,25 +149,13 @@ resource "unifi_network" "home_ops_pods" {
 resource "unifi_network" "vpn_network" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "192.168.90.6"
     stop                = "192.168.90.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "vpn.sklab.dev"
   enabled         = true
@@ -242,22 +200,13 @@ resource "unifi_network" "server_private" {
       filename = "netboot.xyz.efi"
       server   = "10.10.0.40"
     }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.10.0.210"
     stop                = "10.10.0.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "server.sklab.dev"
   enabled         = true
@@ -292,25 +241,13 @@ resource "unifi_network" "server_private" {
 resource "unifi_network" "home_default" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.0.0.11"
     stop                = "10.0.1.100"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "home.sklab.dev"
   enabled         = true
@@ -345,25 +282,13 @@ resource "unifi_network" "home_default" {
 resource "unifi_network" "iot_devices" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.40.0.16"
     stop                = "10.40.3.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "iot.sklab.dev"
   enabled         = true
@@ -403,25 +328,13 @@ resource "unifi_network" "iot_devices" {
 resource "unifi_network" "managment" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.10.4.16"
     stop                = "10.10.7.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "sklab.dev"
   enabled         = true
@@ -457,25 +370,13 @@ resource "unifi_network" "managment" {
 resource "unifi_network" "home_ops_lb" {
   auto_scale = true
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.50.0.6"
     stop                = "10.50.0.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   enabled         = false
   gateway_type    = "default"
@@ -510,25 +411,13 @@ resource "unifi_network" "home_ops_lb" {
 resource "unifi_network" "security_cams" {
   auto_scale = true
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.0.20.6"
     stop                = "10.0.20.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   enabled         = true
   gateway_type    = "default"
@@ -563,25 +452,13 @@ resource "unifi_network" "security_cams" {
 resource "unifi_network" "guest_access" {
   auto_scale = false
   dhcp_server = {
-    boot = {
-      enabled = false
-    }
-    conflict_checking = true
-    dns = {
-      enabled = false
-    }
-    enabled         = true
-    gateway_enabled = false
-    leasetime       = "24h0m0s"
-    ntp = {
-      enabled = false
-    }
+    conflict_checking   = true
+    enabled             = true
+    gateway_enabled     = false
+    leasetime           = "24h0m0s"
     start               = "10.0.2.6"
     stop                = "10.0.2.254"
     time_offset_enabled = false
-    wins = {
-      enabled = false
-    }
   }
   domain_name     = "guest.sklab.dev"
   enabled         = true

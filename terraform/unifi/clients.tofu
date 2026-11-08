@@ -94,7 +94,6 @@ resource "unifi_client" "true_nas_enp7s0" {
   allow_existing         = true
   blocked                = false
   fixed_ip               = "10.10.0.41"
-  local_dns_record       = ""
   mac                    = "d0:50:99:c3:c9:4e"
   name                   = "True Nas [enp7s0]"
   skip_forget_on_destroy = false

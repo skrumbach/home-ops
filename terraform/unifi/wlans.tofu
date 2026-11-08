@@ -173,12 +173,6 @@ resource "unifi_wlan" "u7_iot" {
   radius = {
     mac_auth_enabled = false
   }
-  roaming_assistant_6e = {
-    enabled = false
-  }
-  roaming_assistant_na = {
-    enabled = false
-  }
   security      = "wpapsk"
   uapsd         = false
   user_group_id = local.unmanaged_ids.user_group_default

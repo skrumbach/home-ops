@@ -49,1055 +49,549 @@ resource "unifi_firewall_zone" "server_private" {
 resource "unifi_firewall_policy" "internal_to_k8s_01" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Internal_To_K8s-01"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Internal_To_K8s-01"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "vpn_network_gateway" {
   action                = "BLOCK"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.gateway
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.gateway
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "VPN_Network_Gateway"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "VPN_Network_Gateway"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.vpn_network.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.vpn_network.id
   }
 }
 
 resource "unifi_firewall_policy" "vpn_network_external" {
   action                = "BLOCK"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.external
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.external
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "VPN_Network_External"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "VPN_Network_External"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.vpn_network.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.vpn_network.id
   }
 }
 
 resource "unifi_firewall_policy" "allow" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.external
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.external
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "allow"
-  protocol                = "tcp_udp"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "allow"
+  protocol   = "tcp_udp"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "vpn_allow_server" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "VPN - Allow Server"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "VPN - Allow Server"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
     time = {
       all_day = false
     }
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.vpn
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.vpn
   }
 }
 
 resource "unifi_firewall_policy" "block_traffic_to_itorrents_net" {
   action                = "BLOCK"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "WEB"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    web_domains             = ["itorrents.net"]
-    zone_id                 = local.builtin_zone_ids.external
+    matching_target    = "WEB"
+    port_matching_type = "ANY"
+    web_domains        = ["itorrents.net"]
+    zone_id            = local.builtin_zone_ids.external
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Block Traffic to itorrents.net"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Block Traffic to itorrents.net"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
 }
 
 resource "unifi_firewall_policy" "allow_pods_to_external_gateway" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow-Pods-to-External-Gateway"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow-Pods-to-External-Gateway"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "k8s_loadbalancer" {
   action                = "ALLOW"
   connection_state_type = "RESPOND_ONLY"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "k8s-loadbalancer"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "k8s-loadbalancer"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.50.0.0/24"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.vpn
+    ips                = ["10.50.0.0/24"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.vpn
   }
 }
 
 resource "unifi_firewall_policy" "all" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "all"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "all"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
 }
 
 resource "unifi_firewall_policy" "block_traffic_to_104_21_48_100" {
   action                = "BLOCK"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["104.21.48.100"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.external
+    ips                = ["104.21.48.100"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.external
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Block Traffic to 104.21.48.100"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Block Traffic to 104.21.48.100"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
 }
 
 resource "unifi_firewall_policy" "k8s_to_internal_01" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "k8s_To_Internal-01"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "k8s_To_Internal-01"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
 }
 
 resource "unifi_firewall_policy" "k8s_allow_https_route" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.50.0.0/24"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    ips                = ["10.50.0.0/24"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "k8s_allow_https_route"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "k8s_allow_https_route"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.42.0.0/16"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    ips                = ["10.42.0.0/16"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "server_private_to_k8s_01" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Server_Private_To_K8s-01"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Server_Private_To_K8s-01"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
 }
 
 resource "unifi_firewall_policy" "allow_all" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow All"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow All"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
     time = {
       all_day = false
     }
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
 }
 
 resource "unifi_firewall_policy" "allow_all_traffic" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.iot.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.iot.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow All Traffic"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow All Traffic"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
     time = {
       all_day = false
     }
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
 }
 
 resource "unifi_firewall_policy" "aviator_s_pc" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Aviator's PC"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Aviator's PC"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "vpn_to_cluster" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "VPN-To-Cluster"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "VPN-To-Cluster"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.vpn
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.vpn
   }
 }
 
 resource "unifi_firewall_policy" "allow_k8s" {
   action                = "ALLOW"
   connection_state_type = "RESPOND_ONLY"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow K8s"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow K8s"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.42.0.0/16"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.vpn
+    ips                = ["10.42.0.0/16"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.vpn
   }
 }
 
 resource "unifi_firewall_policy" "k8s_to_server_private_01" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.server_private.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.server_private.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "k8s_To_Server_Private-01"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "k8s_To_Server_Private-01"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
 }
 
 resource "unifi_firewall_policy" "block_traffic_from_104_21_48_100" {
   action                = "BLOCK"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = false
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.k8s_01.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.k8s_01.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Block Traffic from 104.21.48.100"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Block Traffic from 104.21.48.100"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["104.21.48.100"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.external
+    ips                = ["104.21.48.100"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.external
   }
 }
 
 resource "unifi_firewall_policy" "allow_all_2" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = unifi_firewall_zone.iot.id
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = unifi_firewall_zone.iot.id
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow All"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow All"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
     time = {
       all_day = false
     }
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "ANY"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    matching_target    = "ANY"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 
 resource "unifi_firewall_policy" "allow_pods_to_internal_gateway" {
   action                = "ALLOW"
   connection_state_type = "ALL"
-  connection_states     = []
   create_allow_respond  = true
-  description           = ""
   destination = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.50.0.0/24"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    ips                = ["10.50.0.0/24"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
-  enabled                 = true
-  ip_version              = "BOTH"
-  logging                 = false
-  match_opposite_protocol = false
-  name                    = "Allow-Pods-to-Internal-Gateway"
-  protocol                = "all"
+  enabled    = true
+  ip_version = "BOTH"
+  name       = "Allow-Pods-to-Internal-Gateway"
+  protocol   = "all"
   schedule = {
     mode           = "ALWAYS"
-    normalize      = false
     repeat_on_days = []
   }
   source = {
-    iid                     = ""
-    ip_group_id             = ""
-    ips                     = ["10.42.0.0/16"]
-    mac                     = ""
-    match_mac               = false
-    match_opposite_iid      = false
-    match_opposite_ips      = false
-    match_opposite_networks = false
-    match_opposite_ports    = false
-    matching_target         = "IP"
-    port_group_id           = ""
-    port_matching_type      = "ANY"
-    zone_id                 = local.builtin_zone_ids.internal
+    ips                = ["10.42.0.0/16"]
+    matching_target    = "IP"
+    port_matching_type = "ANY"
+    zone_id            = local.builtin_zone_ids.internal
   }
 }
 

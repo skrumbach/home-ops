@@ -20,9 +20,8 @@ resource "unifi_wan" "internet_1" {
   }
   enabled = true
   igmp_proxy = {
-    downstream             = "none"
-    downstream_network_ids = []
-    upstream               = false
+    downstream = "none"
+    upstream   = false
   }
   interface_mtu_enabled   = false
   ipv6_setting_preference = "manual"
@@ -40,7 +39,6 @@ resource "unifi_wan" "internet_1" {
   }
   report_wan_event   = false
   setting_preference = "auto"
-  single_network_lan = ""
   type               = "dhcp"
   type_v6            = "dhcpv6"
   vlan = {
@@ -66,9 +64,8 @@ resource "unifi_wan" "internet_2" {
   }
   enabled = true
   igmp_proxy = {
-    downstream             = "none"
-    downstream_network_ids = []
-    upstream               = false
+    downstream = "none"
+    upstream   = false
   }
   interface_mtu_enabled   = false
   ipv6_setting_preference = "manual"
@@ -86,7 +83,6 @@ resource "unifi_wan" "internet_2" {
   }
   report_wan_event   = false
   setting_preference = "auto"
-  single_network_lan = ""
   type               = "dhcp"
   type_v6            = "disabled"
   vlan = {

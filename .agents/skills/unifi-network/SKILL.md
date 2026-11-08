@@ -125,7 +125,14 @@ tofu plan -generate-config-out=generated.tf
 Drop `null` attributes, `site` and `timeouts`; replace raw IDs with
 references (`unifi_network.<name>.id`, `local.builtin_zone_ids.<zone>`,
 `local.unmanaged_ids.<name>`); omit an empty `domain_name` (the provider
-rejects `""`); and iterate until the plan shows only imports.
+rejects `""`); and iterate until the plan shows only imports. Then drop
+zero-value noise (`""`, `[]`, false `match_*`/`logging` toggles, port blocks
+that only say `enabled = false`): undeclared attributes keep their state
+value on update and are sent as zero on create. Keep `schedule` with
+`repeat_on_days = []`, and leave the objects in tripwire 2 verbatim. To check
+an update, rename one object in a scratch copy and plan: no attribute you
+dropped may show `(known after apply)`, except port blocks (the switch falls
+back to its defaults).
 
 ## Verify
 
