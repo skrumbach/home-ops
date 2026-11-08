@@ -14,8 +14,10 @@ read-only on 2026-11-08: 103 import blocks, plan `103 to import, 0 to change`.
 ## Tripwires
 
 1. **No apply without an explicit, current go-ahead.** A clean plan or a green
-   PR is not approval. There is no apply credential yet: `secrets.vals.yaml`
-   uses the `tofu-read-only` key, so a stray apply fails closed.
+   PR is not approval. `secrets.vals.yaml` uses the `tofu-read-only` key
+   (READONLY_ADMIN), so a stray apply through it fails closed.
+   `secrets-apply.vals.yaml` uses the `tofu-apply` key (Full Admin); never copy
+   it into `TRUENAS_API_KEY`. Apply a saved plan.
 2. **Never set `force_destroy`, `allow_rename_in_use` or `allow_recreate`
    without an explicit go-ahead naming the object.** They are the provider's
    only data-destroying opt-ins (its Data Safety guide). Removing a dataset from
@@ -54,7 +56,7 @@ read-only on 2026-11-08: 103 import blocks, plan `103 to import, 0 to change`.
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2 key `truenas/`, encrypted), `variables.tofu` |
 | Objects | `datasets.tofu`, `shares.tofu`, `accounts.tofu`, `tasks.tofu` |
 | Adoption | `imports.tofu` (dataset path or numeric id; kept, inert once in state) |
-| Plan env | `secrets.vals.yaml` (`Automation/truenas-terraform`, `Automation/tofu-state-r2`) |
+| Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/truenas-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
 
 State shares the R2 bucket `home-ops-tfstate` with the UniFi stack (skill
@@ -66,6 +68,15 @@ State shares the R2 bucket `home-ops-tfstate` with the UniFi stack (skill
 cd terraform/truenas
 env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu init
 env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu plan
+```
+
+## Apply (go-ahead only)
+
+```bash
+env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=truenas.tfplan
+# read it: no destroy, no replace, nothing touching tripwire 3
+env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu apply truenas.tfplan
+rm truenas.tfplan
 ```
 
 ## Adopt another object
