@@ -7,8 +7,9 @@ webhook. Annotations:
   `"external.${SECRET_DOMAIN}"` on the **Gateway** is what the webhook uses
   for `gateway-httproute` sources.
 - The same annotation on an HTTPRoute is not the control. A dual-parent route
-  publishes both targets. The webhook keeps the first and warns about once a
-  minute.
+  publishes both targets in sorted order. The webhook keeps the first, so
+  `auth` and `coder` resolve to `external` on the LAN whatever the parentRefs
+  order, and it warns about once a minute.
 
 ## Hand-made records
 
@@ -16,8 +17,13 @@ Registry TXT twin: `k8s.main.<type>-<name>.${SECRET_DOMAIN}`. No twin means
 the record was created in the UniFi controller. external-dns `--policy=sync`
 will not converge it.
 
-The wildcard `*.${SECRET_DOMAIN} -> 10.50.0.27` has no twin. Unclaimed names
-resolve to the AI gateway. No manifest edit removes that wildcard.
+To hand a name to external-dns, delete the UniFi record; the next sync
+(about a minute) recreates it with a twin. 2026-11-08: nine app names
+(pgadmin, pg, homepage, n8n, headlamp, changedetection, coder, auth,
+n8n-webhook) were handed over this way, and the dead `se-admin` and
+`calibre-web` were deleted. The only hand-made records left are the four in
+`terraform/unifi/dns.tofu`. There is no LAN wildcard: an unclaimed name gets
+no address.
 
 Read the webhook before blaming a manifest:
 
