@@ -35,6 +35,9 @@ spec:
               PAPERLESS_CONSUMER_RECURSIVE: "true"
               PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
               PAPERLESS_TASK_WORKERS: "2"
+              # Unset, Paperless sizes OCR threads from the node's 20 cores, not the 2 CPU limit: ~20 parallel
+              # tesseract jobs OOMKilled the pod at 2Gi during the 792-document re-import (2026-11-08).
+              PAPERLESS_THREADS_PER_WORKER: "1"
               PAPERLESS_WEBSERVER_WORKERS: "2"
             envFrom:
               - secretRef:
@@ -45,7 +48,7 @@ spec:
                 memory: 1Gi
               limits:
                 cpu: 2000m
-                memory: 2Gi
+                memory: 4Gi
             probes:
               liveness: &probes
                 enabled: true
