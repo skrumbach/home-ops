@@ -21,7 +21,7 @@ To hand a name to external-dns, delete the UniFi record; the next sync
 (about a minute) recreates it with a twin. 2026-11-08: nine app names
 (pgadmin, pg, homepage, n8n, headlamp, changedetection, coder, auth,
 n8n-webhook) were handed over this way, and the dead `se-admin` and
-`calibre-web` were deleted. The only hand-made records left are the four in
+`calibre-web` were deleted. The only hand-made record left is `nas` in
 `terraform/unifi/dns.tofu`. There is no LAN wildcard: an unclaimed name gets
 no address.
 

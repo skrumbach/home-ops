@@ -275,21 +275,6 @@ import {
 }
 
 import {
-  to = unifi_dns_record.media_sklab_dev
-  id = "dc88e02a-0791-410d-9462-c7a424a2b8ae"
-}
-
-import {
-  to = unifi_dns_record.mgnt_sklab_local
-  id = "924d196c-8460-48a8-afdb-075acad2ac3a"
-}
-
-import {
-  to = unifi_dns_record.pbs_server_sklab_dev
-  id = "270125bd-024d-4a0d-b67a-717c330d973c"
-}
-
-import {
   to = unifi_device_port.usw_pro_max_48_port_1
   id = "9c:05:d6:af:79:45/1"
 }
