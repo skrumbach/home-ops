@@ -398,3 +398,8 @@ import {
   to = unifi_device_port.usw_pro_max_48_port_38
   id = "9c:05:d6:af:79:45/38"
 }
+
+import {
+  to = unifi_bgp.home_ops
+  id = "default" # the site: BGP is a per-site singleton
+}

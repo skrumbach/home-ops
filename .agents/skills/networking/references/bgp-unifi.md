@@ -19,29 +19,10 @@ Source of truth for the CRs is
 `10.10.10.0/24`. Same-VLAN peering on `10.10.3.0/24` is the old layout.
 Private 16-bit ASNs are `64512-65534`.
 
-UniFi BGP is not in Flux. This block is the only git copy. Confirm on the
-UDM with `vtysh` before changing it. Do not put it back into a deleted
-`cilium/unifi/bgp.conf`.
-
-```
-router bgp 64513
-  bgp router-id 10.0.0.1
-  no bgp ebgp-requires-policy
-
-  neighbor k8s peer-group
-  neighbor k8s remote-as 64514
-
-  neighbor 10.10.10.11 peer-group k8s
-  neighbor 10.10.10.12 peer-group k8s
-  neighbor 10.10.10.13 peer-group k8s
-
-  address-family ipv4 unicast
-    redistribute connected
-    neighbor k8s next-hop-self
-    neighbor k8s soft-reconfiguration inbound
-  exit-address-family
-exit
-```
+UniFi BGP is not in Flux. The UDM side is OpenTofu: the FRR text is
+`terraform/unifi/bgp.conf` (the only git copy) and `bgp.tofu` uploads it
+(skill `unifi-network`). Confirm on the UDM with `vtysh` before changing it.
+Do not put it back into a deleted `cilium/unifi/bgp.conf`.
 
 Timers, `no bgp default ipv4-unicast`, `no bgp network import-check`, and a
 global `neighbor k8s activate` were removed in `c3160f11`. Do not restore

@@ -32,8 +32,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
    managing the port. Removing a `unifi_network` deletes the network
    (cluster networks carry `prevent_destroy`), and removing a `unifi_client`
    makes the controller forget the client.
-4. **Not in this stack, on purpose:** BGP (an uploaded FRR file, `home-ops`), policy
-   order, client groups, built-in zones and policies, WANs, the One-Click
+4. **Not in this stack, on purpose:** policy order, client groups, built-in zones and policies, WANs, the One-Click
    VPN and NordVPN clients, the guest network, firewall groups, Protect, and
    the ~90 clients without a fixed IP. Adding one is its own reviewed PR.
 5. **external-dns owns every app record.** `network/unifi-dns` writes A and
@@ -59,7 +58,11 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
     account quota; when it is spent, run tofu through `op run --env-file`
     with the owner's desktop login. `UNIFI_API_KEY` must stay unset: the
     provider prefers it, and the field of that name is a cloud key (401).
-11. **The Network app is on Early Access with daily auto-update.** The
+11. **BGP config is ignored after adoption.** The read-only role reads it back
+    empty, so `bgp.tofu` ignores `config`; `bgp.conf` is the only git copy
+    and what a recreate uploads. Changing it re-uploads FRR and resets every
+    Cilium session: lift `ignore_changes` for one reviewed apply.
+12. **The Network app is on Early Access with daily auto-update.** The
     provider drives the controller's internal API. Re-plan after every
     Network update before trusting a plan, and prefer the Official channel.
 
@@ -68,7 +71,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 | What | Path |
 |---|---|
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
-| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `ports.tofu`, `clients.tofu`, `dns.tofu` |
+| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `ports.tofu`, `clients.tofu`, `dns.tofu`, `bgp.tofu` + `bgp.conf` |
 | Adoption | `imports.tofu` (kept, inert once in state) |
 | Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
