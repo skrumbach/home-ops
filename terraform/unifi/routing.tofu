@@ -2,10 +2,10 @@
 # bonds) out through the NordVpn-Public client with a kill switch: the
 # cluster's VPN egress depends on it.
 #
-# `space-engineers` routes the whole LoadBalancer pool 10.50.0.0/24 to talos-1.
-# Cilium's BGP /32s are more specific and win, so it only catches pool IPs no
-# node announces. It is a leftover; removing it is its own change.
-# Skill `unifi-network`.
+# No static route covers the LoadBalancer pool 10.50.0.0/24: Cilium announces
+# each LB IP as a BGP /32. A pool-wide route to a node loops for every IP no
+# node announces (UDM -> node -> UDM), which the removed `space-engineers`
+# route did. Skill `unifi-network`.
 
 resource "unifi_traffic_route" "nordvpn_public" {
   description         = "NordVpn-Public"
@@ -19,17 +19,4 @@ resource "unifi_traffic_route" "nordvpn_public" {
       },
     ]
   }
-}
-
-resource "unifi_static_route" "space_engineers" {
-  distance = 1
-  enabled  = true
-  gateway = {
-    device = "60:22:32:7b:b8:45"
-    type   = "default"
-  }
-  name     = "space-engineers"
-  network  = "10.50.0.0/24"
-  next_hop = "10.10.10.11"
-  type     = "nexthop-route"
 }
