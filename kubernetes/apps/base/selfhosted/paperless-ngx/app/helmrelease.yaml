@@ -29,7 +29,11 @@ spec:
               PAPERLESS_PORT: &port 8000
               PAPERLESS_TIME_ZONE: Pacific/Auckland
               PAPERLESS_REDIS: "redis://paperless-ngx-dragonfly.selfhosted.svc.cluster.local:6379"
-              PAPERLESS_OCR_LANGUAGE: eng
+              # ~40% of the library is German (272 of 688 text documents, 2026-11-08); both ship in the image.
+              PAPERLESS_OCR_LANGUAGE: deu+eng
+              # A PDF/A archive for every document, as the pre-2026 instance had (761 of 792); the default
+              # `auto` skips born-digital PDFs.
+              PAPERLESS_ARCHIVE_FILE_GENERATION: always
               # Consumer (polling required on Ceph -- no inotify support)
               PAPERLESS_CONSUMER_POLLING: "60"
               PAPERLESS_CONSUMER_RECURSIVE: "true"
