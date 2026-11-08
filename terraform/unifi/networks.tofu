@@ -1,5 +1,5 @@
-# LAN networks on the UDM. WANs, the One-Click VPN server, the NordVPN clients
-# and the guest network are not managed here. k8s-01 is the untagged network on
+# LAN networks on the UDM, plus the guest network. WANs are in wans.tofu and the
+# One-Click VPN in vpn.tofu; the NordVPN clients stay in the UI. k8s-01 is the untagged network on
 # the Talos bonds; IoT (VLAN 3) and VPN_Network (VLAN 90) are tagged on them too.
 # Changing any of these three cuts the cluster off, and deleting a network
 # really deletes it, so the networks the cluster or the NAS ride carry
@@ -558,4 +558,58 @@ resource "unifi_network" "security_cams" {
   subnet              = "10.0.20.1/24"
   third_party_gateway = false
   vlan                = 4
+}
+
+resource "unifi_network" "guest_access" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.0.2.6"
+    stop                = "10.0.2.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "guest.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Guest [Access]"
+  network_isolation   = false
+  purpose             = "guest"
+  setting_preference  = "manual"
+  subnet              = "10.0.2.1/24"
+  third_party_gateway = false
+  vlan                = 2
 }

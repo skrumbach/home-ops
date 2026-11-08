@@ -34,7 +34,7 @@ resource "unifi_wlan" "u7_guest" {
   multicast_enhance              = true
   name                           = "U7-Guest"
   nas_identifier_type            = "bssid"
-  network_id                     = local.unmanaged_ids.guest_network
+  network_id                     = unifi_network.guest_access.id
   no2ghz_oui                     = true
   pmf_mode                       = "disabled"
   private_preshared_keys_enabled = false

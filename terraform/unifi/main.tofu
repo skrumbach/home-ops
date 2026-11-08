@@ -23,11 +23,11 @@ provider "unifi" {
   allow_insecure = true # the UDM serves a self-signed certificate
 }
 
-# Controller objects referenced here but managed elsewhere (UI defaults and the
-# unmanaged guest network).
+# Controller objects referenced here but managed in the UI (defaults and the
+# NordVPN client the traffic route uses).
 locals {
   unmanaged_ids = {
-    guest_network          = "49a124e1-8f03-4591-a1c7-f9423f99e901" # Guest [Access]
+    nordvpn_public_client  = "2fb695ac-89d1-472d-9c7d-4db719c9bfa5" # NordVpn-Public
     ap_group_all           = "8b483984-4bfa-4c92-a26c-a98843865d0e" # All APs
     user_group_default     = "63465ffb-c97c-4cb5-8a08-7885791a2cb0" # Default
     radius_profile_default = "2c2eb642-ffee-414b-bb7a-8f5d60436479" # Default

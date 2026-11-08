@@ -403,3 +403,53 @@ import {
   to = unifi_bgp.home_ops
   id = "default" # the site: BGP is a per-site singleton
 }
+
+import {
+  to = unifi_wan.internet_1
+  id = "Internet 1"
+}
+
+import {
+  to = unifi_wan.internet_2
+  id = "Internet 2"
+}
+
+import {
+  to = unifi_vpn_server.one_click_vpn
+  id = "name=One-Click VPN"
+}
+
+import {
+  to = unifi_traffic_route.nordvpn_public
+  id = "64643769-18e0-4bcb-8472-712605cfd9c0"
+}
+
+import {
+  to = unifi_static_route.space_engineers
+  id = "0594253d-b17d-4277-a040-795c3ff5b79e"
+}
+
+import {
+  to = unifi_setting.site
+  id = "default"
+}
+
+import {
+  to = unifi_firewall_group.talos
+  id = "3f2eff1f-a448-4906-a69f-f82ea6d8b24e"
+}
+
+import {
+  to = unifi_firewall_group.home_ops_lb
+  id = "c2950cc6-5e59-4b3f-90e9-447ee402c42d"
+}
+
+import {
+  to = unifi_firewall_group.home_ops_pod_cidr
+  id = "bfcf4f31-f08e-4b04-aaa4-5c4bc24f2ad6"
+}
+
+import {
+  to = unifi_network.guest_access
+  id = "name=Guest [Access]"
+}
