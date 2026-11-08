@@ -425,18 +425,8 @@ import {
 }
 
 import {
-  to = unifi_static_route.space_engineers
-  id = "0594253d-b17d-4277-a040-795c3ff5b79e"
-}
-
-import {
   to = unifi_setting.site
   id = "default"
-}
-
-import {
-  to = unifi_firewall_group.talos
-  id = "3f2eff1f-a448-4906-a69f-f82ea6d8b24e"
 }
 
 import {

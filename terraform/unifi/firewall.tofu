@@ -1101,13 +1101,7 @@ resource "unifi_firewall_policy" "allow_pods_to_internal_gateway" {
   }
 }
 
-# Address groups. Nothing in firewall.tofu references them. `Talos` still holds
-# the old 10.10.3.x node addresses (the layout before k8s-01).
-resource "unifi_firewall_group" "talos" {
-  members = ["10.10.3.11", "10.10.3.12", "10.10.3.13"]
-  name    = "Talos"
-  type    = "address-group"
-}
+# Address groups. Nothing in firewall.tofu references them.
 
 resource "unifi_firewall_group" "home_ops_lb" {
   members = ["10.50.0.0/24"]
