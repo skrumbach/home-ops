@@ -9,7 +9,7 @@ description: "Read before touching terraform/unifi/ or the UDM Pro SE: UniFi net
 Network app 11.x) with the `ubiquiti-community/unifi` provider. Flux does not
 reconcile it, and nothing in CI applies it. It was adopted read-only on
 2026-11-07 with terrifi and moved to ubiquiti-community on 2026-11-08
-(`migration.tofu`: terrifi objects forgotten, the same objects imported).
+(terrifi objects forgotten, the same objects imported, no controller write).
 
 ## Tripwires
 
@@ -21,16 +21,18 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 2. **Some objects carry the cluster.** `k8s-01` (VLAN 1010, untagged on the
    Talos bonds), `IoT [Devices]` (VLAN 3) and `VPN_Network` (VLAN 90), both
    tagged on the bonds (`talos/nodes/*.yaml.j2`), the `MS01-0x` reservations,
-   the `k8s*` / `Allow-Pods-*` policies, the `k8s-01` zone and Pro Max 48
-   port 49 (the uplink LAG). A plan line touching any of these needs a reason
-   before anything else. Nothing is published from the WAN (no port
+   the `k8s*` / `Allow-Pods-*` policies, the `k8s-01` zone, the Talos bond
+   ports (Aggregation 5, 7, 9) and Pro Max 48 port 49 (the uplink LAG). A plan
+   line touching any of these needs a reason before anything else. The bonds
+   use `custom` VLAN mode: every network not in `excluded_networkconf_ids` is
+   tagged on them, so a new network lands on the Talos nodes unless it is
+   added to that list. Nothing is published from the WAN (no port
    forwards, no LAN IPv6), so an ALLOW from `external` is a finding.
 3. **Deletes differ by resource.** Removing a `unifi_device_port` only stops
    managing the port. Removing a `unifi_network` deletes the network
    (cluster networks carry `prevent_destroy`), and removing a `unifi_client`
    makes the controller forget the client.
-4. **Not in this stack, on purpose:** the Talos bonds, Aggregation 11 and
-   15+16, the disabled ports, BGP (an uploaded FRR file, `home-ops`), policy
+4. **Not in this stack, on purpose:** BGP (an uploaded FRR file, `home-ops`), policy
    order, client groups, built-in zones and policies, WANs, the One-Click
    VPN and NordVPN clients, the guest network, firewall groups, Protect, and
    the ~90 clients without a fixed IP. Adding one is its own reviewed PR.
@@ -67,7 +69,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 |---|---|
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
 | Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `ports.tofu`, `clients.tofu`, `dns.tofu` |
-| Adoption | `imports.tofu` (kept, inert once in state), `migration.tofu` (one-time) |
+| Adoption | `imports.tofu` (kept, inert once in state) |
 | Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
 

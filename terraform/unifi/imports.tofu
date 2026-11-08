@@ -358,3 +358,43 @@ import {
   to = unifi_device_port.usw_pro_aggregation_port_13
   id = "28:70:4e:5b:41:2b/13"
 }
+
+import {
+  to = unifi_device_port.usw_pro_aggregation_port_5
+  id = "28:70:4e:5b:41:2b/5"
+}
+
+import {
+  to = unifi_device_port.usw_pro_aggregation_port_7
+  id = "28:70:4e:5b:41:2b/7"
+}
+
+import {
+  to = unifi_device_port.usw_pro_aggregation_port_9
+  id = "28:70:4e:5b:41:2b/9"
+}
+
+import {
+  to = unifi_device_port.usw_pro_aggregation_port_11
+  id = "28:70:4e:5b:41:2b/11"
+}
+
+import {
+  to = unifi_device_port.usw_pro_aggregation_port_15
+  id = "28:70:4e:5b:41:2b/15"
+}
+
+import {
+  to = unifi_device_port.usw_pro_max_48_port_34
+  id = "9c:05:d6:af:79:45/34"
+}
+
+import {
+  to = unifi_device_port.usw_pro_max_48_port_36
+  id = "9c:05:d6:af:79:45/36"
+}
+
+import {
+  to = unifi_device_port.usw_pro_max_48_port_38
+  id = "9c:05:d6:af:79:45/38"
+}

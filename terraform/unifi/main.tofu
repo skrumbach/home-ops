@@ -1,7 +1,7 @@
 # Provider wiring for the UDM Pro SE (Network app 11.x).
 #
 # Credentials never live in this tree. UNIFI_USERNAME and UNIFI_PASSWORD come
-# from 1Password through `vals` (secrets.vals.yaml) and both providers read
+# from 1Password through `vals` (secrets.vals.yaml) and the provider reads
 # them from the environment. UNIFI_API_KEY must stay unset: the provider
 # prefers it, and the 1Password field of that name is a cloud key that
 # returns 401 on the console. Skill `unifi-network`.
@@ -15,22 +15,12 @@ terraform {
       # 0.x: every minor can change a schema. Renovate opens a PR; no automerge.
       version = "0.65.0"
     }
-    # Only for the removed blocks in migration.tofu; drop it with that file.
-    terrifi = {
-      source  = "alexklibisz/terrifi"
-      version = "~> 0.12.0"
-    }
   }
 }
 
 provider "unifi" {
   api_url        = var.unifi_url
   allow_insecure = true # the UDM serves a self-signed certificate
-}
-
-provider "terrifi" {
-  api_url        = var.unifi_url
-  allow_insecure = true
 }
 
 # Controller objects referenced here but managed elsewhere (UI defaults and the
