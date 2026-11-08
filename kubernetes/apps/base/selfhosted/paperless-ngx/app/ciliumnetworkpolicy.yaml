@@ -5,7 +5,7 @@ kind: CiliumNetworkPolicy
 metadata:
   name: paperless-ngx
 spec:
-  # Ingress fence only: egress (postgres-18, dragonfly, LiteLLM, Authentik via envoy-internal, DNS) stays open. Skill `networking`.
+  # Ingress fence only: egress (postgres-18, dragonfly, LiteLLM, Authentik via envoy-external, DNS) stays open. Skill `networking`.
   # Each of those peers is also admitted on ingress with no toPorts, for its replies (cilium/cilium#47913).
   # The controller label keeps the operator-managed paperless-ngx-dragonfly pods out of this selector.
   endpointSelector:
@@ -40,14 +40,19 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: database
             cnpg.io/cluster: postgres-18
-    # Replies from envoy-internal to Paperless' own calls through it: the Authentik OIDC discovery and
-    # token requests (auth.${SECRET_DOMAIN}). No toPorts: the reply lands on an ephemeral port. Supersedes
-    # the :8000 rule above for these pods; that rule stays as the documented route path.
+    # Replies to Paperless' own calls through the gateways: the Authentik OIDC discovery, token and
+    # userinfo requests. auth.${SECRET_DOMAIN} resolves to external.${SECRET_DOMAIN}, the envoy-external
+    # LoadBalancer, so admitting only envoy-internal timed out the SSO login whenever the serving
+    # envoy-external pod shared Paperless' node. Both gateways, so a DNS change cannot reopen it. No
+    # toPorts: the reply lands on an ephemeral port. Supersedes the :8000 rule above for envoy-internal.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
             gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-external
     # AI backend (PAPERLESS_AI_LLM_ENDPOINT ai/litellm:4000), for its replies.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
