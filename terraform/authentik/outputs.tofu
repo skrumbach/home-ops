@@ -41,3 +41,11 @@ output "renovate_operator_session_secret" {
   value       = random_password.renovate_operator_session_secret.result
   sensitive   = true
 }
+
+# Generated Paperless-ngx client secret. Copy once into 1Password Homelab/paperless-oidc (field
+# client-secret). Skill `authentik-terraform` references/apply-runbook.md.
+output "paperless_client_secret" {
+  description = "OAuth2 client_secret generated for the Paperless-ngx provider"
+  value       = random_password.paperless_client_secret.result
+  sensitive   = true
+}

@@ -72,6 +72,12 @@ spec:
               # b70-llm-serving.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "384"
               PAPERLESS_WEBSERVER_WORKERS: "2"
+              # Authentik SSO; the provider JSON with the client secret is in paperless-ngx-secret. SSO users
+              # are signed up on first login with no permissions; grant them in Paperless. The password
+              # form stays as break-glass until the admin account is linked (Profile > Connect).
+              PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"
+              PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
               # Office documents (.docx/.xlsx/.doc/.odt/.rtf) and e-mail (.eml) go through the tika and
               # gotenberg sidecars below, over localhost (no Service, no network policy change).
               PAPERLESS_TIKA_ENABLED: "true"

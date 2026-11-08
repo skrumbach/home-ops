@@ -139,6 +139,9 @@ CREATED_RESOURCE_ADDRS = frozenset(
         "authentik_application.renovate_operator",
         "random_password.renovate_operator_client_secret",
         "random_password.renovate_operator_session_secret",
+        "authentik_provider_oauth2.paperless",
+        "authentik_application.paperless",
+        "random_password.paperless_client_secret",
     }
 )
 
@@ -555,6 +558,22 @@ def test_stack_hcl_model() -> dict[str, Any]:
                 raise Failure("created renovate_operator provider must declare grant_types")
             if "/auth/callback" not in json.dumps(block.get("allowed_redirect_uris") or []):
                 raise Failure("renovate_operator redirect URI must end with /auth/callback")
+            continue
+        if name == "paperless":
+            # Created confidential client: generated secret, literal client_id, explicit grants.
+            if "client_secret" not in block:
+                raise Failure("paperless provider must declare generated client_secret")
+            grants = [_strip_quotes(str(g)) for g in block.get("grant_types") or []]
+            if "authorization_code" not in grants:
+                raise Failure(
+                    f"created paperless provider must declare grant_types authorization_code, got {grants!r}"
+                )
+            if "/accounts/oidc/authentik/login/callback/" not in json.dumps(
+                block.get("allowed_redirect_uris") or []
+            ):
+                raise Failure(
+                    "paperless redirect URI must be allauth's /accounts/oidc/authentik/login/callback/"
+                )
             continue
         if name == "home_assistant":
             # Created public client (PKCE): no secret, grant_types explicit.
