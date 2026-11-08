@@ -16,13 +16,14 @@ Host firewall policy is skill `cilium-host-policy`. ExtAuth ownership is skill
 1. **The DNS target comes from the parent Gateway.** For the
    `gateway-httproute` source, `external-dns.kubernetes.io/target` on the
    HTTPRoute does not decide the record. A route on both envoy gateways yields
-   both targets, and the UniFi webhook keeps the first. Route-level targets
-   that match their Gateway are documentation.
+   both targets, sorted, and the UniFi webhook keeps the first: on the LAN it
+   resolves to `external`. Route-level targets that match their Gateway are
+   documentation.
 2. **A record with no TXT twin is hand-made.** Every record
    `network/unifi-dns` manages has a `k8s.main.<type>-<name>.${SECRET_DOMAIN}`
-   TXT twin. external-dns will not update or delete a record that lacks one.
-   The LAN wildcard `*.${SECRET_DOMAIN}` -> `10.50.0.27` is hand-made, which
-   is why unclaimed names hit the AI gateway. [dns-ownership.md](references/dns-ownership.md)
+   TXT twin. external-dns will not update or delete a record that lacks one;
+   delete the hand-made record and it recreates an owned one within a minute.
+   [dns-ownership.md](references/dns-ownership.md)
 3. **A NetworkPolicy `ports:` entry matches the destination port on the
    protected pod.** A DNS reply arrives on the querier's ephemeral port, never
    53, so `port: 53` cannot admit it. Drop the `ports:` restriction on the

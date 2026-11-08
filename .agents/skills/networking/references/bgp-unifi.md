@@ -48,9 +48,9 @@ FRR commands, not Cisco: `show bgp summary`, `show bgp ipv4 unicast`,
 | `10.50.0.121` | kube-api |
 
 `10.50.0.27` and `10.50.0.29` were agentgateway's and are free since it was
-retired (2026-10-25). The hand-made UniFi wildcard `*.${SECRET_DOMAIN}` that
-targeted `10.50.0.27` now points at an unassigned address; repoint it to
-`envoy-internal` (`10.50.0.26`) or remove it. `10.50.0.28` is not pinned.
+retired (2026-10-25); the UniFi wildcard that targeted `10.50.0.27` is gone.
+No static route covers the pool: an IP no node announces is unrouted.
+`10.50.0.28` is not pinned.
 `10.50.0.24` was falkordb's and is free (retired 2026-11-01).
 
 Node underlay (Talos, not this skill's files): `bond0` 802.3ad MTU 9000,
