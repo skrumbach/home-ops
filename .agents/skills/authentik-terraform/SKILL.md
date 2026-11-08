@@ -19,8 +19,9 @@ outpost. `postgresql.enabled: false`; the DB is `postgres-18`.
 1. **`tofu apply` and `tofu destroy` need an explicit, current go-ahead.**
    A green PR, a clean plan and a passing `terraform-diff` are not that
    approval. Apply a saved plan from `secrets-apply.vals.yaml`. Never a bare
-   `tofu apply`. `AUTHENTIK_APPLY_TOKEN` stays absent from 1Password until
-   that go-ahead, so a stray apply fails closed.
+   `tofu apply`. Two durable tokens, as in `terraform/unifi`: the read-only
+   `AUTHENTIK_TOKEN` (403 on writes, so a stray apply fails closed) and the
+   write `AUTHENTIK_APPLY_TOKEN`, read only by `secrets-apply.vals.yaml`.
    [apply-runbook.md](references/apply-runbook.md)
 2. **Four traps `tofu validate` cannot see.**
    - Omitting `grant_types` is correct on an imported provider and fatal on a

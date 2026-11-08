@@ -32,7 +32,7 @@ regenerating a key.
 | Field | Who uses it | Scope |
 |---|---|---|
 | `AUTHENTIK_TOKEN` | `secrets.vals.yaml` review plans | `tofu-readonly`, view-only, writes 403 |
-| `AUTHENTIK_APPLY_TOKEN` | `secrets-apply.vals.yaml` only, absent until go-ahead | `tofu-writer`, no delete, model-level `change_flow` on every flow |
+| `AUTHENTIK_APPLY_TOKEN` | `secrets-apply.vals.yaml` only, durable (the `terraform/unifi` model); used only after a go-ahead | `tofu-writer`, no delete, model-level `change_flow` on every flow |
 | `OP_CONNECT_TOKEN` | GitHub Actions secret for `terraform-diff` | 1Password Connect bearer for the whole Automation vault |
 
 `OP_CONNECT_TOKEN` is not an item grant. Connect tokens are per-vault. This
