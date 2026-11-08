@@ -1,7 +1,7 @@
 # OpenTofu conventions
 
 Flux owns Kubernetes objects. OpenTofu owns state inside an application's API.
-Stacks: `terraform/authentik/` and `terraform/unifi/` (skill `unifi-network`).
+Stacks: `terraform/authentik/`, `terraform/unifi/` (skill `unifi-network`) and `terraform/truenas/` (skill `truenas-nas`).
 
 | File | Role |
 |---|---|
