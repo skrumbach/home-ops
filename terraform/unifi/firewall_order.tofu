@@ -31,23 +31,3 @@ resource "terrifi_firewall_policy_order" "k8s_01_to_external" {
     terrifi_firewall_policy.block_traffic_to_104_21_48_100.id,
   ]
 }
-
-resource "terrifi_firewall_policy_order" "internal_to_server_talos" {
-  source_zone_id      = local.builtin_zone_ids.internal
-  destination_zone_id = terrifi_firewall_zone.server_talos.id
-  policy_ids = [
-    terrifi_firewall_policy.aviator.id,
-    terrifi_firewall_policy.allow_bgp.id,
-    terrifi_firewall_policy.allow_all_3.id,
-  ]
-}
-
-resource "terrifi_firewall_policy_order" "internal_to_server_private" {
-  source_zone_id      = local.builtin_zone_ids.internal
-  destination_zone_id = terrifi_firewall_zone.server_private.id
-  policy_ids = [
-    terrifi_firewall_policy.aviator_s_pc.id,
-    terrifi_firewall_policy.pxe.id,
-    terrifi_firewall_policy.allow_all_nas.id,
-  ]
-}

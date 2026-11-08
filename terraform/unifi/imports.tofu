@@ -83,16 +83,6 @@ import {
 }
 
 import {
-  to = terrifi_firewall_zone.server_talos
-  id = "58669e45-e29e-48ce-a699-7a05dca7ac82"
-}
-
-import {
-  to = terrifi_firewall_zone.vpn
-  id = "f1c29eb8-1b2f-4068-a8d9-2bb46c9df3ef"
-}
-
-import {
   to = terrifi_firewall_zone.vpn_network
   id = "627ac57b-b670-4588-8dc1-a80a8d1427cb"
 }
@@ -125,51 +115,6 @@ import {
 import {
   to = terrifi_firewall_policy.vpn_allow_server
   id = "88e71652-7f95-4457-ae6e-a58351709455"
-}
-
-import {
-  to = terrifi_firewall_policy.pxe
-  id = "0746563e-2919-4b70-a12a-7a74f8f6880b"
-}
-
-import {
-  to = terrifi_firewall_policy.aviator
-  id = "a4524ddd-76cf-40be-aa06-7841bcc0a07c"
-}
-
-import {
-  to = terrifi_firewall_policy.nas
-  id = "16d5450c-f651-4c89-8596-1524470f5503"
-}
-
-import {
-  to = terrifi_firewall_policy.vpn_allow
-  id = "7da1aa26-b732-422a-b029-6affa7cba446"
-}
-
-import {
-  to = terrifi_firewall_policy.nas_allow_all
-  id = "df1a22de-6f5f-4704-9771-5c4f933376ff"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_all_nas
-  id = "51755811-3e41-407d-95aa-48b01b037cc5"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_bgp
-  id = "188ebe23-4ff7-4403-b314-d66b590a9c9f"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_all_3
-  id = "201756c1-1c33-424b-bd1f-a1491e401af6"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_all_talos
-  id = "8ac52bd5-e585-456a-bc2e-873c74a0ebae"
 }
 
 import {
@@ -230,11 +175,6 @@ import {
 import {
   to = terrifi_firewall_policy.k8s_loadbalancer
   id = "f1259377-6ee6-416e-92a4-117cb06490fd"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_iot
-  id = "111bf134-b3ed-4a87-90c7-afa01dc5f8bc"
 }
 
 import {
@@ -395,16 +335,6 @@ import {
 import {
   to = terrifi_firewall_policy_order.k8s_01_to_external
   id = "99e31282-ef3a-41c9-b516-8226ab2c65b1:ac40fe17-3454-4085-924e-25584b09948a"
-}
-
-import {
-  to = terrifi_firewall_policy_order.internal_to_server_talos
-  id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:58669e45-e29e-48ce-a699-7a05dca7ac82"
-}
-
-import {
-  to = terrifi_firewall_policy_order.internal_to_server_private
-  id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:0993a852-a466-46f2-a438-a3b17c08ce41"
 }
 
 import {
