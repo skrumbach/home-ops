@@ -4,16 +4,6 @@
 # apply rewrites each order to the list below, which is the controller's
 # current order as of 2026-11-07. Skill `unifi-network`.
 
-resource "terrifi_firewall_policy_order" "external_to_k8s_01" {
-  source_zone_id      = local.builtin_zone_ids.external
-  destination_zone_id = terrifi_firewall_zone.k8s_01.id
-  policy_ids = [
-    terrifi_firewall_policy.allow_bgp_4.id,
-    terrifi_firewall_policy.test.id,
-    terrifi_firewall_policy.block_traffic_from_104_21_48_100.id,
-  ]
-}
-
 resource "terrifi_firewall_policy_order" "internal_to_k8s_01" {
   source_zone_id      = local.builtin_zone_ids.internal
   destination_zone_id = terrifi_firewall_zone.k8s_01.id

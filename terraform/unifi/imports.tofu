@@ -163,16 +163,6 @@ import {
 }
 
 import {
-  to = terrifi_firewall_policy.allow_bgp_2
-  id = "ef858d94-14a9-4c55-8b88-4dc6b0c993b7"
-}
-
-import {
-  to = terrifi_firewall_policy.allow_bgp_3
-  id = "1b8abf65-580c-4726-843b-5f8e4532a38d"
-}
-
-import {
   to = terrifi_firewall_policy.allow_all_3
   id = "201756c1-1c33-424b-bd1f-a1491e401af6"
 }
@@ -203,11 +193,6 @@ import {
 }
 
 import {
-  to = terrifi_firewall_policy.allow_bgp_4
-  id = "4443a63f-79e6-46bc-9868-ada75e570aa9"
-}
-
-import {
   to = terrifi_firewall_policy.all
   id = "9cfdf807-0a9c-45c8-9de7-fb4cf395fac2"
 }
@@ -225,16 +210,6 @@ import {
 import {
   to = terrifi_firewall_policy.allow_pods_to_external_gateway
   id = "076ca585-966c-4e26-a04b-87f9ee0de182"
-}
-
-import {
-  to = terrifi_firewall_policy.test
-  id = "0fef9229-c84a-44a8-91b4-3ab4ef7114f5"
-}
-
-import {
-  to = terrifi_firewall_policy.space_engineers
-  id = "74fe42de-f607-4a36-a236-aa10367a9c0b"
 }
 
 import {
@@ -405,11 +380,6 @@ import {
 import {
   to = terrifi_dns_record.pbs_server_sklab_dev
   id = "270125bd-024d-4a0d-b67a-717c330d973c"
-}
-
-import {
-  to = terrifi_firewall_policy_order.external_to_k8s_01
-  id = "ac40fe17-3454-4085-924e-25584b09948a:99e31282-ef3a-41c9-b516-8226ab2c65b1"
 }
 
 import {

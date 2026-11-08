@@ -20,9 +20,10 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 2. **Some objects carry the cluster.** `k8s-01` (VLAN 1010, untagged on the
    Talos bonds), `IoT [Devices]` (VLAN 3) and `VPN_Network` (VLAN 90), both
    tagged on the bonds (`talos/nodes/*.yaml.j2`), the `MS01-0x` reservations,
-   the `allow_bgp*` / `k8s*` / `Allow-Pods-*` policies and the `Server [Talos]`
-   / `k8s-01` zones. A plan line touching any of these needs a reason before
-   anything else.
+   the `k8s*` / `Allow-Pods-*` policies and the `k8s-01` zone. A plan line
+   touching any of these needs a reason before anything else. Nothing is
+   published from the WAN (no port forwards, no LAN IPv6), so an ALLOW from
+   `external` is a finding, not drift (four were removed 2026-11-08).
 3. **Not in this stack, on purpose:** the Talos bonds (Aggregation LAGs 5+6,
    7+8, 9+10: inline `custom` VLAN mode, which terrifi device_ports cannot
    represent yet), Aggregation 15+16, disabled ports, BGP (an
@@ -74,15 +75,16 @@ outside the cluster, with S3-native locking. OpenTofu encrypts state and plan
 files client-side (pbkdf2 + aes_gcm, `enforced`) with `TF_STATE_PASSPHRASE`;
 losing that passphrase means a fresh state rebuilt from `imports.tofu`.
 `AWS_ENDPOINT_URL_S3` must resolve, or the S3 backend dials real AWS. The
-1Password items need `env -u OP_SERVICE_ACCOUNT_TOKEN` when a service-account
-token is exported in the shell.
+`Automation` vault is readable only through the token `mise exec` loads;
+a token already exported in the shell may see only `Home-Lab` (`no vault
+matched`), so unset it and run vals under `mise exec`.
 
 ## Plan
 
 ```bash
 cd terraform/unifi
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu init
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu plan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets.vals.yaml -- tofu init
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets.vals.yaml -- tofu plan
 ```
 
 ## Apply (go-ahead only)
@@ -90,9 +92,9 @@ env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu plan
 From a wired machine. The plan file is encrypted and gitignored (`*.tfplan`).
 
 ```bash
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=unifi.tfplan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=unifi.tfplan
 # read it: only the changes that were approved, nothing on the objects in tripwire 2
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu apply unifi.tfplan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets-apply.vals.yaml -- tofu apply unifi.tfplan
 rm unifi.tfplan
 ```
 
