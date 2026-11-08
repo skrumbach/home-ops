@@ -7,7 +7,10 @@ forward-auth provider every ExtAuth SecurityPolicy uses.
 
 1. The review plan (read-only token, no `-out`) shows zero destroys and only
    the change this commit declares. A create or destroy of an object that
-   already lives on the instance is a bug in the stack.
+   already lives on the instance is a bug in the stack. Expected noise: every
+   created provider shows `+ client_secret = (sensitive value)` in place. The
+   read-only role cannot read client secrets, so apply re-writes the same
+   generated value (the `random_password` is unchanged), no rotation.
 2. A second person has read the diff on
    `authentik_provider_proxy.forward_auth` and its outpost attachment.
 3. A second browser session is already logged into `auth.${SECRET_DOMAIN}` as
@@ -18,8 +21,10 @@ forward-auth provider every ExtAuth SecurityPolicy uses.
 returns 403 on writes. Do not put the write token in that field. File keys
 beat an exported `TF_VAR_`, so an override in the shell does not swap tokens.
 
-`secrets-apply.vals.yaml` reads `AUTHENTIK_APPLY_TOKEN`. That 1Password field
-is absent until approval. OpenTofu refuses to apply a saved plan whose
+`secrets-apply.vals.yaml` reads `AUTHENTIK_APPLY_TOKEN`, a durable token for the
+`tofu-writer` user kept in 1Password next to the read token (the
+`terraform/unifi` model). The go-ahead, not the token's absence, is the
+control. OpenTofu refuses to apply a saved plan whose
 `TF_VAR_*` values differ from the plan, so the `-out` plan and the apply use
 the same vals file.
 
@@ -31,21 +36,18 @@ cd terraform/authentik
 # 1. Review plan. Approval is granted against this output. It cannot be applied.
 vals exec -i -f secrets.vals.yaml -- tofu plan
 
-# 2. After an explicit go-ahead, place the write token in
-#    Automation/authentik-terraform AUTHENTIK_APPLY_TOKEN.
-
-# 3. Re-plan with -out. Confirm it matches the approved review plan.
+# 2. After an explicit go-ahead, re-plan with -out. Confirm it matches the
+#    approved review plan.
 vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=authentik.tfplan
 
-# 4. Apply that file. Never a bare `tofu apply`.
+# 3. Apply that file. Never a bare `tofu apply`.
 vals exec -i -f secrets-apply.vals.yaml -- tofu apply authentik.tfplan
 
-# 5. Remove the plan and the apply token.
+# 4. Remove the plan.
 rm -f authentik.tfplan
 ```
 
-Remove `AUTHENTIK_APPLY_TOKEN` from 1Password immediately after. The write
-role can `change_flow` on every flow. Compare a before/after snapshot of
+The write role can `change_flow` on every flow. Compare a before/after snapshot of
 flows and stage bindings taken from the database, not Terraform's summary.
 
 Then confirm ExtAuth still redirects and the server pod is Ready.

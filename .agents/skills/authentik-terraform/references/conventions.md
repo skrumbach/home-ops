@@ -12,7 +12,7 @@ Stacks: `terraform/authentik/`, `terraform/unifi/` (skill `unifi-network`) and `
 | `imports.tofu` | adopt live objects |
 | `secrets.vals.yaml` | `ref+op://` for plan/init. Plain `AWS_ENDPOINT_URL_S3` is the non-secret exception |
 | `secrets-ci.vals.yaml` | `ref+onepasswordconnect://` mirror. Absent means schema-only CI |
-| `secrets-apply.vals.yaml` | apply token. Field absent until go-ahead |
+| `secrets-apply.vals.yaml` | durable `tofu-writer` apply token; used only after a go-ahead |
 | `*.tofu` | resources, grouped by subject |
 
 `.tofu`, not `.tf`. Two-space indent. Resource names are singular nouns
