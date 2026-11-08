@@ -24,3 +24,9 @@ variable "wlan_passphrase_secure" {
   description = "WPA passphrase of the U7-Secure SSID"
   sensitive   = true
 }
+
+variable "state_passphrase" {
+  type        = string
+  description = "Passphrase for OpenTofu state and plan encryption (pbkdf2, aes_gcm). 1Password owns it; losing it means rebuilding state from imports.tofu."
+  sensitive   = true
+}

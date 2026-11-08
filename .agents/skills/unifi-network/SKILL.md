@@ -55,15 +55,19 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 
 | What | Path |
 |---|---|
-| Provider, backend, inputs | `main.tofu`, `backend.tofu` (local state), `variables.tofu` |
+| Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
 | Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `clients.tofu`, `dns.tofu` |
 | Adoption | `imports.tofu` (kept, inert once in state) |
-| Plan env | `secrets.vals.yaml` (`ref+op://Automation/unifi-terraform/*`) |
+| Plan env | `secrets.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
 
-State is local and gitignored until the R2 backend lands; the 1Password
-items need `env -u OP_SERVICE_ACCOUNT_TOKEN` when a service-account token is
-exported in the shell.
+State is `unifi/terraform.tfstate` in the R2 bucket `home-ops-tfstate`,
+outside the cluster, with S3-native locking. OpenTofu encrypts state and plan
+files client-side (pbkdf2 + aes_gcm, `enforced`) with `TF_STATE_PASSPHRASE`;
+losing that passphrase means a fresh state rebuilt from `imports.tofu`.
+`AWS_ENDPOINT_URL_S3` must resolve, or the S3 backend dials real AWS. The
+1Password items need `env -u OP_SERVICE_ACCOUNT_TOKEN` when a service-account
+token is exported in the shell.
 
 ## Plan
 
