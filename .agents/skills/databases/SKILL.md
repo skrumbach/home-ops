@@ -1,6 +1,6 @@
 ---
 name: databases
-description: "Read before editing kubernetes/apps/base/database/** (surrealdb, cloudnative-pg including offsite-mirror, emqx) or the dragonfly component, changing a database's memory or durability flags, or bumping a database operator. Covers one barman destination per CNPG Cluster, and crash-consistent snapshots needing fsync-level durability."
+description: "Read before editing kubernetes/apps/base/database/** (surrealdb, cloudnative-pg including offsite-mirror, emqx) or the dragonfly component, recovering EMQX after a power loss, changing a database's memory or durability flags, or bumping a database operator. Covers one barman destination per CNPG Cluster, and crash-consistent snapshots needing fsync-level durability."
 ---
 
 # Databases: SurrealDB, CloudNativePG, EMQX, Dragonfly
@@ -56,7 +56,7 @@ image, scrape-target count).
 
 - SurrealDB replica and chart traps: [surrealdb.md](references/surrealdb.md).
 - CNPG backup, restore, labels: [cnpg.md](references/cnpg.md).
-- EMQX pin and clients: [emqx.md](references/emqx.md).
+- EMQX pin, clients, and recovery when both cores lost power: [emqx.md](references/emqx.md).
 - Dragonfly consumers and cache policy: [dragonfly.md](references/dragonfly.md).
 - Retired FalkorDB and DuckLake: what was kept, how to delete it, revival rules: [retired.md](references/retired.md).
 
