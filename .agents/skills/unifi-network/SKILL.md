@@ -26,15 +26,19 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
    line touching any of these needs a reason before anything else. The bonds
    use `custom` VLAN mode: every network not in `excluded_networkconf_ids` is
    tagged on them, so a new network lands on the Talos nodes unless it is
-   added to that list. Nothing is published from the WAN (no port
+   added to that list. Also the WANs (`wans.tofu`), the traffic route that
+   sends VPN_Network out through NordVPN with a kill switch (`routing.tofu`),
+   and jumbo frames in `settings.tofu` (the bonds run MTU 9000). Nothing is published from the WAN (no port
    forwards, no LAN IPv6), so an ALLOW from `external` is a finding.
 3. **Deletes differ by resource.** Removing a `unifi_device_port` only stops
    managing the port. Removing a `unifi_network` deletes the network
    (cluster networks carry `prevent_destroy`), and removing a `unifi_client`
    makes the controller forget the client.
-4. **Not in this stack, on purpose:** policy order, client groups, built-in zones and policies, WANs, the One-Click
-   VPN and NordVPN clients, the guest network, firewall groups, Protect, and
-   the ~90 clients without a fixed IP. Adding one is its own reviewed PR.
+4. **Not in this stack, on purpose:** policy order, client groups, built-in
+   zones and policies, the NordVPN clients (the provider models WireGuard
+   only, and their peers are vendor configs), the One-Click VPN private key
+   (setting it rotates the key), Protect, and the ~90 clients without a fixed
+   IP. Adding one is its own reviewed PR.
 5. **external-dns owns every app record.** `network/unifi-dns` writes A and
    CNAME records plus `k8s.main.*` TXT ownership records. `dns.tofu` holds
    only records nothing in the cluster owns. Declaring an app record makes
@@ -71,7 +75,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 | What | Path |
 |---|---|
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
-| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `ports.tofu`, `clients.tofu`, `dns.tofu`, `bgp.tofu` + `bgp.conf` |
+| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu` (+ address groups), `ports.tofu`, `clients.tofu`, `dns.tofu`, `bgp.tofu` + `bgp.conf`, `wans.tofu`, `vpn.tofu`, `routing.tofu`, `settings.tofu` |
 | Adoption | `imports.tofu` (kept, inert once in state) |
 | Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
@@ -108,7 +112,7 @@ Afterwards the read-only plan shows `No changes`.
 
 ## Adopt another object
 
-Write an import block (networks and WLANs as `name=<name>`, ports as
+Write an import block (networks, WLANs, VPN clients and servers as `name=<name>`, WANs by bare name, settings and BGP as `default`, ports as
 `<switch mac>/<index>`, clients by MAC, the rest by ID), then let OpenTofu
 write the resource in a scratch copy of the stack, outside the repo:
 

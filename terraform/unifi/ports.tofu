@@ -459,7 +459,7 @@ resource "unifi_device_port" "usw_pro_aggregation_port_5" {
   aggregate_members        = [5, 6]
   autoneg                  = true
   device_mac               = "28:70:4e:5b:41:2b"
-  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, local.unmanaged_ids.guest_network, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
+  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, unifi_network.guest_access.id, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
   forward                  = "customize"
   index                    = 5
   name                     = "SFP+ 5"
@@ -482,7 +482,7 @@ resource "unifi_device_port" "usw_pro_aggregation_port_7" {
   aggregate_members        = [7, 8]
   autoneg                  = true
   device_mac               = "28:70:4e:5b:41:2b"
-  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, local.unmanaged_ids.guest_network, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
+  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, unifi_network.guest_access.id, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
   forward                  = "customize"
   index                    = 7
   name                     = "SFP+ 7"
@@ -505,7 +505,7 @@ resource "unifi_device_port" "usw_pro_aggregation_port_9" {
   aggregate_members        = [9, 10]
   autoneg                  = false
   device_mac               = "28:70:4e:5b:41:2b"
-  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, local.unmanaged_ids.guest_network, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
+  excluded_networkconf_ids = [unifi_network.home_ops_pods.id, unifi_network.guest_access.id, unifi_network.unifi_managment.id, unifi_network.managment.id, unifi_network.home_ops_lb.id, unifi_network.home_default.id, unifi_network.security_cams.id, unifi_network.server_private.id]
   forward                  = "customize"
   full_duplex              = true
   index                    = 9
