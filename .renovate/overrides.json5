@@ -84,6 +84,23 @@
       allowedVersions: "<5.9.0",
     },
     {
+      // Paperless-ngx 3.4.2's gotenberg-client 1.0.0 still calls /forms/pdfengines/* and the pdfa field that
+      // Gotenberg 9 removed (paperless-ngx/paperless-ngx#14702); upstream compose pins 8.38. Lift with Paperless.
+      description: "Hold Gotenberg on major 8 until Paperless-ngx supports 9",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["docker.io/gotenberg/gotenberg"],
+      allowedVersions: "<9.0.0",
+    },
+    {
+      // Tika 4 removed /tika/form/* and renamed the metadata keys; Paperless-ngx's tika-client does not support it
+      // (paperless-ngx/paperless-ngx#13755); upstream compose pins 3.3.1.0. A regex, because 3.x tags have four
+      // parts and 4.x three, which the default docker versioning cannot order. Lift with Paperless.
+      description: "Hold Apache Tika on major 3 until Paperless-ngx supports 4",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["docker.io/apache/tika"],
+      allowedVersions: "/^3\\./",
+    },
+    {
       // 2.x is untested against the ToolHive vmcp gateway; lift this after a test. Skill `ai-stack`.
       description: "Keep github-mcp-server on major 1",
       matchDatasources: ["docker"],
