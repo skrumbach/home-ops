@@ -188,11 +188,15 @@ spec:
     route:
       app:
         annotations:
+          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
+          # login page. Probe the frontend Service in-cluster instead. Skill observability.
           gatus.home-operations.com/endpoint: |-
-            url: https://zigbee2mqtt.${SECRET_DOMAIN}/
+            url: http://zigbee2mqtt.home-automation.svc.cluster.local:8080/
             conditions:
               - "[STATUS] == 200"
             group: home-automation
+            ui:
+              hide-url: true
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: "Home Automation"
           gethomepage.dev/name: zigbee2mqtt
@@ -203,7 +207,7 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        # Rule names are load-bearing: securitypolicy.yaml gates rule `code` only.
+        # securitypolicy.yaml gates the whole route (both rules), so it uses no sectionName.
         rules:
           - name: code
             matches:

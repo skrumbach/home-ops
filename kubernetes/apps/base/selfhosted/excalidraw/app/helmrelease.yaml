@@ -64,11 +64,15 @@ spec:
           gethomepage.dev/group: Selfhosted
           gethomepage.dev/name: Excalidraw
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
+          # login page. Probe the Service in-cluster instead. Skill observability.
           gatus.home-operations.com/endpoint: |-
-            url: https://excalidraw.${SECRET_DOMAIN}/
+            url: http://excalidraw.selfhosted.svc.cluster.local/
             conditions:
               - "[STATUS] == 200"
             group: selfhosted
+            ui:
+              hide-url: true
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

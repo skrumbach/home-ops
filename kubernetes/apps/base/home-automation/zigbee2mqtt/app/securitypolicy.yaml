@@ -1,18 +1,18 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Only rule `code` (the /code/ editor, code-server with --auth none) is gated. Rule `app`, the
-# Zigbee2MQTT frontend and its Gatus check, is unchanged. The forward_domain proxy provider covers
-# every host, so no Authentik change is needed. Skill authentik-terraform.
+# Gates the whole zigbee2mqtt route: the /code/ editor runs code-server with --auth none, and the
+# frontend has no login of its own and can permit-join or remove devices. Home Assistant talks to
+# Zigbee2MQTT over MQTT, not this route. The forward_domain proxy provider covers every host, so no
+# Authentik change is needed. Skill authentik-terraform.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
-  name: zigbee2mqtt-code-auth
+  name: zigbee2mqtt-auth
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: zigbee2mqtt
-      sectionName: code
   extAuth:
     headersToExtAuth:
       - cookie
