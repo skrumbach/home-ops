@@ -29,12 +29,9 @@ resource "unifi_device_port" "usw_pro_max_48_port_49" {
 resource "unifi_device_port" "usw_pro_max_48_port_31" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "all"
-  index     = 31
-  isolation = false
+  forward    = "all"
+  index      = 31
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -43,37 +40,17 @@ resource "unifi_device_port" "usw_pro_max_48_port_31" {
   op_mode                = "switch"
   poe_mode               = "auto"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_28" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "customize"
-  index     = 28
-  isolation = false
+  forward    = "customize"
+  index      = 28
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -82,26 +59,9 @@ resource "unifi_device_port" "usw_pro_max_48_port_28" {
   op_mode                = "switch"
   poe_mode               = "auto"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_4" {
@@ -110,9 +70,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_4" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "all"
   index     = 4
@@ -125,13 +82,10 @@ resource "unifi_device_port" "usw_pro_max_48_port_4" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stp_edge_state     = "auto"
-  stp_port_mode      = true
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  stp_edge_state         = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_37" {
@@ -140,9 +94,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_37" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "all"
   index     = 37
@@ -155,13 +106,10 @@ resource "unifi_device_port" "usw_pro_max_48_port_37" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stp_edge_state     = "auto"
-  stp_port_mode      = true
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  stp_edge_state         = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_35" {
@@ -170,9 +118,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_35" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "all"
   index     = 35
@@ -185,24 +130,18 @@ resource "unifi_device_port" "usw_pro_max_48_port_35" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stp_edge_state     = "auto"
-  stp_port_mode      = true
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  stp_edge_state         = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_39" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "all"
-  index     = 39
-  isolation = false
+  forward    = "all"
+  index      = 39
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -211,37 +150,17 @@ resource "unifi_device_port" "usw_pro_max_48_port_39" {
   op_mode                = "switch"
   poe_mode               = "auto"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_1" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "customize"
-  index     = 1
-  isolation = false
+  forward    = "customize"
+  index      = 1
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -250,26 +169,9 @@ resource "unifi_device_port" "usw_pro_max_48_port_1" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_aggregation_port_13" {
@@ -287,23 +189,17 @@ resource "unifi_device_port" "usw_pro_aggregation_port_13" {
   native_networkconf_id  = unifi_network.server_private.id
   op_mode                = "aggregate"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  speed              = 10000
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  speed                  = 10000
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_2" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "customize"
-  index     = 2
-  isolation = false
+  forward    = "customize"
+  index      = 2
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -312,37 +208,17 @@ resource "unifi_device_port" "usw_pro_max_48_port_2" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_15" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "customize"
-  index     = 15
-  isolation = false
+  forward    = "customize"
+  index      = 15
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -351,26 +227,9 @@ resource "unifi_device_port" "usw_pro_max_48_port_15" {
   op_mode                = "switch"
   poe_mode               = "auto"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "auto"
+  setting_preference     = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_aggregation_port_3" {
@@ -383,11 +242,8 @@ resource "unifi_device_port" "usw_pro_aggregation_port_3" {
   native_networkconf_id  = unifi_network.home_default.id
   op_mode                = "aggregate"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "manual"
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "manual"
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_3" {
@@ -396,9 +252,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_3" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "all"
   index     = 3
@@ -411,13 +264,10 @@ resource "unifi_device_port" "usw_pro_max_48_port_3" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stp_edge_state     = "auto"
-  stp_port_mode      = true
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  stp_edge_state         = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 resource "unifi_device_port" "usw_pro_max_48_port_33" {
@@ -426,9 +276,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_33" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "all"
   index     = 33
@@ -441,13 +288,10 @@ resource "unifi_device_port" "usw_pro_max_48_port_33" {
   op_mode                = "switch"
   poe_mode               = "off"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  stp_edge_state     = "auto"
-  stp_port_mode      = true
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  stp_edge_state         = "auto"
+  stp_port_mode          = true
+  tagged_vlan_mgmt       = "auto"
 }
 
 # Talos bond: LACP 5+6 to talos-1. k8s-01 untagged; `custom` tags every
@@ -555,12 +399,9 @@ resource "unifi_device_port" "usw_pro_aggregation_port_15" {
   name                   = "SFP+ 15"
   op_mode                = "aggregate"
   port_keepalive_enabled = false
-  port_security = {
-    enabled = false
-  }
-  setting_preference = "auto"
-  speed              = 10000
-  tagged_vlan_mgmt   = "auto"
+  setting_preference     = "auto"
+  speed                  = 10000
+  tagged_vlan_mgmt       = "auto"
 }
 
 # Disabled.
@@ -570,9 +411,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_34" {
   dot1x = {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
-  }
-  egress_rate_limit = {
-    enabled = false
   }
   forward   = "disabled"
   index     = 34
@@ -601,9 +439,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_36" {
     ctrl         = "force_authorized"
     idle_timeout = "5m0s"
   }
-  egress_rate_limit = {
-    enabled = false
-  }
   forward   = "disabled"
   index     = 36
   isolation = false
@@ -627,12 +462,9 @@ resource "unifi_device_port" "usw_pro_max_48_port_36" {
 resource "unifi_device_port" "usw_pro_max_48_port_38" {
   autoneg    = true
   device_mac = "9c:05:d6:af:79:45"
-  egress_rate_limit = {
-    enabled = false
-  }
-  forward   = "disabled"
-  index     = 38
-  isolation = false
+  forward    = "disabled"
+  index      = 38
+  isolation  = false
   lldpmed = {
     enabled = true
   }
@@ -644,20 +476,6 @@ resource "unifi_device_port" "usw_pro_max_48_port_38" {
     enabled = true
   }
   setting_preference = "auto"
-  stormctrl = {
-    bcast = {
-      enabled = false
-      rate    = 100
-    }
-    mcast = {
-      enabled = false
-      rate    = 100
-    }
-    ucast = {
-      enabled = false
-      rate    = 100
-    }
-  }
-  stp_port_mode    = true
-  tagged_vlan_mgmt = "block_all"
+  stp_port_mode      = true
+  tagged_vlan_mgmt   = "block_all"
 }
