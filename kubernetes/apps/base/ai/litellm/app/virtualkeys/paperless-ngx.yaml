@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
+# selfhosted/paperless-ngx's key (AI suggestions, document chat and RAG embeddings on the local models).
+# chat-local and embedding-local only, so spend is $0 by construction and maxBudget is an inert guard
+# (same reasoning as linkwarden); rpm/tpm are the real bound on the shared B70. The model-level rpm on
+# embedding-local still caps every key together. See skill litellm-proxy (references/governance-keys.md).
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paperless-ngx
+spec:
+  proxyRef: litellm
+  keyAlias: paperless-ngx
+  secretName: litellm-key-paperless-ngx
+  secretKey: key
+  models:
+    - chat-local
+    - embedding-local
+  maxBudget: "1.00"
+  budgetDuration: 30d
+  rpmLimit: 30
+  tpmLimit: 200000
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: litellm-key-paperless-ngx
+spec:
+  refreshInterval: 5m
+  secretStoreRefs:
+    - name: onepassword
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: litellm-key-paperless-ngx
+  data:
+    - match:
+        secretKey: key
+        remoteRef:
+          remoteKey: litellm-consumer-paperless-ngx
+          property: key

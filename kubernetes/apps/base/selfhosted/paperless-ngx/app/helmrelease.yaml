@@ -38,6 +38,21 @@ spec:
               # Unset, Paperless sizes OCR threads from the node's 20 cores, not the 2 CPU limit: ~20 parallel
               # tesseract jobs OOMKilled the pod at 2Gi during the 792-document re-import (2026-11-08).
               PAPERLESS_THREADS_PER_WORKER: "1"
+              # AI suggestions, document chat and RAG on the local models through LiteLLM, with Paperless'
+              # own key (PAPERLESS_AI_LLM_API_KEY from paperless-ngx-secret). Role aliases only, never a real
+              # model name (kubernetes/apps/base/ai/AGENTS.md).
+              PAPERLESS_AI_ENABLED: "true"
+              PAPERLESS_AI_LLM_BACKEND: openai-like
+              PAPERLESS_AI_LLM_ENDPOINT: "http://litellm.ai.svc.cluster.local:4000/v1"
+              PAPERLESS_AI_LLM_MODEL: chat-local
+              # The local chat model can think before answering; the 120s default is too short for it.
+              PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
+              PAPERLESS_AI_LLM_EMBEDDING_BACKEND: openai-like
+              PAPERLESS_AI_LLM_EMBEDDING_MODEL: embedding-local
+              # embedding-local is a 512-token llama-server context (over-length input is a 400). The 1024
+              # default would fail every chunk; 384 leaves margin for tokenizer differences. Skill
+              # b70-llm-serving.
+              PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "384"
               PAPERLESS_WEBSERVER_WORKERS: "2"
             envFrom:
               - secretRef:

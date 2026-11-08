@@ -5,7 +5,7 @@ kind: CiliumNetworkPolicy
 metadata:
   name: paperless-ngx
 spec:
-  # Ingress fence only: egress (postgres-18, dragonfly, DNS) stays open. Skill `networking`.
+  # Ingress fence only: egress (postgres-18, dragonfly, LiteLLM, DNS) stays open. Skill `networking`.
   # Each of those peers is also admitted on ingress with no toPorts, for its replies (cilium/cilium#47913).
   # The controller label keeps the operator-managed paperless-ngx-dragonfly pods out of this selector.
   endpointSelector:
@@ -40,6 +40,13 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: database
             cnpg.io/cluster: postgres-18
+    # AI backend (PAPERLESS_AI_LLM_ENDPOINT ai/litellm:4000), for its replies.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: litellm
+            app.kubernetes.io/instance: litellm
     # DNS replies from CoreDNS. No toPorts on purpose: a reply lands on an ephemeral port, never 53.
     - fromEndpoints:
         - matchLabels:
