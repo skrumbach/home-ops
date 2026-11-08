@@ -13,10 +13,10 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 ## Tripwires
 
 1. **No apply without an explicit, current go-ahead, and never over WiFi.**
-   A clean plan or a green PR is not approval. There is no apply credential
-   yet: `secrets.vals.yaml` is the `read-only` UniFi OS user (View role), so a
-   stray apply fails closed. A future apply runs from a wired machine with a
-   saved plan.
+   A clean plan or a green PR is not approval. `secrets.vals.yaml` logs in as
+   `tofu-read-only` (Network view only), so a stray apply through it fails
+   closed. `secrets-apply.vals.yaml` logs in as `tofu-apply` (Network admin
+   only); never copy that login into `UNIFI_USER`. Apply a saved plan, wired.
 2. **Some objects carry the cluster.** `k8s-01` (VLAN 1010, untagged on the
    Talos bonds), `IoT [Devices]` (VLAN 3) and `VPN_Network` (VLAN 90), both
    tagged on the bonds (`talos/nodes/*.yaml.j2`), the `MS01-0x` reservations,
@@ -58,7 +58,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
 | Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `clients.tofu`, `dns.tofu` |
 | Adoption | `imports.tofu` (kept, inert once in state) |
-| Plan env | `secrets.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
+| Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |
 
 State is `unifi/terraform.tfstate` in the R2 bucket `home-ops-tfstate`,
@@ -76,6 +76,19 @@ cd terraform/unifi
 env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu init
 env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu plan
 ```
+
+## Apply (go-ahead only)
+
+From a wired machine. The plan file is encrypted and gitignored (`*.tfplan`).
+
+```bash
+env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=unifi.tfplan
+# read it: only the changes that were approved, nothing on the objects in tripwire 2
+env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu apply unifi.tfplan
+rm unifi.tfplan
+```
+
+Afterwards the read-only plan shows `No changes`.
 
 ## Adopt another object
 
