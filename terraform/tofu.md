@@ -12,7 +12,7 @@ Skill `authentik-terraform`
    plan. `tofu apply` stays behind the go-ahead in
    [`apply-runbook.md`](../.agents/skills/authentik-terraform/references/apply-runbook.md).
 2. State never goes in Git. Authentik's holds OAuth client secrets and lives
-   in a private bucket; UniFi's is local until it moves to R2.
+   in a private RGW bucket; UniFi's is encrypted in R2, outside the cluster.
 3. Adopt objects that already exist (`import` blocks). Create only what
    never lived on the instance (LiteLLM).
 4. Secrets come from 1Password through `vals exec -i`. No committed tfvars.
