@@ -14,7 +14,7 @@
 > [retired-expiry-apply-plan.md](retired-expiry-apply-plan.md) against each of the three object
 > stores, on the owner's explicit go-ahead. Until then this is a decision on paper.
 >
-> When applied, the earliest deletion is **2027-03-31**; the sole-copy tier is **2027-09-30**.
+> When applied, the earliest deletion is **2026-11-16**; the sole-copy tier is **2027-09-30**.
 
 **Owner's decision, 2026-09-12: an expiry date.** Not deletion now, not keeping it
 indefinitely. A recovery window is preserved and unbounded growth stops for every future app
@@ -31,12 +31,13 @@ and the apply-plan flags.
 
 | Tier | What | Prefixes | Size across 3 destinations | Earliest delete |
 |---|---|---|---|---|
-| `redundant` | Retired from VolSync in the kopiur Stage 5 migration. The claim still exists and kopiur backs it up on both ceph and r2 | 29 | ~97.7 GiB | 2027-03-31 |
+| `redundant` | Retired from VolSync in the kopiur Stage 5 migration. The claim still exists and kopiur backs it up on both ceph and r2 | 29 | ~97.7 GiB | 2026-11-16 |
 | `sole_copy` | App and volume are gone. This restic repository is the only remaining copy | 22 | 30.00 GiB | 2027-09-30 |
 
 51 repositories, ~128 GiB. Nothing is reclaimed before those dates even after the apply. The
-window is about 6.5 months for data that already has two current backups and about 12.5 months
-for data that has none. Two dates, not 51.
+window is about 12.5 months for data that has no other copy. The redundant tier was brought
+forward on 2026-11-08 (owner) from 2027-03-31 to cut R2 storage; its data has two current kopiur
+backups. Two dates, not 51.
 
 `ledger.yaml` marks a prefix `protected` while it still has a live `ReplicationSource`; the list
 is empty since 2026-11-01 (issue #2202 PR-4), when `paperless-ngx`, the last, moved to

@@ -79,6 +79,7 @@ outpost. `postgresql.enabled: false`; the DB is `postgres-18`.
 - Owned objects vs blueprints: [inventory.md](references/inventory.md).
 - File layout and style: [conventions.md](references/conventions.md).
 - Server upgrade checks: [upgrade-checklist.md](references/upgrade-checklist.md).
+- Database over 2 GiB, expired sessions/messages: [db-bloat.md](references/db-bloat.md).
 
 ## Verify
 

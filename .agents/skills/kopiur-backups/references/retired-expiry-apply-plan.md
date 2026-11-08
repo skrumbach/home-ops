@@ -121,7 +121,7 @@ uv run --with boto3 python scripts/volsync-retired-expiry/apply_lifecycle.py \
 ```
 
 Success ends with `VERIFIED: 51 rules stored, all prefixes exact-segment, no rule in range of a
-live repository.` and `Earliest deletion: 2027-03-31T00:00:00Z`. Anything else (mismatch,
+live repository.` and `Earliest deletion: 2026-11-16T00:00:00Z`. Anything else (mismatch,
 missing rule, a prefix the store rewrote) exits non-zero and names the problem. Keep
 `/tmp/volsync-lc-undo/` until all three have verified.
 
@@ -141,7 +141,7 @@ kubectl --kubeconfig="$KC" -n rook-ceph exec deploy/rook-ceph-tools -- \
 The invariant is not "51 rules exist" but **every stored rule's prefix is an exact segment
 that reaches no other repository and no live one** (none is live since 2026-11-01; `paperless-ngx/`
 and `paperless-ngx-media/`, `syncthing/` and `syncthing-data/` are distinct rules). `num_objects`
-must be unchanged; nothing expires until 2027-03-31.
+must be unchanged; nothing expires until 2026-11-16.
 
 ## Step 4 - undo
 
@@ -156,7 +156,7 @@ uv run --with boto3 python scripts/volsync-retired-expiry/apply_lifecycle.py \
 
 Undo is a pure configuration change, safe any time before the expiry date. **After an expiry
 date passes, undo recovers nothing**: deletion is done by the object store and the buckets are
-not versioned. The decision point is before 2027-03-31.
+not versioned. The decision point is before 2026-11-16.
 
 ## Residual risk
 

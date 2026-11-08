@@ -8,5 +8,6 @@ resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./httproute-outpost.yaml
+  - ./prometheusrule.yaml
   - ./bucketclaim.yaml
   - ./referencegrant.yaml
