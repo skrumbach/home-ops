@@ -27,7 +27,7 @@ spec:
             env:
               PAPERLESS_URL: "https://docs.${SECRET_DOMAIN}"
               PAPERLESS_PORT: &port 8000
-              PAPERLESS_TIME_ZONE: Pacific/Auckland
+              PAPERLESS_TIME_ZONE: America/New_York
               PAPERLESS_REDIS: "redis://paperless-ngx-dragonfly.selfhosted.svc.cluster.local:6379"
               # ~40% of the library is German (272 of 688 text documents, 2026-11-08); both ship in the image.
               PAPERLESS_OCR_LANGUAGE: deu+eng
