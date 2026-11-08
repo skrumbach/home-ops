@@ -27,7 +27,8 @@ manual-dispatch only (no schedule, no `push` trigger), so it never runs beside t
    `ghcr.io/berriai/litellm-non_root`, and the CloudNativePG chart and operator
    image (a bump rolls the shared postgres-18 Cluster; 1.31.0's in-tree barman
    removal no longer applies since postgres-17 retired; skill `databases`), and
-   Authentik chart minors (a CalVer release line; skill `authentik-terraform`). rsshub
+   Authentik chart minors (a CalVer release line; skill `authentik-terraform`), and Envoy
+   Gateway chart minors (bundled Envoy minor + Gateway API CRDs; the boards ride the same branch). rsshub
    digests stay `automerge: true` on `before 6am on monday` (America/New_York,
    set in `.renovaterc.json5`). 0.x minors open PRs but never automerge.
 4. **A version pin uses a negated regex, never a bare `<X.Y.Z`.**

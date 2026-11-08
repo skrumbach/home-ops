@@ -65,6 +65,13 @@
       automerge: false,
     },
     {
+      // MUST stay after the blanket rules. A gateway minor moves the bundled Envoy minor and the Gateway API CRDs; the chart and its two Grafana boards share one branch (grafanaDashboards.json5). Owner decision 2026-11-07.
+      description: "Never auto merge Envoy Gateway minor or major versions - review the release notes and the CRD diff",
+      matchPackageNames: ["mirror.gcr.io/envoyproxy/gateway-helm", "docker.io/envoyproxy/gateway-helm"],
+      matchUpdateTypes: ["minor", "major"],
+      automerge: false,
+    },
+    {
       // MUST stay after the blanket rules. A Python minor is a new ABI: native deps (PyO3 wheels such as litellm's fastuuid) lag it, and 3.15 broke the nightly tests (#1991).
       // The hold is per consumer, not per version: a stdlib-only image (queue-watchdog) can merge on green CI. Skill `renovate-review`.
       description: "Never auto merge Python minor or major versions - mise tool and docker image",
