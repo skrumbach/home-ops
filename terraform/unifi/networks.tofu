@@ -1,103 +1,561 @@
-# LAN networks on the UDM. WANs, the One-Click VPN server and the NordVPN
-# clients are not managed here. k8s-01 is the untagged network on the Talos
-# bonds; IoT (VLAN 3) and VPN_Network (VLAN 90) are tagged on them too.
-# Changing any of these three cuts the cluster off. Skill `unifi-network`.
+# LAN networks on the UDM. WANs, the One-Click VPN server, the NordVPN clients
+# and the guest network are not managed here. k8s-01 is the untagged network on
+# the Talos bonds; IoT (VLAN 3) and VPN_Network (VLAN 90) are tagged on them too.
+# Changing any of these three cuts the cluster off, and deleting a network
+# really deletes it, so the networks the cluster or the NAS ride carry
+# prevent_destroy. Zone membership is declared on the zone (firewall.tofu),
+# never with firewall_zone_id here: managing it from both sides loops.
+# Skill `unifi-network`.
 
-resource "terrifi_network" "home_default" {
-  name         = "Home [Default]"
-  purpose      = "corporate"
-  subnet       = "10.0.0.1/23"
-  dhcp_enabled = true
-  dhcp_start   = "10.0.0.11"
-  dhcp_stop    = "10.0.1.100"
+resource "unifi_network" "unifi_managment" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.0.10.100"
+    stop                = "10.0.10.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "unifi.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Unifi [Managment]"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.0.10.1/24"
+  third_party_gateway = false
+  vlan                = 10
 }
 
-resource "terrifi_network" "iot_devices" {
-  name         = "IoT [Devices]"
-  purpose      = "corporate"
-  vlan_id      = 3
-  subnet       = "10.40.0.1/22"
-  dhcp_enabled = true
-  dhcp_start   = "10.40.0.16"
-  dhcp_stop    = "10.40.3.254"
+resource "unifi_network" "k8s_01" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled  = true
+      filename = "netboot.xyz.efi"
+      server   = "10.10.0.40"
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = true
+      servers = ["10.10.10.1"]
+    }
+    start               = "10.10.10.200"
+    stop                = "10.10.10.254"
+    tftp_server         = "10.10.0.40"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "k8s-01"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.10.10.1/24"
+  third_party_gateway = false
+  vlan                = 1010
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-resource "terrifi_network" "unifi_managment" {
-  name         = "Unifi [Managment]"
-  purpose      = "corporate"
-  vlan_id      = 10
-  subnet       = "10.0.10.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "10.0.10.100"
-  dhcp_stop    = "10.0.10.254"
+resource "unifi_network" "home_ops_pods" {
+  auto_scale = true
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.42.0.46"
+    stop                = "10.42.255.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  enabled         = false
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = false
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Home-Ops-Pods"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "auto"
+  subnet              = "10.42.0.1/16"
+  third_party_gateway = false
+  vlan                = 7
 }
 
-resource "terrifi_network" "server_private" {
-  name         = "Server [Private]"
-  purpose      = "corporate"
-  vlan_id      = 1000
-  subnet       = "10.10.0.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "10.10.0.210"
-  dhcp_stop    = "10.10.0.254"
+resource "unifi_network" "vpn_network" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "192.168.90.6"
+    stop                = "192.168.90.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "vpn.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = false
+  name                = "VPN_Network"
+  network_isolation   = true
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "192.168.90.1/24"
+  third_party_gateway = false
+  vlan                = 90
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-resource "terrifi_network" "security_cams" {
-  name         = "Security [Cams]"
-  purpose      = "corporate"
-  vlan_id      = 4
-  subnet       = "10.0.20.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "10.0.20.6"
-  dhcp_stop    = "10.0.20.254"
+resource "unifi_network" "server_private" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled  = true
+      filename = "netboot.xyz.efi"
+      server   = "10.10.0.40"
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.10.0.210"
+    stop                = "10.10.0.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "server.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    interface_type = "none"
+    pd = {
+      auto_prefixid_enabled = true
+    }
+    ra = {
+      enabled = true
+    }
+    setting_preference = "manual"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Server [Private]"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.10.0.1/24"
+  third_party_gateway = false
+  vlan                = 1000
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-resource "terrifi_network" "k8s_01" {
-  name         = "k8s-01"
-  purpose      = "corporate"
-  vlan_id      = 1010
-  subnet       = "10.10.10.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "10.10.10.200"
-  dhcp_stop    = "10.10.10.254"
+resource "unifi_network" "home_default" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.0.0.11"
+    stop                = "10.0.1.100"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "home.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = false
+  multicast_dns       = true
+  name                = "Home [Default]"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.0.0.1/23"
+  third_party_gateway = false
 }
 
-resource "terrifi_network" "managment" {
-  name         = "Managment"
-  purpose      = "corporate"
-  vlan_id      = 5
-  subnet       = "10.10.4.1/22"
-  dhcp_enabled = true
-  dhcp_start   = "10.10.4.16"
-  dhcp_stop    = "10.10.7.254"
+resource "unifi_network" "iot_devices" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.40.0.16"
+    stop                = "10.40.3.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "iot.sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = false
+  name                = "IoT [Devices]"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.40.0.1/22"
+  third_party_gateway = false
+  vlan                = 3
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-resource "terrifi_network" "vpn_network" {
-  name         = "VPN_Network"
-  purpose      = "corporate"
-  vlan_id      = 90
-  subnet       = "192.168.90.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "192.168.90.6"
-  dhcp_stop    = "192.168.90.254"
+resource "unifi_network" "managment" {
+  auto_scale = false
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.10.4.16"
+    stop                = "10.10.7.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  domain_name     = "sklab.dev"
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = true
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Managment"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.10.4.1/22"
+  third_party_gateway = false
+  vlan                = 5
 }
 
-resource "terrifi_network" "home_ops_lb" {
-  name         = "Home-Ops-LB"
-  purpose      = "corporate"
-  vlan_id      = 6
-  subnet       = "10.50.0.1/24"
-  dhcp_enabled = true
-  dhcp_start   = "10.50.0.6"
-  dhcp_stop    = "10.50.0.254"
+resource "unifi_network" "home_ops_lb" {
+  auto_scale = true
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.50.0.6"
+    stop                = "10.50.0.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  enabled         = false
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = false
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = true
+  name                = "Home-Ops-LB"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "auto"
+  subnet              = "10.50.0.1/24"
+  third_party_gateway = false
+  vlan                = 6
 }
 
-resource "terrifi_network" "home_ops_pods" {
-  name         = "Home-Ops-Pods"
-  purpose      = "corporate"
-  vlan_id      = 7
-  subnet       = "10.42.0.1/16"
-  dhcp_enabled = true
-  dhcp_start   = "10.42.0.46"
-  dhcp_stop    = "10.42.255.254"
+resource "unifi_network" "security_cams" {
+  auto_scale = true
+  dhcp_server = {
+    boot = {
+      enabled = false
+    }
+    conflict_checking = true
+    dns = {
+      enabled = false
+    }
+    enabled         = true
+    gateway_enabled = false
+    leasetime       = "24h0m0s"
+    ntp = {
+      enabled = false
+    }
+    start               = "10.0.20.6"
+    stop                = "10.0.20.254"
+    time_offset_enabled = false
+    wins = {
+      enabled = false
+    }
+  }
+  enabled         = true
+  gateway_type    = "default"
+  igmp_snooping   = false
+  internet_access = true
+  ipv6 = {
+    client_address_assignment = "slaac"
+    interface_type            = "none"
+    pd = {
+      auto_prefixid_enabled = false
+      start                 = "::2"
+      stop                  = "::7d1"
+    }
+    ra = {
+      enabled            = true
+      preferred_lifetime = "4h0m0s"
+      priority           = "high"
+    }
+    setting_preference = "auto"
+  }
+  lte_lan             = true
+  multicast_dns       = false
+  name                = "Security [Cams]"
+  network_isolation   = false
+  purpose             = "corporate"
+  setting_preference  = "manual"
+  subnet              = "10.0.20.1/24"
+  third_party_gateway = false
+  vlan                = 4
 }
