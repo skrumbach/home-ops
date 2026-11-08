@@ -24,3 +24,4 @@ resources:
   - ./hermes.yaml
   - ./hermes-ha.yaml
   - ./linkwarden.yaml
+  - ./paperless-ngx.yaml
