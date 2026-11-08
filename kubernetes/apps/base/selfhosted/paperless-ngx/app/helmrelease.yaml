@@ -122,7 +122,7 @@ spec:
           gotenberg:
             image:
               repository: docker.io/gotenberg/gotenberg
-              tag: 8.38.1@sha256:aa552cc115db488e0f0bcb07446aac13071ad51505b642c84bb894500907b42b
+              tag: 9.2.0@sha256:e1840b4c1ee113078cc153b8359433c9511ab544c1a15cd45b09f81c9329118a
             # args, not command: keeps the image's tini entrypoint. Flags from paperless' compose: the
             # chromium route renders .eml, so no JavaScript and no fetching of remote content.
             args:
