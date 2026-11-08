@@ -1,7 +1,9 @@
 # Zone-based firewall. Built-in zones cannot be created or deleted, so they are
 # referenced by controller ID. Order for zone pairs with 2+ policies lives in
 # firewall_order.tofu. Built-in (predefined) policies are not managed.
-# Skill `unifi-network`.
+# Nothing is published from the WAN: no port forwards, no IPv6 on any LAN, and
+# Cloudflare Tunnel dials out. So the only External-sourced user policy is a
+# block; an ALLOW from `external` needs a reviewed reason. Skill `unifi-network`.
 
 locals {
   builtin_zone_ids = {
@@ -214,38 +216,6 @@ resource "terrifi_firewall_policy" "allow_bgp" {
   }
 }
 
-resource "terrifi_firewall_policy" "allow_bgp_2" {
-  name        = "Allow BGP"
-  description = "Allow BGP Traffic to the Gateway"
-  action      = "ALLOW"
-  protocol    = "tcp"
-
-  source {
-    zone_id = local.builtin_zone_ids.external
-  }
-
-  destination {
-    zone_id            = local.builtin_zone_ids.gateway
-    port_matching_type = "SPECIFIC"
-    port               = 179
-  }
-}
-
-resource "terrifi_firewall_policy" "allow_bgp_3" {
-  name   = "Allow bgp"
-  action = "BLOCK"
-
-  source {
-    zone_id = local.builtin_zone_ids.external
-  }
-
-  destination {
-    zone_id            = terrifi_firewall_zone.server_talos.id
-    port_matching_type = "SPECIFIC"
-    port               = 179
-  }
-}
-
 resource "terrifi_firewall_policy" "allow_all_3" {
   name                 = "allow all"
   action               = "ALLOW"
@@ -330,23 +300,6 @@ resource "terrifi_firewall_policy" "k8s_to_server_private_01" {
   }
 }
 
-resource "terrifi_firewall_policy" "allow_bgp_4" {
-  name                 = "Allow bgp"
-  action               = "ALLOW"
-  logging              = true
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.external
-  }
-
-  destination {
-    zone_id            = terrifi_firewall_zone.k8s_01.id
-    port_matching_type = "SPECIFIC"
-    port               = 179
-  }
-}
-
 resource "terrifi_firewall_policy" "all" {
   name                 = "all"
   action               = "ALLOW"
@@ -403,38 +356,6 @@ resource "terrifi_firewall_policy" "allow_pods_to_external_gateway" {
 
   destination {
     zone_id = terrifi_firewall_zone.k8s_01.id
-  }
-}
-
-resource "terrifi_firewall_policy" "test" {
-  name                 = "test"
-  action               = "ALLOW"
-  logging              = true
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.external
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.k8s_01.id
-  }
-}
-
-resource "terrifi_firewall_policy" "space_engineers" {
-  name                 = "space-engineers"
-  action               = "ALLOW"
-  logging              = true
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.external
-  }
-
-  destination {
-    zone_id              = local.builtin_zone_ids.internal
-    port_matching_type   = "SPECIFIC"
-    match_opposite_ports = true
   }
 }
 

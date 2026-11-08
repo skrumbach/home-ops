@@ -66,16 +66,16 @@ State shares the R2 bucket `home-ops-tfstate` with the UniFi stack (skill
 
 ```bash
 cd terraform/truenas
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu init
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets.vals.yaml -- tofu plan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets.vals.yaml -- tofu init
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets.vals.yaml -- tofu plan
 ```
 
 ## Apply (go-ahead only)
 
 ```bash
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=truenas.tfplan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets-apply.vals.yaml -- tofu plan -out=truenas.tfplan
 # read it: no destroy, no replace, nothing touching tripwire 3
-env -u OP_SERVICE_ACCOUNT_TOKEN vals exec -i -f secrets-apply.vals.yaml -- tofu apply truenas.tfplan
+env -u OP_SERVICE_ACCOUNT_TOKEN mise exec -- vals exec -i -f secrets-apply.vals.yaml -- tofu apply truenas.tfplan
 rm truenas.tfplan
 ```
 
