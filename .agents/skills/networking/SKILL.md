@@ -72,7 +72,7 @@ Host firewall policy is skill `cilium-host-policy`. ExtAuth ownership is skill
 | Public / internal DNS | `kubernetes/apps/base/network/{cloudflare-dns,unifi-dns}/` |
 | Shared dragonfly NetworkPolicy | `kubernetes/components/dragonfly/networkpolicy.yaml` |
 | Diagnostics | `task --list` under `network:` (`.taskfiles/network/`) |
-| UniFi FRR snippet | [bgp-unifi.md](references/bgp-unifi.md) (the only git copy) |
+| UniFi FRR config | `terraform/unifi/bgp.conf` (the only git copy); context in [bgp-unifi.md](references/bgp-unifi.md) |
 
 ## Procedures
 

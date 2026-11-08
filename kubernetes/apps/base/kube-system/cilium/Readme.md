@@ -3,8 +3,8 @@
 Chart pin, BGP CRs and LoadBalancer pool:
 `app/ocirepository.yaml`, `app/networking.yaml`.
 
-UniFi is not reconciled from here. The FRR snippet and peer table are in
-skill `networking`
+UniFi is not reconciled from here. The UDM's FRR config is
+`terraform/unifi/bgp.conf` (OpenTofu); the peer table is in skill `networking`
 ([bgp-unifi.md](../../../../../.agents/skills/networking/references/bgp-unifi.md)).
 Human page: `.agents/skills/networking/references/bgp-unifi.md`.
 
