@@ -23,8 +23,8 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
    the `allow_bgp*` / `k8s*` / `Allow-Pods-*` policies and the `Server [Talos]`
    / `k8s-01` zones. A plan line touching any of these needs a reason before
    anything else.
-3. **Not in this stack, on purpose:** switch ports and the 8 LACP groups
-   (7 on the USW Pro Aggregation, the uplink on the Pro Max 48), BGP (an
+3. **Not in this stack, on purpose:** the USW Pro Aggregation ports (its 7
+   LACP groups carry the Talos bonds), disabled ports, BGP (an
    uploaded FRR file, enabled as `home-ops`), order of single-policy zone pairs, built-in zones
    and policies, WANs, the One-Click VPN and NordVPN clients, the guest
    network, firewall groups, Protect, and the ~90 clients without a fixed
@@ -43,14 +43,18 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 7. **terrifi does not read `policy_ids` back on import.** A freshly imported
    `terrifi_firewall_policy_order` plans `[] -> [ids]`, which rewrites the
    order. Check the list matches the UI order before applying it.
-8. **An empty list is not null.** The controller keeps `ips = []` on
+8. **Import adopts every port terrifi can represent.** `ports.tofu` must list
+   each of them, including port 49 (the Pro Max 48 uplink LAG): a port in
+   state but not in config plans a deletion of its whole override. Read any
+   `- "<n>" = {` line in a ports plan as an outage.
+9. **An empty list is not null.** The controller keeps `ips = []` on
    `allow_bgp`; omitting it plans a write to the BGP policy. A generated
    block that plans an `[] -> null` change needs the empty list declared.
-9. **Username/password logins are rate limited.** Five or six logins in a
-   row return `giving up after 5 attempt(s)`; wait a couple of minutes.
-   The `UNIFI_API_KEY` field in `Automation/unifi-terraform` is a Site
-   Manager (cloud) key and returns 401 on the console.
-10. **The Network app is on Early Access with daily auto-update.** terrifi
+10. **Username/password logins are rate limited.** Five or six logins in a
+    row return `giving up after 5 attempt(s)`; wait a couple of minutes.
+    The `UNIFI_API_KEY` field in `Automation/unifi-terraform` is a Site
+    Manager (cloud) key and returns 401 on the console.
+11. **The Network app is on Early Access with daily auto-update.** terrifi
     drives the controller's internal API. Re-plan after every Network update
     before trusting a plan, and prefer the Official channel.
 
@@ -59,7 +63,7 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
 | What | Path |
 |---|---|
 | Provider, backend, inputs | `main.tofu`, `backend.tofu` (R2, encrypted), `variables.tofu` |
-| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `firewall_order.tofu`, `clients.tofu`, `dns.tofu` |
+| Objects | `networks.tofu`, `wlans.tofu`, `firewall.tofu`, `firewall_order.tofu`, `ports.tofu`, `clients.tofu`, `dns.tofu` |
 | Adoption | `imports.tofu` (kept, inert once in state) |
 | Plan / apply env | `secrets.vals.yaml`, `secrets-apply.vals.yaml` (`Automation/unifi-terraform`, `Automation/tofu-state-r2`) |
 | Conventions | `terraform/tofu.md`, skill `authentik-terraform` `references/conventions.md` |

@@ -436,3 +436,8 @@ import {
   to = terrifi_firewall_policy_order.internal_to_server_private
   id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:0993a852-a466-46f2-a438-a3b17c08ce41"
 }
+
+import {
+  to = terrifi_device_ports.usw_pro_max_48_poe
+  id = "9c:05:d6:af:79:45"
+}
