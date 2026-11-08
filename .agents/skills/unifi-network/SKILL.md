@@ -49,9 +49,13 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
    each of them, including port 49 (the Pro Max 48 uplink LAG): a port in
    state but not in config plans a deletion of its whole override. Read any
    `- "<n>" = {` line in a ports plan as an outage.
-9. **An empty list is not null.** The controller keeps `ips = []` on
-   `allow_bgp`; omitting it plans a write to the BGP policy. A generated
-   block that plans an `[] -> null` change needs the empty list declared.
+9. **terrifi writes a policy with a full PUT from its own model.** A match
+   it cannot represent (web domain, app, region) reads as "any" and is
+   erased by the next update. `block_traffic_to_itorrents_net` matches by
+   domain, so its config reads as block-all k8s-01 egress; it carries
+   `ignore_changes = all`. Check `matching_target` in the API before adopting
+   a policy. Also, an empty list is not null: a generated block that plans
+   `[] -> null` needs the empty list declared.
 10. **Username/password logins are rate limited.** Five or six logins in a
     row return `giving up after 5 attempt(s)`; wait a couple of minutes.
     The `UNIFI_API_KEY` field in `Automation/unifi-terraform` is a Site

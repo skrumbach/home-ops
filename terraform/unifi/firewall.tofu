@@ -26,14 +26,6 @@ resource "terrifi_firewall_zone" "server_private" {
   network_ids = [terrifi_network.server_private.id]
 }
 
-resource "terrifi_firewall_zone" "server_talos" {
-  name = "Server [Talos]"
-}
-
-resource "terrifi_firewall_zone" "vpn" {
-  name = "VPN"
-}
-
 resource "terrifi_firewall_zone" "vpn_network" {
   name        = "VPN_Network"
   network_ids = [terrifi_network.vpn_network.id]
@@ -110,137 +102,6 @@ resource "terrifi_firewall_policy" "vpn_allow_server" {
 
   destination {
     zone_id = terrifi_firewall_zone.server_private.id
-  }
-}
-
-resource "terrifi_firewall_policy" "pxe" {
-  name                 = "PXE"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.internal
-  }
-
-  destination {
-    zone_id            = terrifi_firewall_zone.server_private.id
-    port_matching_type = "SPECIFIC"
-    port               = 69
-  }
-}
-
-resource "terrifi_firewall_policy" "aviator" {
-  name                 = "Aviator"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id    = local.builtin_zone_ids.internal
-    device_ids = ["04:d9:f5:81:13:44", "52:ac:cd:e9:38:2f", "0e:2b:e9:78:0f:71", "5c:9b:a6:5f:88:84"]
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-}
-
-resource "terrifi_firewall_policy" "nas" {
-  name                 = "NAS"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = terrifi_firewall_zone.server_private.id
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-}
-
-resource "terrifi_firewall_policy" "vpn_allow" {
-  name                 = "VPN Allow"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.vpn
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-}
-
-resource "terrifi_firewall_policy" "nas_allow_all" {
-  name                 = "NAS-Allow-ALL"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_private.id
-  }
-}
-
-resource "terrifi_firewall_policy" "allow_all_nas" {
-  name                 = "Allow-All-Nas"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id    = local.builtin_zone_ids.internal
-    device_ids = ["58:47:ca:78:c3:09", "58:47:ca:78:c8:9d", "58:47:ca:77:f4:41", "58:47:ca:78:c3:06", "58:47:ca:78:c3:07", "58:47:ca:78:c8:9a", "58:47:ca:78:c8:9b", "58:47:ca:77:f4:3e", "58:47:ca:77:f4:3f", "04:d9:f5:81:13:44", "3c:f0:11:3e:08:87", "f0:4e:a4:7b:e0:b3", "5c:9b:a6:5f:88:84"]
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_private.id
-  }
-}
-
-resource "terrifi_firewall_policy" "allow_bgp" {
-  name   = "Allow BGP"
-  action = "ALLOW"
-
-  source {
-    zone_id = local.builtin_zone_ids.internal
-    # The controller stores an empty list here; omitting it plans a write.
-    ips = []
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-}
-
-resource "terrifi_firewall_policy" "allow_all_3" {
-  name                 = "allow all"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = local.builtin_zone_ids.internal
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-}
-
-resource "terrifi_firewall_policy" "allow_all_talos" {
-  name                 = "allow All talos"
-  action               = "ALLOW"
-  create_allow_respond = true
-
-  source {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.server_talos.id
   }
 }
 
@@ -417,19 +278,6 @@ resource "terrifi_firewall_policy" "k8s_loadbalancer" {
   }
 }
 
-resource "terrifi_firewall_policy" "allow_iot" {
-  name   = "Allow IOT"
-  action = "ALLOW"
-
-  source {
-    zone_id = terrifi_firewall_zone.server_talos.id
-  }
-
-  destination {
-    zone_id = terrifi_firewall_zone.iot.id
-  }
-}
-
 resource "terrifi_firewall_policy" "vpn_network_external" {
   name   = "VPN_Network_External"
   action = "BLOCK"
@@ -456,6 +304,11 @@ resource "terrifi_firewall_policy" "vpn_network_gateway" {
   }
 }
 
+# The controller matches the destination by web domain (itorrents.net), which
+# terrifi 0.12 cannot represent, so this block reads as "k8s-01 -> External,
+# everything". terrifi updates with a full PUT built from this block: any
+# update would drop the domain and cut all cluster egress. Never let tofu write
+# it; edit it in the UI.
 resource "terrifi_firewall_policy" "block_traffic_to_itorrents_net" {
   name   = "Block Traffic to itorrents.net"
   action = "BLOCK"
@@ -466,6 +319,10 @@ resource "terrifi_firewall_policy" "block_traffic_to_itorrents_net" {
 
   destination {
     zone_id = local.builtin_zone_ids.external
+  }
+
+  lifecycle {
+    ignore_changes = all
   }
 }
 
