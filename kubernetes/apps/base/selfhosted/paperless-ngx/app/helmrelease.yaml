@@ -58,6 +58,11 @@ spec:
               # b70-llm-serving.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "384"
               PAPERLESS_WEBSERVER_WORKERS: "2"
+              # Office documents (.docx/.xlsx/.doc/.odt/.rtf) and e-mail (.eml) go through the tika and
+              # gotenberg sidecars below, over localhost (no Service, no network policy change).
+              PAPERLESS_TIKA_ENABLED: "true"
+              PAPERLESS_TIKA_ENDPOINT: "http://localhost:9998"
+              PAPERLESS_TIKA_GOTENBERG_ENDPOINT: "http://localhost:3000"
             envFrom:
               - secretRef:
                   name: paperless-ngx-secret
@@ -92,6 +97,68 @@ spec:
                   periodSeconds: 5
                   timeoutSeconds: 3
                   failureThreshold: 60
+
+          # Majors follow what paperless-ngx 3.4.2's own compose files pin (gotenberg 8.38, tika 3.3.x).
+          gotenberg:
+            image:
+              repository: docker.io/gotenberg/gotenberg
+              tag: 8.38.1@sha256:aa552cc115db488e0f0bcb07446aac13071ad51505b642c84bb894500907b42b
+            # args, not command: keeps the image's tini entrypoint. Flags from paperless' compose: the
+            # chromium route renders .eml, so no JavaScript and no fetching of remote content.
+            args:
+              - gotenberg
+              - --chromium-disable-javascript=true
+              - --chromium-allow-list=file:///tmp/.*
+            securityContext:
+              # The image's `gotenberg` user; its HOME holds the chromium and LibreOffice profiles.
+              runAsUser: 1001
+              runAsGroup: 1001
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+            probes:
+              liveness: &gotenberg-probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 3000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 4
+              readiness: *gotenberg-probes
+
+          tika:
+            image:
+              repository: docker.io/apache/tika
+              tag: 3.3.3.0@sha256:326b238b37904c94ff61fed87afe0af72e6a29fa715933b10af97b7d56f1d4cb
+            securityContext:
+              # The image's USER.
+              runAsUser: 35002
+              runAsGroup: 35002
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+            probes:
+              liveness: &tika-probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /tika
+                    port: 9998
+                  initialDelaySeconds: 20
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 4
+              readiness: *tika-probes
 
     defaultPodOptions:
       securityContext:
