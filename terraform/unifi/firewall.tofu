@@ -1,6 +1,6 @@
 # Zone-based firewall. Built-in zones cannot be created or deleted, so they are
-# referenced by controller ID. Policy order is not managed yet: new policies land
-# where the controller puts them. Built-in (predefined) policies are not managed.
+# referenced by controller ID. Order for zone pairs with 2+ policies lives in
+# firewall_order.tofu. Built-in (predefined) policies are not managed.
 # Skill `unifi-network`.
 
 locals {

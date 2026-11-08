@@ -406,3 +406,33 @@ import {
   to = terrifi_dns_record.pbs_server_sklab_dev
   id = "270125bd-024d-4a0d-b67a-717c330d973c"
 }
+
+import {
+  to = terrifi_firewall_policy_order.external_to_k8s_01
+  id = "ac40fe17-3454-4085-924e-25584b09948a:99e31282-ef3a-41c9-b516-8226ab2c65b1"
+}
+
+import {
+  to = terrifi_firewall_policy_order.internal_to_k8s_01
+  id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:99e31282-ef3a-41c9-b516-8226ab2c65b1"
+}
+
+import {
+  to = terrifi_firewall_policy_order.vpn_to_internal
+  id = "d43625d6-2373-490c-84b3-942adacb73c7:4ef9a66f-f4e1-4442-a51a-1e636516b20d"
+}
+
+import {
+  to = terrifi_firewall_policy_order.k8s_01_to_external
+  id = "99e31282-ef3a-41c9-b516-8226ab2c65b1:ac40fe17-3454-4085-924e-25584b09948a"
+}
+
+import {
+  to = terrifi_firewall_policy_order.internal_to_server_talos
+  id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:58669e45-e29e-48ce-a699-7a05dca7ac82"
+}
+
+import {
+  to = terrifi_firewall_policy_order.internal_to_server_private
+  id = "4ef9a66f-f4e1-4442-a51a-1e636516b20d:0993a852-a466-46f2-a438-a3b17c08ce41"
+}
