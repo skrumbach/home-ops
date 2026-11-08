@@ -1,0 +1,177 @@
+---
+# Paperless-ngx starter taxonomy, applied by seed.py through the Paperless API. Not a Kubernetes manifest; Flux
+# never reads it. seed.py creates what is missing and converges the fields declared here; it never deletes, and
+# anything created in the UI (person tags, correspondents, extra tags) is left alone.
+#
+# Rules: type = what it is, correspondent = who sent it (created by the AI workflow), tags = status + topic.
+# English names only, one set for the English/German library. Matching is "none" everywhere: the local AI
+# workflows and inbox review do the classifying until an object has a few dozen confirmed documents.
+
+tags:
+  # Status. `inbox` is the review queue; the workflows add it, you remove it once a document is checked.
+  - name: inbox
+    color: "#f6c344"
+    inbox: true
+  - name: todo
+    color: "#e5484d"
+  # Trigger for the "Reclassify with local AI" workflow. An inbox tag, because Paperless never offers inbox tags
+  # to the AI as candidates, so the AI can never re-add it and loop the workflow.
+  - name: ai-classify
+    color: "#8e4ec6"
+    inbox: true
+  # Topics.
+  - name: finance
+    color: "#30a46c"
+  - name: health
+    color: "#e54d2e"
+  - name: career
+    color: "#3e63dd"
+  - name: home
+    color: "#ad7f58"
+  - name: car
+    color: "#0090ff"
+  - name: immigration
+    color: "#d6409f"
+  - name: tax
+    color: "#f76b15"
+  # The 2025-05 restore (792 documents). Marked inbox so it is not fed to the AI as a tag candidate for every
+  # new document; delete it once the backlog is classified.
+  - name: restored-2025-05
+    color: "#8b8d98"
+    inbox: true
+
+document_types:
+  - Certificate
+  - Medical
+  - Insurance
+  - Contract
+  - Payslip
+  - Tax
+  - Invoice
+  - Receipt
+  - Statement
+  - ID & Immigration
+  - Letter
+  - Manual & Warranty
+  - Other
+
+custom_fields:
+  # A field's data type cannot be changed after creation.
+  - name: Amount
+    data_type: monetary
+  - name: Due date
+    data_type: date
+  - name: Invoice number
+    data_type: string
+  - name: Valid until
+    data_type: date
+  - name: Warranty until
+    data_type: date
+
+# `rule` names map to Paperless SavedViewFilterRule types in seed.py. Pin views to the dashboard in the UI (per
+# user, so not seeded).
+saved_views:
+  - name: Inbox
+    sort: added
+    reverse: true
+    rules:
+      - rule: has_tag
+        tag: inbox
+  - name: To do
+    sort: created
+    reverse: false
+    rules:
+      - rule: has_tag
+        tag: todo
+  - name: Tax
+    sort: created
+    reverse: true
+    rules:
+      - rule: has_tag
+        tag: tax
+  - name: Valid until
+    sort_custom_field: Valid until
+    reverse: false
+    rules:
+      - rule: has_custom_field
+        field: Valid until
+  - name: Warranties
+    sort_custom_field: Warranty until
+    reverse: false
+    rules:
+      - rule: has_custom_field
+        field: Warranty until
+  - name: Restored 2025 backlog
+    sort: created
+    reverse: true
+    rules:
+      - rule: has_tag
+        tag: restored-2025-05
+
+# Each AI action queries chat-local through LiteLLM (Paperless' own key, local B70 only). Two actions per
+# workflow because "create missing" is per action: correspondents may be created, tags and types may not.
+ai_actions:
+  - &ai_title
+    type: ai
+    fields:
+      - title
+      - document_type
+      - tags
+      - created
+    create_missing: false
+    overwrite: true
+  - &ai_correspondent
+    type: ai
+    fields:
+      - correspondent
+    create_missing: true
+    overwrite: false
+
+workflows:
+  - name: "New document: inbox + local AI"
+    order: 10
+    trigger:
+      type: document_added
+    actions:
+      - type: assign
+        tags:
+          - inbox
+      - *ai_title
+      - *ai_correspondent
+  - name: "Reclassify with local AI (tag ai-classify)"
+    order: 20
+    # Bulk-add `ai-classify` to a selection; bulk edits fire Document Updated. The tag is removed first, so the
+    # AI's own update does not re-trigger the workflow.
+    trigger:
+      type: document_updated
+      has_tags:
+        - ai-classify
+    actions:
+      - type: remove
+        tags:
+          - ai-classify
+      - type: assign
+        tags:
+          - inbox
+      - *ai_title
+      - *ai_correspondent
+  - name: "Reminder: valid until in 60 days"
+    order: 30
+    trigger:
+      type: scheduled
+      date_custom_field: Valid until
+      offset_days: -60
+    actions:
+      - type: assign
+        tags:
+          - todo
+  - name: "Reminder: due in 7 days"
+    order: 31
+    trigger:
+      type: scheduled
+      date_custom_field: Due date
+      offset_days: -7
+    actions:
+      - type: assign
+        tags:
+          - todo

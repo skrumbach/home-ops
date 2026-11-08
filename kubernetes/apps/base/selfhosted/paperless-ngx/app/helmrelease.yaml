@@ -34,6 +34,17 @@ spec:
               # A PDF/A archive for every document, as the pre-2026 instance had (761 of 792); the default
               # `auto` skips born-digital PDFs.
               PAPERLESS_ARCHIVE_FILE_GENERATION: always
+              # dateparser codes, not tesseract ones. Order stays the DMY default: right for German dates; US
+              # numeric dates (11/08/2026) can misparse, and the AI created-date suggestion corrects them.
+              PAPERLESS_DATE_PARSER_LANGUAGES: de+en
+              # Readable layout on disk for new files; existing files move only with `document_renamer`. app-template
+              # runs values through Helm tpl, so the Paperless placeholders are wrapped in a raw string.
+              PAPERLESS_FILENAME_FORMAT: "{{`{{ created_year }}/{{ correspondent }}/{{ title }}`}}"
+              PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true"
+              # E-mail and re-scans re-deliver the same file; drop exact duplicates instead of failing them.
+              PAPERLESS_CONSUMER_DELETE_DUPLICATES: "true"
+              # .eml archive: text part first, HTML as fallback.
+              PAPERLESS_EMAIL_PARSE_DEFAULT_LAYOUT: "1"
               # Consumer (polling required on Ceph -- no inotify support)
               PAPERLESS_CONSUMER_POLLING: "60"
               PAPERLESS_CONSUMER_RECURSIVE: "true"
@@ -49,6 +60,9 @@ spec:
               PAPERLESS_AI_LLM_BACKEND: openai-like
               PAPERLESS_AI_LLM_ENDPOINT: "http://litellm.ai.svc.cluster.local:4000/v1"
               PAPERLESS_AI_LLM_MODEL: chat-local
+              # Suggestions in English so they match the English taxonomy in scripts/paperless-seed, also for
+              # German documents.
+              PAPERLESS_AI_LLM_OUTPUT_LANGUAGE: English
               # The local chat model can think before answering; the 120s default is too short for it.
               PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
               PAPERLESS_AI_LLM_EMBEDDING_BACKEND: openai-like
