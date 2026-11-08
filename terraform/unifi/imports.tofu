@@ -441,3 +441,8 @@ import {
   to = terrifi_device_ports.usw_pro_max_48_poe
   id = "9c:05:d6:af:79:45"
 }
+
+import {
+  to = terrifi_device_ports.usw_pro_aggregation
+  id = "28:70:4e:5b:41:2b"
+}

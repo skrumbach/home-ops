@@ -9,7 +9,6 @@
 # Not here, on purpose:
 # - Ports 34, 36, 38: disabled; terrifi cannot represent forward mode "disabled"
 #   and leaves them untouched.
-# - USW Pro Aggregation: its 7 LACP groups are the Talos bonds and uplinks.
 # - USW Flex: no overrides, nothing to manage.
 # Each change re-provisions the switch. Skill `unifi-network`.
 
@@ -29,5 +28,22 @@ resource "terrifi_device_ports" "usw_pro_max_48_poe" {
     "39" = { name = "Port 39", native_network_id = terrifi_network.home_default.id, tagged_vlan_mode = "allow_all" }
     # Uplink LAG, see header.
     "49" = { name = "SFP+ 1", native_network_id = terrifi_network.home_default.id, tagged_vlan_mode = "allow_all" }
+  }
+}
+
+# USW Pro Aggregation: all seven port pairs are LACP groups. Import adopts only
+# the ports terrifi can represent, and every one of those must stay listed
+# (see the Pro Max 48 header). LAG members follow their first port.
+#
+# Not here, untouched by this resource:
+# - 5+6, 7+8, 9+10: the Talos bonds. k8s-01 untagged, IoT (3) and VPN_Network
+#   (90) tagged via inline `custom` VLAN mode, which terrifi device_ports cannot
+#   represent yet. They stay in the UI until it can (zero-change import).
+# - 11+12: disabled. 15+16: no native network (unsupported inline settings).
+resource "terrifi_device_ports" "usw_pro_aggregation" {
+  device_mac = "28:70:4e:5b:41:2b"
+  ports = {
+    "3"  = { name = "SFP+ 3", native_network_id = terrifi_network.home_default.id, tagged_vlan_mode = "allow_all" }
+    "13" = { name = "SFP+ 13", native_network_id = terrifi_network.server_private.id, tagged_vlan_mode = "allow_all" }
   }
 }
