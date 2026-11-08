@@ -88,9 +88,10 @@ resource "unifi_setting" "site" {
     }
     debug_tools_enabled    = false
     direct_connect_enabled = false
+    # Read as disabled by the read-only role; the admin login sees the truth.
     ssh = {
-      auth_password_enabled = false
-      enabled               = false
+      auth_password_enabled = true
+      enabled               = true
     }
     unifi_idp_enabled = true
     wifiman_enabled   = true
@@ -174,5 +175,14 @@ resource "unifi_setting" "site" {
       nat_pmp_enabled = false
       secure_mode     = false
     }
+  }
+
+  # Both read differently per login: the read-only role sees device SSH as
+  # disabled and no suppression alert IDs. Without this, an admin plan from a
+  # read-only-generated config turns SSH off on every device (caught by the
+  # guarded apply, 2026-11-08). Edit these in the UI, or lift this for one
+  # reviewed apply.
+  lifecycle {
+    ignore_changes = [mgmt.ssh, ips.suppression]
   }
 }

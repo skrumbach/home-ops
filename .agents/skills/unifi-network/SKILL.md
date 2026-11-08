@@ -62,10 +62,12 @@ reconcile it, and nothing in CI applies it. It was adopted read-only on
     account quota; when it is spent, run tofu through `op run --env-file`
     with the owner's desktop login. `UNIFI_API_KEY` must stay unset: the
     provider prefers it, and the field of that name is a cloud key (401).
-11. **BGP config is ignored after adoption.** The read-only role reads it back
-    empty, so `bgp.tofu` ignores `config`; `bgp.conf` is the only git copy
-    and what a recreate uploads. Changing it re-uploads FRR and resets every
-    Cilium session: lift `ignore_changes` for one reviewed apply.
+11. **Some fields read differently per login.** The read-only role sees the BGP
+    `config` empty, device SSH (`settings.tofu` `mgmt.ssh`) as disabled, and
+    no IPS suppression IDs. Config generated read-only would rewrite them
+    from an admin plan (it would have turned SSH off), so those fields carry
+    `ignore_changes`. Adopt with an admin plan-only check before any apply.
+    `bgp.conf` is the only git copy of FRR and what a recreate uploads.
 12. **The Network app is on Early Access with daily auto-update.** The
     provider drives the controller's internal API. Re-plan after every
     Network update before trusting a plan, and prefer the Official channel.
