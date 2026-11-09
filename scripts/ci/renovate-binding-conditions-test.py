@@ -559,13 +559,13 @@ def test_rendered_renovate_app_contract(docs: list[dict[str, Any]]) -> None:
 
 
 def test_rendered_renovate_job_contract(docs: list[dict[str, Any]]) -> None:
-    """One RenovateJob, scoped to home-ops, authenticated by the GitHub App secret."""
+    """One RenovateJob, scoped to the skrumbach account, authenticated by the GitHub App secret."""
     jobs = [d for d in docs if d.get("kind") == "RenovateJob"]
     require(len(jobs) == 1, f"expected 1 RenovateJob, got {len(jobs)}")
     spec = jobs[0].get("spec") or {}
     require(
-        spec.get("discoveryFilters") == ["skrumbach/home-ops"],
-        f"RenovateJob must discover only skrumbach/home-ops, got {spec.get('discoveryFilters')!r}",
+        spec.get("discoveryFilters") == ["skrumbach/*"],
+        f"RenovateJob must discover skrumbach/*, got {spec.get('discoveryFilters')!r}",
     )
     require(
         str(spec.get("image", "")).startswith("ghcr.io/renovatebot/renovate:"),
