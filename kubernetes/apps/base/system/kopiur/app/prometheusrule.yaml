@@ -69,6 +69,8 @@ spec:
         # Chart KopiurBackupStale waits 48h for every policy. Ceph fires here at 6h; r2 stays at 48h.
         # Skill `kopiur-backups`.
         - alert: KopiurBackupStaleCeph
+          # The metric has no repository label: select on the policy suffix, never repository="ceph",
+          # or this matches nothing and ceph staleness falls back to 48h.
           expr: |
             time() - kopiur_policy_last_backup_success_timestamp_seconds{policy=~".+-ceph$"} > 21600
           for: 5m

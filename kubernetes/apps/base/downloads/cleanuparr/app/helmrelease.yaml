@@ -87,7 +87,8 @@ spec:
     persistence:
       config:
         # Created here (app-template names it after the release: cleanuparr) and backed up
-        # by components/kopiur.
+        # by components/kopiur. A second persistentVolumeClaim entry renames this claim to
+        # cleanuparr-config and orphans the backed-up one.
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi

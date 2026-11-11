@@ -56,9 +56,9 @@ candidate count exceeds `PRUNE_CEILING`. Upload time is never earlier than the L
 every object stays at least 35d in R2, a seed of old objects is not pruned on arrival, an
 R2 bucket lock shorter than 35d never blocks the prune, and no per-object `HEAD` is needed.
 
-`scripts/ci/postgres-offsite-mirror-test.py` pins all three, plus `SERVER_NAME` and the
-bucket against the live archiver: a restore that bumps the Cluster's `serverName` must bump
-this CronJob in the same commit, or the mirror keeps copying the old path and succeeding.
+`scripts/ci/postgres-offsite-mirror-test.py` pins `SERVER_NAME` against the live archiver:
+a restore that bumps the Cluster's `serverName` must bump this CronJob in the same commit,
+or the mirror keeps copying the old path and succeeding.
 
 ## Storage and cost
 

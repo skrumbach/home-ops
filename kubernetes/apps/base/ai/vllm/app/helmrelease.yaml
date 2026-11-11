@@ -96,7 +96,7 @@ spec:
               - --cache-ram
               # Absence restores the silent 8192 MiB default. A memory limit cannot stop that leak
               # (kernel SIGKILL at page fault). 4096, not 0. Pairs with GLIBC_TUNABLES. --no-mmap is not this fix.
-              # See skill b70-llm-serving references/memory.md. Gate: scripts/ci/vllm-prompt-cache-test.py.
+              # See skill b70-llm-serving references/memory.md.
               - "4096"
               - --no-mmap
               # -ub 4096 with -b 8192: prefill +14% at 16K and +11% at 64K, decode unchanged, and
@@ -128,7 +128,7 @@ spec:
               # Do not ship one without the other. See skill b70-llm-serving references/memory.md.
               GLIBC_TUNABLES: glibc.malloc.mmap_threshold=131072
               # Numeric only. "false" or "off" parse as the default and leave the leak on.
-              # Lift only when this tag bounds fattn-onednn.cpp. Gate: scripts/ci/vllm-prompt-cache-test.py.
+              # Lift only when this tag bounds fattn-onednn.cpp.
               # See skill b70-llm-serving references/memory.md.
               GGML_SYCL_FA_ONEDNN: "0"
             envFrom: &envFrom

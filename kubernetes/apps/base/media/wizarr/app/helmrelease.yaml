@@ -123,6 +123,7 @@ spec:
       config:
         # Created here (app-template names it after the release) and backed up by
         # components/kopiur. Invites, servers and libraries live in this SQLite database.
+        # A second persistentVolumeClaim entry renames this claim to wizarr-config and orphans the backed-up one.
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi

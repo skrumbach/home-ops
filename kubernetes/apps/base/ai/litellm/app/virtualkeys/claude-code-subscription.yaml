@@ -13,7 +13,7 @@ spec:
   secretName: litellm-key-claude-code-subscription
   secretKey: key
   # Pass-through entries carry the placeholder apiKey and $0 prices; embedding-local is
-  # credential-less and unpriced (both CI-asserted).
+  # credential-less and unpriced (the credentials are CI-asserted).
   models:
     - claude-sonnet-5
     - claude-opus-5

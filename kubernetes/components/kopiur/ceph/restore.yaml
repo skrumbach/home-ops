@@ -34,4 +34,6 @@ spec:
       fsGroup: ${KOPIUR_PGID:-1000}
     cache:
       mode: Ephemeral
+      # Restore cache grows ~1:1 to a ~6.2 GiB plateau; a claim past its cache fails ENOSPC and never retries.
+      # IfNotPresent: after raising KOPIUR_CACHE_CAPACITY, delete the failed Restore so Flux recreates it.
       capacity: "${KOPIUR_CACHE_CAPACITY:-2Gi}"

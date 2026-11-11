@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# Took over each claim the retired components/volsync/pvc.yaml emitted (issue #2202 PR-6 removed it).
+# Emits the live data claim for every overlay that includes this component. Removing the include
+# prunes the claim, and ceph-block reclaimPolicy is Delete.
 # Skill `kopiur-backups`.
 resources:
   - ./pvc.yaml

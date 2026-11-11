@@ -77,8 +77,8 @@ spec:
     endpointRoutes:
       enabled: true
     # The four metrics ports (prometheus, operator, envoy, hubble.metrics) are pinned at the
-    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965, and
-    # scripts/ci/hostpolicy-ceph-selector-test.py fails if a pin leaves that list.
+    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965; keep the pins in sync
+    # with that list.
     envoy:
       enabled: false
       prometheus:

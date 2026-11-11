@@ -65,7 +65,8 @@ spec:
           serverName: postgres18-v2
 
   # serverName is one per cluster generation: postgres18-v1 is the archive of the
-  # empty cluster this one replaced. Increment it on any rebuild. Skill `databases`.
+  # empty cluster this one replaced. Increment it on any rebuild, and bump SERVER_NAME in
+  # ../offsite-mirror/cronjob.yaml with it. Skill `databases`.
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true

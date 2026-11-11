@@ -111,7 +111,7 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 40
               # nlohmann renders NaN as bare null, so grep -q null is the detector. No $ in this
-              # script: Flux envsubst eats it. Gate: scripts/ci/embedding-values-test.py.
+              # script: Flux envsubst eats it.
               # See skill b70-llm-serving references/embeddings.md.
               readiness: &probe
                 enabled: true
