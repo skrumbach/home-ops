@@ -61,7 +61,7 @@ spec:
               # Q3_K_M of the official distill, not the IQ3_XXS APEX build: same quality on the
               # graded suite and +28% decode (81 vs 63 t/s), because K-quants dequantize faster
               # than IQ-quants on SYCL. Q4_K_M decodes 99 t/s but leaves 1.5 GiB of VRAM at 262K.
-              # Not abliterated. mmproj auto-loads. Results: scripts/bench/results/q6-*, quality-*.
+              # Not abliterated. mmproj auto-loads.
               # The alias is the loaded model's real name, from ConfigMap chat-model
               # (apps/main/ai/chat-model.yaml). Change both together on a swap.
               # See skill b70-llm-serving references/flags.md.
@@ -100,8 +100,8 @@ spec:
               - "4096"
               - --no-mmap
               # -ub 4096 with -b 8192: prefill +14% at 16K and +11% at 64K, decode unchanged, and
-              # 4 concurrent 16K requests finished 6% sooner with per-request decode 10.4 vs 6.7 t/s
-              # (scripts/bench/results/day-ub4096-*.json). The earlier rejection did not reproduce.
+              # 4 concurrent 16K requests finished 6% sooner with per-request decode 10.4 vs 6.7 t/s.
+              # The earlier rejection did not reproduce.
               # See skill b70-llm-serving references/flags.md.
               - -b
               - "8192"
@@ -110,7 +110,7 @@ spec:
               # Drafts from n-grams already in the context, so there is no draft model and no VRAM cost.
               # Neutral on novel text (64.4 vs 64.3 t/s), faster only when the output copies the prompt.
               # draft-mtp was slower at short context and worse under concurrency. Do not swap it in
-              # without re-running day-mtp3-*.json. See skill b70-llm-serving references/flags.md.
+              # without re-measuring it. See skill b70-llm-serving references/flags.md.
               - --spec-type
               - ngram-mod
               # Unset, llama.cpp spawns one thread per hardware thread (20 on talos-3) and the
