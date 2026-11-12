@@ -238,10 +238,16 @@ EOF
 }
 
 # Renders base/<piece>/ocirepository.yaml - the app-template chart source, named
-# after the HelmRelease. Keep url, tag and layerSelector in step with the other
-# app-template OCIRepositories (e.g. kubernetes/apps/base/network/echo/app).
+# after the HelmRelease. The tag is read from network/echo, which Renovate keeps
+# current; url and layerSelector stay in step with it by hand.
 render_app_ocirepository() {
   local name="$1"
+  local tag
+  tag="$(awk '$1 == "tag:" { print $2 }' "$REPO_ROOT/kubernetes/apps/base/network/echo/app/ocirepository.yaml")"
+  if [[ -z "$tag" ]]; then
+    echo "generate-app: could not read the app-template tag from network/echo" >&2
+    exit 1
+  fi
   cat <<EOF
 ---
 $ocirepository_schema
@@ -255,7 +261,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: 5.3.0
+    tag: $tag
   url: oci://ghcr.io/bjw-s-labs/helm/app-template
 EOF
 }
