@@ -22,7 +22,7 @@ env:
   # Pinned exactly: the action's SHA-ref lookup falls back to "latest" when the tags API
   # call fails. Keep in step with the action pin on the `uses:` lines and image-pull.yaml.
   # renovate: datasource=github-releases depName=home-operations/flate
-  FLATE_VERSION: 0.6.5
+  FLATE_VERSION: 0.7.3
 
 jobs:
   changes:
@@ -101,7 +101,7 @@ jobs:
 
       # Empty base: otherwise the action exports FLATE_BASE and `flate test all` goes changed-only.
       - name: Setup flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
         with:
           version: ${{ env.FLATE_VERSION }}
           base: ""
@@ -143,7 +143,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
         with:
           version: ${{ env.FLATE_VERSION }}
           base: ""
