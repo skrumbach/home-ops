@@ -507,6 +507,12 @@ spec:
             name: Loki
             type: loki
             url: http://loki-headless.monitoring.svc.cluster.local:3100
+          # Beside Loki while both run (phase 1); needs the victoriametrics-logs-datasource plugin below.
+          - access: proxy
+            name: VictoriaLogs
+            type: victoriametrics-logs-datasource
+            uid: victoria-logs
+            url: http://victoria-logs.monitoring.svc.cluster.local:9428
           - name: Alertmanager
             type: alertmanager
             access: proxy
@@ -585,6 +591,7 @@ spec:
 
     plugins:
       - grafana-clock-panel
+      - victoriametrics-logs-datasource
 
     rbac:
       pspEnabled: false
