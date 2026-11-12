@@ -604,11 +604,7 @@ spec:
           gethomepage.dev/name: Grafana
           gethomepage.dev/group: Observability
           gethomepage.dev/description: Dashboards
-          gethomepage.dev/widget.type: grafana
-          # In-cluster Service: the public host redirects http to https and the widget proxy fails on it.
-          gethomepage.dev/widget.url: http://grafana.monitoring
-          gethomepage.dev/widget.username: "{{`{{HOMEPAGE_VAR_GRAFANA_USERNAME}}`}}"
-          gethomepage.dev/widget.password: "{{`{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}`}}"
+          # No homepage widget: it only speaks basic auth, and GF_AUTH_BASIC_ENABLED is false.
         enabled: true
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
