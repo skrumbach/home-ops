@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: home-assistant
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -174,7 +173,7 @@ spec:
           gethomepage.dev/description: Smart home hub
           gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
         hostnames:
-          - "hass.${SECRET_DOMAIN}"
+          - "hass.sklab.dev"
         parentRefs:
           - name: envoy-external
             namespace: network
@@ -192,7 +191,7 @@ spec:
           gethomepage.dev/description: Edit the Home Assistant config
           gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
         hostnames:
-          - "hass-code.${SECRET_DOMAIN}"
+          - "hass-code.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

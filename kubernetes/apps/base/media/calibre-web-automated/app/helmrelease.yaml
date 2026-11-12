@@ -9,7 +9,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: calibre-web-automated
   install:
     remediation:
       retries: 3
@@ -102,11 +102,11 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/description: E-book library
           gatus.home-operations.com/endpoint: |-
-            url: https://calibre.${SECRET_DOMAIN}/login
+            url: https://calibre.sklab.dev/login
             conditions:
               - "[STATUS] == 200"
             group: media
-        hostnames: ["calibre.${SECRET_DOMAIN}"]
+        hostnames: ["calibre.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -132,7 +132,7 @@ spec:
             subPath: run
       ingest:
         type: nfs
-        server: &nas nas.${SECRET_DOMAIN}
+        server: &nas nas.sklab.dev
         path: /mnt/storage/Media/ebooks/calibre/ingest
         globalMounts:
           - path: /cwa-book-ingest

@@ -5,7 +5,7 @@ kind: HTTPRoute
 metadata:
   name: rook-ceph-s3
 spec:
-  hostnames: ["s3.${SECRET_DOMAIN}"]
+  hostnames: ["s3.sklab.dev"]
   parentRefs:
     - name: envoy-internal
       namespace: network

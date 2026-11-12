@@ -4,11 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app searxng
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   components:
     - ../../../../../components/dragonfly
   dependsOn:
@@ -24,9 +21,6 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/ai/searxng/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
   prune: true
@@ -35,5 +29,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m

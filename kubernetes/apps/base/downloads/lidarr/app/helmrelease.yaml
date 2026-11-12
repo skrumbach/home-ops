@@ -9,8 +9,7 @@ spec:
   timeout: 10m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: lidarr
   values:
     controllers:
       lidarr:
@@ -130,7 +129,7 @@ spec:
 
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -144,13 +143,13 @@ spec:
           gethomepage.dev/description: Music
           gethomepage.dev/icon: lidarr.svg
           gatus.home-operations.com/endpoint: |-
-            url: https://lidarr.${SECRET_DOMAIN}/ping
+            url: https://lidarr.sklab.dev/ping
             conditions:
               - "[STATUS] == 200"
             group: downloads
 
         hostnames:
-          - lidarr.${SECRET_DOMAIN}
+          - lidarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

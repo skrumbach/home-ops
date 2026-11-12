@@ -10,18 +10,18 @@ metadata:
     gethomepage.dev/name: pgAdmin
     gethomepage.dev/pod-selector: app.kubernetes.io/name=pgadmin
     gethomepage.dev/icon: pgadmin.svg
-    gethomepage.dev/siteMonitor: "https://pgadmin.${SECRET_DOMAIN}"
+    gethomepage.dev/siteMonitor: "https://pgadmin.sklab.dev"
     gethomepage.dev/description: PostgreSQL admin
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
-      url: https://pgadmin.${SECRET_DOMAIN}/misc/ping
+      url: https://pgadmin.sklab.dev/misc/ping
       conditions:
         - "[STATUS] == 200"
       group: database
 spec:
   hostnames:
-    - "pgadmin.${SECRET_DOMAIN}"
-    - "pg.${SECRET_DOMAIN}"
+    - "pgadmin.sklab.dev"
+    - "pg.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

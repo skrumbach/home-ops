@@ -20,7 +20,7 @@ spec:
     auth:
       oidc:
         enabled: true
-        issuerUrl: "https://auth.${SECRET_DOMAIN}/application/o/renovate-operator/"
+        issuerUrl: "https://auth.sklab.dev/application/o/renovate-operator/"
         clientId: renovate-operator
         existingSecret: renovate-operator-oidc
         secretKey: client-secret
@@ -46,7 +46,7 @@ spec:
         gatus.home-operations.com/endpoint: |-
           conditions: ["[STATUS] == 200"]
       hostnames:
-        - "renovate.${SECRET_DOMAIN}"
+        - "renovate.sklab.dev"
       parentRefs:
         - name: envoy-internal
           namespace: network

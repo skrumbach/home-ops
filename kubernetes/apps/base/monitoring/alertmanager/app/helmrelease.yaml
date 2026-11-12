@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: alertmanager
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -106,7 +105,7 @@ spec:
             conditions: ["[STATUS] == 200"]
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

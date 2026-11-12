@@ -8,7 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: shelfmark
   install:
     remediation:
       retries: 3
@@ -151,11 +151,11 @@ spec:
           gethomepage.dev/group: Downloads
           gethomepage.dev/description: Book search and download
           gatus.home-operations.com/endpoint: |-
-            url: https://books.${SECRET_DOMAIN}/api/health
+            url: https://books.sklab.dev/api/health
             conditions:
               - "[STATUS] == 200"
             group: media
-        hostnames: ["books.${SECRET_DOMAIN}"]
+        hostnames: ["books.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -191,14 +191,14 @@ spec:
           - path: /data/downloads
       ingest:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media/ebooks/calibre/ingest
         globalMounts:
           - path: /cwa-book-ingest
       # Read-only view of the CWA library so Shelfmark can see which books already exist.
       library:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media/ebooks/calibre/library
         globalMounts:
           - path: /calibre-library

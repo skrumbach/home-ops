@@ -5,6 +5,7 @@ kind: Kustomization
 # No SecurityPolicy on purpose: kromgo is public (see the route comment in helmrelease.yaml).
 resources:
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
 configMapGenerator:
   - name: kromgo-configmap
     files:

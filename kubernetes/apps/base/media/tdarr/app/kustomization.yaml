@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./ciliumnetworkpolicy.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
   - ./pvc.yaml
   - ./service.yaml
 # Applies to the SnapshotPolicies the overlay's kopiur component adds (tdarr-ceph, tdarr-r2). An overlay

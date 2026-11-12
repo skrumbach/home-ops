@@ -69,7 +69,7 @@ Each is a warning needed before deciding to touch the subsystem.
 **Flux and CI**
 - **NEVER run `just bootstrap cluster` / `apps` against a healthy cluster** (DR and first-time only; `bootstrap/AGENTS.md`).
 - **A literal `${...}` that is not a Flux variable (Grafana `${datasource}`, shell/env tokens) fails or silently blanks the whole Kustomization at reconcile and flate does not report it:** write `$${VAR}` or set `kustomize.toolkit.fluxcd.io/substitute: disabled` on a resource with no real variables (`kubernetes/apps/base/ai/opencode/app/kustomization.yaml`).
-- **`healthChecks` target the workload, never the HelmRelease, and a Kustomization that owns a kopiur claim keeps `wait` false (dependency gates like CRDs, operators and secret stores set `wait: true`).** Suspend a Kustomization before a live HelmRelease edit.
+- **`healthChecks` target the workload, never the HelmRelease, and a Kustomization that owns a kopiur claim never sets `wait: true` (dependency gates like CRDs, operators and secret stores do).** Suspend a Kustomization before a live HelmRelease edit.
 - **Deleting a Kustomization deletes its resources whatever `prune` says** (`deletionPolicy: WaitForTermination`); the guard is `kustomize.toolkit.fluxcd.io/prune: disabled` on the HelmRelease or CR.
 - **Never add a helm `postRenderer: bash`** (breaks on Helm 4).
 - **A Renovate bump of `talosupgrade.yaml` or `kubernetesupgrade.yaml` is an unattended node upgrade.**

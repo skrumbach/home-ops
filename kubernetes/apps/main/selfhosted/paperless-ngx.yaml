@@ -4,12 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app paperless-ngx
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: selfhosted
   interval: 30m
   timeout: 5m
   path: "./kubernetes/apps/base/selfhosted/paperless-ngx/app"
@@ -18,7 +14,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   healthCheckExprs:
     - apiVersion: dragonflydb.io/v1alpha1
       kind: Dragonfly
@@ -40,9 +35,6 @@ spec:
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/dragonfly
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 10Gi
@@ -56,21 +48,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: paperless-ngx-media-kopiur
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: paperless-ngx
+  targetNamespace: &namespace selfhosted
   interval: 30m
-  timeout: 5m
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
@@ -90,12 +76,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: paperless-ngx-db
-  namespace: selfhosted
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: paperless-ngx
   interval: 30m
   timeout: 5m
   path: ./kubernetes/components/cnpg-database

@@ -4,11 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app lidarr
-  namespace: &namespace downloads
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
@@ -27,9 +23,6 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/base/downloads/lidarr/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: lidarr-config
@@ -42,9 +35,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: downloads
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
@@ -53,12 +44,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: lidarr-db
-  namespace: downloads
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: lidarr
   interval: 30m
   timeout: 5m
   path: ./kubernetes/components/cnpg-database

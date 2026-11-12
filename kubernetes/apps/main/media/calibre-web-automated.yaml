@@ -4,9 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app calibre-web-automated
-  namespace: &namespace media
 spec:
-  targetNamespace: *namespace
+  targetNamespace: &namespace media
   dependsOn:
     - name: kopiur-repository
       namespace: system
@@ -16,9 +15,6 @@ spec:
       namespace: security
     - name: rook-ceph-cluster
       namespace: rook-ceph
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/base/media/calibre-web-automated/app
   components:
     - ../../../../../components/kopiur/pvc
@@ -28,19 +24,15 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   interval: 30m
   timeout: 3m
-  # Workload health signal only. wait:false is required for Flux to honour healthChecks at all (wait:true assesses the whole inventory instead).
+  # Workload health signal only. wait stays unset (false): Flux honours healthChecks only then (wait:true assesses the whole inventory instead).
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
       name: calibre-web-automated
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 20Gi
@@ -50,21 +42,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: calibre-web-automated-kopiur
-  namespace: &namespace media
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: calibre-web-automated
+  targetNamespace: media
   interval: 30m
-  timeout: 5m
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     # Deliberately no dependsOn calibre-web-automated (greenfield deadlock).
     # kopiur-repository is the dependency that matters.

@@ -4,15 +4,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app home-assistant
-  namespace: &namespace home-automation
 spec:
-  targetNamespace: *namespace
+  targetNamespace: home-automation
   components:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-store
       namespace: security
@@ -26,13 +22,8 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   interval: 30m
-  timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 5Gi

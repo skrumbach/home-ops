@@ -3,12 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app gha-runner-scale-set
-  namespace: &namespace actions-runner-system
+  name: gha-runner-scale-set
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace actions-runner-system
   interval: 1h
   dependsOn:
     - name: gha-runner-scale-set-controller
@@ -22,5 +19,3 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m

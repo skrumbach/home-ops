@@ -60,7 +60,7 @@ spec:
     sources: ["gateway-httproute", "service"]
     txtOwnerId: main
     txtPrefix: k8s.main.
-    domainFilters: ["${SECRET_DOMAIN}"]
+    domainFilters: ["sklab.dev"]
     serviceMonitor:
       enabled: true
     podAnnotations:

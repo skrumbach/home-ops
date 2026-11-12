@@ -8,3 +8,4 @@ resources:
   - ./externalsecret-api-key.yaml
   - ./pushsecret-api-key.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml

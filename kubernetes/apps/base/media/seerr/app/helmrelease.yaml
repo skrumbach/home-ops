@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: seerr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -107,9 +106,9 @@ spec:
           gethomepage.dev/icon: seerr.svg
           gethomepage.dev/description: Request movies and shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=seerr
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "external.sklab.dev"
         hostnames:
-          - seerr.${SECRET_DOMAIN}
+          - seerr.sklab.dev
         parentRefs:
           - name: envoy-external
             namespace: network

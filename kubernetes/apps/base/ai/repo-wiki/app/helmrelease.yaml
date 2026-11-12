@@ -8,7 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: repo-wiki
   maxHistory: 2
   install:
     remediation:
@@ -149,11 +149,11 @@ spec:
           gethomepage.dev/name: Repo Wiki
           gethomepage.dev/description: Generated repo documentation
           gethomepage.dev/icon: "mdi-book-open-page-variant-#22D8F0"
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
         hostnames:
-          - "repo-wiki.${SECRET_DOMAIN}"
+          - "repo-wiki.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

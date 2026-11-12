@@ -4,11 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app coder
-  namespace: &namespace coder
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: coder-db
       namespace: coder
@@ -19,15 +15,14 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/base/coder/coder/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: coder
   timeout: 5m
   wait: true
 ---
@@ -38,12 +33,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: coder-db
-  namespace: coder
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: coder
   interval: 30m
   timeout: 5m
   path: ./kubernetes/components/cnpg-database

@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cleanuparr
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: downloads
   interval: 30m
-  timeout: 5m
   path: "./kubernetes/apps/base/downloads/cleanuparr/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
@@ -27,9 +21,6 @@ spec:
     # VolSync retirements and points the claim at a snapshot a new app does not have.
     - ../../../../../components/kopiur
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       # KOPIUR_CLAIM is omitted: app-template names the claim after the release, so it is the app.

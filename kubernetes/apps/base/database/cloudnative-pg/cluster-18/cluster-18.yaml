@@ -77,7 +77,7 @@ spec:
   # Never serverTLSSecret/serverCASecret.
   certificates:
     serverAltDNSNames:
-      - postgres-18.${SECRET_DOMAIN}
+      - postgres-18.sklab.dev
 
   postgresql:
     synchronous:

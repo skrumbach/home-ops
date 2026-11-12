@@ -13,15 +13,15 @@ metadata:
     gethomepage.dev/description: Subscription OAuth API proxy
     gethomepage.dev/pod-selector: app.kubernetes.io/name=cliproxyapi
     gethomepage.dev/icon: "mdi-api-#22D8F0"
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
-      url: https://cliproxyapi.${SECRET_DOMAIN}/healthz
+      url: https://cliproxyapi.sklab.dev/healthz
       conditions:
         - "[STATUS] == 200"
       group: ai
 spec:
   hostnames:
-    - "cliproxyapi.${SECRET_DOMAIN}"
+    - "cliproxyapi.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

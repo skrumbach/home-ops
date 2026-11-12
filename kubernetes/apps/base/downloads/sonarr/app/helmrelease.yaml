@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: sonarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -116,7 +115,7 @@ spec:
           - path: /data/downloads
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -131,7 +130,7 @@ spec:
           gethomepage.dev/description: TV shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sonarr
         hostnames:
-          - sonarr.${SECRET_DOMAIN}
+          - sonarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

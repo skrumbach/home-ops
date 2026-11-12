@@ -14,12 +14,12 @@ metadata:
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: app.kubernetes.io/name=konflate
     gethomepage.dev/icon: konflate.svg
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == 200"]
 spec:
   hostnames:
-    - "konflate.${SECRET_DOMAIN}"
+    - "konflate.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

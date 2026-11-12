@@ -33,15 +33,15 @@ spec:
     - name: MAX_STRING_LENGTH_PROMPT_IN_DB
       value: "1000000"
     - name: GENERIC_AUTHORIZATION_ENDPOINT
-      value: https://auth.${SECRET_DOMAIN}/application/o/authorize/
+      value: https://auth.sklab.dev/application/o/authorize/
     - name: GENERIC_TOKEN_ENDPOINT
-      value: https://auth.${SECRET_DOMAIN}/application/o/token/
+      value: https://auth.sklab.dev/application/o/token/
     - name: GENERIC_USERINFO_ENDPOINT
-      value: https://auth.${SECRET_DOMAIN}/application/o/userinfo/
+      value: https://auth.sklab.dev/application/o/userinfo/
     # Redirect URI is <PROXY_BASE_URL>/sso/callback: change it only together
     # with allowed_redirect_uris in litellm.tofu.
     - name: PROXY_BASE_URL
-      value: https://litellm.${SECRET_DOMAIN}
+      value: https://litellm.sklab.dev
     # Must include litellm_role (litellm.tofu property mapping), or first login
     # lands as INTERNAL_USER_VIEW_ONLY.
     - name: GENERIC_SCOPE
@@ -52,7 +52,7 @@ spec:
     - name: AUTO_REDIRECT_UI_LOGIN_TO_SSO
       value: "true"
     - name: PROXY_LOGOUT_URL
-      value: https://auth.${SECRET_DOMAIN}/application/o/litellm/end-session/
+      value: https://auth.sklab.dev/application/o/litellm/end-session/
 
   # The operator mints and syncs virtual keys through the admin API with this.
   apiAccess:

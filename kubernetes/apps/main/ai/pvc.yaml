@@ -3,13 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app ai-pvc
-  namespace: &namespace ai
+  name: ai-pvc
 spec:
   # shared-xml and shared-files. Do not attach components/kopiur; neither claim is a backup.
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -21,6 +17,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: ai

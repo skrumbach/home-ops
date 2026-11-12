@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: prowlarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -105,7 +104,7 @@ spec:
           gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
         hostnames:
-          - prowlarr.${SECRET_DOMAIN}
+          - prowlarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

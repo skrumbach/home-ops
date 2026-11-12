@@ -14,12 +14,12 @@ metadata:
     gethomepage.dev/description: Coding workspace
     gethomepage.dev/pod-selector: app.kubernetes.io/name=opencode
     gethomepage.dev/icon: opencode.svg
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == any(200, 302, 401)"]
 spec:
   hostnames:
-    - "opencode.${SECRET_DOMAIN}"
+    - "opencode.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

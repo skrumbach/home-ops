@@ -6,8 +6,8 @@ drops to uid 10000). This page is the human setup.
 
 | Container | URL |
 | --- | --- |
-| `app` (dashboard, basic auth) | `https://hermes.${SECRET_DOMAIN}` |
-| `codeserver` (no auth of its own, Authentik SSO at Envoy) | `https://hermes-code.${SECRET_DOMAIN}` |
+| `app` (dashboard, basic auth) | `https://hermes.sklab.dev` |
+| `codeserver` (no auth of its own, Authentik SSO at Envoy) | `https://hermes-code.sklab.dev` |
 
 Ports: `9119` dashboard, `8642` API, `12321` code-server. Mounts:
 `/opt/data` (RWO, single writer), `/opt/xml`, `/opt/files`.
@@ -81,7 +81,7 @@ DM the bot from an allowed user. `TELEGRAM_BOT_TOKEN` and
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS` | BotFather token and numeric user ids |
 
 `MCP_GATEWAY_TOKEN` (the ToolHive MCP gateway bearer token, sent to
-`https://mcp.${SECRET_DOMAIN}/mcp`) is not a prerequisite.
+`https://mcp.sklab.dev/mcp`) is not a prerequisite.
 It comes from 1Password item `mcp-gateway`, which
 `ai/toolhive`'s PushSecret writes.
 

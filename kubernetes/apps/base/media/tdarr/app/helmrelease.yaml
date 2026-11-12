@@ -11,8 +11,7 @@ spec:
   timeout: 15m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: tdarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -271,7 +270,7 @@ spec:
           - path: /temp
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /media
@@ -286,7 +285,7 @@ spec:
           gethomepage.dev/description: Library transcoding to AV1
           gethomepage.dev/pod-selector: app.kubernetes.io/name=tdarr
         hostnames:
-          - tdarr.${SECRET_DOMAIN}
+          - tdarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

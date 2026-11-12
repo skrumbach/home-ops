@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: esphome
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -140,7 +139,7 @@ spec:
             ui:
               hide-url: true
         hostnames:
-          - "esphome.${SECRET_DOMAIN}"
+          - "esphome.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

@@ -40,7 +40,7 @@ spec:
     # need to reach it: Prometheus, the emqx-exporter, the EMQX operator
     # (calls /api/v5/configs during reconciliation; if blocked, pods
     # never become on-serving), and the envoy gateway pods routing
-    # mqtt.${SECRET_DOMAIN} traffic. Source-restricting is a maintenance
+    # mqtt.sklab.dev traffic. Source-restricting is a maintenance
     # burden that breaks any new consumer; the dashboard's own
     # username/password auth is the real security boundary.
     - ports:

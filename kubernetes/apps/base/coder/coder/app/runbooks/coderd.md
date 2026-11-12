@@ -1,7 +1,7 @@
 # Coderd Runbooks
 
 These files are mounted as ConfigMap `coder-runbooks` (label `runbook_docs: "true"`).
-There is no `runbooks.${SECRET_DOMAIN}` HTTPRoute. Alert `runbook_url` values
+There is no `runbooks.sklab.dev` HTTPRoute. Alert `runbook_url` values
 point at this Git path.
 
 ## CoderdCPUUsage

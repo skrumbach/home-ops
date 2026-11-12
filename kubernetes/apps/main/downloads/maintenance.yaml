@@ -3,13 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app downloads-maintenance
-  namespace: &namespace downloads
+  name: downloads-maintenance
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: downloads
   dependsOn:
     - name: downloads-pvc
       namespace: downloads
@@ -21,5 +17,3 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  timeout: 5m
-  wait: false

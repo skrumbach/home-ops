@@ -8,8 +8,7 @@ spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: sabnzbd
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -76,7 +75,7 @@ spec:
                 sabnzbd.downloads.svc,
                 sabnzbd.downloads.svc.cluster,
                 sabnzbd.downloads.svc.cluster.local,
-                sabnzbd.${SECRET_DOMAIN}
+                sabnzbd.sklab.dev
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -201,7 +200,7 @@ spec:
           gethomepage.dev/description: Usenet downloader
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sabnzbd
         hostnames:
-          - sabnzbd.${SECRET_DOMAIN}
+          - sabnzbd.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
