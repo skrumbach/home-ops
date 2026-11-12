@@ -4,7 +4,8 @@ kind: ServiceAccount
 metadata:
   name: flux-mcp
 ---
-# Reuses the broad read-only ClusterRole from kubectl-mcp (secrets excluded).
+# Read-only on purpose: Flux applies as cluster-admin, so any write grant here lets a gateway-token holder apply anything.
+# Reuses kubectl-mcp-readonly (secrets excluded); keep mcpserver.yaml --read-only too.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:

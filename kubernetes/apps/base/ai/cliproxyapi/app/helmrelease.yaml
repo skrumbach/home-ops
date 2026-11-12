@@ -117,7 +117,7 @@ spec:
         size: 1Gi
         storageClass: ceph-block
         # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
+        # delete the only live copy of this born-kopiur claim.
         retain: true
         globalMounts:
           - path: /data

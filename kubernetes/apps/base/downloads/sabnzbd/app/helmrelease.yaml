@@ -137,7 +137,7 @@ spec:
     defaultPodOptions:
       # No dedicated-taint toleration. PreferNoSchedule keeps this off
       # talos-3 by score, not a hard filter. An explicit toleration is
-      # required to place it there. Skill node-scheduling.
+      # required to place it there.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname
@@ -174,7 +174,7 @@ spec:
       # download_dir scratch on ceph-block, not CephFS: thousands of tiny
       # SABnzbd_article_* files storm the MDS metadata journal. Mounts over the
       # usenet/incomplete subpath; `complete` stays on shared-downloads for *arr
-      # hardlinks. Path matches download_dir in sabnzbd.ini. Skill media-stack.
+      # hardlinks. Path matches download_dir in sabnzbd.ini.
       incomplete:
         existingClaim: sabnzbd-incomplete
         advancedMounts:

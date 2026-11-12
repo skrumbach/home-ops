@@ -1,6 +1,6 @@
 # AI stack: model naming
 
-Subsystem detail lives in skills `ai-stack`, `litellm-proxy`, `hermes-agent` and `b70-llm-serving` (`.agents/skills/<name>/SKILL.md`). This page is the naming rule only.
+This page is the naming rule only.
 
 ## Two kinds of name
 
@@ -19,15 +19,13 @@ The real name is defined once: ConfigMap `chat-model`, key `CHAT_MODEL_ID` (`kub
 1. **Consumers use `chat-local`, never the real name.** Hermes `model.default`, Linkwarden `OPENAI_MODEL`, LiteLLM tiers and fallbacks. A model swap must not touch them.
 2. **`CHAT_MODEL_ID` is one path-safe token with no `/`.** No `org/` prefix, no `-GGUF` suffix.
 3. **Do not add a literal model name to a new file.** Use `${CHAT_MODEL_ID}` where the real name is needed, `chat-local` everywhere else.
-4. **The four local LiteLLM aliases share one backend**, each with one distinct property: `chat-local` (zero price, no cloud fallback), `chat-ha` (cloud fallback), `chat-local-classifier` (thinking off), `demo-priced-local` (synthetic prices, `demo` key only). Detail: skill `litellm-proxy`, `references/model-catalog.md`.
+4. **The four local LiteLLM aliases share one backend**, each with one distinct property: `chat-local` (zero price, no cloud fallback), `chat-ha` (cloud fallback), `chat-local-classifier` (thinking off), `demo-priced-local` (synthetic prices, `demo` key only).
 
 ## Swapping the chat model
 
 1. Change the `-hf` repo in the vllm HelmRelease.
 2. Change `CHAT_MODEL_ID` in `chat-model.yaml`.
 3. Merge. Chat restarts once (Recreate, about 4 minutes).
-
-Full steps and the verification list: skill `b70-llm-serving`, `references/flags.md` ("Swapping the chat model").
 
 ## Side effects of a swap
 

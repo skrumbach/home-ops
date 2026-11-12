@@ -39,7 +39,6 @@ spec:
       csi:
         cephfs:
           # ms_mode=prefer-crc so the kernel client uses msgr2. forceCephFSKernelClient is inert and stays deleted.
-          # See skill rook-ceph.
           kernelMountOptions: "ms_mode=prefer-crc"
       cephConfig:
         global:
@@ -53,17 +52,15 @@ spec:
           auth_service_required: "cephx"
 
           # Compression stays off. Media and RBD never hit the ratio, and zstd added write latency on these drives.
-          # See skill rook-ceph.
 
         mgr:
           mgr/crash/warn_recent_interval: "7200"
 
         osd:
           # 10 GiB is the BlueStore cache target, not OSD RSS. Do not cut the 12Gi request to match it.
-          # See skill rook-ceph.
           osd_memory_target: "10737418240" # 10 GiB
           osd_recovery_max_active: "3" # Don't overwhelm homelab hardware
-          # One scrub per OSD, window 01:00-07:00. See skill rook-ceph.
+          # One scrub per OSD, window 01:00-07:00.
           osd_max_scrubs: "1"
           osd_scrub_begin_hour: "1"
           osd_scrub_end_hour: "7"
@@ -71,12 +68,10 @@ spec:
           osd_mclock_profile: high_client_ops
 
           # Threshold 5 is Ceph's own non-default and still trips a real stall. Lifetime 3600 is what stops one stall latching HEALTH_WARN for a day and blocking the reboot gate.
-          # See skill rook-ceph.
           bluestore_slow_ops_warn_threshold: "5"
           bluestore_slow_ops_warn_lifetime: "3600"
 
         # Literature caps, not fio: Samsung 15000, Lexar 7000. A set cap makes the OSD skip re-bench. No osd.1.
-        # See skill rook-ceph.
         "osd.0":
           osd_mclock_max_capacity_iops_ssd: "15000" # Samsung 980 PRO 2TB
         "osd.2":
@@ -99,19 +94,20 @@ spec:
           rgw_realm: ceph-objectstore
 
           # false restores the CVE-2026-54330 x-amz-* check. v20.2.5 carries ceph/ceph#71192, so unsigned content-type PUTs pass.
-          # Keep the key: Rook does not delete a removed cephConfig key from the mon DB. See skill rook-ceph.
+          # Keep the key: Rook does not delete a removed cephConfig key from the mon DB. After a Ceph bump check:
+          # unsigned content-type PUT 200, unsigned x-amz-* PUT 403.
           rgw_sigv4_insecure: "false"
       security:
         cephx:
           # Daemon keys are aes256k at generation 2. Next rotation sets keyGeneration to current+1. csi stays aes (kernel < 7.0).
-          # See skill rook-ceph.
           daemon:
             keyType: aes256k
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
-            # csi stays aes. Kernel clients need Linux >= 7.0. These nodes run 6.18.x. See skill rook-ceph.
+            # csi stays aes. Kernel clients need Linux >= 7.0. Never turn off mon_auth_allow_insecure_key /
+            # mon_auth_emergency_allowed_ciphers (the AUTH_INSECURE_* warnings): that cuts auth on every RBD map and CephFS mount.
       # Effect must match PreferNoSchedule. `all` covers mon, osd, and mgr. It does not cover mds or rgw.
-      # CSI nodeplugins are operator/csi-driver-tolerations.yaml. See skill node-scheduling.
+      # CSI nodeplugins are operator/csi-driver-tolerations.yaml.
       placement:
         all:
           tolerations:
@@ -132,10 +128,10 @@ spec:
             enabled: true
           - name: pg_autoscaler
             enabled: true
-          # Stays off. No consumer of the Rook orchestrator; the v20.2.5 crash fixes are not a reason to enable it. See skill rook-ceph.
+          # Stays off. No consumer of the Rook orchestrator; the v20.2.5 crash fixes are not a reason to enable it.
           - name: rook
             enabled: false
-          # Stays off. It crash-reports through the disabled rook orchestrator. Re-enable only with that module. See skill rook-ceph.
+          # Stays off. It crash-reports through the disabled rook orchestrator. Re-enable only with that module.
           - name: nfs
             enabled: false
           - name: rgw
@@ -162,7 +158,6 @@ spec:
           limits:
             memory: 2Gi
         # requests==limits keeps mon and logcollector Guaranteed, so OOMController skips them. Do not copy this onto MDS.
-        # See skill rook-ceph.
         mon:
           requests:
             cpu: 500m
@@ -179,7 +174,6 @@ spec:
             memory: 256Mi
         osd:
           # Request 12Gi is above the 9317 Mi peak. osd_memory_target is cache, not RSS. Limit 14Gi stays so a spike can burst. OSDs stay Burstable.
-          # See skill rook-ceph.
           requests:
             cpu: 500m
             memory: 12Gi
@@ -194,14 +188,13 @@ spec:
       storage:
         useAllNodes: false
         useAllDevices: false
-        # Under storage, not the spec root. Pinned to 1 (CRD default 20). See skill rook-ceph.
+        # Under storage, not the spec root. Pinned to 1 (CRD default 20).
         osdMaxUpdatesInParallel: 1
         nodes:
           - name: "talos-1"
             devices:
               - name: "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_NME714W100393P2202"
               # osd.0 is a stopgap with a known silent-write fault. Checksums and size 3 contain a bad read. Do not mark it out.
-              # See skill rook-ceph.
               - name: "/dev/disk/by-id/nvme-Samsung_SSD_980_PRO_2TB_S6B0NL0W412707M"
           - name: "talos-2"
             devices:
@@ -237,11 +230,11 @@ spec:
           failureDomain: host
           replicated:
             size: 3
-          # Compression stays off. See skill rook-ceph.
+          # Compression stays off.
           compressionMode: none
           parameters:
             compression_mode: none
-            # bulk lets the autoscaler grow PGs. Do not hand-set pg_num. See skill rook-ceph.
+            # bulk lets the autoscaler grow PGs. Do not hand-set pg_num.
             bulk: "true"
         storageClass:
           enabled: true
@@ -252,7 +245,6 @@ spec:
           volumeBindingMode: Immediate
           parameters:
             # Immutable. aggressive only tags new images; the pool's none governs. Do not edit this to match the pool.
-            # See skill rook-ceph.
             compression_mode: aggressive
             compression_algorithm: zstd
             imageFormat: "2"
@@ -281,7 +273,7 @@ spec:
             parameters:
               compression_mode: none
           dataPools:
-            # No deviceClass. A shadow CRUSH root made the autoscaler skip every pool. See skill rook-ceph.
+            # No deviceClass. A shadow CRUSH root made the autoscaler skip every pool.
             - name: data0
               failureDomain: host
               replicated:
@@ -295,7 +287,7 @@ spec:
             priorityClassName: system-cluster-critical
             placement:
               # Preferred anti-affinity only. Required would leave standby-replay unschedulable during a drain.
-              # MDS has no talos-3 toleration. Do not add a NotIn deny-list. See skill rook-ceph and skill node-scheduling.
+              # MDS has no talos-3 toleration. Do not add a NotIn deny-list.
               podAntiAffinity:
                 preferredDuringSchedulingIgnoredDuringExecution:
                   - weight: 100
@@ -309,7 +301,6 @@ spec:
                               - ceph-filesystem-a
                               - ceph-filesystem-b
               # Honor ignores PreferNoSchedule. Kept so a future hard taint cannot make DoNotSchedule refuse every node.
-              # See skill node-scheduling.
               topologySpreadConstraints:
                 - maxSkew: 1
                   topologyKey: kubernetes.io/hostname
@@ -377,7 +368,6 @@ spec:
             priorityClassName: system-cluster-critical
             placement:
               # RGW has no talos-3 toleration. Honor ignores PreferNoSchedule and stays as hygiene for a future hard taint.
-              # See skill node-scheduling.
               topologySpreadConstraints:
                 - maxSkew: 1
                   topologyKey: kubernetes.io/hostname

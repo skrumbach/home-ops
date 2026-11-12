@@ -3,7 +3,7 @@
 # Two failures that ran for days with no page (2026-10 review): tdarr-node and
 # kube-apiserver-talos-3 restarted for 13 and 7 days (KubePodCrashLooping needs 15m of
 # continuous CrashLoopBackOff, a ~12 min restart cycle never gets there), and an
-# ExternalSecret failed for 13 days (no rule read its metric). Skill observability.
+# ExternalSecret failed for 13 days (no rule read its metric).
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

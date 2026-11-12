@@ -6,7 +6,7 @@
 # was born by a monolith import, which creates neither, so without these the
 # exporter drops every cnpg_pg_* series (the backup and WAL alerts join on them)
 # and the instance reconcile loop errors. A recovery rebuild creates the same pair.
-# No app uses them. Skill `databases`.
+# No app uses them.
 apiVersion: postgresql.cnpg.io/v1
 kind: DatabaseRole
 metadata:

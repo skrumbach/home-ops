@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # Claude Max subscription via the in-cluster cliproxyapi (OpenAI-compatible, OAuth held there), not the
 # metered ANTHROPIC_API_KEY. The *-metered routes stay on the API key as the auto-router and fallback targets.
-# INVARIANT: explicit $0 on every price field (flat-rate subscription). Skill litellm-proxy.
+# INVARIANT: explicit $0 on every price field (flat-rate subscription).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

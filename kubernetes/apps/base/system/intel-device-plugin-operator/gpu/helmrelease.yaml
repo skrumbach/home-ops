@@ -26,9 +26,8 @@ spec:
     nodeFeatureRule: false
     sharedDevNum: 99
     # This pool is the iGPU only (allowIDs 0xa7a0). B70 consumers use devic.es/b70 and devic.es/b70-vaapi.
-    # See skill intel-gpu.
     allowIDs: "0xa7a0"
-    # Toleration is hygiene under PreferNoSchedule. See skill node-scheduling.
+    # Toleration is hygiene under PreferNoSchedule.
     tolerations:
       - key: home-operations.com/dedicated
         operator: Exists

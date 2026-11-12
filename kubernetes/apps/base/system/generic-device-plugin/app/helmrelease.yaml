@@ -17,7 +17,6 @@ spec:
     defaultPodOptions:
       priorityClassName: system-node-critical
       # Toleration is hygiene. PreferNoSchedule does not filter, and talos-3 is this DaemonSet's only legal node for the B70.
-      # See skill node-scheduling.
       tolerations:
         - key: home-operations.com/dedicated
           operator: Exists

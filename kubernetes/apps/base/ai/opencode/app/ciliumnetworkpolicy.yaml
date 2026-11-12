@@ -9,7 +9,7 @@ spec:
   # 0.0.0.0:4096, behind OPENCODE_PASSWORD (ExternalSecret). Egress stays open (GitHub, npm, LiteLLM, toolhive).
   # Residual exposure: the toPorts-free reply rules below (LiteLLM, envoy-internal) admit every port on
   # the pod, not only replies (cilium/cilium#47913), so a compromised LiteLLM or envoy-internal peer can
-  # reach :4096, where the server password is the remaining guard. Skill `networking`.
+  # reach :4096, where the server password is the remaining guard.
   # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
   # The controller label keeps any other pod in ns ai out of this selector.
   endpointSelector:
@@ -33,7 +33,7 @@ spec:
     # Service reply arrives with the ClusterIP or LB IP as source after reverse NAT and is re-checked
     # here. LiteLLM :4000 (providers litellm and litellm-projects), the ToolHive MCP gateway through
     # the envoy-internal LoadBalancer IP (the LAN mcp route). The envoy-internal entry here is also
-    # the reply path for the route rule above. Skill `networking` references/dns-ownership.md.
+    # the reply path for the route rule above.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

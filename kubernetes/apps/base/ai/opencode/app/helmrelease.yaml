@@ -23,7 +23,6 @@ spec:
   values:
     defaultPodOptions:
       # No talos-3 toleration. PreferNoSchedule keeps it off that node. A hostname deny-list fails open.
-      # See skill node-scheduling.
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true

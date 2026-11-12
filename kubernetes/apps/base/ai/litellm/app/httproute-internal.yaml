@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
 # INTERNAL-ONLY route (captain decision B4): never an envoy-external parentRef.
 # Hand-written instead of the operator's spec.route, which cannot carry annotations.
-# See skill litellm-proxy (references/platform.md).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

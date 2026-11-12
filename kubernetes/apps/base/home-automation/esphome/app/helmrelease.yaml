@@ -133,7 +133,7 @@ spec:
       app:
         annotations:
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the dashboard Service in-cluster instead. Skill observability.
+          # login page. Probe the dashboard Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://esphome.home-automation.svc.cluster.local:6052/
             conditions: ["[STATUS] == 200"]

@@ -9,7 +9,7 @@ spec:
   # (helmrelease.yaml), so :8265 (UI and API) and :8266 (node protocol, which also serves the API)
   # are open to anything that can reach them. This fence is the only gate. Ingress only: plugin
   # downloads and the NFS mount stay as they are. The tdarr-node pod listens on nothing and is
-  # not selected. Skill `networking`. The server connects to no in-cluster Service but CoreDNS, so
+  # not selected. The server connects to no in-cluster Service but CoreDNS, so
   # it needs no other cilium/cilium#47913 reply rule. A new outbound in-cluster peer needs one.
   endpointSelector:
     matchLabels:

@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # External callers of the local embedder. The B70 is shared with chat and has no partition, so
-# rpmLimit also protects ai/vllm (skill b70-llm-serving). maxBudget is inert but kept as the widening guard.
+# rpmLimit also protects ai/vllm. maxBudget is inert but kept as the widening guard.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

@@ -42,7 +42,7 @@
 | **One wildcard, not one certificate per route** | One issuance and one renewal to watch. It stays far below Let's Encrypt rate limits, and Certificate Transparency logs show `*.domain` instead of an inventory of every app hostname. |
 | **A `ClusterIssuer`, not a namespaced `Issuer`** | Any namespace can request a certificate without copying the Cloudflare token around. The token Secret exists once, here. |
 | **Let's Encrypt production only** | There is no staging issuer. One certificate renewing once every 60 days is not at rate-limit risk, and a staging issuer would be one more thing to drift. |
-| **Cloudflare token from 1Password** | ExternalSecret `cloudflare-issuer` extracts `CLOUDFLARE_DNS_TOKEN` from item `cloudflare`. Nothing secret is in Git (skill `secrets-1password`). |
+| **Cloudflare token from 1Password** | ExternalSecret `cloudflare-issuer` extracts `CLOUDFLARE_DNS_TOKEN` from item `cloudflare`. Nothing secret is in Git. |
 
 ## How it works
 
@@ -105,7 +105,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted. T
 | `dns01RecursiveNameservers` | `https://1.1.1.1:443/dns-query,https://1.0.0.1:443/dns-query` | The propagation self-check sees the public zone, over port 443, and avoids the split-horizon internal DNS. |
 | `dns01RecursiveNameserversOnly` | `true` | Never fall back to the authoritative-nameserver walk, which takes the same internal path. |
 | `prometheus.servicemonitor.enabled` | `true` | Feeds the certificate expiry and renewal metrics the alerts below use. |
-| `resources` | requests 10m CPU each; memory 64/32/128Mi requested, 128/64/256Mi limit (controller/webhook/cainjector) | Every limit has a request (skill `node-scheduling`). cainjector gets the most memory because it watches every webhook and CRD. |
+| `resources` | requests 10m CPU each; memory 64/32/128Mi requested, 128/64/256Mi limit (controller/webhook/cainjector) | Every limit has a request. cainjector gets the most memory because it watches every webhook and CRD. |
 | `solvers[].selector.dnsZones` ([`app/clusterissuer.yaml`](app/clusterissuer.yaml)) | `${SECRET_DOMAIN}` | The Cloudflare solver answers only for the lab zone, and Flux substitutes the domain from `cluster-secrets`. |
 
 ## Alerts

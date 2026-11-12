@@ -10,8 +10,7 @@ Cloudflare R2, so the cluster's only Postgres backup copy stops being a single L
 Every one of the fleet's file volumes already has both a Ceph copy and an off-site copy;
 Postgres was the outlier.
 
-Why a mirror and not a second destination is below; CNPG backup rules are skill `databases`,
-[`references/cnpg.md`](../../../../../../.agents/skills/databases/references/cnpg.md).
+Why a mirror and not a second destination is below.
 
 ## Why a mirror and not a second CNPG destination
 
@@ -111,7 +110,7 @@ lock costs nothing extra.
 
 Fields are fetched by explicit `data` + `property`, so a missing field fails the
 `ExternalSecret` loudly. An empty field does not: `SecretSynced` is reported with a
-zero-length value (skill `secrets-1password`), so check key lengths, not the status.
+zero-length value, so check key lengths, not the status.
 
 ## Alerting
 
@@ -124,5 +123,5 @@ returns a series for a CronJob more than 4h stale and none for a fresh one.
 ## Known follow-ups
 
 - **The restore path remains unproven.** No CNPG restore has ever been exercised on this
-  cluster; all restore runbooks (skill `kopiur-backups`) are kopiur or retired VolSync. The drill was
+  cluster; all restore runbooks (`.agents/skills/incident-runbooks/references/restore.md`) are kopiur or retired VolSync. The drill was
   deliberately deferred by the captain on 2026-09-11 and is out of scope here.

@@ -3,7 +3,6 @@
 #
 # Replacement for the chart's KubeAggregatedAPIErrors (disabled there).
 # increase() window is [5m]: [1m] returns no series at a 1m scrape.
-# Skill observability.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

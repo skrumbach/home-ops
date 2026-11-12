@@ -71,7 +71,7 @@ spec:
             probes:
               # /healthz cannot fail, so liveness stays there. Readiness and
               # Gatus use /healthz/readiness. A DB-aware liveness probe would
-              # restart the pod on every CNPG switchover. Skill observability.
+              # restart the pod on every CNPG switchover.
               liveness:
                 enabled: true
                 custom: true
@@ -99,7 +99,7 @@ spec:
 
     defaultPodOptions:
       # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)
-      # keeps this app off it via the TaintToleration score. Skill `node-scheduling`, references/talos-3-ledger.md.
+      # keeps this app off it via the TaintToleration score.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -118,7 +118,6 @@ spec:
       config:
         enabled: true
         # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-n8n}
 
     route:

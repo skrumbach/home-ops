@@ -21,7 +21,6 @@ spec:
       app.kubernetes.io/name: *app
   path: ./kubernetes/apps/base/media/calibre/calibre-web-automated
   components:
-    # Proof: proof-ledger.md row 18.
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/keda/nfs-scaler
   prune: true
@@ -33,7 +32,6 @@ spec:
   interval: 30m
   timeout: 3m
   # Workload health signal only. wait:false is required for Flux to honour healthChecks at all (wait:true assesses the whole inventory instead).
-  # Skill `kopiur-backups`.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -69,7 +67,7 @@ spec:
   wait: false
   dependsOn:
     # Deliberately no dependsOn calibre-web-automated (greenfield deadlock).
-    # kopiur-repository is the dependency that matters. Skill `kopiur-backups`.
+    # kopiur-repository is the dependency that matters.
     - name: kopiur-repository
       namespace: system
   postBuild:

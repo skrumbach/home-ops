@@ -72,7 +72,6 @@ spec:
                 memory: 1536Mi
     # `defaultPodOptions.affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no
     # toleration here) keeps this app off it via the TaintToleration score.
-    # Skill `node-scheduling`, references/talos-3-ledger.md.
     service:
       app:
         type: ClusterIP

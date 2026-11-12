@@ -3,7 +3,7 @@
 #
 # Recording rules and the alerts on them use [5m]. [1m] returns nothing
 # at a 1m scrape. job=promtail-metrics is not the Loki server.
-# LokiRequestPanics already uses increase([10m]). Skill observability.
+# LokiRequestPanics already uses increase([10m]).
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

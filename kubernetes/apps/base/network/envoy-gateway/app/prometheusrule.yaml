@@ -11,7 +11,7 @@ spec:
         # An Envoy proxy lost its xDS connection to the controller and serves FROZEN config (no route/endpoint
         # updates). Cause seen: controller crash-loop, expired GatewayNamespaceMode SA tokens, xDS auth failure.
         # Runbook: kubectl -n network rollout restart deploy envoy-gateway, then envoy-internal + envoy-external.
-        # 10m absorbs a normal controller roll. Skill `networking`, references/envoy-gateway.md.
+        # 10m absorbs a normal controller roll.
         - alert: EnvoyProxyControlPlaneDisconnected
           expr: envoy_control_plane_connected_state{namespace="network"} == 0
           for: 10m
@@ -24,7 +24,7 @@ spec:
             severity: critical
         # The controller is crash-looping. Past cause: a liveness-kill (exit 137, not OOM) from stale proxies
         # flooding the auth interceptor with expired tokens; a crash-looping controller stops pushing xDS, which
-        # freezes the proxies. Skill `networking`, references/envoy-gateway.md.
+        # freezes the proxies.
         - alert: EnvoyGatewayControllerCrashLooping
           expr: increase(kube_pod_container_status_restarts_total{namespace="network", pod=~"envoy-gateway-.*"}[15m]) >= 2
           for: 5m

@@ -13,7 +13,6 @@ spec:
       rules:
         # PSI, not MemAvailable: Talos fires while memory still looks free.
         # for: 10m. Do not lengthen it without remeasuring the contiguous run.
-        # Skill observability.
         - alert: NodeMemoryPressure
           expr: rate(node_pressure_memory_stalled_seconds_total[15m]) > 0.05
           for: 10m
@@ -22,13 +21,12 @@ spec:
               {{ $labels.instance }} has sustained full memory-PSI stall of
               {{ $value | humanizePercentage }} of wall time over 15m - the
               node is spending real time in reclaim. Move heavy burstables
-              off before the Talos OOMController starts killing
-              (.agents/skills/talos-nodes/references/hardware.md).
+              off before the Talos OOMController starts killing.
           labels:
             severity: warning
         # Acute tier is PSI full (node_pressure_memory_stalled), rate [3m].
         # [1m] returns no series. Do not lengthen for without remeasuring
-        # the contiguous burst. Skill observability.
+        # the contiguous burst.
         - alert: NodeMemoryPSIHigh
           expr: rate(node_pressure_memory_stalled_seconds_total[3m]) > 0.25
           for: 1m
@@ -42,7 +40,7 @@ spec:
             severity: critical
         # Exit 137 and reason=Error together mean the Talos OOMController.
         # Do not min_over_time the exit code. AND a restart increase so the
-        # gauge clears. Skill observability.
+        # gauge clears.
         - alert: NodeOOMControllerKill
           expr: |-
             (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1)
@@ -85,6 +83,6 @@ spec:
               rook-ceph container {{ $labels.container }} in pod
               {{ $labels.pod }} has been in CrashLoopBackOff for 15m — check
               for OSD store corruption signatures or device-path drift
-              (.agents/skills/rook-ceph/references/osd-device-path-recovery.md).
+              (.agents/skills/incident-runbooks/references/ceph-osd-recovery.md).
           labels:
             severity: critical

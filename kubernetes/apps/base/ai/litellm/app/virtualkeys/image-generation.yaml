@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # Image generation key: POST /v1/images/generations against Grok (cliproxyapi, $0), GPT Image 2 and
-# Gemini image (OpenRouter, metered). Skill litellm-proxy (references/governance-keys.md).
+# Gemini image (OpenRouter, metered).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

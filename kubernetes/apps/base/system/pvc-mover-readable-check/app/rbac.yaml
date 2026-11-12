@@ -6,7 +6,6 @@ metadata:
   namespace: system
 ---
 # Split-role design, copied deliberately from pvc-writable-check rather than invented here - see that app's rbac.
-# Skill `pvc-integrity-checks`.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

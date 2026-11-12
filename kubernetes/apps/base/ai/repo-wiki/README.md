@@ -2,7 +2,7 @@
 
 mkdocs of generated pages. A CronJob writes them through LiteLLM
 (`chat-local` on virtual key `repo-wiki`) and commits them onto the PVC.
-Skill `ai-stack` references/consumers.md. The repo list is only
+The repo list is only
 `app/resources/repos.txt`.
 
 Those resource files are `configMapGenerator` input. A byte change rolls

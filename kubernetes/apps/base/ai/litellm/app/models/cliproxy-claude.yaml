@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # Claude Max subscription via the in-cluster cliproxyapi (OpenAI-compatible, OAuth held there).
 # Registration only: no virtual key allow-lists it yet. No cloud fallback may point at it.
-# INVARIANT: explicit $0 on every price field (flat-rate subscription). Skill litellm-proxy.
+# INVARIANT: explicit $0 on every price field (flat-rate subscription).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

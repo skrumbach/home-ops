@@ -2,7 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   packageRules: [
     {
-      // automergeType "pr" is explicit on every automerge rule: the base preset extends :automergeBranch. Skill `renovate`.
+      // automergeType "pr" is explicit on every automerge rule: the base preset extends :automergeBranch.
       description: "Auto merge all container digest updates",
       matchDatasources: ["docker"],
       automerge: true,
@@ -12,7 +12,7 @@
     },
     {
       // Same risk class as digest: the tag stays, it only gains the digest it resolves to today. The "digest" type does not match "pinDigest".
-      // The never-automerge rules below still win, so a pin PR grouped with Cilium, Rook, kopiur or Renovate's own chart waits for review. Skill `renovate`.
+      // The never-automerge rules below still win, so a pin PR grouped with Cilium, Rook, kopiur or Renovate's own chart waits for review.
       description: "Auto merge container digest pins",
       matchDatasources: ["docker"],
       automerge: true,
@@ -29,7 +29,7 @@
       ignoreTests: false,
     },
     {
-      // GHCR and quay publish no release timestamp; with the default timestamp-required the age check never passes and the update stalls in "Pending Status Checks". 0.x minors can break, so they open PRs without automerge. Skill `renovate`.
+      // GHCR and quay publish no release timestamp; with the default timestamp-required the age check never passes and the update stalls in "Pending Status Checks". 0.x minors can break, so they open PRs without automerge.
       description: "Auto merge all container and helm minor updates (not 0.x)",
       matchDatasources: ["docker", "helm", "github-releases", "github-tags"],
       automerge: true,
@@ -41,7 +41,7 @@
       ignoreTests: false,
     },
     {
-      // GitHub publishes release timestamps, so the age gate works here. PR, not branch: renovate/** pushes get no status check. Skill `renovate`.
+      // GitHub publishes release timestamps, so the age gate works here. PR, not branch: renovate/** pushes get no status check.
       description: "Auto merge GitHub Actions and mise tool updates as PRs after checks pass",
       matchManagers: ["github-actions", "mise"],
       matchUpdateTypes: ["minor", "patch", "digest"],
@@ -51,14 +51,14 @@
       ignoreTests: false,
     },
     {
-      // MUST stay after the blanket rules. CNI and storage: every reference repo reviews these by hand. The Ceph image must match the Rook release, so it is reviewed too. Datasource-scoped, so aqua:cilium/cilium-cli is not matched. Skill `renovate`.
+      // MUST stay after the blanket rules. CNI and storage: every reference repo reviews these by hand. The Ceph image must match the Rook release, so it is reviewed too. Datasource-scoped, so aqua:cilium/cilium-cli is not matched.
       description: "Never auto merge Cilium, Rook-Ceph or the Ceph image - a bad CNI, storage operator or a Ceph version Rook does not support takes the cluster down",
       matchDatasources: ["docker", "helm"],
       matchPackageNames: ["/cilium/", "/rook-ceph/", "quay.io/ceph/ceph"],
       automerge: false,
     },
     {
-      // MUST stay after the blanket rules. Envoy Gateway tests one Envoy minor per release (v1.9 = 1.39.x, compatibility matrix); bump envoy with the gateway minor. Skill `renovate`.
+      // MUST stay after the blanket rules. Envoy Gateway tests one Envoy minor per release (v1.9 = 1.39.x, compatibility matrix); bump envoy with the gateway minor.
       description: "Never auto merge Envoy proxy minor or major versions - must match the Envoy Gateway release",
       matchPackageNames: ["/(^|/)envoyproxy/envoy$/"],
       matchUpdateTypes: ["minor", "major"],
@@ -73,20 +73,20 @@
     },
     {
       // MUST stay after the blanket rules. A Python minor is a new ABI: native deps (PyO3 wheels such as litellm's fastuuid) lag it, and 3.15 broke the nightly tests (#1991).
-      // The hold is per consumer, not per version: a stdlib-only image (queue-watchdog) can merge on green CI. Skill `renovate-review`.
+      // The hold is per consumer, not per version: a stdlib-only image (queue-watchdog) can merge on green CI.
       description: "Never auto merge Python minor or major versions - mise tool and docker image",
       matchPackageNames: ["python", "/(^|/)python$/"],
       matchUpdateTypes: ["minor", "major"],
       automerge: false,
     },
     {
-      // MUST stay after the three blanket automerge rules. Path match, not package name: a chart self-update must stay a reviewed PR. Skill `renovate`.
+      // MUST stay after the three blanket automerge rules. Path match, not package name: a chart self-update must stay a reviewed PR.
       description: "Never auto merge Renovate's own chart/image - self-update must be reviewed",
       matchFileNames: ["kubernetes/apps/base/renovate/**"],
       automerge: false,
     },
     {
-      // MUST stay after the three blanket automerge rules. Skill `renovate`.
+      // MUST stay after the three blanket automerge rules.
       description: "Never auto merge kopiur - it is the backup system on an alpha API",
       matchPackageNames: [
         "ghcr.io/home-operations/charts/kopiur",
@@ -95,11 +95,11 @@
         "ghcr.io/home-operations/kopiur-mover",
         "home-operations/kopiur",
       ],
-      // Proposals stay PRs. An unattended CRD change can refuse every backup. Read upstream upgrade notes before taking one. Skill `renovate`.
+      // Proposals stay PRs. An unattended CRD change can refuse every backup. Read upstream upgrade notes before taking one.
       automerge: false,
     },
     {
-      // MUST stay after the blanket rules. hermes state.db and the opencode session DB migrate on version bumps, and #1768 (hermes) and #2374 (opencode) merged unattended. Digest refreshes stay automerged. Skill `renovate`.
+      // MUST stay after the blanket rules. hermes state.db and the opencode session DB migrate on version bumps, and #1768 (hermes) and #2374 (opencode) merged unattended. Digest refreshes stay automerged.
       description: "Never auto merge hermes-agent or opencode minor/patch versions - a version bump migrates the app's on-disk database",
       matchDatasources: ["docker"],
       matchPackageNames: ["docker.io/nousresearch/hermes-agent", "ghcr.io/joryirving/opencode"],
@@ -107,7 +107,7 @@
       automerge: false,
     },
     {
-      // MUST stay after the three blanket automerge rules. A merge of talosupgrade.yaml powercycles nodes, and docker isStable treats -alpha as a minor. Skill `renovate` references/versioning-traps.md.
+      // MUST stay after the three blanket automerge rules. A merge of talosupgrade.yaml powercycles nodes, and docker isStable treats -alpha as a minor.
       description: "Never auto merge Talos - node upgrades are attended captain operations, and ghcr.io/siderolabs/installer's docker versioning does not treat -alpha/-beta/-rc suffixes as unstable",
       matchPackageNames: [
         "ghcr.io/siderolabs/installer",
@@ -118,7 +118,7 @@
       automerge: false,
     },
     {
-      // MUST stay after the blanket rules. kubelet feeds KubernetesUpgrade, which upgrades the live cluster with no human apply step. Skill `renovate`.
+      // MUST stay after the blanket rules. kubelet feeds KubernetesUpgrade, which upgrades the live cluster with no human apply step.
       description: "Never auto merge Kubernetes control-plane/kubelet - kubelet feeds tuppr's KubernetesUpgrade CR, which upgrades the live cluster with no human apply step",
       matchPackageNames: [
         "ghcr.io/siderolabs/kubelet",
@@ -130,7 +130,7 @@
       automerge: false,
     },
     {
-      // MUST stay after the three blanket automerge rules. Exact package names only, so ghcr.io/cloudnative-pg/postgresql stays automerged. Skill `renovate`.
+      // MUST stay after the three blanket automerge rules. Exact package names only, so ghcr.io/cloudnative-pg/postgresql stays automerged.
       description: "Never auto merge CloudNativePG operator - an operator bump rolls the shared postgres-18 Cluster and the Barman Cloud plugin must stay compatible",
       matchPackageNames: [
         "ghcr.io/cloudnative-pg/charts/cloudnative-pg",
@@ -139,27 +139,27 @@
       automerge: false,
     },
     {
-      // MUST stay after the blanket minor rule. CalVer: 2026.8 -> 2026.11 is a "minor", i.e. a new release line with one-way migrations. Patches stay automerged. Skill `authentik-terraform` references/upgrade-checklist.md.
+      // MUST stay after the blanket minor rule. CalVer: 2026.8 -> 2026.11 is a "minor", i.e. a new release line with one-way migrations. Patches stay automerged.
       description: "Never auto merge Authentik release lines - each one runs one-way Django migrations and has a pre-upgrade checklist",
       matchPackageNames: ["ghcr.io/goauthentik/helm-charts/authentik"],
       matchUpdateTypes: ["minor", "major"],
       automerge: false,
     },
     {
-      // MUST stay after the three blanket automerge rules. Third-party code that runs inside Home Assistant's login path, installed by the install-oidc init container. Each bump needs a new OIDC_SHA256. Skill `home-automation`.
+      // MUST stay after the three blanket automerge rules. Third-party code that runs inside Home Assistant's login path, installed by the install-oidc init container. Each bump needs a new OIDC_SHA256.
       description: "Never auto merge hass-oidc-auth - it is Home Assistant's login provider and each bump needs a new pinned checksum",
       matchPackageNames: ["christiaangoossens/hass-oidc-auth"],
       automerge: false,
     },
     {
-      // MUST stay after the blanket minor rule. GHCR has no releaseTimestamp, so timestamp-optional is what opens the PR. automerge stays false. Do not widen this. Skill `renovate` references/versioning-traps.md.
+      // MUST stay after the blanket minor rule. GHCR has no releaseTimestamp, so timestamp-optional is what opens the PR. automerge stays false. Do not widen this.
       description: "LiteLLM proxy: GHCR has no release timestamp, so open minor PRs but never automerge them",
       matchPackageNames: ["ghcr.io/berriai/litellm-non_root"],
       minimumReleaseAgeBehaviour: "timestamp-optional",
       automerge: false,
     },
     {
-      // MUST stay after the blanket digest rule. automerge stays true; the schedule only throttles the rolling latest tag to once a week, America/New_York (.renovaterc.json5 timezone). Skill `renovate`.
+      // MUST stay after the blanket digest rule. automerge stays true; the schedule only throttles the rolling latest tag to once a week, America/New_York (.renovaterc.json5 timezone).
       description: "rsshub tracks a rolling `latest` tag that rebuilds many times a day - limit its digest updates to once a week instead of every rebuild",
       matchPackageNames: ["ghcr.io/diygod/rsshub"],
       matchUpdateTypes: ["digest"],

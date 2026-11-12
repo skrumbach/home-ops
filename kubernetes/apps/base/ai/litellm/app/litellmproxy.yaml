@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmproxy_v1alpha1.json
-# The LiteLLM proxy, rendered by litellm-operator. Tripwires and rationale for
-# every block below: skill litellm-proxy (references/platform.md).
+# The LiteLLM proxy, rendered by litellm-operator.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMProxy
 metadata:
@@ -11,7 +10,7 @@ spec:
   applyMode: file
   image: ghcr.io/berriai/litellm-non_root:v1.108.3@sha256:36e4ec234cf279efa525f229417d8443499464f796d25f19ac5847cd7f16d316
   # ^ Floor v1.93.0 (auto-router LLM classifier; below it the config is silently
-  # ignored). Enforced by .renovate/overrides.json5 - references/auto-router.md.
+  # ignored). Enforced by .renovate/overrides.json5.
   replicas: 1
 
   service:
@@ -19,7 +18,7 @@ spec:
     port: 4000
 
   # NO spec.route, ever: httproute-internal.yaml is the route, and the operator
-  # would create a second one (references/platform.md).
+  # would create a second one.
 
   envFrom:
     # Master/salt key, DATABASE_URL, the four provider keys and SSO client
@@ -67,14 +66,14 @@ spec:
 
     # Full prompt/response capture into the Postgres spend log; the prompt lands
     # in proxy_server_request, not messages. 30d matches the postgres-18 Barman
-    # window ("30d", never "1mo"). references/spend-logs.md.
+    # window ("30d", never "1mo").
     store_prompts_in_spend_logs: true
     maximum_spend_logs_retention_period: "30d"
 
     # INVARIANT: provider pass-throughs are admin-only (no virtual key may reach
     # a shared credential). ORDER IS LOAD-BEARING: each exact entry above its
     # dead-loopback catch-all; never set forward_headers. Jev decisions use the
-    # native /v1/decisions route, not a pass-through. references/passthrough-lockdown.md.
+    # native /v1/decisions route, not a pass-through.
     pass_through_endpoints:
       - path: /openrouter
         target: http://127.0.0.1:9/openrouter-pass-through-locked
@@ -113,7 +112,7 @@ spec:
     # OpenCode Go rejects any request without x-opencode-session (HTTP 400 MissingSessionID) and
     # wants one stable value per conversation. Forward the caller's x-* headers for these model
     # groups ONLY (never general_settings: that would forward to every provider). The caller (Hermes,
-    # providers.litellm.session_affinity_header) supplies the value. references/model-catalog.md.
+    # providers.litellm.session_affinity_header) supplies the value.
     model_group_settings:
       forward_client_headers_to_llm_api:
         - go-deepseek-v4-flash
@@ -121,7 +120,6 @@ spec:
         - go-kimi-k2.6
     # The ONLY way a model reaches the AI Hub (UI "make public" 500s here). A new
     # model is unpublished until added; discovery only, grants nothing.
-    # references/model-catalog.md.
     public_model_groups:
       - auto
       - chat-ha
@@ -186,19 +184,19 @@ spec:
     # Pinned so least-busy cannot creep in.
     routing_strategy: simple-shuffle
     # Makes a deployment's rpm a hard limit (429 before the backend); without it rpm only weights
-    # routing. Only embedding-local sets rpm today. references/model-catalog.md.
+    # routing. Only embedding-local sets rpm today.
     optional_pre_call_checks:
       - enforce_model_rate_limits
     # INVARIANT: a config fallback bypasses the caller's allow-list, so only
     # cloud-entitled aliases may appear here, targeting the -metered CR (never a
-    # terminal local alias). references/fallbacks.md.
+    # terminal local alias).
     fallbacks:
       - chat-ha: ["claude-sonnet-5-metered"]
       - auto: ["claude-sonnet-5-metered"]
     # Retry-only for the vector store's embedding model: OpenRouter returns
     # transient HTTP 400 (code 20015) and the router never retries a 400 unless a
     # policy names it. NEVER add a fallback embedding model: a second model writes
-    # vectors incompatible with the pgvector index. references/vector-store.md.
+    # vectors incompatible with the pgvector index.
     model_group_retry_policy:
       # embedding-local: never retry a 429 or timeout. The router sleeps to the end of the rpm
       # window (~60s) and retries a 429, and multiplies the timeout by 3.
@@ -216,7 +214,7 @@ spec:
       - auto: ["claude-sonnet-5-metered"]
 
   # Vector store under extraConfig, never the CRD's vectorStoreRegistry (object vs
-  # list). Open to every key: non-sensitive content only. references/vector-store.md.
+  # list). Open to every key: non-sensitive content only.
   extraConfig:
     vector_store_registry:
       - vector_store_name: default
@@ -260,5 +258,5 @@ spec:
       cpu: 10m
       memory: 1280Mi
     limits:
-      # A bare GET /spend/logs OOM-killed the proxy at 2Gi (references/spend-logs.md).
+      # A bare GET /spend/logs OOM-killed the proxy at 2Gi.
       memory: 4Gi

@@ -10,8 +10,6 @@ fails closed. The VolSync branch is gone: VolSync stages writable and
 `fsGroup` repairs the clone before restic reads, so its unreadables were
 only ever printed, never alerted.
 
-Skill `pvc-integrity-checks`, reference `references/mover-readable.md`.
-
 ## What a page means
 
 Read the Job log. `UNMEASURED` is not a pass: no running pod, a subPath-only

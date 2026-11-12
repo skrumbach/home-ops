@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # The vector store's embedding model (OpenRouter, metered). Store callers request dimensions: 2000.
 # Declares its real price: the bundled cost map has no openrouter entry and would record $0.
-# See skill litellm-proxy (references/vector-store.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

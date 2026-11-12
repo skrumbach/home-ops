@@ -76,7 +76,6 @@ spec:
       data:
         enabled: true
         # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-obsidian-livesync}
         globalMounts:
           - path: /opt/couchdb/data

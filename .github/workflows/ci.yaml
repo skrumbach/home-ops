@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # The one required PR check: `CI Success`. Every job runs on GitHub-hosted runners, so the
 # gate reports while the cluster and its ARC runners are down. Image Pull and Terraform Diff
-# need the cluster and stay advisory in their own files. Skill `github-ci`.
+# need the cluster and stay advisory in their own files.
 name: CI
 
 on:

@@ -2,8 +2,8 @@
 
 Stay on operator 2.2.x. The chart tag is in `operator/helmrelease.yaml`.
 2.3.x drops `apps.emqx.io/v2beta1` and 404s the Enterprise `load_rebalance`
-API against this OSS broker. Image pin, listeners, and ACL are in skill
-`databases` (`references/emqx.md`).
+API against this OSS broker. Both cores crashloop after a power loss:
+`.agents/skills/incident-runbooks/references/emqx-power-loss.md`.
 
 Dashboard: `https://mqtt.${SECRET_DOMAIN}` (internal gateway). MQTT
 LoadBalancer `10.50.0.30`. Do not remove `volumeClaimTemplates`.

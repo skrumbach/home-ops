@@ -1,6 +1,5 @@
 # LiteLLM UI single sign-on. CREATED by this stack (no import block), so unlike the adopted
 # providers both credential halves are generated here and surfaced via outputs.tofu, never Git.
-# Kubernetes side: skill litellm-proxy (references/platform.md).
 
 resource "random_string" "litellm_client_id" {
   length  = 40

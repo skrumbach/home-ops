@@ -69,7 +69,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       # maxSkew 1 so one drain cannot take both replicas. Honor does not see the talos-3 PreferNoSchedule taint.
-      # The chart defaults labelSelector to this controller's pods. See skill node-scheduling.
+      # The chart defaults labelSelector to this controller's pods.
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname

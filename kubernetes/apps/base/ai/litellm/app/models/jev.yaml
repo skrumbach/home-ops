@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # TypeSafe Jev decision model on OpenRouter. OpenRouter refuses it on chat completions, so it is
 # called only via POST /v1/decisions or /v1/systemone (not a chat model). Priced from OpenRouter's usage.cost.
-# Only the jev-decisions key allow-lists it. See skill litellm-proxy (references/model-catalog.md).
+# Allow-listed only by the jev-decisions and litellm-consume-projects keys; never add a pass-through grant or a raw typesafe/ id.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

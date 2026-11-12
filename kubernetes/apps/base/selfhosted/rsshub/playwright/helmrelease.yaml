@@ -50,7 +50,7 @@ spec:
                 add:
                   - SYS_ADMIN
     # `selfhostedPodOptions` is not an app-template key, so Helm silently discarded this block and the
-    # pod ran with an EMPTY securityContext (legal YAML, flate passes, HelmRelease green). Skill `app-workloads`.
+    # pod ran with an EMPTY securityContext (legal YAML, flate passes, HelmRelease green).
     defaultPodOptions:
       securityContext:
         runAsNonRoot: false

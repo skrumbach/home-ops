@@ -1,6 +1,5 @@
 ---
 # Second, OFF-SITE copy of the postgres-18 barman archive.
-# Skill `databases`.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -10,7 +9,7 @@ metadata:
     app.kubernetes.io/name: postgres-offsite-mirror
 spec:
   # LIVE since D1 (owner-approved). Setting this back to true turns the
-  # off-site copy OFF, and PostgresOffsiteMirrorStale fires. Skill `databases`.
+  # off-site copy OFF, and PostgresOffsiteMirrorStale fires.
   suspend: false
   # Hourly, offset from :00. The off-site WAL stream therefore lags the LAN
   # copy by up to ~1h - this is a second copy, not a second primary; the LAN
@@ -75,11 +74,9 @@ spec:
                 - name: SERVER_NAME
                   value: postgres18-v2
                 # 35d, five days past the LAN 30d retention, so a LAN prune cannot race this copy.
-                # Skill `databases`.
                 - name: OFFSITE_RETENTION
                   value: 35d
                 # Runaway guard: a candidate count above PRUNE_CEILING fails the job instead of deleting.
-                # Skill `databases`.
                 - name: PRUNE_CEILING
                   value: "2000"
                 - name: HOME
@@ -134,7 +131,6 @@ spec:
                 - /bin/sh
                 - -c
                 # EVERY shell token below is written `$${...}` / `$$(...)`.
-                # Skill `databases`.
                 - |
                   set -eu
 

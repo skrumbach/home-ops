@@ -16,7 +16,7 @@ spec:
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 # Barman Cloud CNPG-I plugin. It replaces the in-tree `barmanObjectStore`, which
 # CNPG 1.31 removes. It must run in the operator's namespace and needs cert-manager
-# for its gRPC mTLS. Skill `databases`.
+# for its gRPC mTLS.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

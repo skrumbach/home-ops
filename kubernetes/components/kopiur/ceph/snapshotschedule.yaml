@@ -9,11 +9,9 @@ spec:
     name: "${APP}-ceph"
   schedule:
     # Odd hours 01,05,09,13,17,21. Do not hand-assign the H minute.
-    # Skill `kopiur-backups`.
     cron: "${KOPIUR_SCHEDULE_CEPH:-H 1-23/4 * * *}"
     jitter: 5m
-    # kopiur evaluates cron as UTC unless timezone is set, and the odd/even stagger then collides at EST.
-    # Skill `kopiur-backups`.
+    # kopiur reads cron as UTC unless timezone is set; the pin keeps the slot hours fixed across DST.
     timezone: "${KOPIUR_SCHEDULE_TIMEZONE:-America/New_York}"
   deletion:
     onScheduleDelete: Retain

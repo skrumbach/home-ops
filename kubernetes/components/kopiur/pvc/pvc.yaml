@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/_definitions.json#/definitions/io.k8s.api.core.v1.PersistentVolumeClaim
 # Keeps the claim in the Flux inventory so prune does not delete the volume. ssa IfNotPresent; never force: enabled.
-# Skill `kopiur-backups`.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

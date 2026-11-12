@@ -12,7 +12,7 @@ metadata:
     gethomepage.dev/app: *app
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     # Check /health, not `/`: bare `/` redirects to a third-party surrealdb.com
-    # page that Gatus follows. Skill `databases`.
+    # page that Gatus follows.
     gatus.home-operations.com/endpoint: |-
       url: https://surrealdb.${SECRET_DOMAIN}/health
       conditions: ["[STATUS] == 200"]

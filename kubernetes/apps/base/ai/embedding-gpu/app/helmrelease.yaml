@@ -3,7 +3,7 @@
 #
 # Separate HelmRelease: a change here must not Recreate the chat server.
 # TEI XPU failed on this Battlemage card. Do not append <|endoftext|>. Cosine vs the CPU
-# endpoint is not the NaN probe. See skill b70-llm-serving references/embeddings.md.
+# endpoint is not the NaN probe.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -28,10 +28,9 @@ spec:
         strategy: Recreate
         pod:
           terminationGracePeriodSeconds: 30
-          # Lowest priority, never preempts. See priorityclass.yaml and skill node-scheduling.
+          # Lowest priority, never preempts. See priorityclass.yaml.
           priorityClassName: embedding-gpu-low
           # talos-3 PreferNoSchedule: this pod can only land there, so it tolerates the penalty.
-          # See skill node-scheduling.
           tolerations:
             - key: home-operations.com/dedicated
               operator: Exists
@@ -56,18 +55,16 @@ spec:
               - -ngl
               - "99"
               # Must pin 2. There is a 56 MiB F16 KV pool; the 0.00 MiB line is only the reserve pass.
-              # The chat "do not pin --parallel" rule does not transfer. See skill b70-llm-serving references/embeddings.md.
+              # The chat "do not pin --parallel" rule does not transfer.
               - --parallel
               - "2"
               # Required with --parallel. Without it n_ctx_slot halves to 256.
-              # See skill b70-llm-serving references/embeddings.md.
               - --kv-unified
               # 0. The embedding cache is write-only, and absence restores the silent 8192 MiB default.
-              # A memory limit cannot stop that. Do not copy chat's 4096. See skill b70-llm-serving references/memory.md.
+              # A memory limit cannot stop that. Do not copy chat's 4096.
               - --cache-ram
               - "0"
               # One triple. 512 leaves room for a chat restart; 2048 fits but spends that margin.
-              # See skill b70-llm-serving references/embeddings.md.
               - --ctx-size
               - "512"
               - -b
@@ -76,14 +73,13 @@ spec:
               - "512"
               # --timeout 30 replaces the image default of 3600 but is only a socket timeout: it does not
               # bound a queued request (live: 28-31 s, all 200). Load is capped at LiteLLM on the embedding-local
-              # model. See skill b70-llm-serving references/contention.md.
+              # model.
               - --no-cont-batching
               - --timeout
               - "30"
             env:
               LLAMA_CACHE: /models
               # /dev/dri/card0 here is the B70; /sys/class/drm/card0 is the iGPU. Use PCI 0000:03:00.0.
-              # See skill intel-gpu references/devices.md.
               ONEAPI_DEVICE_SELECTOR: level_zero:0
               ZES_ENABLE_SYSMAN: "1"
               UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS: "1"
@@ -91,13 +87,12 @@ spec:
               requests:
                 cpu: 250m
                 # 1024Mi on purpose: this pod is evicted before chat. Do not raise it without
-                # redoing the talos-3 arithmetic. See skill node-scheduling.
+                # redoing the talos-3 arithmetic.
                 memory: 1024Mi
                 devic.es/b70: 1
               limits:
                 cpu: "2"
                 # Headroom, not a bound. --cache-ram 0 is what stops the OOM.
-                # See skill b70-llm-serving references/memory.md.
                 memory: 4Gi
                 devic.es/b70: 1
             probes:
@@ -112,7 +107,6 @@ spec:
                   failureThreshold: 40
               # nlohmann renders NaN as bare null, so grep -q null is the detector. No $ in this
               # script: Flux envsubst eats it.
-              # See skill b70-llm-serving references/embeddings.md.
               readiness: &probe
                 enabled: true
                 custom: true

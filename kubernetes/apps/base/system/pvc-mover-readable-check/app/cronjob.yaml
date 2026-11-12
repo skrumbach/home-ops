@@ -1,6 +1,5 @@
 ---
 # Catches a backup mover that cannot READ the volume it is backing up - the sibling failure to pvc-writable-check's "app cannot write its own volume".
-# Skill `pvc-integrity-checks`.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -10,7 +9,6 @@ metadata:
     app.kubernetes.io/name: pvc-mover-readable-check
 spec:
   # Every 6h, matching pvc-writable-check's cadence.
-  # Skill `pvc-integrity-checks`.
   schedule: "47 */6 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
@@ -44,7 +42,6 @@ spec:
               type: RuntimeDefault
           volumes:
             # walk.sh is a ConfigMap so the walker stays a reviewable file.
-            # Skill `pvc-integrity-checks`.
             - name: walk
               configMap:
                 name: pvc-mover-readable-check-walk
@@ -373,6 +370,5 @@ spec:
                   memory: 64Mi
                 limits:
                   # 1000m. A tight CFS quota throttled every run while the node was idle.
-                  # Skill `pvc-integrity-checks`.
                   cpu: 1000m
                   memory: 256Mi

@@ -4,12 +4,9 @@ Chart pin, BGP CRs and LoadBalancer pool:
 `app/ocirepository.yaml`, `app/networking.yaml`.
 
 UniFi is not reconciled from here. The UDM's FRR config is
-`terraform/unifi/bgp.conf` (OpenTofu); the peer table is in skill `networking`
-([bgp-unifi.md](../../../../../.agents/skills/networking/references/bgp-unifi.md)).
-Human page: `.agents/skills/networking/references/bgp-unifi.md`.
+`terraform/unifi/bgp.conf` (OpenTofu); change it together with `app/networking.yaml`.
 
-Host firewall policy: skill `cilium-host-policy`. Manifest:
-`app/hostpolicy-ceph.yaml`.
+Host firewall policy: `app/hostpolicy-ceph.yaml`.
 
 Hubble: agent server, relay and UI are on, with flow metrics (dns, drop,
 tcp, flow, port-distribution, icmp, httpV2) scraped by ServiceMonitors and

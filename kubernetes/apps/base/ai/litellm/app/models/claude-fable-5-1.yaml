@@ -3,7 +3,6 @@
 # Claude Code subscription PASS-THROUGH: the caller's own OAuth token pays, never ANTHROPIC_API_KEY.
 # INVARIANT: placeholder apiKey + $0 on all seven price fields below are load-bearing (money safety).
 # Fable 5.1, a distinct model from the metered claude-fable-5 (not a rename).
-# See skill litellm-proxy (references/claude-code-subscription.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

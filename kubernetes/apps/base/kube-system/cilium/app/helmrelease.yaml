@@ -182,7 +182,7 @@ spec:
           memory: 512Mi
     pmtuDiscovery:
       enabled: true
-    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in hostpolicy-ceph.yaml, not this flag. Rollback: set this true, or delete the CCNP. Skill `cilium-host-policy`.
+    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in hostpolicy-ceph.yaml, not this flag. Rollback: set this true, or delete the CCNP.
     policyAuditMode: false
     prometheus:
       enabled: true
@@ -209,7 +209,6 @@ spec:
     # Guaranteed QoS (requests == limits on EVERY container, init containers
     # included) so the Talos OOMController never selects the agent: a kill
     # takes the node network plane down. CPU limit is required for Guaranteed.
-    # See skill node-scheduling.
     resources:
       requests:
         cpu: 500m

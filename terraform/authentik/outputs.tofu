@@ -1,4 +1,4 @@
-# Generated LiteLLM credentials. Read with tofu output -raw and push with kubectl create, never client-side kubectl apply. Skill `authentik-terraform` references/apply-runbook.md.
+# Generated LiteLLM credentials. Read with tofu output -raw and push with kubectl create, never client-side kubectl apply.
 
 output "litellm_client_id" {
   description = "OAuth2 client_id generated for the LiteLLM provider"
@@ -21,7 +21,7 @@ output "litellm_oidc_endpoints" {
 }
 
 # Generated Grafana client secret. Copy once into 1Password Homelab/grafana-oidc (field
-# client-secret). Skill `authentik-terraform` references/apply-runbook.md.
+# client-secret).
 output "grafana_client_secret" {
   description = "OAuth2 client_secret generated for the Grafana provider"
   value       = random_password.grafana_client_secret.result
@@ -29,7 +29,7 @@ output "grafana_client_secret" {
 }
 
 # Generated renovate-operator credentials. Copy once into 1Password Homelab/renovate-operator-oidc
-# (fields client-secret, session-secret). Skill `authentik-terraform` references/apply-runbook.md.
+# (fields client-secret, session-secret).
 output "renovate_operator_client_secret" {
   description = "OAuth2 client_secret generated for the renovate-operator provider"
   value       = random_password.renovate_operator_client_secret.result
@@ -43,7 +43,7 @@ output "renovate_operator_session_secret" {
 }
 
 # Generated Paperless-ngx client secret. Copy once into 1Password Homelab/paperless-oidc (field
-# client-secret). Skill `authentik-terraform` references/apply-runbook.md.
+# client-secret).
 output "paperless_client_secret" {
   description = "OAuth2 client_secret generated for the Paperless-ngx provider"
   value       = random_password.paperless_client_secret.result

@@ -29,7 +29,6 @@ spec:
           hostNetwork: true
           hostPID: true
           # Honor ignores PreferNoSchedule. Kept so a future hard taint cannot make DoNotSchedule refuse a pod.
-          # See skill node-scheduling.
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname

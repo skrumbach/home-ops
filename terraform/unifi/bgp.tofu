@@ -7,7 +7,6 @@
 # change means removing ignore_changes for one reviewed apply, and that apply
 # re-uploads FRR and resets every Cilium BGP session (graceful restart 15s).
 # Confirm the running config on the UDM with `vtysh` first.
-# Skill `unifi-network`, skill `networking` references/bgp-unifi.md.
 resource "unifi_bgp" "home_ops" {
   enabled          = true
   description      = "home-ops"

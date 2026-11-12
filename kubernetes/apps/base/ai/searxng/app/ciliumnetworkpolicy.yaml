@@ -6,7 +6,7 @@ metadata:
   name: searxng
 spec:
   # SearXNG has no login and image_proxy is on, so it is fenced both ways: a pod cannot use it
-  # anonymously, and it cannot fetch LAN or node addresses for anyone. Skill `networking`.
+  # anonymously, and it cannot fetch LAN or node addresses for anyone.
   # The controller label keeps the operator-managed searxng-dragonfly pods out of this selector.
   endpointSelector:
     matchLabels:
@@ -37,7 +37,6 @@ spec:
               protocol: TCP
     # Limiter state (SEARXNG_VALKEY_URL searxng-dragonfly:6379), both replicas. No toPorts: a same-node
     # Service reply arrives with the ClusterIP as source after reverse NAT and is re-checked here.
-    # Skill `networking` references/dns-ownership.md.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 #
 # Sum by (namespace, persistentvolumeclaim). A per-node series resets predict_linear on reschedule.
-# Compare to the live capacity, not a hardcoded size. See skill hermes-agent references/state-db.md.
+# Compare to the live capacity, not a hardcoded size.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

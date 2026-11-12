@@ -6,7 +6,8 @@ metadata:
   name: plex
   namespace: media
 spec:
-  # Default-deny for pod-network sources; rationale in skill networking references/plex-ingress-policy.md.
+  # ALLOWED_NETWORKS (10.0.0.0/8) contains the pod CIDR 10.42.0.0/16, so any pod would read Plex unauthenticated;
+  # Plex cannot subtract a CIDR, so ingress is default-denied here.
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: plex

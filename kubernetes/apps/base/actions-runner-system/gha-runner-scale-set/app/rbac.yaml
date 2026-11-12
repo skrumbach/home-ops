@@ -1,6 +1,6 @@
 ---
 # No Kubernetes RoleBinding: both scale sets use the chart no-permission SA and automountServiceAccountToken false. Do not reintroduce a shared cluster-admin binding.
-# Talos actions-runner is os:operator, the least role that can image-pull, and only the home-ops runner mounts it. Skill `github-ci` references/arc-runners.md.
+# Talos actions-runner is os:operator, the least role that can image-pull, and only the home-ops runner mounts it.
 apiVersion: talos.dev/v1alpha1
 kind: ServiceAccount
 metadata:

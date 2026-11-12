@@ -3,7 +3,6 @@
 # Creates the litellm_pgvector role and database, then applies resources/schema.sql (idempotent,
 # every run). The superuser creates the `vector` extension, then SET ROLEs to the app role.
 # A schema.sql edit renames the hashed ConfigMap, so Flux recreates this Job and re-applies it.
-# See skill litellm-proxy (references/vector-store.md).
 apiVersion: batch/v1
 kind: Job
 metadata:

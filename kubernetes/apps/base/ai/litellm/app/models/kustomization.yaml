@@ -5,7 +5,7 @@ kind: Kustomization
 # One LiteLLMModel per model. REGISTRATION IS NOT ENTITLEMENT: a key must allow-list it,
 # and a new model must also join public_model_groups (litellmproxy.yaml). Metered models
 # carry no info.extra prices, except ids the cost map cannot price (gpt-image-2, qwen3-embedding-8b):
-# their declared price IS the invoice, never strip it. See skill litellm-proxy (references/model-catalog.md).
+# their declared price IS the invoice, never strip it.
 resources:
   - ./auto.yaml
   - ./chat-ha.yaml

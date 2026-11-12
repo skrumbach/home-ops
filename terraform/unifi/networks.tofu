@@ -5,7 +5,6 @@
 # really deletes it, so the networks the cluster or the NAS ride carry
 # prevent_destroy. Zone membership is declared on the zone (firewall.tofu),
 # never with firewall_zone_id here: managing it from both sides loops.
-# Skill `unifi-network`.
 
 resource "unifi_network" "unifi_managment" {
   auto_scale = false

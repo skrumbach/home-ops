@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # The Claude Code subscription pass-through key. INVARIANT: allow-list only credential-less
 # pass-through CRs (+ embedding-local), never a -metered model or auto. No maxBudget and no rpm/tpm
-# by captain decision; never zero its historical spend. Skill litellm-proxy (references/claude-code-subscription.md).
+# by captain decision; never zero its historical spend.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

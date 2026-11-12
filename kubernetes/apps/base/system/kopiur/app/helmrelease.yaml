@@ -30,7 +30,6 @@ spec:
     installScope: cluster
 
     # CREDENTIAL PROJECTION. Captain decision 2026-08-30, key `credential-scope` (Option B), which closes the question Stage 1 deliberately deferred.
-    # Skill `kopiur-backups`.
     features:
       credentialProjection:
         enabled: true
@@ -83,7 +82,6 @@ spec:
         enabled: true
       prometheusRule:
         # The chart alerts go silent if the operator stops emitting. The absent() rule is in ./prometheusrule.yaml.
-        # Skill `kopiur-backups`.
         enabled: true
       dashboards:
         enabled: true

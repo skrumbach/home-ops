@@ -72,7 +72,7 @@ repos:
         language: system
         files: ^\.github/(workflows|zizmor\.yml)
         pass_filenames: false
-      # Public repo. Scans only the staged diff; findings are redacted. Skill `secrets-1password`.
+      # Public repo. Scans only the staged diff; findings are redacted.
       - id: gitleaks
         name: Scan staged changes for secrets
         entry: mise exec -- gitleaks git --pre-commit --staged --redact --no-banner --verbose

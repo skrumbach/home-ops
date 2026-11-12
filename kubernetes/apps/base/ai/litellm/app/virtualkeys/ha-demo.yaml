@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # Cloud-entitled failover demo: holding chat-ha IS the cloud entitlement (config fallbacks bypass
-# allow-lists). Its budget is real USD, moved only by fallback spend. references/fallbacks.md.
+# allow-lists). Its budget is real USD, moved only by fallback spend.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

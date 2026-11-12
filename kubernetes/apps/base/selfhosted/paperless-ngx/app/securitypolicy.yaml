@@ -3,7 +3,7 @@
 # Only rule `app` (the browser UI) is gated. Rule `api` (/api) stays open to Paperless' own token,
 # basic and session auth: mobile apps and scripts cannot follow an SSO redirect. Do not use the
 # proxy provider's skip_path_regex for this, it is domain-wide. The cross-namespace backendRef
-# needs the selfhosted entry in security/allow-authentik-access. Skill authentik-terraform.
+# needs the selfhosted entry in security/allow-authentik-access.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

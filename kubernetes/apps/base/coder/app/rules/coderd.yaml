@@ -82,7 +82,7 @@ spec:
       rules:
         # Sparse labeled counter: quiet until a build completes. The unlabeled
         # sibling coderd_provisionerd_num_daemons proves it is registered.
-        # Do not rewire this rule. Skill observability.
+        # Do not rewire this rule.
         - alert: CoderdWorkspaceBuildFailures
           expr: sum(increase(coderd_workspace_builds_total{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`, status="failed" }[10m])) > 10
           for: 10m

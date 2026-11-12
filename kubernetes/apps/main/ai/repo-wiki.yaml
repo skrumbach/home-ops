@@ -10,7 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    # Proof: proof-ledger.md row 3.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   healthChecks:

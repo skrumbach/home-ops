@@ -10,7 +10,7 @@ spec:
   instances: 3
   # `standard` ships pgvector (extension `vector`). Backups go through the Barman Cloud
   # plugin, so the deprecated `system` flavour is not needed. Renovate holds this to
-  # major 18 (.renovate/overrides.json5). Skill `databases`.
+  # major 18 (.renovate/overrides.json5).
   # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
   imageName: ghcr.io/cloudnative-pg/postgresql:18.6-standard-trixie@sha256:5bf4a23aa13fb560903fba932676773ba4ba2729c162e587b09bf539a2e3df56
 
@@ -22,7 +22,6 @@ spec:
       kubernetes.io/os: linux
     # instances: 3 + required hostname anti-affinity means one instance must land
     # on talos-3 (PreferNoSchedule taint); this toleration removes the score penalty.
-    # Skill `node-scheduling`.
     tolerations:
       - key: home-operations.com/dedicated
         operator: Exists
@@ -36,7 +35,7 @@ spec:
   # Node-local NVMe: Postgres replicates to the other two instances and archives
   # WAL, so Ceph's 3 copies underneath would be 9 copies in total. hostpath has no
   # quota; the NodeFilesystem* alerts cover /var. A drained node's instance stays
-  # Pending until that node returns. Skill `databases`.
+  # Pending until that node returns.
   storage:
     size: 100Gi
     storageClass: openebs-hostpath
@@ -51,7 +50,7 @@ spec:
   # restores from this cluster's own Barman Cloud archive, never by re-importing
   # postgres-17 (frozen at the 2026-11-04 cutover). The archive serverName below must be
   # bumped (postgres18-v3) in the same commit, or the restored primary refuses to archive
-  # into the non-empty v2 archive. Skill `databases` references/cnpg.md "Restore shape".
+  # into the non-empty v2 archive.
   bootstrap:
     recovery:
       source: postgres18-v2
@@ -66,7 +65,7 @@ spec:
 
   # serverName is one per cluster generation: postgres18-v1 is the archive of the
   # empty cluster this one replaced. Increment it on any rebuild, and bump SERVER_NAME in
-  # ../offsite-mirror/cronjob.yaml with it. Skill `databases`.
+  # ../offsite-mirror/cronjob.yaml with it.
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
@@ -75,7 +74,7 @@ spec:
         serverName: postgres18-v2
 
   # Adds the LAN name of postgres-18-lb to the CNPG-issued server certificate.
-  # Never serverTLSSecret/serverCASecret. Skill `databases` references/cnpg.md.
+  # Never serverTLSSecret/serverCASecret.
   certificates:
     serverAltDNSNames:
       - postgres-18.${SECRET_DOMAIN}
@@ -105,7 +104,7 @@ spec:
 
   monitoring:
     enablePodMonitor: true
-    # Keep the original `cluster` label: the bundled dashboard reads it. Skill `databases`.
+    # Keep the original `cluster` label: the bundled dashboard reads it.
     podMonitorMetricRelabelings:
       - sourceLabels: ["cluster"]
         targetLabel: cnpg_cluster

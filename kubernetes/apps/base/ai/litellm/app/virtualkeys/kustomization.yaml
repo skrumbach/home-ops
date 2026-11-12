@@ -3,7 +3,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # One LiteLLMVirtualKey + PushSecret per consumer (D4). A key without maxBudget may reach only
-# free-credential models (scripts/ci/litellm-billing-guard-test.py). See skill litellm-proxy (references/governance-keys.md).
+# free-credential models (scripts/ci/litellm-billing-guard-test.py).
 resources:
   - ./claude-code-subscription.yaml
   - ./demo.yaml

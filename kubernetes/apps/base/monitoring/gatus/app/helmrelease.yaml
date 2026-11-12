@@ -90,7 +90,7 @@ spec:
       # init container (--auto-httproute/--enable-service) watches the K8s API and needs the token.
       automountServiceAccountToken: true
       # fsGroup 65532: the nonroot sidecar must write the shared config PVC
-      # or HTTPRoute auto-discovery stops silently. Skill observability.
+      # or HTTPRoute auto-discovery stops silently.
       securityContext:
         fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch

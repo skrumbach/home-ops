@@ -1,7 +1,7 @@
 # Datasets below the two pools (the pools themselves are not managed). force_destroy
 # stays false: the provider refuses to destroy or replace a dataset that holds
 # data. Encryption is inherited from the pool unless a dataset says otherwise;
-# keys are write-only and never read back. Skill `truenas-nas`.
+# keys are write-only and never read back.
 
 resource "truenas_dataset" "storage_para" {
   aclmode            = "PASSTHROUGH"
@@ -836,6 +836,8 @@ resource "truenas_dataset" "storage_para_0_inbox" {
 }
 
 
+# Backs the NAS MinIO that holds the postgres-18 barman archive (cloudnative-pg/cluster-18/objectstore.yaml).
+# After any change here check ContinuousArchiving on database/postgres-18.
 resource "truenas_dataset" "pool_ssd_miniio" {
   aclmode            = "INHERIT"
   acltype            = "inherit"

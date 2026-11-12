@@ -3,7 +3,6 @@
 # Gates the whole excalidraw route (envoy-internal). Live collaboration goes from the browser to
 # excalidraw.com's own collab server, not this route, so no websocket path needs an exemption. The
 # cross-namespace backendRef needs the selfhosted entry in security/allow-authentik-access.
-# Skill authentik-terraform.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

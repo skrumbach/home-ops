@@ -13,5 +13,5 @@ spec:
   # Disposable transcode scratch on the RWX class. The default `csi`
   # subvolumegroup is broken by Ceph Tentacle v20.2.1 subvolume corruption,
   # so this claim stays on `ceph-filesystem-rwx` until a fixed Ceph release
-  # lands and the subvolumegroup is re-checked. Skill rook-ceph.
+  # lands and the subvolumegroup is re-checked.
   storageClassName: ceph-filesystem-rwx

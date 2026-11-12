@@ -10,7 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    # Proof: proof-ledger.md row 1.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   healthChecks:
@@ -41,9 +40,9 @@ spec:
       APP: *app
       CONFIG_TIMEZONE: America/New_York
       # Claim name matches the app. Capacity is create-time only; growing the live claim is kubectl patch.
-      # Do not set sessions.vacuum_after_prune. Skill `hermes-agent`. Skill `kopiur-backups`.
+      # Do not set sessions.vacuum_after_prune.
       KOPIUR_CAPACITY: 40Gi
-      # Files are 10000:10000. Component default 1000 fails closed. Skill `kopiur-backups`.
+      # Files are 10000:10000. Component default 1000 fails closed.
       KOPIUR_PUID: "10000"
       KOPIUR_PGID: "10000"
       KOPIUR_CACHE_CAPACITY: 48Gi

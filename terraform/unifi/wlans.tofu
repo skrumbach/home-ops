@@ -3,7 +3,6 @@
 # never in state, sent only when the WLAN is created or `passphrase_wo_version`
 # changes. Adding or bumping that version rewrites the passphrase and
 # reprovisions every AP. Never use `passphrase`, which is stored in state.
-# Skill `unifi-network`.
 
 resource "unifi_wlan" "u7_guest" {
   ap_group = {

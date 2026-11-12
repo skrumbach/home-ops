@@ -20,7 +20,7 @@ spec:
 
     # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (ExternalSecret grafana-oidc). Grafana's env override
     # beats grafana.ini, so the secret stays out of the ConfigMap and no Grafana variable-expansion
-    # token has to survive Flux envsubst (skill flux-substitution). optional: a missing secret
+    # token has to survive Flux envsubst. optional: a missing secret
     # breaks only SSO, never the pod or the local break-glass login.
     envFromSecrets:
       - name: grafana-oidc-secret
@@ -245,7 +245,7 @@ spec:
       infrastructure:
         # The Cilium dashboard comes from the cilium HelmRelease (kube-system/cilium-dashboard).
         # Do not re-add gnetId 16611: same UID as the operator's and it locks sidecarProvider
-        # out of writes. Skill observability.
+        # out of writes.
 
         kube-state-metrics:
           # renovate: depName="Kube-State-Metrics"
@@ -327,7 +327,7 @@ spec:
       databases:
         # CloudNativePG (cloudnative-pg-dashboard chart) and the Dragonfly operator install their
         # own dashboards; gnetIds 15944/15945/21053/21054 are the unrelated Dragonfly P2P project.
-        # Do not duplicate them here (UID collision). Skill observability.
+        # Do not duplicate them here (UID collision).
 
         emqx-authentication:
           url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authentication.json
@@ -641,7 +641,7 @@ spec:
 
     # nodeTaintsPolicy: Honor - no toleration for the talos-3 taint, which is PreferNoSchedule,
     # so Honor does not exclude talos-3 from the spread domains; the TaintToleration score
-    # penalty keeps this workload off it (.agents/skills/node-scheduling/references/talos-3-ledger.md).
+    # penalty keeps this workload off it.
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname

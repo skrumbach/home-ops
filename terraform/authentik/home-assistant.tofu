@@ -1,8 +1,7 @@
 # Home Assistant single sign-on via the hass-oidc-auth custom component.
 # CREATED by this stack (no import block). Public client + PKCE: there is no client secret, so
 # nothing flows through 1Password and the client_id is a plain literal that
-# the Home Assistant ConfigMap repeats. Kubernetes side: skill home-automation
-# (references/home-assistant.md).
+# the Home Assistant ConfigMap repeats.
 
 locals {
   # Public identifier. Must match client_id in

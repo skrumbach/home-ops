@@ -4,10 +4,7 @@
 `litellm.home-operations.com/v1alpha1` CRs reconciled by the
 [home-operations litellm-operator](https://github.com/home-operations/litellm-operator)
 (`../litellm-operator/`). The operator owns the proxy Deployment, Service and
-rendered `config.yaml`; nothing here renders a Deployment. Agent knowledge
-(tripwires, procedures): skill `litellm-proxy`. Human runbooks:
-[request logs](../../../../../.agents/skills/litellm-proxy/references/spend-logs.md) and
-[Claude Code client setup](../../../../../.agents/skills/litellm-proxy/references/claude-code-subscription.md).
+rendered `config.yaml`; nothing here renders a Deployment.
 
 **Scope (captain decision B4):** internal route only - `litellm-internal` on
 `envoy-internal` at `litellm.${SECRET_DOMAIN}`, plus
@@ -39,8 +36,7 @@ the only item created by hand:
 
 Already existing and reused: `ai-keys` (`ANTHROPIC_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`,
 `OPENROUTER_API_KEY`, `OPENCODE_GO_API_KEY`). Written by
-PushSecrets, not by hand: `Automation/litellm-sso` (from OpenTofu,
-`.agents/skills/authentik-terraform/references/apply-runbook.md`), `litellm-pgvector` (seed command in
+PushSecrets, not by hand: `Automation/litellm-sso` (from OpenTofu), `litellm-pgvector` (seed command in
 `app/pushsecret-pgvector.yaml`) and every `litellm-consumer-*` item.
 
 Until `litellm` exists the ExternalSecret reports `SecretSyncedError`, the
