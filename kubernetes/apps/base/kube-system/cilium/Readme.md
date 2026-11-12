@@ -6,7 +6,7 @@ Chart pin, BGP CRs and LoadBalancer pool:
 UniFi is not reconciled from here. The UDM's FRR config is
 `terraform/unifi/bgp.conf` (OpenTofu); change it together with `app/networking.yaml`.
 
-Host firewall policy: `app/hostpolicy-ceph.yaml`.
+Host firewall policy: `app/ciliumclusterwidenetworkpolicy.yaml`.
 
 Hubble: agent server, relay and UI are on, with flow metrics (dns, drop,
 tcp, flow, port-distribution, icmp, httpV2) scraped by ServiceMonitors and

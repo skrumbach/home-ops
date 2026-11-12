@@ -42,6 +42,6 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./pdb.yaml
-  - ./pod-monitor.yaml
+  - ./podmonitor.yaml
   - ./prometheusrule.yaml
   - ./priorityclass.yaml

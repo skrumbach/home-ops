@@ -10,7 +10,7 @@ resources:
   - ./pushsecret.yaml
   - ./service.yaml
   - ./servicemonitor.yaml
-  - ./tailscale-ingress.yaml
+  - ./ingress.yaml
 # Applies to the SnapshotPolicies the overlay's kopiur component adds (plex-ceph, plex-r2). An overlay
 # spec.patches is dropped by cluster-apps, so the patch lives here. Skipped: what Plex rebuilds or
 # re-downloads on its own (cache, logs, crash reports, codecs, GPU drivers, updates). Metadata and Media

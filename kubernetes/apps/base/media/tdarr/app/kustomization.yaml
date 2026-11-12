@@ -6,7 +6,7 @@ resources:
   - ./ciliumnetworkpolicy.yaml
   - ./helmrelease.yaml
   - ./pvc.yaml
-  - ./externalservice.yaml
+  - ./service.yaml
 # Applies to the SnapshotPolicies the overlay's kopiur component adds (tdarr-ceph, tdarr-r2). An overlay
 # spec.patches is dropped by cluster-apps, so the patch lives here. Tdarr/Backups is Tdarr's own rolling
 # zip backups of DB2; kopiur already keeps DB2's history. An explicit list replaces kopiur's default

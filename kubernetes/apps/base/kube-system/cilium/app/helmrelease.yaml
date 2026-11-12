@@ -73,7 +73,7 @@ spec:
     endpointRoutes:
       enabled: true
     # The four metrics ports (prometheus, operator, envoy, hubble.metrics) are pinned at the
-    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965; keep the pins in sync
+    # chart defaults: ciliumclusterwidenetworkpolicy.yaml world-denies 9962-9965; keep the pins in sync
     # with that list.
     envoy:
       enabled: false
@@ -82,9 +82,9 @@ spec:
     # Host firewall: enforces CiliumClusterwideNetworkPolicy with a nodeSelector
     # against the *host* endpoint. Required because every Ceph daemon runs on
     # host network (CephCluster spec.network.provider: host), so pod-level
-    # NetworkPolicy cannot reach them. Consumed by ./hostpolicy-ceph.yaml.
+    # NetworkPolicy cannot reach them. Consumed by ./ciliumclusterwidenetworkpolicy.yaml.
     # Enforced at the tc hook in bpf_host on `devices` (bond0, bond0.3,
-    # bond0.90 here) - see ./hostpolicy-ceph.yaml for the full safety argument.
+    # bond0.90 here) - see ./ciliumclusterwidenetworkpolicy.yaml for the full safety argument.
     hostFirewall:
       enabled: true
     # Hubble: relay, UI (app/httproute.yaml, Authentik SSO) and metrics. Flipping
@@ -178,7 +178,7 @@ spec:
           memory: 512Mi
     pmtuDiscovery:
       enabled: true
-    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in hostpolicy-ceph.yaml, not this flag. Rollback: set this true, or delete the CCNP.
+    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in ciliumclusterwidenetworkpolicy.yaml, not this flag. Rollback: set this true, or delete the CCNP.
     policyAuditMode: false
     prometheus:
       enabled: true

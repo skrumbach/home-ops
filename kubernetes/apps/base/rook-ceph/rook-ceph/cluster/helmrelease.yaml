@@ -103,7 +103,7 @@ spec:
             # csi stays aes. Kernel clients need Linux >= 7.0. Never turn off mon_auth_allow_insecure_key /
             # mon_auth_emergency_allowed_ciphers (the AUTH_INSECURE_* warnings): that cuts auth on every RBD map and CephFS mount.
       # Effect must match PreferNoSchedule. `all` covers mon, osd, and mgr. It does not cover mds or rgw.
-      # CSI nodeplugins are operator/csi-driver-tolerations.yaml.
+      # CSI nodeplugins are operator/driver.yaml.
       placement:
         all:
           tolerations:

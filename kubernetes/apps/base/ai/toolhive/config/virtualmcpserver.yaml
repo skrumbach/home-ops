@@ -18,7 +18,7 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
-  # Shared MCPTelemetryConfig (mcp-telemetry.yaml): serves /metrics on the main port 4483.
+  # Shared MCPTelemetryConfig (mcptelemetryconfig.yaml): serves /metrics on the main port 4483.
   telemetryConfigRef:
     name: prometheus
   podTemplateSpec:

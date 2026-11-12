@@ -5,7 +5,7 @@ resources:
   - ./embeddingserver.yaml
   - ./externalsecret.yaml
   - ./httproute.yaml
-  - ./mcp-telemetry.yaml
+  - ./mcptelemetryconfig.yaml
   - ./mcpgroup.yaml
   - ./networkpolicy.yaml
   - ./podmonitor.yaml
