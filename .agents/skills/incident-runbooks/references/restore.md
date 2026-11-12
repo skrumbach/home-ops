@@ -162,7 +162,7 @@ A lost or corrupt claim, or one whose snapshots cannot be cloned (movers stuck `
 1. Credentials: item `volsync-template`, vault `Homelab` (never delete or rotate it: the only
    restic passwords; never print a value). Unset `OP_SERVICE_ACCOUNT_TOKEN`: it cannot read `Homelab`.
 2. Fields and URL: `git show 4b30a47e^:kubernetes/components/volsync/<ceph|minio|r2>/externalsecret.yaml`.
-   From a workstation, ceph is `s3:https://s3.<SECRET_DOMAIN>/...` (the endpoint field is in-cluster).
+   From a workstation, ceph is `s3:https://s3.sklab.dev/...` (the endpoint field is in-cluster).
 3. Workstation read, r2:
    ```sh
    op_field() { env -u OP_SERVICE_ACCOUNT_TOKEN op read "op://Homelab/volsync-template/$1"; }
@@ -176,7 +176,7 @@ A lost or corrupt claim, or one whose snapshots cannot be cloned (movers stuck `
    ```
 4. Too large for a workstation (owner go-ahead, all labelled `fm.homeops/restore-drill`, deleted
    after): a scratch ExternalSecret extracting `volsync-template` with that template, `${APP}` and
-   `${SECRET_DOMAIN}` replaced by hand; a `ceph-block` scratch PVC; a `restic/restic` pod with
+   `${SECRET_DOMAIN}` (`sklab.dev`) replaced by hand; a `ceph-block` scratch PVC; a `restic/restic` pod with
    `envFrom` that Secret running `restic --no-lock restore <snapshot-id> --target /restore`.
 5. Compare by sha256, not modes: VolSync widened group bits (`600` to `660`), so re-tighten
    credential files before use. restic restores ownership only as root.
