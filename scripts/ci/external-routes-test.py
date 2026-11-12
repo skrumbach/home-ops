@@ -18,6 +18,7 @@ ALLOWED: dict[str, set[str]] = {
     "coder.${SECRET_DOMAIN}": {"/"},
     "flux-webhook.${SECRET_DOMAIN}": {"/hook/"},
     "hass.${SECRET_DOMAIN}": {"/"},
+    "id.sklab.dev": {"/"},  # Pocket ID; the external echo route will log in against it
     "plex.sklab.dev": {"/"},
     "seerr.${SECRET_DOMAIN}": {"/"},
     "kromgo.${SECRET_DOMAIN}": {"/badges/"},  # public read-only badges only

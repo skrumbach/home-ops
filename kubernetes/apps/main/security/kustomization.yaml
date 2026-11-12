@@ -12,3 +12,5 @@ resources:
   - ./authentik.yaml
   - ./external-secrets.yaml
   - ./onepassword-connect.yaml
+  - ./pocket-id-operator.yaml
+  - ./pocket-id.yaml
