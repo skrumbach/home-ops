@@ -94,6 +94,12 @@ spec:
           gethomepage.dev/icon: ntfy.svg
           gethomepage.dev/description: Push notifications
           external-dns.kubernetes.io/target: "internal.sklab.dev"
+          gatus.home-operations.com/endpoint: |-
+            url: https://ntfy.sklab.dev/v1/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].healthy == true"
+            group: selfhosted
         hostnames:
           - "ntfy.sklab.dev"
         parentRefs:

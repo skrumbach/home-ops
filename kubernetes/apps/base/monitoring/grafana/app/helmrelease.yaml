@@ -605,6 +605,12 @@ spec:
           gethomepage.dev/group: Observability
           gethomepage.dev/description: Dashboards
           # No homepage widget: it only speaks basic auth, and GF_AUTH_BASIC_ENABLED is false.
+          gatus.home-operations.com/endpoint: |-
+            url: https://grafana.sklab.dev/api/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].database == ok"
+            group: monitoring
         enabled: true
         hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:

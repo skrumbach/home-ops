@@ -129,6 +129,11 @@ spec:
           gethomepage.dev/icon: sonarr.svg
           gethomepage.dev/description: TV shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sonarr
+          gatus.home-operations.com/endpoint: |-
+            url: https://sonarr.sklab.dev/ping
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
           - sonarr.sklab.dev
         parentRefs:

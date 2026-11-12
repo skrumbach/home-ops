@@ -143,6 +143,11 @@ spec:
           gethomepage.dev/description: Subtitles
           gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
           external-dns.kubernetes.io/target: "internal.sklab.dev"
+          gatus.home-operations.com/endpoint: |-
+            url: https://bazarr.sklab.dev/api/system/ping
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
           - bazarr.sklab.dev
         parentRefs:

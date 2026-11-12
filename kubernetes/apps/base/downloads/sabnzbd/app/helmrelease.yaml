@@ -199,6 +199,11 @@ spec:
           gethomepage.dev/icon: sabnzbd.svg
           gethomepage.dev/description: Usenet downloader
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sabnzbd
+          gatus.home-operations.com/endpoint: |-
+            url: https://sabnzbd.sklab.dev/api?mode=version
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
           - sabnzbd.sklab.dev
         parentRefs:
