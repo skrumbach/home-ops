@@ -414,13 +414,11 @@ add_namespace_resource_entry() {
     return
   fi
   if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "--- would append '  - $entry' to the resources: list in $ns_kustomization ---"
+    echo "--- would insert '  - $entry' into the resources: list in $ns_kustomization ---"
     return
   fi
-  # Appended at the end of the existing resources: block, not inserted
-  # alphabetically - this repo's namespaces don't agree on an order (ai/
-  # and downloads/ sort alphabetically, selfhosted/ is roughly
-  # chronological), so append is the only assumption that holds everywhere.
+  # Inserted in sorted position (name with the extension stripped), the order
+  # scripts/ci/naming-test.py enforces for every overlay resources: list.
   python3 - "$ns_kustomization" "$entry" <<'PYEOF'
 import sys
 path, entry = sys.argv[1], sys.argv[2]
@@ -433,11 +431,17 @@ except StopIteration:
 end = start + 1
 while end < len(lines) and (lines[end].startswith("  - ") or lines[end].startswith("  #")):
     end += 1
-lines.insert(end, f"  - {entry}\n")
+key = lambda e: e.removeprefix("./").removesuffix(".yaml")
+pos = end
+for i in range(start + 1, end):
+    if lines[i].startswith("  - ") and key(lines[i][4:].strip()) > key(entry):
+        pos = i
+        break
+lines.insert(pos, f"  - {entry}\n")
 with open(path, "w") as f:
     f.writelines(lines)
 PYEOF
-  echo "appended '  - $entry' to the resources: list in $ns_kustomization"
+  echo "inserted '  - $entry' into the resources: list in $ns_kustomization"
 }
 
 write_or_append_overlay() {

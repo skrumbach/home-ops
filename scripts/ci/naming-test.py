@@ -88,7 +88,7 @@ for f in files:
             fail(d, "config/ without kustomization.yaml holds payload: move it to resources/")
     if ext != ".yaml" or payload or name == "kustomizeconfig.yaml":
         continue
-    text = (ROOT / f).read_text()
+    text = (ROOT / f).read_text(errors="replace")
     # 7: header
     lines = text.splitlines() + ["", ""]
     if lines[0] != "---" or not lines[1].startswith("# yaml-language-server: $schema="):
@@ -130,7 +130,7 @@ for f in files:
         fail(f, "chart source belongs in ocirepository.yaml / helmrepository.yaml next to helmrelease.yaml")
         continue
     primary = next((k for k in kset if any(stem == n or stem.startswith(n + "-") for n in (k, ABBREV.get(k, k)))), None)
-    if stem == "rbac" and kset <= RBAC:
+    if (stem == "rbac" or stem.startswith("rbac-")) and kset <= RBAC:
         continue
     if primary is None:
         fail(f, f"name the file for its kind ({', '.join(sorted(kset))}), `<kind>-<qualifier>`, pvc/pdb/rbac")

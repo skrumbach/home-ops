@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/cronjob_v1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
 # Daily janitor for the shared-downloads CephFS volume. SABnzbd retry-loops
 # unpacks as the disk fills and never garbage-collects the failed attempts, and
 # orphaned _UNPACK_*/_FAILED_* dirs fill the PVC until complete_free auto-pauses SAB.

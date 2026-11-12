@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/cronjob_v1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
 # Catches a backup mover that cannot READ the volume it is backing up - the sibling failure to pvc-writable-check's "app cannot write its own volume".
 apiVersion: batch/v1
 kind: CronJob
