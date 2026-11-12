@@ -19,7 +19,7 @@ permissions:
 env:
   # Keep in step with the action pin on the `uses:` line and with ci.yaml.
   # renovate: datasource=github-releases depName=home-operations/flate
-  FLATE_VERSION: 0.6.5
+  FLATE_VERSION: 0.7.3
 
 jobs:
   filter:
@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
         with:
           version: ${{ env.FLATE_VERSION }}
           base: ""
