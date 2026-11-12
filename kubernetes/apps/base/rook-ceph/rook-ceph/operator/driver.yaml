@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/csi.ceph.io/driver_v1.json
 # Partial Driver: only nodePlugin.tolerations. Keep prune: disabled (lowercase) and ssa: Merge, or Flux deletes the operator-owned Drivers and every RBD/CephFS mount.
 # The tolerations list is atomic, so Merge protects the other fields. PreferNoSchedule makes this hygiene. Do not delete this file.
 apiVersion: csi.ceph.io/v1

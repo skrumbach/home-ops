@@ -170,10 +170,6 @@ spec:
   install:
     remediation:
       retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     controllers:
       $app:
@@ -332,9 +328,6 @@ spec:
       retries: -1
   upgrade:
     crds: CreateReplace
-    cleanupOnFail: true
-    remediation:
-      retries: 3
 EOF
 }
 
@@ -572,7 +565,7 @@ Next steps:
   - decide whether this app needs a backup component (components/kopiur;
     VolSync is removed) - that requires measuring the live file
     ownership after first deploy, so it is deliberately not auto-generated;
-    see kubernetes/components/kopiur/Readme.md (one components/kopiur include
+    see kubernetes/components/kopiur/README.md (one components/kopiur include
     covers one volume; a second PVC is a second Kustomization)
   - validate: mise exec -- task flux:test:all
 EOF

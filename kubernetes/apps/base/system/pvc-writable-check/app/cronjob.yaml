@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/cronjob_v1.json
 # An app can be Ready, probed, and backed up while unable to write its volume.
 apiVersion: batch/v1
 kind: CronJob

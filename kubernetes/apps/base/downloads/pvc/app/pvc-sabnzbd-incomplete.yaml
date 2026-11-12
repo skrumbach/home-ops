@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/persistentvolumeclaim.json
 # SABnzbd article-assembly scratch (the "incomplete"/download_dir). On
 # `ceph-block` (RWO), NOT CephFS RWX, on purpose: assembly writes thousands of
 # tiny `SABnzbd_article_*` files that storm the CephFS MDS metadata journal and

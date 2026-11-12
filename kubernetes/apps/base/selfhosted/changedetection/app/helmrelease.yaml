@@ -18,7 +18,7 @@ spec:
     # back to its image's `blessuser` uid 999 (see below). This does NOT earn kopiur's
     # `SecurityContextCompatible` condition: it needs the mover uid to match every container of every pod
     # mounting the claim, and the 999 sidecar suppresses it. The condition is positive-only (absence is not
-    # a failure); a whole-volume kopia read is the proof. See `components/kopiur/Readme.md`.
+    # a failure); a whole-volume kopia read is the proof. See `components/kopiur/README.md`.
     defaultPodOptions:
       securityContext:
         runAsUser: 1000

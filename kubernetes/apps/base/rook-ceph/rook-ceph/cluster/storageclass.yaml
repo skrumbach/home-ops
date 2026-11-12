@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/storage.k8s.io/storageclass_v1.json
 # RWX class for group csi-rwx. clusterID must match that group's status.info.clusterID.
 # Do not point a new RWX claim at ceph-filesystem.
 apiVersion: storage.k8s.io/v1

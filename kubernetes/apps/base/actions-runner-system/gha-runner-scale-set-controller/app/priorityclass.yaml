@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/_definitions.json#/definitions/io.k8s.api.scheduling.v1.PriorityClass
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:

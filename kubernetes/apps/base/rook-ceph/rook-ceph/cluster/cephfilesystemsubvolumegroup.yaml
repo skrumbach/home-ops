@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/ceph.rook.io/cephfilesystemsubvolumegroup_v1.json
 # Group csi-rwx is the working CephFS group. Default group csi still returns EINVAL.
 # Four RWX claims use it (shared-downloads, tdarr, shared-xml, shared-files). Do not delete this CR.
 apiVersion: ceph.rook.io/v1
