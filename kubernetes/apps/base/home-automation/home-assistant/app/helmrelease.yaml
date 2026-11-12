@@ -201,8 +201,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key, and the
-        # `:-home-assistant` default would hide a token naming a variable nothing defines.
         existingClaim: ${KOPIUR_CLAIM:-home-assistant}
         globalMounts:
           - path: /config

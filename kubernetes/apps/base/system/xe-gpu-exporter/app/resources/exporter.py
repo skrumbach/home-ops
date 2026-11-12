@@ -5,7 +5,7 @@ The xe driver exposes no VRAM counters in sysfs. Each process holding a DRM
 node does publish /proc/<pid>/fdinfo/<fd> with `drm-total-vram0` (everything
 that client has resident in VRAM: weights, KV cache, compute buffers). This
 sums those per card and per pod. Needs hostPID and CAP_SYS_PTRACE to read other
-processes' fd links. Contract: scripts/ci/xe-gpu-exporter-test.py.
+processes' fd links.
 """
 import logging
 import os

@@ -10,6 +10,8 @@ spec:
   chartRef:
     kind: OCIRepository
     name: kube-prometheus-stack
+  # The cluster-apps HelmRelease patch overrides both to CreateReplace; values.crds.enabled
+  # false is what keeps this chart from shipping CRDs (prometheus-operator/crds owns them).
   install:
     crds: Skip
   upgrade:

@@ -14,10 +14,6 @@ spec:
   install:
     remediation:
       retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     annotations:
       secret.reloader.stakater.com/reload: &secret skrumbach-runner-secret

@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
@@ -22,14 +22,8 @@ spec:
   chartRef:
     kind: OCIRepository
     name: dragonfly-operator
-  install:
-    crds: CreateReplace
   interval: 30m
   maxHistory: 3
-  upgrade:
-    crds: CreateReplace
-  uninstall:
-    keepHistory: false
   values:
     kube-rbac-proxy:
       resources:

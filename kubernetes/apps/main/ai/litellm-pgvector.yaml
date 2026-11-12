@@ -27,12 +27,6 @@ spec:
       namespace: ai
   interval: 1h
   path: ./kubernetes/apps/base/ai/litellm-pgvector/app
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-    substitute:
-      APP: *app
   prune: true
   retryInterval: 2m
   sourceRef:

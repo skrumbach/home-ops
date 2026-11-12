@@ -17,10 +17,6 @@ spec:
       retries: 3
   upgrade:
     timeout: 20m
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   values:
     controllers:
       pgadmin:

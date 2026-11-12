@@ -39,8 +39,6 @@ spec:
         kind: Secret
     substitute:
       APP: *app
-      GATUS_GROUP: *namespace
-      GATUS_SUBDOMAIN: auth
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never

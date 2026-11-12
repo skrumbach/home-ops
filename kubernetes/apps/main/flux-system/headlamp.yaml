@@ -16,9 +16,6 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
-    substitute:
-      APP: *app
-      GATUS_SUBDOMAIN: *app
   sourceRef:
     kind: GitRepository
     name: flux-system

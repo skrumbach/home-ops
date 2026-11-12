@@ -12,10 +12,6 @@ spec:
   install:
     remediation:
       retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     controllers:
       hermes:
@@ -408,9 +404,6 @@ spec:
               verbs: [get, list, watch]
             - apiGroups: [external-secrets.io]
               resources: [externalsecrets, secretstores, clustersecretstores]
-              verbs: [get, list, watch]
-            - apiGroups: [volsync.backube]
-              resources: [replicationsources, replicationdestinations]
               verbs: [get, list, watch]
             - apiGroups: [postgresql.cnpg.io]
               resources: [clusters, backups, scheduledbackups]

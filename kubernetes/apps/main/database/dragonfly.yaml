@@ -16,9 +16,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  postBuild:
-    substitute:
-      APP: *app
   targetNamespace: *namespace
   wait: true
 # Per-cluster Dragonfly instances are provisioned by consuming apps via the

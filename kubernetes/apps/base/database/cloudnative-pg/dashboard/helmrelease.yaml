@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
@@ -24,8 +24,6 @@ spec:
     name: cloudnative-pg-dashboard
   maxHistory: 3
   interval: 30m
-  uninstall:
-    keepHistory: false
   values:
     grafanaDashboard:
       namespace: database

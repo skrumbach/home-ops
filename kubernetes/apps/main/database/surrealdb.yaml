@@ -60,9 +60,6 @@ spec:
     - name: surrealdb
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: surrealdb
       KOPIUR_PUID: "65532"

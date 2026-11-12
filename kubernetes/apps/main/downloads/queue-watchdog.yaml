@@ -22,7 +22,3 @@ spec:
   dependsOn:
     - name: onepassword-store
       namespace: security
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret

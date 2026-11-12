@@ -26,5 +26,4 @@ spec:
       - name: cluster-secrets
         kind: Secret
     substitute:
-      APP: *app
       CONFIG_TIMEZONE: America/New_York

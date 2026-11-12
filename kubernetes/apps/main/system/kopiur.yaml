@@ -69,8 +69,6 @@ spec:
   targetNamespace: *namespace
   postBuild:
     substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
       # Written by the kopiur-substitutions ExternalSecret in the `kopiur`
       # Kustomization above, which is why this one dependsOn it.
       - name: kopiur-substitutions

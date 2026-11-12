@@ -20,8 +20,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
   timeout: 5m

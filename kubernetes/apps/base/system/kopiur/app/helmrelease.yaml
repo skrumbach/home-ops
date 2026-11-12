@@ -19,9 +19,6 @@ spec:
     # shipped exactly that shape (three schema changes).
     crds: CreateReplace
   upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
     crds: CreateReplace
   values:
     # Load-bearing and pinned deliberately: a namespaced install swaps the

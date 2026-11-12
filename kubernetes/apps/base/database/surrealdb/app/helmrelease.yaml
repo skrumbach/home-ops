@@ -21,13 +21,9 @@ spec:
       retries: 3
   upgrade:
     timeout: 10m
-    cleanupOnFail: true
     remediation:
-      retries: 3
       # Never roll back: the last good release points at TiKV, which is gone.
       strategy: uninstall
-  uninstall:
-    keepHistory: false
   values:
     # Single replica: RocksDB allows one writer on the data dir lock.
     replicaCount: 1

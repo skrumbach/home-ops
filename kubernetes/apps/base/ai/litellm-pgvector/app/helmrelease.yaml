@@ -14,10 +14,6 @@ spec:
   install:
     remediation:
       retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     defaultPodOptions:
       automountServiceAccountToken: false

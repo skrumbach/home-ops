@@ -14,15 +14,8 @@ spec:
     name: app-template
   maxHistory: 2
   install:
-    createNamespace: true
     remediation:
       retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     # Placement is the devic.es/b70 request, not hostname affinity. KV at ctx
     # 262144 is 2720 MiB at q8_0 (10 of 40 layers are full attention), about twice that at f16.

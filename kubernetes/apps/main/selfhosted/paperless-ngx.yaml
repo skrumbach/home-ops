@@ -47,7 +47,6 @@ spec:
       APP: *app
       KOPIUR_CAPACITY: 10Gi
       KOPIUR_CACHE_CAPACITY: 10Gi
-      GATUS_GROUP: *namespace
       KOPIUR_SCHEDULE_R2: "H 14 * * *"
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -78,9 +77,6 @@ spec:
     - name: paperless-ngx
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: paperless-ngx-media
       KOPIUR_CLAIM: paperless-ngx-media
