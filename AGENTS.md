@@ -1,6 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux v2. `CLAUDE.md` is a symlink to this file. Subsystem knowledge lives in skills (SKILL INDEX below); operator detail also in [`talos/AGENTS.md`](talos/AGENTS.md), [`bootstrap/AGENTS.md`](bootstrap/AGENTS.md), [`kubernetes/apps/base/ai/AGENTS.md`](kubernetes/apps/base/ai/AGENTS.md) (chat model naming) and the runbooks in skill references (SKILL INDEX below; [`docs/README.md`](docs/README.md) lists the few that live elsewhere).
+Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux v2. `CLAUDE.md` is a symlink to this file. Runbooks are in [`.agents/skills/incident-runbooks/`](.agents/skills/incident-runbooks/SKILL.md); operator detail in [`talos/AGENTS.md`](talos/AGENTS.md), [`bootstrap/AGENTS.md`](bootstrap/AGENTS.md) and [`kubernetes/apps/base/ai/AGENTS.md`](kubernetes/apps/base/ai/AGENTS.md) (chat model naming).
 
 **Core stack**: Talos Linux + Flux v2 + Cilium (CNI, BGP LoadBalancer, kube-proxy replacement, no L2 announcements) + Rook-Ceph + External Secrets Operator/1Password + Cloudflare Tunnel + External-DNS (split: `network/cloudflare-dns` public, `network/unifi-dns` internal) + kopiur (the only backup engine; VolSync removed 2026-11-01, its retired repositories kept) + Gateway API (`envoy-internal`/`envoy-external` in `network`) + kube-prometheus-stack/Loki/Grafana/Gatus in `monitoring`.
 
@@ -12,13 +12,12 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 │   ├── apps/base/<ns>/<app>/   # manifests (19 namespaces)
 │   ├── apps/main/<ns>/         # overlay: one Flux Kustomization CR per app + kustomization.yaml
 │   ├── clusters/main/          # Flux entry point: meta.yaml + apps.yaml (cluster-meta -> cluster-apps)
-│   └── components/             # alerts, common, dragonfly, kopiur (+ kopiur/pvc)
+│   └── components/             # alerts, cnpg-database, common, dragonfly, keda, kopiur (+ kopiur/pvc)
 ├── talos/                      # minijinja templates, rendered by `just talos`, not Flux
 ├── bootstrap/                  # just bootstrap stages
-├── .agents/skills/             # one skill per subsystem (.claude/skills is a symlink)
-├── .taskfiles/                 # task domains: 1password, k8s, flux, rook, network, actions-runner
+├── .agents/skills/             # one skill, incident-runbooks (.claude/skills is a symlink)
+├── .taskfiles/                 # task domains: 1password, flux, rook, network, actions-runner
 ├── terraform/                  # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
-├── docs/                       # tdarr harness files + pointer (docs/README.md)
 └── .renovate/                  # Renovate presets
 ```
 
@@ -26,88 +25,76 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 
 | Task | Location |
 |------|----------|
-| Add app | `kubernetes/apps/base/{ns}/{app}/` + overlay `kubernetes/apps/main/{ns}/{app}.yaml`, then `- ./{app}.yaml` in the overlay `kustomization.yaml` (skill `flux-gitops`) |
-| Enable backups | overlay Kustomization, kopiur only (skill `kopiur-backups`) |
+| Add app | `kubernetes/apps/base/{ns}/{app}/` + overlay `kubernetes/apps/main/{ns}/{app}.yaml`, then `- ./{app}.yaml` in the overlay `kustomization.yaml` |
+| Enable backups | include `components/kopiur` only (`/pvc` only replaces an existing PVC manifest whose claim already has snapshots); restores: `.agents/skills/incident-runbooks/references/restore.md` |
 | Namespace-wide labels | `kubernetes/components/common/namespace.yaml` (one `Namespace` named `not-used`, renamed per overlay) |
-| App secrets | `{app}/app/externalsecret.yaml`, ClusterSecretStore `onepassword` (skill `secrets-1password`) |
+| App secrets | `{app}/app/externalsecret.yaml`, ClusterSecretStore `onepassword` |
 | Bootstrap secrets | `bootstrap/kustomize/apps/security/`, `vals` resolves `ref+op://Home-Lab/1password/*` |
 | Helm/OCI repos | `kubernetes/apps/base/flux-system/meta/repos/` |
-| Talos config | `talos/machineconfig.yaml.j2`, `talos/nodes/*.yaml.j2`, `talos/schematic.yaml.j2` (skill `talos-nodes`) |
+| Talos config | `talos/machineconfig.yaml.j2`, `talos/nodes/*.yaml.j2`, `talos/schematic.yaml.j2` |
 | Tasks | `Taskfile.yaml` + `.taskfiles/` (`task --list-all`), `.justfile` + `*/mod.just` |
-| CI, branch protection | `.github/workflows/`; ruleset on `main` is applied via `gh api`, not in Git (skill `github-ci`) |
-| Renovate | `.renovaterc.json5` + `.renovate/`; in-cluster renovate-operator is the writer (skill `renovate`) |
-| Authentik SSO | `terraform/authentik/` (skill `authentik-terraform`) |
-| UniFi network (UDM) | `terraform/unifi/` (skill `unifi-network`) |
-| TrueNAS NAS | `terraform/truenas/` (skill `truenas-nas`) |
-| AI stack | `kubernetes/apps/{main,base}/ai/` (skills `ai-stack`, `litellm-proxy`, `hermes-agent`) |
-| Gatus | `monitoring/gatus`; endpoints come from the `gatus.home-operations.com/endpoint` HTTPRoute annotation (skill `observability`) |
+| CI, branch protection | `.github/workflows/`; ruleset on `main` is applied via `gh api`, not in Git |
+| Renovate | `.renovaterc.json5` + `.renovate/`; in-cluster renovate-operator is the writer |
+| Authentik SSO, UniFi network (UDM), TrueNAS NAS | `terraform/authentik/`, `terraform/unifi/`, `terraform/truenas/` |
+| AI stack | `kubernetes/apps/{main,base}/ai/` |
+| Gatus | `monitoring/gatus`; endpoints come from the `gatus.home-operations.com/endpoint` HTTPRoute annotation |
 | konflate | `flux-system/konflate`, read-only PR-review UI, internal route only; its README owns the write-back-off invariant |
 | Tool versions | `.mise.toml`; resolve CLIs with `mise which <cli>` / `mise exec -- <cli>` |
 
 ## CONVENTIONS
 
 - Every manifest starts with a `# yaml-language-server: $schema=...` comment. Prefer `kubernetes-schemas.pages.dev`, fall back to `k8s-schemas.home-operations.com`, never `crd.movishell.pl` or `fluxcd-community`.
-- Overlay Kustomization anchors: `name: &app myapp`, `namespace: &namespace myns`, referenced as `*app`, `*namespace`. Many overlays `dependsOn` `onepassword-store` in `security`.
-- Lowercase kebab-case names: `helmrelease.yaml`, `kustomization.yaml`, `externalsecret.yaml`, overlay `<app>.yaml`.
 - Commits: `type(scope): description`, types feat/fix/chore/ci/docs/refactor/test, scope is a container, helm, github-action, mise, talos, flux, deps or an app/namespace (`.commitlintrc.yaml`).
-- HTTPRoutes carry `gethomepage.dev/*` and `gatus.home-operations.com/endpoint` annotations. The parent Gateway's `external-dns.kubernetes.io/target` decides the DNS record, not a route annotation (skill `networking`).
-- HelmRelease defaults (CRD CreateReplace, rollback recreate, upgrade remediation) are patched in by `cluster-apps`.
-- Flux substitution: `postBuild.substituteFrom` `cluster-secrets` plus an inline `substitute` map.
+- The parent Gateway's `external-dns.kubernetes.io/target` decides the DNS record, not a route annotation.
 - Task runner split is deliberate: `just` owns Talos, bootstrap and `kube` recipes; `task` owns the Rook suite and network diagnostics. Do not port one to the other.
-- Storage classes: `ceph-block` (RWO), `ceph-filesystem-rwx` (RWX), `openebs-hostpath` (local); leave new claims off `ceph-filesystem` (skill `rook-ceph`).
-- Nodes `talos-1|2|3` are `10.10.10.11/12/13`; never target the VIP `10.10.10.10`. Bonded LACP, MTU 9000, VLANs 3 and 90.
+- Storage classes: `ceph-block` (RWO), `ceph-filesystem-rwx` (RWX), `openebs-hostpath` (local); leave new claims off `ceph-filesystem`.
+- Nodes `talos-1|2|3` are `10.10.10.11/12/13`; never target the VIP `10.10.10.10`.
 
 ## TRIPWIRES
 
-Each is a warning needed before deciding to touch the subsystem; detail is in the named skill.
+Each is a warning needed before deciding to touch the subsystem.
 
 **Secrets and access**
 - **NEVER put plaintext secrets in Git.** App secrets are ExternalSecret + 1Password; bootstrap/Talos secrets are `ref+op://Home-Lab/...` via `vals`. Never seed a Secret with client-side `kubectl apply`. There is no SOPS/age path. Do not store secrets in `**/resources/**` (Renovate ignores it).
-- **`Home-Lab` and `Homelab` are different vaults; Connect cannot see `Home-Lab`, and `SecretSynced` does not mean a non-empty value.** Skill `secrets-1password`.
+- **`Home-Lab` (vals, mise's `OP_SERVICE_ACCOUNT_TOKEN`) and `Homelab` (Connect/ESO) are different vaults: Connect cannot see `Home-Lab`, `op read` of Homelab needs `env -u OP_SERVICE_ACCOUNT_TOKEN`, and `SecretSynced` does not mean non-empty.**
 - **NEVER run `find /Users/coder`, `find $HOME` or any unbounded home search.** Tools are mise-managed; `kubeconfig` and `talosconfig` are absent in fresh worktrees and that is normal - report and continue.
 - **`kubectl`/`talosctl` default to `.mise.toml`'s read-only `~/.kube/home-ops-agent` / `~/.talos/home-ops-agent`.** `Forbidden` on a write means the read-only default is in use; a missing file means the owner has not run `scripts/agent-credentials.sh`. For a write the owner has approved in the current session, prefix `KUBECONFIG=~/.kube/home-ops-admin` / `TALOSCONFIG=~/.talos/home-ops-admin` (a `HOME_OPS_*` prefix does nothing in an agent shell).
-- **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/`, `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead.** A green PR is not approval. A UniFi apply can cut the cluster's VLANs; never apply it over WiFi. Never set a TrueNAS `force_destroy`/`allow_*` opt-in unasked. Skills `authentik-terraform`, `unifi-network`, `truenas-nas`.
+- **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/`, `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead; a green PR is not approval, and the only apply is a saved plan from `secrets-apply.vals.yaml`.** A UniFi apply can cut the cluster's VLANs (never over WiFi), an Authentik apply can lock out SSO, and a TrueNAS `force_destroy`/`allow_*` opt-in is never set unasked.
 - **NEVER commit without the pre-commit hooks** (`task setup-dev-env`).
 
 **Flux and CI**
 - **NEVER run `just bootstrap cluster` / `apps` against a healthy cluster** (DR and first-time only; `bootstrap/AGENTS.md`).
-- **A literal `${...}` that is not a Flux variable fails the whole Kustomization, and neither `flate` nor `task flux:test:all` catches it.** Skill `flux-substitution`.
-- **`flate -n` filters the exit code; `task flux:test:all` is the gate.** Skill `flux-gitops`.
-- **`healthChecks` target the workload, never the HelmRelease, and a Kustomization that owns a kopiur claim keeps `wait` false (dependency gates like CRDs, operators and secret stores set `wait: true`).** Suspend a Kustomization before a live HelmRelease edit. Only `Namespace/flux-system` is exempt from `cluster-apps` (`ssa: Ignore`), so a git-only label on it never lands; its apps reconcile normally. Skill `flux-gitops`.
-- **An overlay `spec.patches` is silently dropped: the `cluster-apps` defaults patch replaces the list.** Put the patch in the base kustomization the `path` builds; gate `scripts/ci/overlay-patches-test.py`. Skill `flux-gitops`.
-- **Deleting a Kustomization deletes its resources whatever `prune` says** (`deletionPolicy: WaitForTermination`); the guard is `kustomize.toolkit.fluxcd.io/prune: disabled` on the HelmRelease or CR. Skill `flux-gitops`.
+- **A literal `${...}` that is not a Flux variable (Grafana `${datasource}`, shell/env tokens) fails or silently blanks the whole Kustomization at reconcile and flate does not report it:** write `$${VAR}` or set `kustomize.toolkit.fluxcd.io/substitute: disabled` on a resource with no real variables (`kubernetes/apps/base/ai/opencode/app/kustomization.yaml`).
+- **`healthChecks` target the workload, never the HelmRelease, and a Kustomization that owns a kopiur claim keeps `wait` false (dependency gates like CRDs, operators and secret stores set `wait: true`).** Suspend a Kustomization before a live HelmRelease edit.
+- **Deleting a Kustomization deletes its resources whatever `prune` says** (`deletionPolicy: WaitForTermination`); the guard is `kustomize.toolkit.fluxcd.io/prune: disabled` on the HelmRelease or CR.
 - **Never add a helm `postRenderer: bash`** (breaks on Helm 4).
-- **Retiring an app or changing a pinned value can break a `scripts/ci` gate `flate` does not run.** Grep `scripts/ci/` first. `ci.yaml` is the only CI signal for `talos/`, `bootstrap/`, `.renovate/` and `terraform/`; non-gate tests run only nightly (`tests.yaml`), so run a changed one locally. Skill `github-ci`.
-- **A Renovate bump of `talosupgrade.yaml` is an unattended node upgrade.** Skill `renovate`.
+- **A Renovate bump of `talosupgrade.yaml` or `kubernetesupgrade.yaml` is an unattended node upgrade.**
 
 **Nodes and storage**
-- **`talos/*.j2` changes are not applied by Flux.** `apply-node` restages only; kernel args and extensions need `just talos upgrade-node`. `machineconfig.yaml.j2`'s 6 version pins can drift from the live cluster (tuppr drives upgrades), so applying a stale template can downgrade a node: check `kubectl get nodes -o wide` first. Skill `talos-nodes`.
-- **Before any node reboot: `ceph status` HEALTH_OK and `task rook:check-osd-device-paths` clean, one node at a time.** Never `just talos shutdown-node` for planned power work (`--force`, no drain); runbook skill `talos-nodes` `references/power-down-up.md`. A talos-3 reboot can drop the B70: power the dock first (`references/talos-3-b70-reboot.md`). Skills `rook-ceph`, `talos-nodes`.
-- **CephX rotation is GitOps-only: never `ceph auth` by hand, never `security.cephx.csi: aes256k`, `keyGeneration` only increases.** Skill `rook-ceph`.
-- **`rgw_sigv4_insecure` stays explicitly `"false"`, and after a Ceph bump RGW PUTs can 403 with `HEALTH_OK`.** Skill `rook-ceph`.
+- **`talos/*.j2` changes are not applied by Flux.** `apply-node` restages only; kernel args and extensions need `just talos upgrade-node`. `machineconfig.yaml.j2`'s 6 version pins can drift from the live cluster (tuppr drives upgrades), so applying a stale template can downgrade a node: check `kubectl get nodes -o wide` first.
+- **Before any node reboot: `ceph status` HEALTH_OK and `task rook:check-osd-device-paths` clean, one node at a time.** Never `just talos shutdown-node` for planned power work (`--force`, no drain); runbook `.agents/skills/incident-runbooks/references/power-down-up.md`. A talos-3 reboot can drop the B70: power the dock first.
+- **CephX and Ceph config are GitOps-only: never `ceph auth` or `ceph config set` by hand, never `security.cephx.csi: aes256k`, `keyGeneration` only increases.**
+- **`rgw_sigv4_insecure` stays explicitly `"false"`, and after a Ceph bump RGW PUTs can 403 with `HEALTH_OK`.**
 - **The Ceph metadata backup (`ceph-backup-pvc`) is OpenEBS hostpath; a host wipe destroys it.** Emergency steps: `kubernetes/apps/base/rook-ceph/rook-ceph/backup/RECOVERY-PROCEDURES.md`.
-- **talos-3 carries a `PreferNoSchedule` taint; a hard `NoSchedule` strands drains.** A container with `limits.memory` and no `requests.memory` reserves the whole limit, so audit the Git manifest. Skill `node-scheduling`.
-- **Do not merge `system-controller` or `system-upgrade` into `system`.** Skill `system-namespaces`.
+- **talos-3 carries a `PreferNoSchedule` taint; a hard `NoSchedule` strands drains.** A container with `limits.memory` and no `requests.memory` reserves the whole limit, so audit the Git manifest.
 
 **Backups (silent data loss)**
-- **Deleting a kopiur Snapshot CR deletes the kopia snapshot.** The PVC component is `ssa: IfNotPresent` and never sets `force: enabled`. Measure mover identity from the files or the backup fails closed. One component include covers one volume. Skill `kopiur-backups`.
-- **The 51 retired VolSync restic repositories outlive the operator: Flux Kustomization `system/volsync` keeps its name (the OBC stays in its inventory, `prune: disabled`). Their expiry is NOT IN FORCE; `paperless-ngx` is a string prefix of `paperless-ngx-media` (and `syncthing` of `syncthing-data`), so a bare prefix match selects the sibling repo.** Skill `kopiur-backups`.
-- **Both engines snapshot crash-consistently, so a database backup is only as durable as its fsync setting.** CNPG takes one barman destination per Cluster. Skill `databases`.
+- **Deleting a kopiur Snapshot CR deletes the kopia snapshot.** The PVC component is `ssa: IfNotPresent` and never sets `force: enabled`. Measure mover identity from the files or the backup fails closed. One include covers one volume. Restore: `.agents/skills/incident-runbooks/references/restore.md`.
+- **The 51 retired VolSync restic repositories outlive the operator: Flux Kustomization `system/volsync` keeps its name (the OBC stays in its inventory, `prune: disabled`). Their expiry is NOT IN FORCE; `paperless-ngx` is a string prefix of `paperless-ngx-media` (and `syncthing` of `syncthing-data`), so a bare prefix match selects the sibling repo.**
+- **kopiur snapshots are crash-consistent unless a `beforeSnapshot` hook exports first (surrealdb does), so a database backup is only as durable as its fsync setting.** CNPG writes every ScheduledBackup of a Cluster to its one live barman store.
 
 **Network**
-- **NEVER add a `CiliumClusterwideNetworkPolicy` with a `nodeSelector` and ingress unless `enableDefaultDeny.ingress` is false, and the selector label must survive onto the host endpoint** (`kubernetes.io/os`, `kubernetes.io/hostname` are stripped). Skill `cilium-host-policy`.
-- **A NetworkPolicy `ports:` entry matches the destination port, so `port: 53` never admits a DNS reply.** Skill `networking`.
-- **A Cilium bump carrying cilium/cilium#47914 refuses to start the agents with our netkit + endpoint routes + L7 proxy, so land `l7Proxy: false` first; until then a CiliumNetworkPolicy admits every Service peer's replies with no `toPorts` (#47913).** Skills `renovate-review`, `networking`.
+- **NEVER add a `CiliumClusterwideNetworkPolicy` with a `nodeSelector` and ingress unless `enableDefaultDeny.ingress` is false, and the selector label must survive onto the host endpoint** (`kubernetes.io/os`, `kubernetes.io/hostname` are stripped).
+- **A `CiliumNetworkPolicy`/`NetworkPolicy` ingress rule must admit every Service peer's replies with no `toPorts` (cilium/cilium#47913):** `port: 53` never admits a DNS reply, and a same-node Service reply is dropped after reverse NAT.
 
 **AI and GPU**
-- **NEVER rename a DRM device node with `generic-device-plugin`'s `mountPath`, and never ship a GPU change without the VA-API check.** VA-API consumers use `devic.es/b70-vaapi`. No DRA migration, never `adminAccess: true`. Skill `intel-gpu`.
-- **The B70 has two tenants: throttle the embedding endpoint by request rate. Both llama.cpp workloads pin `--cache-ram` (chat non-zero, embeddings `0`) and `vllm` sets `GGML_SYCL_FA_ONEDNN: "0"` or host RAM leaks with no OOM. An embedding endpoint can return pure NaN with green health.** Skill `b70-llm-serving`.
-- **LiteLLM: a config fallback bypasses every key allow-list, and a `LiteLLMModel` with no `apiKey` bills the household-metered `ANTHROPIC_API_KEY`.** Skill `litellm-proxy`.
-- **NEVER set `sessions.vacuum_after_prune: true` on `ai/hermes`.** Any Hermes config byte restarts it uncleanly. Skill `hermes-agent`.
-- kagent/kmcp are not deployed; ToolHive `MCPServer` is `toolhive.stacklok.dev/v1alpha1`. Skill `ai-stack`.
+- **NEVER rename a DRM device node with `generic-device-plugin`'s `mountPath`, and never ship a GPU change without the VA-API check:** `kubectl -n media exec deploy/tdarr-tdarr-node -c app -- vainfo --display drm --device /dev/dri/renderD129`. VA-API consumers use `devic.es/b70-vaapi`. No DRA migration, never `adminAccess: true`.
+- **The B70 has two tenants: throttle the embedding endpoint by request rate. Both llama.cpp workloads pin `--cache-ram` (chat non-zero, embeddings `0`) and `vllm` sets `GGML_SYCL_FA_ONEDNN: "0"` or host RAM leaks with no OOM. An embedding endpoint can return pure NaN with green health.**
+- **LiteLLM: a config fallback bypasses every key allow-list, and a `LiteLLMModel` with no `apiKey` bills the household-metered `ANTHROPIC_API_KEY`.**
+- **NEVER set `sessions.vacuum_after_prune: true` on `ai/hermes`.** Any Hermes config byte restarts it uncleanly.
 
 **Workloads**
-- **An app can be Ready while it cannot write its PVC (a discarded pod-options key), and `fsGroup` re-owns volume content permanently.** Skill `app-workloads`.
+- **An app can be Ready while it cannot write its PVC:** an app-template pod-options key the chart does not read (e.g. `selfhostedPodOptions`, see `kubernetes/apps/base/selfhosted/rsshub/playwright/helmrelease.yaml`) is silently discarded and ships `securityContext: {}`, and `fsGroup` re-owns volume content permanently.
 
 ## COMMANDS
 
@@ -118,7 +105,7 @@ task flux:test:all                 # Validate Flux manifests with flate
 task rook:check-disks              # Check Ceph disk status
 just talos render-config talos-1   # Render a node's machine config
 just talos apply-node talos-1      # Apply config (node names, not IPs)
-for t in scripts/ci/*-test.py; do python3 "$t"; done   # CI gates, including docs-budget
+for t in scripts/ci/*-test.py; do python3 "$t"; done   # CI tests
 ```
 
 Agents default to read-only credentials. Admin writes: `KUBECONFIG=~/.kube/home-ops-admin TALOSCONFIG=~/.talos/home-ops-admin <command>` (agent, with owner approval), or `HOME_OPS_KUBECONFIG=~/.kube/home-ops-admin HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin <command>` (owner shell via mise). Setup and renewal: `scripts/agent-credentials.sh` header.
@@ -127,44 +114,12 @@ Debugging: `flux get ks -A`, `flux get hr -A`, `kubectl -n {ns} get pods -o wide
 
 ## SKILL INDEX
 
-Skills live in `.agents/skills/<name>/SKILL.md` (`.claude/skills` is a symlink). Harnesses that do not auto-load them: read the matching `SKILL.md` before touching its subsystem.
+Skills live in `.agents/skills/<name>/SKILL.md` (`.claude/skills` is a symlink). Harnesses that do not auto-load them: read the `SKILL.md` first.
 
-| Skill | Load when touching (workflow skills: load at that step of every task) |
+| Skill | Load when |
 |---|---|
-| `renovate-review` | a Renovate PR that did not merge itself (minor, major) |
-| `flux-gitops` | apps, overlays, Flux healthChecks/wait/dependsOn, live HelmRelease tests |
-| `flux-substitution` | literal `${...}` in Flux-reconciled files, envsubst failures |
-| `app-workloads` | pod securityContext, fsGroup, probes, PVC mounts, linuxserver images |
-| `node-scheduling` | requests/limits, tolerations, affinity, talos-3 placement, throttling/OOM |
-| `secrets-1password` | ExternalSecret, PushSecret, 1Password items, `ref+op://` |
-| `github-ci` | workflows, `scripts/ci` gates, ARC runners, branch protection |
-| `renovate` | Renovate config, `# renovate:` annotations, risky Renovate merges |
-| `talos-nodes` | `talos/*.j2`, `just talos`, tuppr upgrades, reboots, power work |
-| `rook-ceph` | Rook/Ceph config, CephX, RGW, OSD health, storage classes |
-| `system-namespaces` | k8tz, tuppr namespace, kube-system add-ons, fstrim |
-| `cilium-host-policy` | CiliumClusterwideNetworkPolicy, host firewall, nodeSelector policies |
-| `networking` | HTTPRoute, Gateway, SecurityPolicy, external-dns, BGP, NetworkPolicy |
-| `authentik-terraform` | `terraform/**`, Authentik SSO apps/providers, ExtAuth routes |
-| `unifi-network` | `terraform/unifi/`, UDM networks, WiFi, zone firewall, DHCP reservations, UDM DNS |
-| `truenas-nas` | `terraform/truenas/`, NAS datasets, SMB/NFS shares, NAS users, TrueNAS API keys and upgrades |
-| `kopiur-backups` | any kopiur component, CR, restore, alert or backup failure; the retired VolSync bucket and its expiry |
-| `image-generation` | generating images, the `image-generation` LiteLLM key, `/v1/images/generations` |
-| `jev-decisions` | asking Jev yes/no rule checks, choices or scores (JSONL in/out), second-opinion gates |
-| `pvc-integrity-checks` | pvc-writable-check, pvc-mover-readable-check, their RBAC and alerts |
-| `litellm-proxy` | LiteLLM proxy/operator CRs, models, keys, fallbacks |
-| `hermes-agent` | Hermes config, restarts, state.db, LLM/MCP routing, samba |
-| `ai-stack` | ai namespace apps, ToolHive, opencode/repo-wiki, AI app retirement |
-| `b70-llm-serving` | vllm and embedding-gpu flags, memory, alerts, embedding checks |
-| `intel-gpu` | GPU device plugins, `devic.es/b70*`, VA-API, GPU telemetry |
-| `observability` | PrometheusRule, Service/PodMonitor, Alertmanager, Gatus, Grafana, probes |
-| `branded-readmes` | writing or refreshing an app README, its banner/infographic assets, `readme.py list` stale checks |
-| `media-stack` | *arr apps, SABnzbd, Recyclarr, Bazarr, Plex, backlog searches |
-| `tdarr-transcoding` | Tdarr libraries, flows, customFunction nodes, errored remuxes |
-| `databases` | SurrealDB, CloudNativePG, EMQX, Dragonfly |
-| `home-automation` | Zigbee2MQTT, Home Assistant, matter-server, esphome |
+| `incident-runbooks` | restoring from kopiur backups (whole cluster, one claim, a retired VolSync restic repo), planned node power-down/up, a Ceph OSD that will not start, EMQX not forming a cluster after power loss |
 
 ## Maintaining this file
 
-This file is loaded into every session, so it holds only structure, conventions, commands and tripwires (silent data loss, a cluster-wide outage, an unrecoverable state) plus the SKILL INDEX. A new finding goes in the subsystem skill or its `references/`; it earns a line here only when it fits one sentence plus a pointer AND an agent who has not yet decided to touch that subsystem needs it. Write a finding once where it is owned; a summary here is a second copy that drifts. Do not recreate `CLAUDE.md` as a separate file.
-
-`scripts/ci/docs-budget-test.py` enforces absolute budgets (this file, skill and reference sizes, YAML comment blocks). Raising one needs an allowlist entry with a reason in `scripts/ci/docs-budget.json`.
+This file is loaded into every session, so it holds only structure, conventions, commands and tripwires (silent data loss, a cluster-wide outage, an unrecoverable state). A new finding goes as a comment on the manifest line it is about; it earns a tripwire here only when an agent needs it before deciding to touch the subsystem. Do not recreate `CLAUDE.md` as a separate file.
