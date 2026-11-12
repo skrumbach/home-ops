@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app radarr
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: downloads
   interval: 30m
-  timeout: 5m
   path: "./kubernetes/apps/base/downloads/radarr/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: radarr-db
       namespace: downloads
@@ -54,12 +48,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: radarr-db
-  namespace: downloads
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: radarr
   interval: 30m
   timeout: 5m
   path: ./kubernetes/components/cnpg-database

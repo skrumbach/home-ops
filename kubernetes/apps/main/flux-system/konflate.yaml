@@ -4,11 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app konflate
-  namespace: &namespace flux-system
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace flux-system
   # No ExternalSecret here, but postBuild substitutes cluster-secrets; on a cold
   # bootstrap wait for the secrets operator rather than fail the first build.
   dependsOn:
@@ -31,6 +28,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false

@@ -3,12 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kopiur
-  namespace: &namespace system
+  name: kopiur
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace system
   dependsOn:
     # ClusterRepository credentials come from 1Password through ESO.
     - name: onepassword-store
@@ -19,7 +16,7 @@ spec:
   healthChecks:
     # The WORKLOADS, never the HelmRelease: a HelmRelease Ready only reports
     # that the last helm action succeeded and stays True through a crashloop.
-    # Paired with wait: false (below), because Flux ignores spec.healthChecks
+    # wait stays unset (false), because Flux ignores spec.healthChecks
     # entirely when wait is true.
     - apiVersion: apps/v1
       kind: Deployment
@@ -37,20 +34,15 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kopiur-repository
-  namespace: &namespace system
+  name: kopiur-repository
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace system
   dependsOn:
     # Separate Kustomization on purpose. The admission webhook is
     # failurePolicy: Fail, so the API server REJECTS these CRs outright (rather
@@ -66,12 +58,9 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   postBuild:
     substituteFrom:
       # Written by the kopiur-substitutions ExternalSecret in the `kopiur`
       # Kustomization above, which is why this one dependsOn it.
       - name: kopiur-substitutions
         kind: Secret
-  timeout: 5m
-  wait: false

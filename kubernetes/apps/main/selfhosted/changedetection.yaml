@@ -4,12 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app changedetection
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: selfhosted
   path: ./kubernetes/apps/base/selfhosted/changedetection/app
   sourceRef:
     kind: GitRepository
@@ -35,6 +31,4 @@ spec:
       # 2Gi default clears this snapshot. Namespace r2 hour; ceph stays on the component default.
       KOPIUR_SCHEDULE_R2: "H 14 * * *"
   prune: true
-  wait: false
   interval: 30m
-  timeout: 5m

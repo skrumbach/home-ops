@@ -3,22 +3,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app excalidraw
-  namespace: &namespace selfhosted
+  name: excalidraw
 spec:
-  targetNamespace: *namespace
+  targetNamespace: selfhosted
   path: ./kubernetes/apps/base/selfhosted/excalidraw/app
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   prune: true
-  wait: false
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   interval: 90m
-  timeout: 5m
   postBuild:
     substituteFrom:
       - name: cluster-secrets

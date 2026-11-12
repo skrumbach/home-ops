@@ -3,12 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app headlamp
-  namespace: flux-system
+  name: headlamp
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   interval: 30m
   path: ./kubernetes/apps/base/flux-system/headlamp/app
   prune: true
@@ -21,5 +17,3 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: flux-system
-  timeout: 5m
-  wait: false

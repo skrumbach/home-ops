@@ -3,13 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app surrealdb
-  namespace: &namespace database
+  name: surrealdb
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: database
   interval: 30m
   timeout: 5m
   path: ./kubernetes/apps/base/database/surrealdb/app
@@ -39,21 +35,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: surrealdb-kopiur
-  namespace: &namespace database
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: surrealdb
+  targetNamespace: &namespace database
   interval: 30m
-  timeout: 5m
   path: ./kubernetes/apps/base/database/surrealdb/backup
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system

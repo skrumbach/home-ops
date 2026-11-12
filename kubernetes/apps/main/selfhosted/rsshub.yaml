@@ -4,13 +4,10 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app rsshub
-  namespace: &namespace selfhosted
 spec:
+  targetNamespace: &namespace selfhosted
   components:
     - ../../../../../components/dragonfly
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   interval: 1h
   path: ./kubernetes/apps/base/selfhosted/rsshub/app
   postBuild:
@@ -32,21 +29,14 @@ spec:
       namespace: database
     - name: rsshub-playwright
       namespace: *namespace
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app rsshub-playwright
-  namespace: &namespace selfhosted
+  name: rsshub-playwright
 spec:
   # No components: browserless is stateless (/config is an emptyDir), so there is no claim to back up.
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   interval: 1h
   path: ./kubernetes/apps/base/selfhosted/rsshub/playwright
   postBuild:
@@ -68,6 +58,4 @@ spec:
       namespace: database
     - name: intel-device-plugin-gpu
       namespace: system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: selfhosted

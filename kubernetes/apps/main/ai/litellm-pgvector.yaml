@@ -4,11 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app litellm-pgvector
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   # The rendered workload, never the HelmRelease.
   healthChecks:
     - apiVersion: apps/v1
@@ -33,7 +30,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -43,12 +39,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: litellm-pgvector-db
-  namespace: ai
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: litellm-pgvector
   interval: 30m
   timeout: 5m
   path: ./kubernetes/apps/base/ai/litellm-pgvector/db

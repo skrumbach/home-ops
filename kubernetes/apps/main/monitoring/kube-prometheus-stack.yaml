@@ -3,18 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kube-prometheus-stack
-  namespace: &namespace monitoring
+  name: kube-prometheus-stack
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: monitoring
   dependsOn:
     - name: prometheus-operator-crds
       namespace: monitoring
   interval: 30m
-  timeout: 5m
   path: "./kubernetes/apps/base/monitoring/kube-prometheus-stack/app"
   postBuild:
     substituteFrom:
@@ -25,4 +20,3 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false

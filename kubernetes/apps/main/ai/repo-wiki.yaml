@@ -4,11 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app repo-wiki
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   components:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
@@ -33,9 +30,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false
   postBuild:
     substituteFrom:
       - name: cluster-secrets
