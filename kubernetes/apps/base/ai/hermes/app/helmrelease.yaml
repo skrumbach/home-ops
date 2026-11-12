@@ -224,6 +224,13 @@ spec:
               # Dashboard 302-redirects unauthenticated requests to its login.
               - "[STATUS] == any(200, 302, 401)"
             group: ai
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: Hermes
+          gethomepage.dev/icon: "mdi-robot-outline-#22D8F0"
+          gethomepage.dev/description: Agent workspace
+          # The route is named hermes-app, so homepage's default selector would match no pod.
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
         hostnames:
           - "{{ .Release.Name }}.sklab.dev"
         parentRefs:
