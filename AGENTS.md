@@ -2,7 +2,7 @@
 
 Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux v2. `CLAUDE.md` is a symlink to this file. Runbooks are in [`.agents/skills/incident-runbooks/`](.agents/skills/incident-runbooks/SKILL.md); operator detail in [`talos/AGENTS.md`](talos/AGENTS.md), [`bootstrap/AGENTS.md`](bootstrap/AGENTS.md) and [`kubernetes/apps/base/ai/AGENTS.md`](kubernetes/apps/base/ai/AGENTS.md) (chat model naming).
 
-**Core stack**: Talos Linux + Flux v2 + Cilium (CNI, BGP LoadBalancer, kube-proxy replacement, no L2 announcements) + Rook-Ceph + External Secrets Operator/1Password + Cloudflare Tunnel + External-DNS (split: `network/cloudflare-dns` public, `network/unifi-dns` internal) + kopiur (the only backup engine; VolSync removed 2026-11-01, its retired repositories kept) + Gateway API (`envoy-internal`/`envoy-external` in `network`) + kube-prometheus-stack/Loki/Grafana/Gatus in `monitoring`.
+**Core stack**: Talos Linux + Flux v2 + Cilium (CNI, BGP LoadBalancer, kube-proxy replacement, no L2 announcements) + Rook-Ceph + External Secrets Operator/1Password + Cloudflare Tunnel + External-DNS (split: `network/cloudflare-dns` public, `network/unifi-dns` internal) + kopiur (the only backup engine; VolSync removed 2026-11-01, its retired repositories kept) + Gateway API (`envoy-internal`/`envoy-external` in `network`) + kube-prometheus-stack/VictoriaLogs/Grafana/Gatus in `monitoring`.
 
 ## STRUCTURE
 

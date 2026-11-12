@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/networking.k8s.io/networkpolicy_v1.json
-# Same shape as loki-ingress. Nothing in monitoring is default-deny, so this only narrows who can
+# Nothing in monitoring is default-deny, so this only narrows who can
 # write to or query the unauthenticated API: the collector, Grafana and Prometheus all run in
 # monitoring. The Service is headless, so peers reach the pod IP directly and no Service reply is
 # reverse-NATed (cilium/cilium#47913). No HTTPRoute: an envoy-internal route would need a network

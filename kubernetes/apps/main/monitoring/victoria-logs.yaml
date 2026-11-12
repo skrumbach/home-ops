@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# Phase 1 of the Loki/promtail replacement: runs beside them, nothing reads it yet but the
-# Grafana VictoriaLogs datasource. No kopiur claim, like Loki: logs are not backed up.
+# The only log store (replaced Loki and promtail). No kopiur claim: logs are not backed up.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
