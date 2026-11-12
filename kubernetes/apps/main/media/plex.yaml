@@ -4,11 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app plex
-  namespace: &namespace media
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
@@ -24,9 +20,6 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/base/media/plex/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 20Gi
@@ -39,6 +32,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: media

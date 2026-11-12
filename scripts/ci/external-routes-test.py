@@ -18,10 +18,10 @@ ALLOWED: dict[str, set[str]] = {
     "coder.${SECRET_DOMAIN}": {"/"},
     "flux-webhook.${SECRET_DOMAIN}": {"/hook/"},
     "hass.${SECRET_DOMAIN}": {"/"},
-    "plex.${SECRET_DOMAIN}": {"/"},
+    "plex.sklab.dev": {"/"},
     "seerr.${SECRET_DOMAIN}": {"/"},
     "kromgo.${SECRET_DOMAIN}": {"/badges/"},  # public read-only badges only
-    "echo.${SECRET_DOMAIN}": {"/"},
+    "echo.sklab.dev": {"/"},
     "n8n-webhook.${SECRET_DOMAIN}": {"/webhook", "/rest/oauth2-credential"},  # not the editor
     # Wizarr invite flow only; the admin UI is wizarr.${SECRET_DOMAIN} on envoy-internal.
     "join.${SECRET_DOMAIN}": {
