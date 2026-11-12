@@ -19,7 +19,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/base/media/calibre/calibre-web-automated
+  path: ./kubernetes/apps/base/media/calibre-web-automated/app
   components:
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/keda/nfs-scaler

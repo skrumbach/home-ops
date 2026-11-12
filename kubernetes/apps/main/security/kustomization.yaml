@@ -9,5 +9,6 @@ components:
   - ../../../components/alerts
 
 resources:
-  - ./external-secrets.yaml
   - ./authentik.yaml
+  - ./external-secrets.yaml
+  - ./onepassword-connect.yaml

@@ -9,7 +9,7 @@ components:
   - ../../../components/alerts
 
 resources:
-  - ./calibre.yaml
+  - ./calibre-web-automated.yaml
   - ./plex.yaml
   - ./seerr.yaml
   - ./tdarr.yaml

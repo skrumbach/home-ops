@@ -33,3 +33,30 @@ spec:
     name: flux-system
     namespace: flux-system
   timeout: 5m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app renovate-jobs
+  namespace: &namespace renovate
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  # The RenovateJob CRD ships with the operator chart.
+  dependsOn:
+    - name: renovate-operator
+    - name: onepassword-store
+      namespace: security
+  interval: 1h
+  path: ./kubernetes/apps/base/renovate/renovate-operator/jobs
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
