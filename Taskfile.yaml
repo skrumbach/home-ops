@@ -5,10 +5,10 @@ version: '3'
 set: [pipefail]
 shopt: [globstar]
 
-# Same defaults as .mise.toml: admin kubeconfig, read-only talosconfig, unless HOME_OPS_* says otherwise.
+# Same defaults as .mise.toml: admin kubeconfig and talosconfig unless HOME_OPS_* says otherwise.
 env:
   KUBECONFIG: '{{env "HOME_OPS_KUBECONFIG" | default (print (env "HOME") "/.kube/home-ops-admin")}}'
-  TALOSCONFIG: '{{env "HOME_OPS_TALOSCONFIG" | default (print (env "HOME") "/.talos/home-ops-agent")}}'
+  TALOSCONFIG: '{{env "HOME_OPS_TALOSCONFIG" | default (print (env "HOME") "/.talos/home-ops-admin")}}'
 
 includes:
   flux: .taskfiles/flux

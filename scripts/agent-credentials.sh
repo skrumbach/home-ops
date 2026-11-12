@@ -2,10 +2,9 @@
 # Mint read-only credentials for agent sessions. OWNER runs this
 # with admin credentials; agents never do:
 #
-#   HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin \
-#     mise exec -- scripts/agent-credentials.sh
+#   mise exec -- scripts/agent-credentials.sh
 #
-# (.mise.toml already defaults kubectl to ~/.kube/home-ops-admin and maps HOME_OPS_* onto
+# (.mise.toml defaults kubectl and talosctl to the admin files and maps HOME_OPS_* onto
 # KUBECONFIG/TALOSCONFIG; a plain KUBECONFIG= prefix is overridden.)
 #
 # Writes (outside the repo, shared by every worktree, picked up by .mise.toml and Taskfile.yaml):
