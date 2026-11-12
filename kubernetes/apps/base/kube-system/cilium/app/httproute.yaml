@@ -16,7 +16,7 @@ metadata:
     gethomepage.dev/name: Hubble
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: k8s-app=hubble-ui
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       url: http://hubble-ui.kube-system.svc.cluster.local/
       conditions: ["[STATUS] == 200"]
@@ -24,7 +24,7 @@ metadata:
         hide-url: true
 spec:
   hostnames:
-    - "hubble.${SECRET_DOMAIN}"
+    - "hubble.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

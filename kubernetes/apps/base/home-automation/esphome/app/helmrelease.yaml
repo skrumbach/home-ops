@@ -139,7 +139,7 @@ spec:
             ui:
               hide-url: true
         hostnames:
-          - "esphome.${SECRET_DOMAIN}"
+          - "esphome.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

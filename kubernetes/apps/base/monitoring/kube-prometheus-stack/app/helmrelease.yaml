@@ -247,7 +247,7 @@ spec:
             gethomepage.dev/description: Metrics
             gethomepage.dev/widget.type: prometheus
             gethomepage.dev/widget.url: http://kube-prometheus-stack-prometheus.monitoring:9090
-          hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+          hostnames: ["{{ .Release.Name }}.sklab.dev"]
           parentRefs:
             - name: envoy-internal
               namespace: network

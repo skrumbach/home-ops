@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: envoy-gateway
+  name: &app envoy-gateway
 spec:
   targetNamespace: &namespace network
   dependsOn:
@@ -32,9 +32,8 @@ spec:
   prune: true
   retryInterval: 2m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   sourceRef:
     kind: GitRepository
     name: flux-system

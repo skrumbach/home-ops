@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: unifi-dns
+  name: &app unifi-dns
 spec:
   dependsOn:
     - name: onepassword-store
@@ -11,9 +11,8 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/network/unifi-dns/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   prune: true
   retryInterval: 2m
   sourceRef:

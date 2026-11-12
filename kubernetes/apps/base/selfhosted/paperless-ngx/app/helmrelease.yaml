@@ -24,7 +24,7 @@ spec:
               repository: ghcr.io/paperless-ngx/paperless-ngx
               tag: 3.4.2@sha256:d704e84f88300eb6ab001ab15720a2330ff99169cf9f94d6b8fcc44b63a84c84
             env:
-              PAPERLESS_URL: "https://docs.${SECRET_DOMAIN}"
+              PAPERLESS_URL: "https://docs.sklab.dev"
               PAPERLESS_PORT: &port 8000
               PAPERLESS_TIME_ZONE: America/New_York
               PAPERLESS_REDIS: "redis://paperless-ngx-dragonfly.selfhosted.svc.cluster.local:6379"
@@ -233,17 +233,17 @@ spec:
           gethomepage.dev/name: Paperless-ngx
           gethomepage.dev/icon: sh-paperless-ngx-light.svg
           gethomepage.dev/description: Document archive
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
           # that /api still bypasses Authentik (a gated path would end on a 200 login page).
           gatus.home-operations.com/endpoint: |-
-            url: https://docs.${SECRET_DOMAIN}/api/ui_settings/
+            url: https://docs.sklab.dev/api/ui_settings/
             conditions:
               - "[STATUS] == 401"
               - "[BODY].detail == pat(*credentials*)"
             group: selfhosted
         hostnames:
-          - "docs.${SECRET_DOMAIN}"
+          - "docs.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

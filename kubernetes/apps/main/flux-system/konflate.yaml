@@ -6,8 +6,8 @@ metadata:
   name: &app konflate
 spec:
   targetNamespace: &namespace flux-system
-  # No ExternalSecret here, but postBuild substitutes cluster-secrets; on a cold
-  # bootstrap wait for the secrets operator rather than fail the first build.
+  # No ExternalSecret here. The edge dates from when postBuild substituted
+  # cluster-secrets; it keeps konflate after the secrets operator on a cold bootstrap.
   dependsOn:
     - name: external-secrets
       namespace: security
@@ -21,9 +21,8 @@ spec:
   prune: true
   retryInterval: 2m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   sourceRef:
     kind: GitRepository
     name: flux-system

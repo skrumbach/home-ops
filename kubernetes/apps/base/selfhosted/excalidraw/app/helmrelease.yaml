@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/name: Excalidraw
           gethomepage.dev/icon: excalidraw.svg
           gethomepage.dev/description: Whiteboard
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
           # login page. Probe the Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
@@ -70,7 +70,7 @@ spec:
             group: selfhosted
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

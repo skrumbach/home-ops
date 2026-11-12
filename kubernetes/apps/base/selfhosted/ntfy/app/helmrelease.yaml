@@ -93,9 +93,9 @@ spec:
           gethomepage.dev/name: ntfy
           gethomepage.dev/icon: ntfy.svg
           gethomepage.dev/description: Push notifications
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
         hostnames:
-          - "ntfy.${SECRET_DOMAIN}"
+          - "ntfy.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

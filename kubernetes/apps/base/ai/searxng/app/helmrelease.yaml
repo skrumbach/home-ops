@@ -25,7 +25,7 @@ spec:
               repository: ghcr.io/searxng/searxng
               tag: 2026.11.12-de722ab1b@sha256:0b104e2e1117b0ca83a36f3ac6ecda7d9ee948ccea6ead74750a03e1b856229a
             env:
-              SEARXNG_BASE_URL: "https://search.${SECRET_DOMAIN}"
+              SEARXNG_BASE_URL: "https://search.sklab.dev"
               SEARXNG_PORT: &port 8080
               SEARXNG_VALKEY_URL: redis://searxng-dragonfly:6379
               UWSGI_WORKERS: "4"
@@ -90,13 +90,13 @@ spec:
           gethomepage.dev/icon: searxng.svg
           gethomepage.dev/description: Metasearch
           gatus.home-operations.com/endpoint: |-
-            url: https://search.${SECRET_DOMAIN}/stats
+            url: https://search.sklab.dev/stats
             conditions:
               - "[STATUS] == 200"
             group: ai
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-          - search.${SECRET_DOMAIN}
+          - "{{ .Release.Name }}.sklab.dev"
+          - search.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

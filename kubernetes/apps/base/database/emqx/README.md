@@ -5,7 +5,7 @@ Stay on operator 2.2.x. The chart tag is in `operator/helmrelease.yaml`.
 API against this OSS broker. Both cores crashloop after a power loss:
 `.agents/skills/incident-runbooks/references/emqx-power-loss.md`.
 
-Dashboard: `https://mqtt.${SECRET_DOMAIN}` (internal gateway). MQTT
+Dashboard: `https://mqtt.sklab.dev` (internal gateway). MQTT
 LoadBalancer `10.50.0.30`. Do not remove `volumeClaimTemplates`.
 
 The exporter API key is created in the dashboard (name `exporter`, role

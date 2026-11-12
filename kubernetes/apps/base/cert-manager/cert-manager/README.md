@@ -23,7 +23,7 @@
 
 ## What it does
 
-- **Issues** one certificate, `sklab-dev-production`, covering the apex `${SECRET_DOMAIN}` and `*.${SECRET_DOMAIN}`.
+- **Issues** one certificate, `sklab-dev-production`, covering the apex `sklab.dev` and `*.sklab.dev`.
   The `Certificate` lives with its consumers in `network`
   ([`certificate.yaml`](../../network/certificates/export/certificate.yaml)); this app provides the issuer that signs it.
 - **Proves domain ownership** with the ACME DNS-01 challenge: it writes a `_acme-challenge` TXT record through the
@@ -106,7 +106,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted. T
 | `dns01RecursiveNameserversOnly` | `true` | Never fall back to the authoritative-nameserver walk, which takes the same internal path. |
 | `prometheus.servicemonitor.enabled` | `true` | Feeds the certificate expiry and renewal metrics the alerts below use. |
 | `resources` | requests 10m CPU each; memory 64/32/128Mi requested, 128/64/256Mi limit (controller/webhook/cainjector) | Every limit has a request. cainjector gets the most memory because it watches every webhook and CRD. |
-| `solvers[].selector.dnsZones` ([`app/clusterissuer.yaml`](app/clusterissuer.yaml)) | `${SECRET_DOMAIN}` | The Cloudflare solver answers only for the lab zone, and Flux substitutes the domain from `cluster-secrets`. |
+| `solvers[].selector.dnsZones` ([`app/clusterissuer.yaml`](app/clusterissuer.yaml)) | `sklab.dev` | The Cloudflare solver answers only for the lab zone. |
 
 ## Alerts
 

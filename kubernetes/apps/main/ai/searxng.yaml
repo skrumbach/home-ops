@@ -21,9 +21,6 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/ai/searxng/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
   prune: true

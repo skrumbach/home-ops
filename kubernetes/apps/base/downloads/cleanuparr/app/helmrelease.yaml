@@ -116,7 +116,7 @@ spec:
           gethomepage.dev/description: Clears stalled downloads
           gethomepage.dev/pod-selector: app.kubernetes.io/name=cleanuparr
         hostnames:
-          - cleanuparr.${SECRET_DOMAIN}
+          - cleanuparr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

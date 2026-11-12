@@ -7,7 +7,7 @@ does the NAS accept NFS connections from inside the cluster?
 | What | Path |
 |------|------|
 | Chart, values | `app/ocirepository.yaml`, `app/helmrelease.yaml` |
-| Probe `nas-nfs` (TCP `nas.${SECRET_DOMAIN}:2049`, every 30s) | `app/probe.yaml` |
+| Probe `nas-nfs` (TCP `nas.sklab.dev:2049`, every 30s) | `app/probe.yaml` |
 | `NASNFSExportDown` (critical, 5m), `NASNFSProbeMissing` (warning, 15m) | `app/prometheusrule.yaml` |
 
 The Probe sets `jobName: nas-nfs`, so the series is

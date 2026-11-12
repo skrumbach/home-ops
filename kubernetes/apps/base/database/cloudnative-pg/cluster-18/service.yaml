@@ -5,7 +5,7 @@ kind: Service
 metadata:
   name: postgres-18-lb
   annotations:
-    external-dns.kubernetes.io/hostname: "postgres-18.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/hostname: "postgres-18.sklab.dev"
 spec:
   type: LoadBalancer
   ports:

@@ -25,7 +25,7 @@ spec:
               tag: v2.8.0@sha256:019d8f063a7299e7c1c51ee4a70b692291809af3244894fbec2c2ac7d1f71b18
             env:
               - name: HOMEPAGE_ALLOWED_HOSTS
-                value: homepage.${SECRET_DOMAIN}
+                value: homepage.sklab.dev
               - name: TZ
                 value: ${CONFIG_TIMEZONE}
             ports:
@@ -61,7 +61,7 @@ spec:
                     # Must match HOMEPAGE_ALLOWED_HOSTS or the probes are rejected.
                     httpHeaders:
                       - name: Host
-                        value: homepage.${SECRET_DOMAIN}
+                        value: homepage.sklab.dev
                   initialDelaySeconds: 0
               readiness: *probes
               startup: *probes
@@ -87,12 +87,12 @@ spec:
           gethomepage.dev/icon: sh-homepage.svg
           gethomepage.dev/name: Homepage
           gatus.home-operations.com/endpoint: |-
-            url: https://homepage.${SECRET_DOMAIN}/api/healthcheck
+            url: https://homepage.sklab.dev/api/healthcheck
             conditions:
               - "[STATUS] == 200"
             group: selfhosted
         enabled: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

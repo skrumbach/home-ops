@@ -17,8 +17,5 @@ spec:
     - name: onepassword-store
       namespace: security
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       CONFIG_TIMEZONE: America/New_York

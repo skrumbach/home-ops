@@ -11,15 +11,15 @@ metadata:
     gethomepage.dev/icon: coder-light.svg
     gethomepage.dev/description: Dev workspaces
     gethomepage.dev/pod-selector: app.kubernetes.io/name=coder
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN},external.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev,external.sklab.dev"
     gatus.home-operations.com/endpoint: |-
-      url: https://coder.${SECRET_DOMAIN}/healthz
+      url: https://coder.sklab.dev/healthz
       conditions:
         - "[STATUS] == 200"
       group: coder
 spec:
   hostnames:
-    - "coder.${SECRET_DOMAIN}"
+    - "coder.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

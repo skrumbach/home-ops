@@ -11,9 +11,6 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/selfhosted/rsshub/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
   prune: true
@@ -40,9 +37,6 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/selfhosted/rsshub/playwright
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       CONFIG_TIMEZONE: America/New_York
   prune: true

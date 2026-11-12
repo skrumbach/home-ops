@@ -63,7 +63,7 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

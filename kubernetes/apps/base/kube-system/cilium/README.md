@@ -11,7 +11,7 @@ Host firewall policy: `app/ciliumclusterwidenetworkpolicy.yaml`.
 Hubble: agent server, relay and UI are on, with flow metrics (dns, drop,
 tcp, flow, port-distribution, icmp, httpV2) scraped by ServiceMonitors and
 dashboards in the Grafana `Cilium` folder. The UI is
-`hubble.${SECRET_DOMAIN}` on `envoy-internal` behind Authentik ExtAuth
+`hubble.sklab.dev` on `envoy-internal` behind Authentik ExtAuth
 (`app/httproute.yaml`, `app/securitypolicy.yaml`). Certs use
 `hubble.tls.auto.method: cronJob`: the chart's `helm` method reuses its leaf
 certs on every upgrade and never renews them, while certgen renews every four

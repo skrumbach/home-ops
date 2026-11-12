@@ -33,9 +33,8 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/cert-manager/cert-manager/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   prune: true
   sourceRef:
     kind: GitRepository

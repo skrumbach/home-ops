@@ -222,13 +222,13 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            url: https://hermes.${SECRET_DOMAIN}/
+            url: https://hermes.sklab.dev/
             conditions:
               # Dashboard 302-redirects unauthenticated requests to its login.
               - "[STATUS] == any(200, 302, 401)"
             group: ai
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "{{ .Release.Name }}.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -241,7 +241,7 @@ spec:
       # Browser VS Code. code-server has no auth of its own; securitypolicy.yaml adds SSO.
       codeserver:
         hostnames:
-          - "hermes-code.${SECRET_DOMAIN}"
+          - "hermes-code.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

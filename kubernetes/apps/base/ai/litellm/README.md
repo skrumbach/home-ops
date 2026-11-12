@@ -7,7 +7,7 @@
 rendered `config.yaml`; nothing here renders a Deployment.
 
 **Scope (captain decision B4):** internal route only - `litellm-internal` on
-`envoy-internal` at `litellm.${SECRET_DOMAIN}`, plus
+`envoy-internal` at `litellm.sklab.dev`, plus
 `http://litellm.ai.svc.cluster.local:4000` in-cluster. It never fronts the
 public listener: no `envoy-external` parentRef, ever.
 

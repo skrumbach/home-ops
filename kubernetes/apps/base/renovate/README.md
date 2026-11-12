@@ -2,7 +2,7 @@
 
 mogenius `renovate-operator` with one hourly `RenovateJob` (`home-ops`). The
 GitHub Actions workflow is rollback only (manual dispatch). UI at
-`renovate.${SECRET_DOMAIN}`, internal route, Authentik OIDC
+`renovate.sklab.dev`, internal route, Authentik OIDC
 (`terraform/authentik/renovate-operator.tofu`, 1Password `Homelab/renovate-operator-oidc`).
 
 ## Rollback

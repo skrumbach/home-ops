@@ -41,7 +41,7 @@ spec:
             k8s:io.kubernetes.pod.namespace: database
             cnpg.io/cluster: postgres-18
     # Replies to Paperless' own calls through the gateways: the Authentik OIDC discovery, token and
-    # userinfo requests. auth.${SECRET_DOMAIN} resolves to external.${SECRET_DOMAIN}, the envoy-external
+    # userinfo requests. auth.sklab.dev resolves to external.sklab.dev, the envoy-external
     # LoadBalancer, so admitting only envoy-internal timed out the SSO login whenever the serving
     # envoy-external pod shared Paperless' node. Both gateways, so a DNS change cannot reopen it. No
     # toPorts: the reply lands on an ephemeral port. Supersedes the :8000 rule above for envoy-internal.

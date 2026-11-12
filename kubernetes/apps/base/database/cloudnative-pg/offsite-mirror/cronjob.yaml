@@ -92,7 +92,7 @@ spec:
                 # Real Flux substitution variable - NOT escaped, unlike every
                 # shell token in the script below.
                 - name: RCLONE_CONFIG_LAN_ENDPOINT
-                  value: https://nas.${SECRET_DOMAIN}:9000
+                  value: https://nas.sklab.dev:9000
                 - name: RCLONE_CONFIG_LAN_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:

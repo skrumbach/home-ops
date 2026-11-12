@@ -86,9 +86,9 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            url: https://kromgo.${SECRET_DOMAIN}/badges/cluster_node_count?format=json
+            url: https://kromgo.sklab.dev/badges/cluster_node_count?format=json
             conditions: ["[STATUS] == 200", "[BODY].id == cluster_node_count"]
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-external
             namespace: network

@@ -166,12 +166,12 @@ spec:
           gethomepage.dev/description: Plex invitations
           gethomepage.dev/pod-selector: app.kubernetes.io/name=wizarr
           gatus.home-operations.com/endpoint: |-
-            url: https://wizarr.${SECRET_DOMAIN}/health
+            url: https://wizarr.sklab.dev/health
             conditions:
               - "[STATUS] == 200"
             group: media
         hostnames:
-          - wizarr.${SECRET_DOMAIN}
+          - wizarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -184,16 +184,16 @@ spec:
       # settings, plex scan, API) is not routed on this host.
       join:
         annotations:
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "external.sklab.dev"
           # "/" is not routed on this host, so the default probe of the bare hostname always 404s.
           # /favicon.ico is an Exact route straight to the app.
           gatus.home-operations.com/endpoint: |-
-            url: https://join.${SECRET_DOMAIN}/favicon.ico
+            url: https://join.sklab.dev/favicon.ico
             conditions:
               - "[STATUS] == 200"
             group: media
         hostnames:
-          - join.${SECRET_DOMAIN}
+          - join.sklab.dev
         parentRefs:
           - name: envoy-external
             namespace: network

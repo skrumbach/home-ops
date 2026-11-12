@@ -6,7 +6,7 @@ metadata:
   name: emqx
 spec:
   hostnames:
-    - "mqtt.${SECRET_DOMAIN}"
+    - "mqtt.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

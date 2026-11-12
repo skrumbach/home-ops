@@ -21,9 +21,6 @@ spec:
     # VolSync retirements and points the claim at a snapshot a new app does not have.
     - ../../../../../components/kopiur
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       # KOPIUR_CLAIM is omitted: app-template names the claim after the release, so it is the app.

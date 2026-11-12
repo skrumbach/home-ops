@@ -23,7 +23,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: emqx-cluster
+  name: &app emqx-cluster
 spec:
   targetNamespace: database
   interval: 30m
@@ -35,9 +35,8 @@ spec:
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   wait: true
   dependsOn:
     - name: emqx-operator

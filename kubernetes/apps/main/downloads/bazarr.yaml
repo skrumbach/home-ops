@@ -27,9 +27,6 @@ spec:
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/keda/nfs-scaler
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: bazarr-config

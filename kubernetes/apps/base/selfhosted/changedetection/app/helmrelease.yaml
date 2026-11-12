@@ -47,7 +47,7 @@ spec:
               - {name: USE_X_SETTINGS, value: "1"}
               # Apprise notification URLs carry credentials and are logged at INFO.
               - {name: LOGGER_LEVEL, value: WARNING}
-              - {name: BASE_URL, value: "https://changedetection.${SECRET_DOMAIN}"}
+              - {name: BASE_URL, value: "https://changedetection.sklab.dev"}
               # The browser sidecar's DevTools socket is token-gated (TOKEN on `browser`); port 3000 is not in the Service.
               - name: PLAYWRIGHT_DRIVER_URL
                 value: "ws://localhost:3000/?stealth=1&--disable-web-security=true&--user-data-dir=~/browserless-cache-123&token=$(BROWSER_TOKEN)"
@@ -127,7 +127,7 @@ spec:
             group: selfhosted
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

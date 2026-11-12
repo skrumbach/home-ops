@@ -14,17 +14,17 @@ GATEWAY = "envoy-external"
 
 # hostname -> path prefixes it may expose ("/" is the whole app).
 ALLOWED: dict[str, set[str]] = {
-    "auth.${SECRET_DOMAIN}": {"/", "/outpost.goauthentik.io"},
-    "coder.${SECRET_DOMAIN}": {"/"},
-    "flux-webhook.${SECRET_DOMAIN}": {"/hook/"},
-    "hass.${SECRET_DOMAIN}": {"/"},
+    "auth.${SECRET_DOMAIN}": {"/", "/outpost.goauthentik.io"},  # Authentik still renders the Flux variable
+    "coder.sklab.dev": {"/"},
+    "flux-webhook.sklab.dev": {"/hook/"},
+    "hass.sklab.dev": {"/"},
     "plex.sklab.dev": {"/"},
-    "seerr.${SECRET_DOMAIN}": {"/"},
-    "kromgo.${SECRET_DOMAIN}": {"/badges/"},  # public read-only badges only
+    "seerr.sklab.dev": {"/"},
+    "kromgo.sklab.dev": {"/badges/"},  # public read-only badges only
     "echo.sklab.dev": {"/"},
-    "n8n-webhook.${SECRET_DOMAIN}": {"/webhook", "/rest/oauth2-credential"},  # not the editor
-    # Wizarr invite flow only; the admin UI is wizarr.${SECRET_DOMAIN} on envoy-internal.
-    "join.${SECRET_DOMAIN}": {
+    "n8n-webhook.sklab.dev": {"/webhook", "/rest/oauth2-credential"},  # not the editor
+    # Wizarr invite flow only; the admin UI is wizarr.sklab.dev on envoy-internal.
+    "join.sklab.dev": {
         "/j", "/join", "/invitation", "/wizard", "/static", "/image-proxy",
         "/cinema-posters", "/reset", "/favicon.ico", "/plex/callback",
     },

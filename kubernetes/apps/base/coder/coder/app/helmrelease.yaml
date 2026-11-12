@@ -31,7 +31,7 @@ spec:
             name: *app
       env:
         - name: CODER_ACCESS_URL
-          value: "https://coder.${SECRET_DOMAIN}"
+          value: "https://coder.sklab.dev"
         - name: CODER_BLOCK_DIRECT
           value: "true"
         - name: CODER_DISABLE_PASSWORD_AUTH
@@ -39,7 +39,7 @@ spec:
         - name: CODER_DERP_SERVER_STUN_ADDRESSES
           value: "disable"
         - name: CODER_EMAIL_FROM
-          value: "Coder <admin@${SECRET_DOMAIN}>"
+          value: "Coder <admin@sklab.dev>"
         - name: CODER_EMAIL_TLS_STARTTLS
           value: "true"
         - name: CODER_LOGGING_HUMAN
@@ -54,7 +54,7 @@ spec:
         - name: CODER_OIDC_ICON_URL
           value: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/refs/heads/main/svg/authentik.svg"
         - name: CODER_OIDC_ISSUER_URL
-          value: "https://auth.${SECRET_DOMAIN}/application/o/coder/"
+          value: "https://auth.sklab.dev/application/o/coder/"
         - name: CODER_OIDC_ROLE_FIELD
           value: "groups"
         - name: CODER_OIDC_SCOPES
@@ -73,7 +73,7 @@ spec:
         - name: CODER_TELEMETRY_ENABLE
           value: "false"
         - name: CODER_WILDCARD_ACCESS_URL
-          value: "*.coder.${SECRET_DOMAIN}"
+          value: "*.coder.sklab.dev"
         - name: CODER_UPDATE_CHECK
           value: "false"
 

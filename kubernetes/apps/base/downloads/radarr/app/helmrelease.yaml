@@ -107,7 +107,7 @@ spec:
           - path: /data/downloads
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -122,7 +122,7 @@ spec:
           gethomepage.dev/description: Movies
           gethomepage.dev/pod-selector: app.kubernetes.io/name=radarr
         hostnames:
-          - radarr.${SECRET_DOMAIN}
+          - radarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

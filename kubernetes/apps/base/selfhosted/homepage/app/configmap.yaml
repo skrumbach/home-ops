@@ -42,12 +42,12 @@ data:
               url: {{HOMEPAGE_VAR_UNIFI_HOST_URL}}
               key: {{HOMEPAGE_VAR_UNIFI_API_KEY}}
         - TrueNAS:
-            href: https://nas.${SECRET_DOMAIN}
+            href: https://nas.sklab.dev
             icon: truenas.svg
             description: NAS storage
             widget:
               type: truenas
-              url: https://nas.${SECRET_DOMAIN}
+              url: https://nas.sklab.dev
               key: {{HOMEPAGE_VAR_TRUENAS_TOKEN}}
               enablePools: true
               nasType: scale

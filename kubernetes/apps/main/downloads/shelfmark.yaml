@@ -23,8 +23,5 @@ spec:
   components:
     - ../../../../../components/keda/nfs-scaler
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app

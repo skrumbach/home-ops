@@ -96,10 +96,10 @@ spec:
         data:
           config.yaml: |-
             ingress:
-              - hostname: "*.${SECRET_DOMAIN}"
+              - hostname: "*.sklab.dev"
                 originRequest:
                   http2Origin: true
-                  originServerName: "external.${SECRET_DOMAIN}"
+                  originServerName: "external.sklab.dev"
                   tcpKeepAlive: 7200s
                 service: &svc https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
               - service: http_status:404

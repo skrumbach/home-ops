@@ -105,7 +105,7 @@ spec:
             conditions: ["[STATUS] == 200"]
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

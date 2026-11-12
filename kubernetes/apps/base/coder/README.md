@@ -11,5 +11,5 @@ If a first-connect setup wizard still appears, it is leftover Coder chart UI.
 Skip it and use **Sign in with Authentik**. Membership of Authentik `Admins` is
 what grants `owner`.
 
-OIDC issuer: `https://auth.${SECRET_DOMAIN}/application/o/coder/`
+OIDC issuer: `https://auth.sklab.dev/application/o/coder/`
 (see `app/helmrelease.yaml`).

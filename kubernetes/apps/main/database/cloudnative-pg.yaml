@@ -43,7 +43,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: postgres-cluster-18
+  name: &app postgres-cluster-18
 spec:
   dependsOn:
     - name: cloudnative-pg
@@ -74,9 +74,8 @@ spec:
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   targetNamespace: database
   wait: true
 ---
@@ -123,9 +122,6 @@ spec:
       namespace: *namespace
   path: ./kubernetes/apps/base/database/cloudnative-pg/pgadmin
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
@@ -170,7 +166,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: postgres-offsite-mirror
+  name: &app postgres-offsite-mirror
 spec:
   dependsOn:
     # Supplies `cloudnative-pg-secret`, whose aws-access-key-id /
@@ -192,9 +188,8 @@ spec:
     namespace: flux-system
   targetNamespace: database
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   # No healthChecks and no wait, matching the fleet's other CronJob-only
   # overlays (kubernetes/apps/main/system/pvc-writable-check.yaml): a CronJob
   # has no meaningful Ready condition, and the job's real health signal is a

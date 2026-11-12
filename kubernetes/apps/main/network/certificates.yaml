@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: certificates-import
+  name: &app certificates-import
 spec:
   dependsOn:
     - name: onepassword-store
@@ -16,9 +16,8 @@ spec:
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   targetNamespace: network
   wait: true
 ---
@@ -26,7 +25,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: certificates-export
+  name: &app certificates-export
 spec:
   dependsOn:
     - name: certificates-import
@@ -41,7 +40,6 @@ spec:
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   targetNamespace: network

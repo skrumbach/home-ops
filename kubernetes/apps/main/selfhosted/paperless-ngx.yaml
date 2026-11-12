@@ -35,9 +35,6 @@ spec:
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/dragonfly
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 10Gi

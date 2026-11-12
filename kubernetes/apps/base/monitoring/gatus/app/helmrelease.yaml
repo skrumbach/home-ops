@@ -111,10 +111,10 @@ spec:
           gethomepage.dev/description: Status page
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.monitoring
-          external-dns.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          external-dns.kubernetes.io/target: internal.sklab.dev
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-          - status.${SECRET_DOMAIN}
+          - "{{ .Release.Name }}.sklab.dev"
+          - status.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

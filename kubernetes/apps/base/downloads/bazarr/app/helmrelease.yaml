@@ -128,7 +128,7 @@ spec:
           - path: /data/downloads
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -142,9 +142,9 @@ spec:
           gethomepage.dev/icon: bazarr.svg
           gethomepage.dev/description: Subtitles
           gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
         hostnames:
-          - bazarr.${SECRET_DOMAIN}
+          - bazarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

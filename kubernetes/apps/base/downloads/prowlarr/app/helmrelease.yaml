@@ -104,7 +104,7 @@ spec:
           gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
         hostnames:
-          - prowlarr.${SECRET_DOMAIN}
+          - prowlarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

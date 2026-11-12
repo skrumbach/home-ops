@@ -11,16 +11,16 @@ metadata:
     gethomepage.dev/name: SurrealDB
     gethomepage.dev/app: *app
     gethomepage.dev/icon: surrealdb.svg
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.kubernetes.io/target: "internal.sklab.dev"
     # Check /health, not `/`: bare `/` redirects to a third-party surrealdb.com
     # page that Gatus follows.
     gatus.home-operations.com/endpoint: |-
-      url: https://surrealdb.${SECRET_DOMAIN}/health
+      url: https://surrealdb.sklab.dev/health
       conditions: ["[STATUS] == 200"]
 spec:
   hostnames:
-    - "surrealdb.${SECRET_DOMAIN}"
-    - "sdb.${SECRET_DOMAIN}"
+    - "surrealdb.sklab.dev"
+    - "sdb.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

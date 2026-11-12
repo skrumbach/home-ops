@@ -20,9 +20,6 @@ spec:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi

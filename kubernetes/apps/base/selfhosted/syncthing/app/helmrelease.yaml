@@ -110,7 +110,7 @@ spec:
           gethomepage.dev/name: Syncthing
           gethomepage.dev/icon: syncthing.svg
           gethomepage.dev/description: File sync
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # securitypolicy.yaml gates this route, so the auto-discovered route check would measure
           # the Authentik login page. Probe the GUI Service's unauthenticated health endpoint
           # in-cluster instead.
@@ -122,7 +122,7 @@ spec:
             ui:
               hide-url: true
         hostnames:
-          - "syncthing.${SECRET_DOMAIN}"
+          - "syncthing.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
