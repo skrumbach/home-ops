@@ -327,7 +327,7 @@ kind: OCIRepository
 metadata:
   name: $app-crds
 spec:
-  interval: 1h
+  interval: 15m
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
