@@ -6,8 +6,8 @@ metadata:
   name: &app wizarr
 spec:
   components:
-    # kopiur ONLY: the app's own persistence block creates the claim.
     - ../../../../../components/kopiur
+    - ../../../../../components/kopiur/pvc
   dependsOn:
     - name: onepassword-store
       namespace: security
@@ -20,6 +20,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      KOPIUR_CAPACITY: 1Gi
       KOPIUR_PUID: "2000"
       KOPIUR_PGID: "2000"
       KOPIUR_SCHEDULE_R2: "H 15 * * *"
