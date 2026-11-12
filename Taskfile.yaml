@@ -15,6 +15,7 @@ includes:
   rook: .taskfiles/rook
   network: .taskfiles/network
   actions-runner: .taskfiles/actions-runner
+  docs: .taskfiles/docs
 
 tasks:
 

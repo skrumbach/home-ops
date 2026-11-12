@@ -1,0 +1,43 @@
+---
+# Documentation site. Content is not kept here: scripts/docs/build.py writes it into
+# .build/content from the rendered manifests and the Markdown already in the repo.
+baseURL: /
+title: home-ops
+languageCode: en
+contentDir: .build/content
+publishDir: .build/public
+disableKinds: [taxonomy, term, rss]
+enableRobotsTXT: true
+
+outputs:
+  home: [html, json]
+
+markup:
+  goldmark:
+    renderer:
+      # The in-tree READMEs use a little inline HTML. All content comes from this repository.
+      unsafe: true
+  highlight:
+    noClasses: true
+    style: dracula
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
+
+params:
+  repo: skrumbach/home-ops
+  branch: main
+  eyebrow: HOMELAB • TALOS LINUX • FLUX GITOPS
+  tagline: A three-node Talos cluster, reconciled by Flux. These pages are generated from its manifests.
+  # Live numbers served by kromgo on the public gateway (read-only badges).
+  kromgo: https://kromgo.sklab.dev/badges
+  badges:
+    - {id: talos_version, label: Talos}
+    - {id: kubernetes_version, label: Kubernetes}
+    - {id: flux_version, label: Flux}
+    - {id: cluster_node_count, label: Nodes}
+    - {id: cluster_pod_count, label: Pods}
+    - {id: cluster_cpu_usage, label: CPU}
+    - {id: cluster_memory_usage, label: Memory}
+    - {id: cluster_uptime_days, label: Uptime}
+    - {id: cluster_alert_count, label: Alerts}
