@@ -19,8 +19,6 @@ resources:
   - ./kromgo.yaml
   - ./kube-prometheus-stack.yaml
   - ./kube-state-metrics.yaml
-  - ./loki.yaml
   - ./prometheus-operator.yaml
-  - ./promtail.yaml
   - ./unpoller.yaml
   - ./victoria-logs.yaml
