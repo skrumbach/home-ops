@@ -1,0 +1,92 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# vlagent DaemonSet: tails /var/log/containers (symlinks into /var/log/pods) on every node, the same
+# files promtail reads; promtail scrapes no journal, kernel or kubelet source, so neither does this.
+# Field names differ from the Loki labels: namespace -> kubernetes.pod_namespace, pod ->
+# kubernetes.pod_name, container -> kubernetes.container_name, node_name/hostname ->
+# kubernetes.pod_node_name, stream -> output_stream, pod labels -> kubernetes.pod_labels.<label>.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs-collector
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs-collector
+  values:
+    fullnameOverride: victoria-logs-collector
+    global:
+      image:
+        registry: quay.io
+
+    remoteWrite:
+      # Buffered on the node under the chart's tmpDataPath (/var/lib/vl-collector, hostPath) while
+      # the server is down; the oldest buffered data is dropped past the cap.
+      - url: http://victoria-logs.monitoring.svc.cluster.local:9428
+        maxDiskUsagePerURL: 2GiB
+
+    collector:
+      # The chart's three defaults plus the app name, the closest match to Loki's `app` stream label.
+      streamFields:
+        - kubernetes.pod_namespace
+        - kubernetes.pod_name
+        - kubernetes.container_name
+        - kubernetes.pod_labels.app.kubernetes.io/name
+
+    # Same set as promtail: control-plane defaults plus the talos-3 PreferNoSchedule taint.
+    tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: home-operations.com/dedicated
+        operator: Exists
+        effect: PreferNoSchedule
+
+    # Sized like promtail (peak ~185Mi working set per node).
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+
+    # Root like promtail: the CRI log files under /var/log/pods are root-owned 0640. No capabilities
+    # are needed for that (uid 0 is the file owner), so all are dropped.
+    podSecurityContext:
+      enabled: true
+      runAsUser: 0
+      runAsGroup: 0
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
+
+    # The chart mounts all of host /var/log and /var/lib read-only. On Talos the log files sit in
+    # /var/log/pods (/var/log/containers holds symlinks into it, absolute paths), so only those two
+    # are mounted, like promtail; host /var/lib (etcd, kubelet volumes and secrets) stays out. The
+    # chart still adds the writable /var/lib/vl-collector hostPath (checkpoints, send buffer).
+    defaultVolumes:
+      - name: containers
+        hostPath:
+          path: /var/log/containers
+      - name: pods
+        hostPath:
+          path: /var/log/pods
+    defaultVolumeMounts:
+      - name: containers
+        mountPath: /var/log/containers
+        readOnly: true
+      - name: pods
+        mountPath: /var/log/pods
+        readOnly: true
+
+    podMonitor:
+      enabled: true
