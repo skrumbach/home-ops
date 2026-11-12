@@ -46,13 +46,15 @@ spec:
         operator: Exists
         effect: PreferNoSchedule
 
-    # Sized like promtail (peak ~185Mi working set per node).
+    # Not sized like promtail (~185Mi): with no checkpoint file vlagent reads every log file on the
+    # node from the start, and at 256Mi it was OOM-killed within seconds on all three nodes, before
+    # it could write a checkpoint (2026-11-12). It has no flag to skip the backlog.
     resources:
       requests:
         cpu: 50m
-        memory: 64Mi
+        memory: 128Mi
       limits:
-        memory: 256Mi
+        memory: 1Gi
 
     # Root like promtail: the CRI log files under /var/log/pods are root-owned 0640. No capabilities
     # are needed for that (uid 0 is the file owner), so all are dropped.
