@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: onepassword-store
       namespace: security
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/rook-ceph/rook-ceph/operator"
   # prune: false only stops removal of objects dropped from Git. Deleting this
   # Kustomization still deletes its resources (cluster-apps sets
@@ -28,7 +28,7 @@ metadata:
   name: &app rook-ceph-cluster
 spec:
   targetNamespace: rook-ceph
-  interval: 30m
+  interval: 1h
   timeout: 15m
   path: "./kubernetes/apps/base/rook-ceph/rook-ceph/cluster"
   postBuild:

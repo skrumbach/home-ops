@@ -6,7 +6,7 @@ metadata:
   name: kube-state-metrics
 spec:
   targetNamespace: monitoring
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/monitoring/kube-state-metrics/app
   prune: true
   sourceRef:

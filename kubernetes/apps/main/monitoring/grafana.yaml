@@ -6,7 +6,7 @@ metadata:
   name: &app grafana
 spec:
   targetNamespace: monitoring
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/monitoring/grafana/app"
   postBuild:
     substitute:

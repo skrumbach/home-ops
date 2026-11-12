@@ -6,7 +6,7 @@ metadata:
   name: &app ntfy
 spec:
   targetNamespace: selfhosted
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/selfhosted/ntfy/app"
   prune: true
   sourceRef:

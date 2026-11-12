@@ -6,7 +6,7 @@ metadata:
   name: &app n8n
 spec:
   targetNamespace: selfhosted
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/selfhosted/n8n/app"
   prune: true
   sourceRef:
@@ -38,7 +38,7 @@ metadata:
   name: n8n-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

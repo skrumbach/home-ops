@@ -8,4 +8,4 @@ spec:
   chartRef:
     kind: OCIRepository
     name: toolhive-operator-crds
-  interval: 30m
+  interval: 1h

@@ -6,7 +6,7 @@ metadata:
   name: &app radarr
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/radarr/app"
   prune: true
   sourceRef:
@@ -47,7 +47,7 @@ metadata:
   name: radarr-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

@@ -6,7 +6,7 @@ metadata:
   name: &app paperless-ngx
 spec:
   targetNamespace: selfhosted
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: "./kubernetes/apps/base/selfhosted/paperless-ngx/app"
   prune: true
@@ -50,7 +50,7 @@ metadata:
   name: paperless-ngx-media-kopiur
 spec:
   targetNamespace: &namespace selfhosted
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
@@ -78,7 +78,7 @@ metadata:
   name: paperless-ngx-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

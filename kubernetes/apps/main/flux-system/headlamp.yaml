@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: &app headlamp
 spec:
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/flux-system/headlamp/app
   prune: true
   postBuild:

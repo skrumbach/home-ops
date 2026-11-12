@@ -61,7 +61,7 @@ metadata:
   name: litellm-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

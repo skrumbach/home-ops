@@ -6,7 +6,7 @@ metadata:
   name: loki
 spec:
   targetNamespace: monitoring
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/monitoring/loki/app"
   prune: true
   sourceRef:

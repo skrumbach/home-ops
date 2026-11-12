@@ -6,7 +6,7 @@ metadata:
   name: &app surrealdb
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/base/database/surrealdb/app
   prune: true
@@ -36,7 +36,7 @@ metadata:
   name: surrealdb-kopiur
 spec:
   targetNamespace: &namespace database
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/surrealdb/backup
   prune: true
   sourceRef:

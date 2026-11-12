@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: onepassword-store
       namespace: security
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/operator
   prune: true
   sourceRef:
@@ -29,7 +29,7 @@ spec:
       namespace: database
     - name: cert-manager
       namespace: cert-manager
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/barman-cloud
   prune: true
   sourceRef:
@@ -66,7 +66,7 @@ spec:
       kind: Cluster
       current: status.readyInstances >= 1 && status.conditions.filter(e, e.type == 'ContinuousArchiving').all(e, e.status == 'True')
       failed: status.readyInstances < 1
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/cluster-18
   prune: true
   sourceRef:
@@ -85,7 +85,7 @@ kind: Kustomization
 metadata:
   name: cloudnative-pg-dashboard
 spec:
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/dashboard
   prune: true
   sourceRef:
@@ -104,7 +104,7 @@ spec:
   targetNamespace: &namespace database
   components:
     - ../../../../../components/kopiur/pvc
-  interval: 30m
+  interval: 1h
   dependsOn:
     - name: cloudnative-pg
       namespace: database
@@ -139,7 +139,7 @@ metadata:
   name: pgadmin-kopiur
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
@@ -178,7 +178,7 @@ spec:
       namespace: security
     - name: onepassword-store
       namespace: security
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/offsite-mirror
   prune: true
   retryInterval: 2m

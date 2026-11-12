@@ -24,7 +24,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  interval: 30m
+  interval: 1h
   timeout: 3m
   # Workload health signal only. wait stays unset (false): Flux honours healthChecks only then (wait:true assesses the whole inventory instead).
   healthChecks:
@@ -44,7 +44,7 @@ metadata:
   name: calibre-web-automated-kopiur
 spec:
   targetNamespace: media
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:

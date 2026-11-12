@@ -6,7 +6,7 @@ metadata:
   name: &app prowlarr
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/prowlarr/app"
   prune: true
   sourceRef:
@@ -41,7 +41,7 @@ metadata:
   name: prowlarr-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

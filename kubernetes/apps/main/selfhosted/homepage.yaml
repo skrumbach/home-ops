@@ -12,7 +12,7 @@ spec:
     name: flux-system
     namespace: flux-system
   prune: true
-  interval: 10m
+  interval: 1h
   dependsOn:
     - name: onepassword-store
       namespace: security

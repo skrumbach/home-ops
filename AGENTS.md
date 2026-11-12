@@ -48,6 +48,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 - Collection directories (`alerts/ models/ networks/ repos/ rules/ virtualkeys/`) hold one object per file, named after it. Generator payload lives in `resources/` (or `dashboards/ hooks/ runbooks/ skills/`) and keeps the consumer's filename.
 - New names: ConfigMap `<app>-configmap`; ExternalSecret `metadata.name: <app>`, `target.name: <app>-secret`. Paths are lowercase kebab-case (`README.md` upper-case, `_` only in importable Python), `.yaml` not `.yml`. Line 1 `---`, line 2 the schema header; every `resources:`/`components:` entry starts `./` or `../`; overlay namespace lists are sorted.
 - Every manifest starts with a `# yaml-language-server: $schema=...` comment. Prefer `kubernetes-schemas.pages.dev`, fall back to `k8s-schemas.home-operations.com`, never `crd.movishell.pl` or `fluxcd-community`.
+- Reconcile `interval`: `1h` on a Flux Kustomization, a HelmRelease and a HelmRepository, `15m` on an OCIRepository.
 - Commits: `type(scope): description`, types feat/fix/chore/ci/docs/refactor/test, scope is a container, helm, github-action, mise, talos, flux, deps or an app/namespace (`.commitlintrc.yaml`).
 - The parent Gateway's `external-dns.kubernetes.io/target` decides the DNS record, not a route annotation.
 - Task runner split is deliberate: `just` owns Talos, bootstrap and `kube` recipes; `task` owns the Rook suite and network diagnostics. Do not port one to the other.

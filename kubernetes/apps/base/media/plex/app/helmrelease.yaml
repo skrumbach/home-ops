@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app plex
 spec:
-  interval: 30m
+  interval: 1h
   # Plex runs Recreate strategy with a large config PVC that takes several
   # minutes to mount + initialize on cold start; default 5m Helm timeout
   # caused MissingRollbackTarget stalls.

@@ -27,7 +27,7 @@ spec:
     - apiVersion: pocketid.internal/v1alpha1
       kind: PocketIDUser
       current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
-  interval: 30m
+  interval: 1h
   retryInterval: 1m
   timeout: 5m
   path: ./kubernetes/apps/base/security/pocket-id/app
@@ -57,7 +57,7 @@ spec:
       kind: Database
       current: status.applied == true
   wait: true
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

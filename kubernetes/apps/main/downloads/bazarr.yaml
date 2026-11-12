@@ -6,7 +6,7 @@ metadata:
   name: &app bazarr
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/bazarr/app"
   prune: true
   sourceRef:

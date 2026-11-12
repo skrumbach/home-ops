@@ -6,7 +6,7 @@ metadata:
   name: &app headlamp
   namespace: flux-system
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: headlamp

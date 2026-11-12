@@ -254,7 +254,7 @@ kind: OCIRepository
 metadata:
   name: $name
 spec:
-  interval: 5m
+  interval: 15m
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy

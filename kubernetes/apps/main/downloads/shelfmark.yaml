@@ -6,7 +6,7 @@ metadata:
   name: &app shelfmark
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/downloads/shelfmark/app
   prune: true
   sourceRef:

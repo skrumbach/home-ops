@@ -6,7 +6,7 @@ metadata:
   name: queue-watchdog
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/queue-watchdog/app"
   prune: true
   sourceRef:
