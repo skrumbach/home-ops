@@ -7,7 +7,7 @@ _.python.venv = { path = "{{config_root}}/.venv", create = true, uv_create_args 
 # (e.g. OP_SERVICE_ACCOUNT_TOKEN). Gitignored; see .secrets.env.example.
 _.file = ["{{config_root}}/.secrets.env"]
 # Agent sessions default to read-only credentials, one copy shared by every worktree
-# (scripts/agent-credentials.sh, goal §3).
+# (scripts/agent-credentials.sh).
 # Owner writes: export HOME_OPS_KUBECONFIG=~/.kube/home-ops-admin HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin.
 # A plain KUBECONFIG=... prefix does not work here: mise [env] overrides it.
 KUBECONFIG = "{{ get_env(name='HOME_OPS_KUBECONFIG', default=get_env(name='HOME') ~ '/.kube/home-ops-agent') }}"
@@ -30,7 +30,6 @@ MISE_LIST_ALL_VERSIONS = "false"
 "aqua:cilium/cilium-cli" = "0.20.2"
 "aqua:cli/cli" = "2.103.3"
 "aqua:cloudflare/cloudflared" = "2026.10.7"
-"aqua:cue-lang/cue" = "0.17.1"
 "aqua:fluxcd/flux2" = "2.10.0"
 "aqua:go-task/task" = "3.54.0"
 "aqua:helm/helm" = "4.3.1"
@@ -42,7 +41,6 @@ MISE_LIST_ALL_VERSIONS = "false"
 "opentofu" = "1.13.9"
 "aqua:siderolabs/talos" = "1.14.5"
 "aqua:yannh/kubeconform" = "0.8.0"
-"aqua:nektos/act" = "0.2.97"
 # Standard linters: pre-commit hooks and the ci.yaml `lint` job. CI installs them via
 # unversioned mise-action install_args so these pins stay the single source of truth.
 "aqua:rhysd/actionlint" = "1.7.12"
@@ -55,16 +53,3 @@ uv = "0.13.7"
 1password-cli = "2.42.0"
 krew = "0.5.0"
 k9s = "0.51.0"
-
-[tasks.install-hooks]
-description = "Install pre-commit hooks"
-run = "pre-commit install --install-hooks && pre-commit install --hook-type commit-msg"
-depends = ["install"]
-
-[tasks.install]
-description = "Install all tools and setup hooks"
-run = "echo 'Tools installed via mise'"
-
-[tasks.activate]
-description = "Install all tools and setup hooks"
-run = "eval \"$(mise activate zsh)\" "

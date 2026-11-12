@@ -44,43 +44,6 @@ tasks:
       - kubectl wait --for=condition=ready pod -n {{.NAMESPACE}} -l app.kubernetes.io/component=listener --timeout=120s
       - echo "Listener pod is ready"
 
-  cleanup-stale-runners:
-    desc: Manually trigger cleanup of stale/offline runners from GitHub API
-    cmds:
-      - |
-        echo "Fetching runners from GitHub..."
-        RUNNERS=$(gh api repos/{{.REPO}}/actions/runners --jq '.runners[] | select(.status == "offline" and .busy == false) | .id')
-        if [ -z "$RUNNERS" ]; then
-          echo "No stale runners found"
-        else
-          echo "Found stale runners, deleting..."
-          for id in $RUNNERS; do
-            echo "Deleting runner $id..."
-            gh api -X DELETE "repos/{{.REPO}}/actions/runners/$id" && echo "Deleted $id" || echo "Failed to delete $id"
-          done
-        fi
-
-  cancel-stuck-runs:
-    desc: Cancel workflow runs stuck in queued state for more than 30 minutes
-    vars:
-      STUCK_MINUTES: '{{.STUCK_MINUTES | default "30"}}'
-    cmds:
-      - |
-        echo "Checking for workflow runs stuck in queued state for more than {{.STUCK_MINUTES}} minutes..."
-        CURRENT_TIME=$(date +%s)
-        THRESHOLD=$(({{.STUCK_MINUTES}} * 60))
-
-        gh run list --repo {{.REPO}} --status queued --json databaseId,createdAt,name --limit 100 | \
-        jq -r --argjson threshold "$THRESHOLD" --argjson now "$CURRENT_TIME" \
-          '.[] | select(($now - ((.createdAt | gsub("[TZ]"; " ") | strptime("%Y-%m-%d %H:%M:%S") | mktime))) > $threshold) | "\(.databaseId) \(.name)"' | \
-        while read -r id name; do
-          if [ -n "$id" ]; then
-            echo "Cancelling stuck run: $name (id=$id)"
-            gh run cancel "$id" --repo {{.REPO}} && echo "Cancelled $id" || echo "Failed to cancel $id"
-          fi
-        done
-        echo "Done checking stuck runs"
-
   reset-scale-set:
     desc: Full recreation of AutoscalingRunnerSet (use when runners are completely stuck)
     cmds:
@@ -95,7 +58,7 @@ tasks:
       - echo "Resuming HelmReleases..."
       - flux resume hr -n {{.NAMESPACE}} gha-runner-scale-set-skrumbach-home-ops
       - echo "Waiting for reconciliation..."
-      - flux reconcile ks -n flux-system gha-runner-scale-set-skrumbach-home-ops --with-source
+      - flux reconcile ks -n {{.NAMESPACE}} gha-runner-scale-set --with-source
       - echo "Waiting for listener to be ready..."
       - sleep 10
       - kubectl wait --for=condition=ready pod -n {{.NAMESPACE}} -l app.kubernetes.io/component=listener --timeout=180s

@@ -81,13 +81,10 @@ kubectl get secret rook-ceph-mon -n rook-ceph -o jsonpath='{.data.fsid}' | base6
 `ceph-backup-pvc` lives on the same cluster, on a node's OpenEBS hostpath
 volume. Complete cluster loss, node rebuild, PVC delete, or a host wipe
 (`task rook:wipe-talos-N`, `task rook:reset-all-data`,
-`task rook:wipe-all-with-progress`) destroys that copy along with the OSD
+`task rook:wipe-all`) destroys that copy along with the OSD
 disks. After a host wipe there is nothing left to `kubectl apply`.
 
 Off-cluster copies of these YAML/FSID files were never implemented.
-`task rook:backup-rook-config` only dumps Ceph CRs to `/tmp` on the
-workstation; it does not save mon secrets or the FSID, and `/tmp` is not
-durable off-cluster storage.
 
 If the cluster and its nodes are gone, OSD data is unrecoverable and a
 new FSID is required. All-mon-store loss also cannot be restored from an
@@ -191,7 +188,7 @@ kubectl patch cephcluster rook-ceph -n rook-ceph --type=merge -p '{"metadata":{"
 # 3. Wipe OSD disks and /var/lib/rook via the Taskfile, not a missing YAML.
 #    Per node:  task rook:wipe-talos-1  (and talos-2, talos-3)
 #    All nodes + host rook dir:
-task rook:wipe-all-with-progress
+task rook:wipe-all
 # Interactive prompts: the skip flag is global `task --yes rook:...`, not `--yes` after the task name.
 
 # 4. Resume HelmReleases; Flux recreates an empty ceph-backup-pvc

@@ -4,18 +4,6 @@
     // Annotated dependencies (the renovate comment above a version line) are parsed by the base preset
     // (home-operations/renovate-presets "Process annotated dependencies"); a local copy extracts every dep twice.
     {
-      customType: "regex",
-      description: "Process MCP server npm packages",
-      managerFilePatterns: [
-        "/(^|/).vscode/mcp\\.json$/",
-      ],
-      matchStrings: [
-        // Match: "mcp-server-kubernetes@2.8.0"
-        '"(?<depName>mcp-server-[^"@]+)@(?<currentValue>[^"]+)"',
-      ],
-      datasourceTemplate: "npm",
-    },
-    {
       // A bare oci:// artifact URL is matched directly here instead of the # renovate: annotation form.
       description: "Flux distribution artifact in the flux-instance HelmRelease",
       customType: "regex",

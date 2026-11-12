@@ -4,4 +4,3 @@
 self-hosted-runner:
   labels:
     - gha-runner-scale-set-skrumbach-home-ops
-    - gha-rs-ac-ai-k8s-sandbox

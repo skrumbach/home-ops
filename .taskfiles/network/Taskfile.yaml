@@ -51,17 +51,6 @@ tasks:
       - echo "📡 Node 3 (talos-3):"
       - talosctl -n {{.TALOS_NODE_3}} get routes
 
-  ping-test:
-    desc: "Test basic connectivity between all nodes"
-    cmds:
-      - echo "🏓 Testing basic connectivity between nodes..."
-      - echo "talos-1 to talos-2:"
-      - talosctl -n {{.TALOS_NODE_1}} list -l -r {{.TALOS_NODE_2}} >/dev/null 2>&1 && echo "✅ Connected" || echo "❌ Failed"
-      - echo "talos-1 to talos-3:"
-      - talosctl -n {{.TALOS_NODE_1}} list -l -r {{.TALOS_NODE_3}} >/dev/null 2>&1 && echo "✅ Connected" || echo "❌ Failed"
-      - echo "talos-2 to talos-3:"
-      - talosctl -n {{.TALOS_NODE_2}} list -l -r {{.TALOS_NODE_3}} >/dev/null 2>&1 && echo "✅ Connected" || echo "❌ Failed"
-
   deploy-iperf3-server:
     desc: "Deploy iperf3 server pods on all nodes"
     cmds:
@@ -121,88 +110,38 @@ tasks:
   speed-test-all:
     desc: "Run comprehensive speed test between all nodes"
     deps: [deploy-iperf3-server]
+    vars:
+      # "<source node> <target IP>" for every ordered pair.
+      PAIRS:
+        - "talos-1 {{.TALOS_NODE_2}}"
+        - "talos-1 {{.TALOS_NODE_3}}"
+        - "talos-2 {{.TALOS_NODE_1}}"
+        - "talos-2 {{.TALOS_NODE_3}}"
+        - "talos-3 {{.TALOS_NODE_1}}"
+        - "talos-3 {{.TALOS_NODE_2}}"
     cmds:
       - echo "🚀 Running comprehensive network speed tests..."
-      - echo "Test parameters Duration=30s, Parallel=4 streams"
+      - echo "Test parameters Duration={{.TEST_DURATION}}s, Parallel={{.TEST_PARALLEL}} streams"
       - echo ""
-      - task: speed-test-1-to-2
-      - task: speed-test-1-to-3
-      - task: speed-test-2-to-1
-      - task: speed-test-2-to-3
-      - task: speed-test-3-to-1
-      - task: speed-test-3-to-2
+      - for: {var: PAIRS}
+        task: speed-test
+        vars:
+          from: '{{index (splitList " " .ITEM) 0}}'
+          to: '{{index (splitList " " .ITEM) 1}}'
       - task: cleanup-iperf3
 
-  speed-test-1-to-2:
-    desc: "Test speed from talos-1 to talos-2"
+  speed-test:
+    desc: "Test speed from one node to another node's IP"
     internal: true
+    requires:
+      vars: ["from", "to"]
     cmds:
-      - echo "Testing talos-1 ({{.TALOS_NODE_1}}) to talos-2 ({{.TALOS_NODE_2}})"
+      - echo "Testing {{.from}} to {{.to}}"
       - |
-        kubectl run iperf3-client-1-to-2 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-1"}}}' \
+        kubectl run iperf3-client-{{.from}} --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
+          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"{{.from}}"}}}' \
           --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_2}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
-      - echo ""
-
-  speed-test-1-to-3:
-    desc: "Test speed from talos-1 to talos-3"
-    internal: true
-    cmds:
-      - echo "Testing talos-1 ({{.TALOS_NODE_1}}) to talos-3 ({{.TALOS_NODE_3}})"
-      - |
-        kubectl run iperf3-client-1-to-3 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-1"}}}' \
-          --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_3}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
-      - echo ""
-
-  speed-test-2-to-1:
-    desc: "Test speed from talos-2 to talos-1"
-    internal: true
-    cmds:
-      - echo "Testing talos-2 ({{.TALOS_NODE_2}}) to talos-1 ({{.TALOS_NODE_1}})"
-      - |
-        kubectl run iperf3-client-2-to-1 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-2"}}}' \
-          --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_1}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
-      - echo ""
-
-  speed-test-2-to-3:
-    desc: "Test speed from talos-2 to talos-3"
-    internal: true
-    cmds:
-      - echo "Testing talos-2 ({{.TALOS_NODE_2}}) to talos-3 ({{.TALOS_NODE_3}})"
-      - |
-        kubectl run iperf3-client-2-to-3 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-2"}}}' \
-          --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_3}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
-      - echo ""
-
-  speed-test-3-to-1:
-    desc: "Test speed from talos-3 to talos-1"
-    internal: true
-    cmds:
-      - echo "Testing talos-3 ({{.TALOS_NODE_3}}) to talos-1 ({{.TALOS_NODE_1}})"
-      - |
-        kubectl run iperf3-client-3-to-1 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-3"}}}' \
-          --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_1}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
-      - echo ""
-
-  speed-test-3-to-2:
-    desc: "Test speed from talos-3 to talos-2"
-    internal: true
-    cmds:
-      - echo "Testing talos-3 ({{.TALOS_NODE_3}}) to talos-2 ({{.TALOS_NODE_2}})"
-      - |
-        kubectl run iperf3-client-3-to-2 --rm -i --restart=Never --image={{.IPERF3_IMAGE}} \
-          --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-3"}}}' \
-          --namespace=network-test \
-          -- iperf3 -c {{.TALOS_NODE_2}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
+          -- iperf3 -c {{.to}} -t {{.TEST_DURATION}} -P {{.TEST_PARALLEL}} --format m
       - echo ""
 
   ceph-network-test:
@@ -247,8 +186,6 @@ tasks:
       - task: check-bond-status
       - echo ""
       - task: check-routes
-      - echo ""
-      - task: ping-test
       - echo ""
       - task: ceph-network-test
 
