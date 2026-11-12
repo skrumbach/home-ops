@@ -166,12 +166,12 @@ tasks:
       - echo "⚡ Quick bandwidth test using dd and nc..."
       - echo "Testing talos-1 to talos-2"
       - |
-        kubectl run bandwidth-server --rm -i --restart=Never --image=busybox \
+        kubectl run bandwidth-server --rm -i --restart=Never --image=docker.io/library/busybox:1.38@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4 \
           --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-2"}}}' \
           --command -- sh -c "nc -l -p 9999 > /dev/null" &
         SERVER_PID=$!
         sleep 2
-        kubectl run bandwidth-client --rm -i --restart=Never --image=busybox \
+        kubectl run bandwidth-client --rm -i --restart=Never --image=docker.io/library/busybox:1.38@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4 \
           --overrides='{"spec":{"hostNetwork":true,"nodeSelector":{"kubernetes.io/hostname":"talos-1"}}}' \
           --command -- sh -c "dd if=/dev/zero bs=1M count=1000 | nc {{.TALOS_NODE_2}} 9999" 2>&1 | tail -1
         kill $SERVER_PID 2>/dev/null || true
