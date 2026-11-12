@@ -1,7 +1,7 @@
 # Rook-Ceph Recovery Procedures
 
 These steps match the live backup in
-[`backup-system.yaml`](./backup-system.yaml) and the device-path runbook
+[`cronjob.yaml`](./cronjob.yaml) and the device-path runbook
 [`ceph-osd-recovery.md`](../../../../../../.agents/skills/incident-runbooks/references/ceph-osd-recovery.md).
 Do not invent missing objects. There is no `backup-pod` Deployment, no
 `cleanup-all-nodes.yaml`, and no `initial-backup-job.yaml`.
@@ -301,4 +301,4 @@ A `min_size=1` window on the block pool has been used twice to break an RBD-acti
 - [ ] A recent dated directory has been copied **off-cluster** if you
       care about FSID recovery after a wipe
 - [ ] `task rook:check-osd-device-paths` is green before any node reboot
-- [ ] This file still matches `backup-system.yaml`
+- [ ] This file still matches `cronjob.yaml`

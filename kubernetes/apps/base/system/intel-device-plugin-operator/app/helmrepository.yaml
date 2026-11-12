@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+# Intel publishes no OCI chart. The gpu HelmRelease uses this repository too.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: intel
+spec:
+  interval: 1h
+  url: https://intel.github.io/helm-charts

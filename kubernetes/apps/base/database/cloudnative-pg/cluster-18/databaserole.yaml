@@ -19,15 +19,3 @@ spec:
   passwordSecret:
     name: postgres-18-app
   databaseRoleReclaimPolicy: retain
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/database_v1.json
-apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-  name: app
-spec:
-  cluster:
-    name: postgres-18
-  name: app
-  owner: app
-  databaseReclaimPolicy: retain
