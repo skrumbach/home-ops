@@ -29,12 +29,18 @@ spec:
         enabled: true
         storageClassName: ceph-block
         size: 50Gi
+      # On first start the three collectors send every existing log file at once, 14 daily
+      # partitions deep. At 2Gi on a 20-core node the server was OOM-killed 12s after each start
+      # (2026-11-12). GOMAXPROCS keeps its per-core buffers in proportion to the memory limit.
+      env:
+        - name: GOMAXPROCS
+          value: "4"
       resources:
         requests:
           cpu: 50m
           memory: 256Mi
         limits:
-          memory: 2Gi
+          memory: 4Gi
       podSecurityContext:
         enabled: true
         runAsNonRoot: true
