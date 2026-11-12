@@ -5,15 +5,12 @@ kind: HelmRelease
 metadata:
   name: &app gha-runner-scale-set-skrumbach-home-ops
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: gha-runner-scale-set
   driftDetection:
     mode: enabled
-  install:
-    remediation:
-      retries: 3
   values:
     annotations:
       secret.reloader.stakater.com/reload: &secret skrumbach-runner-secret

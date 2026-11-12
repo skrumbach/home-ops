@@ -10,9 +10,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: calibre-web-automated
-  install:
-    remediation:
-      retries: 3
   values:
     defaultPodOptions:
       securityContext:
@@ -25,6 +22,8 @@ spec:
       calibre-web-automated:
         # Left off the Deployment: KEDA owns it (components/keda/nfs-scaler).
         replicas: null
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:

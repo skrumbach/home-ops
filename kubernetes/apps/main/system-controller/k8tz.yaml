@@ -6,7 +6,7 @@ metadata:
   name: k8tz
 spec:
   targetNamespace: system-controller
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/system-controller/k8tz/app
   prune: true
   sourceRef:

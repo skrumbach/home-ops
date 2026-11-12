@@ -5,14 +5,11 @@ kind: HelmRelease
 metadata:
   name: &app rsshub
 spec:
-  interval: 30m
+  interval: 1h
   maxHistory: 3
   chartRef:
     kind: OCIRepository
     name: rsshub
-  install:
-    remediation:
-      retries: 3
   values:
     controllers:
       rsshub:

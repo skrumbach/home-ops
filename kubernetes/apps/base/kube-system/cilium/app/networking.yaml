@@ -69,7 +69,9 @@ kind: Service
 metadata:
   name: kube-api
   annotations:
-    external-dns.kubernetes.io/hostname: k8s.{SECRET_DOMAIN}
+    # Only unifi-dns reads Service annotations, so this is an internal-only record. The name must
+    # be one the API server certificate covers (certSANs in talos/machineconfig.yaml.j2).
+    external-dns.kubernetes.io/hostname: talos.sklab.dev
     lbipam.cilium.io/ips: 10.50.0.121
 spec:
   type: LoadBalancer

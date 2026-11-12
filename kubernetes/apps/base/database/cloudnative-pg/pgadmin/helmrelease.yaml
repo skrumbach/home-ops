@@ -5,15 +5,13 @@ kind: HelmRelease
 metadata:
   name: &app pgadmin
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 20m
   chartRef:
     kind: OCIRepository
     name: pgadmin
   install:
     timeout: 20m
-    remediation:
-      retries: 3
   upgrade:
     timeout: 20m
   values:

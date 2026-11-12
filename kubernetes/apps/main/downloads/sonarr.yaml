@@ -6,7 +6,7 @@ metadata:
   name: &app sonarr
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/sonarr/app"
   prune: true
   sourceRef:
@@ -46,7 +46,7 @@ metadata:
   name: sonarr-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

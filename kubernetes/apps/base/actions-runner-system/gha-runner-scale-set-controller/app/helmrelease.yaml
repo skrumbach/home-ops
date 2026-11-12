@@ -5,13 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app gha-runner-scale-set-controller
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: gha-runner-scale-set-controller
-  install:
-    remediation:
-      retries: 3
   values:
     fullnameOverride: *app
     priorityClassName: gha-runner-infrastructure

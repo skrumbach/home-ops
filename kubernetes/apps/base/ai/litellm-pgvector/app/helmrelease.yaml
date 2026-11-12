@@ -11,9 +11,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: litellm-pgvector
-  install:
-    remediation:
-      retries: -1
   values:
     defaultPodOptions:
       automountServiceAccountToken: false

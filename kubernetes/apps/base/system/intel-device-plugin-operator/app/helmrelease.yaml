@@ -13,9 +13,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: intel
-  install:
-    remediation:
-      retries: -1
   values:
     manager:
       devices:

@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
       namespace: monitoring
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/monitoring/kube-prometheus-stack/app"
   postBuild:
     substitute:

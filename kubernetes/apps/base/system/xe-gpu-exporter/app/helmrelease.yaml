@@ -8,14 +8,11 @@ kind: HelmRelease
 metadata:
   name: xe-gpu-exporter
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: xe-gpu-exporter
   maxHistory: 2
-  install:
-    remediation:
-      retries: 3
   values:
     defaultPodOptions:
       hostPID: true

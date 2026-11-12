@@ -6,7 +6,7 @@ metadata:
   name: prometheus-operator-crds
 spec:
   targetNamespace: monitoring
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: "./kubernetes/apps/base/monitoring/prometheus-operator/crds"
   prune: true

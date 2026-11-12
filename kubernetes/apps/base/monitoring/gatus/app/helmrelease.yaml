@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: gatus
-  install:
-    remediation:
-      retries: -1
   values:
     controllers:
       gatus:
@@ -112,6 +109,12 @@ spec:
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.monitoring
           external-dns.kubernetes.io/target: internal.sklab.dev
+          gatus.home-operations.com/endpoint: |-
+            url: https://status.sklab.dev/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].status == UP"
+            group: monitoring
         hostnames:
           - "{{ .Release.Name }}.sklab.dev"
           - status.sklab.dev

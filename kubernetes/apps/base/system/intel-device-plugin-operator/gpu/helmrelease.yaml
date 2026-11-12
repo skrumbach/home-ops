@@ -13,9 +13,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: intel
-  install:
-    remediation:
-      retries: -1
   values:
     name: xe
     # Chart default nodeSelector (intel.feature.node.kubernetes.io/gpu=true) is a hand-set Talos nodeLabel, not NFD (talos/machineconfig.yaml.j2).

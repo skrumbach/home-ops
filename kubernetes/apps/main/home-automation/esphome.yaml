@@ -6,7 +6,7 @@ metadata:
   name: &app esphome
 spec:
   targetNamespace: home-automation
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/home-automation/esphome/app"
   prune: true
   sourceRef:

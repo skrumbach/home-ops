@@ -9,7 +9,7 @@ spec:
     kind: OCIRepository
     name: cloudnative-pg-dashboard
   maxHistory: 3
-  interval: 30m
+  interval: 1h
   values:
     grafanaDashboard:
       namespace: database

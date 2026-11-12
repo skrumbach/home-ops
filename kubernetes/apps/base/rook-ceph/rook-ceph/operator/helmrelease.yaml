@@ -8,11 +8,8 @@ metadata:
     # Survives a Kustomization delete; prune: false on the Kustomization does not (deletionPolicy WaitForTermination).
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
-  interval: 30m
+  interval: 1h
   releaseName: rook-ceph
-  install:
-    remediation:
-      retries: 3
   chartRef:
     kind: OCIRepository
     name: rook-ceph

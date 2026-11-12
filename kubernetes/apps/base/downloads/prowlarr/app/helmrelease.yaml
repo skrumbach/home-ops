@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app prowlarr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: prowlarr
@@ -103,6 +103,11 @@ spec:
           gethomepage.dev/icon: prowlarr.svg
           gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
+          gatus.home-operations.com/endpoint: |-
+            url: https://prowlarr.sklab.dev/ping
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
           - prowlarr.sklab.dev
         parentRefs:

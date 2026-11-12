@@ -6,7 +6,7 @@ metadata:
   name: &app sabnzbd
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/sabnzbd/app"
   prune: true
   sourceRef:

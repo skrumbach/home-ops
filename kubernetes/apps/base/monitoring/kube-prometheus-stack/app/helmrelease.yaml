@@ -5,17 +5,13 @@ kind: HelmRelease
 metadata:
   name: kube-prometheus-stack
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 15m
   chartRef:
     kind: OCIRepository
     name: kube-prometheus-stack
-  # The cluster-apps HelmRelease patch overrides both to CreateReplace; values.crds.enabled
-  # false is what keeps this chart from shipping CRDs (prometheus-operator/crds owns them).
-  install:
-    crds: Skip
-  upgrade:
-    crds: Skip
+  # values.crds.enabled false keeps this chart from shipping CRDs (prometheus-operator/crds
+  # owns them).
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph

@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app radarr
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 10m
   chartRef:
     kind: OCIRepository
@@ -121,6 +121,11 @@ spec:
           gethomepage.dev/icon: radarr.svg
           gethomepage.dev/description: Movies
           gethomepage.dev/pod-selector: app.kubernetes.io/name=radarr
+          gatus.home-operations.com/endpoint: |-
+            url: https://radarr.sklab.dev/ping
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
           - radarr.sklab.dev
         parentRefs:

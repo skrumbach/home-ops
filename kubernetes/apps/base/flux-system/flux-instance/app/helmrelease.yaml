@@ -12,9 +12,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: flux-instance
-  install:
-    remediation:
-      retries: -1
   dependsOn:
     - name: flux-operator
       namespace: flux-system

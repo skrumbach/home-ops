@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app cleanuparr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: cleanuparr
@@ -115,6 +115,12 @@ spec:
           gethomepage.dev/icon: cleanuparr.png
           gethomepage.dev/description: Clears stalled downloads
           gethomepage.dev/pod-selector: app.kubernetes.io/name=cleanuparr
+          gatus.home-operations.com/endpoint: |-
+            url: https://cleanuparr.sklab.dev/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY] == healthy"
+            group: downloads
         hostnames:
           - cleanuparr.sklab.dev
         parentRefs:

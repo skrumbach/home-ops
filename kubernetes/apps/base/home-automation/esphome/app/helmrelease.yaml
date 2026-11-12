@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: esphome
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: esphome
@@ -138,6 +138,11 @@ spec:
             conditions: ["[STATUS] == 200"]
             ui:
               hide-url: true
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: ESPHome
+          gethomepage.dev/icon: esphome.svg
+          gethomepage.dev/description: Device firmware
         hostnames:
           - "esphome.sklab.dev"
         parentRefs:

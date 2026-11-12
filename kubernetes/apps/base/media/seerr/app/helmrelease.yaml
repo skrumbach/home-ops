@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app seerr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: seerr
@@ -107,6 +107,11 @@ spec:
           gethomepage.dev/description: Request movies and shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=seerr
           external-dns.kubernetes.io/target: "external.sklab.dev"
+          gatus.home-operations.com/endpoint: |-
+            url: https://seerr.sklab.dev/api/v1/status
+            conditions:
+              - "[STATUS] == 200"
+            group: media
         hostnames:
           - seerr.sklab.dev
         parentRefs:

@@ -20,7 +20,7 @@ spec:
       namespace: security
     - name: kopiur-repository
       namespace: system
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/downloads/lidarr/app
   postBuild:
     substitute:
@@ -46,7 +46,7 @@ metadata:
   name: lidarr-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

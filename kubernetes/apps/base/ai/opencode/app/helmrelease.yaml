@@ -10,9 +10,6 @@ spec:
     kind: OCIRepository
     name: opencode
   maxHistory: 2
-  install:
-    remediation:
-      retries: 3
   values:
     defaultPodOptions:
       # No talos-3 toleration. PreferNoSchedule keeps it off that node. A hostname deny-list fails open.

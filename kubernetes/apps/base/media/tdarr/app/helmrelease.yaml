@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app tdarr
 spec:
-  interval: 30m
+  interval: 1h
   # The node Deployment's startup probe allows up to 5 min for the server heartbeat; the
   # default 5m Helm timeout rolled the 3.x upgrade back mid-start.
   timeout: 15m
@@ -284,6 +284,12 @@ spec:
           gethomepage.dev/icon: tdarr.svg
           gethomepage.dev/description: Library transcoding to AV1
           gethomepage.dev/pod-selector: app.kubernetes.io/name=tdarr
+          gatus.home-operations.com/endpoint: |-
+            url: https://tdarr.sklab.dev/api/v2/status
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].status == good"
+            group: media
         hostnames:
           - tdarr.sklab.dev
         parentRefs:

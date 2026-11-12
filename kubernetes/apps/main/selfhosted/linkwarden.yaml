@@ -6,7 +6,7 @@ metadata:
   name: &app linkwarden
 spec:
   targetNamespace: selfhosted
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/selfhosted/linkwarden/app"
   prune: true
   sourceRef:
@@ -40,7 +40,7 @@ metadata:
   name: linkwarden-db
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

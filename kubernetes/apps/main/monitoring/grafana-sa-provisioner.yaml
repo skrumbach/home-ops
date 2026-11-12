@@ -6,7 +6,7 @@ metadata:
   name: grafana-sa-provisioner
 spec:
   targetNamespace: &namespace monitoring
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/monitoring/grafana-sa-provisioner/app"
   prune: true
   sourceRef:

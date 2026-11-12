@@ -6,7 +6,7 @@ metadata:
   name: emqx-operator
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/base/database/emqx/operator
   prune: true
@@ -26,7 +26,7 @@ metadata:
   name: &app emqx-cluster
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/base/database/emqx/cluster
   prune: true
@@ -58,7 +58,7 @@ metadata:
   name: emqx-exporter
 spec:
   targetNamespace: database
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/base/database/emqx/exporter
   prune: true

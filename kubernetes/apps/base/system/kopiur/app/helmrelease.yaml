@@ -10,8 +10,6 @@ spec:
     kind: OCIRepository
     name: kopiur
   install:
-    remediation:
-      retries: -1
     # Helm's crds/ directory is INSTALL-ONLY: `helm upgrade` never updates a CRD
     # schema. Without CreateReplace on BOTH install and upgrade, a chart bump
     # that adds a CRD field leaves the old schema in place, the API server

@@ -11,8 +11,6 @@ spec:
     name: openebs
   install:
     disableHooks: true
-    remediation:
-      retries: 3
   upgrade:
     disableHooks: true
   values:

@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: &app home-assistant
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: home-assistant
@@ -172,6 +172,11 @@ spec:
           gethomepage.dev/icon: home-assistant.svg
           gethomepage.dev/description: Smart home hub
           gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
+          gatus.home-operations.com/endpoint: |-
+            url: https://hass.sklab.dev/manifest.json
+            conditions:
+              - "[STATUS] == 200"
+            group: home-automation
         hostnames:
           - "hass.sklab.dev"
         parentRefs:

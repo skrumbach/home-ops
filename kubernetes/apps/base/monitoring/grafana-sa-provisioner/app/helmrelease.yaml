@@ -10,9 +10,6 @@ spec:
     kind: OCIRepository
     name: grafana-sa-provisioner
   maxHistory: 2
-  install:
-    remediation:
-      retries: 3
   values:
     controllers:
       grafana-sa-provisioner:

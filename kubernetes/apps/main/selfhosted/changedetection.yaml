@@ -28,4 +28,4 @@ spec:
       # 2Gi default clears this snapshot. Namespace r2 hour; ceph stays on the component default.
       KOPIUR_SCHEDULE_R2: "H 14 * * *"
   prune: true
-  interval: 30m
+  interval: 1h

@@ -5,13 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app coder
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: *app
-  install:
-    remediation:
-      retries: 3
   values:
     podAnnotations:
       secret.reloader.stakater.com/reload: *app

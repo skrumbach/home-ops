@@ -6,7 +6,7 @@ metadata:
   name: &app recyclarr
 spec:
   targetNamespace: downloads
-  interval: 30m
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/recyclarr/app"
   prune: true
   sourceRef:

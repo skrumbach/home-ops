@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: dragonfly-operator
 spec:
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/dragonfly/app
   prune: true
   sourceRef:
