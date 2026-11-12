@@ -541,6 +541,7 @@ EOF
       exit 1
     fi
     base_dir="$BASE_NS_DIR/$APP/app/$KEY/$INSTANCE"
+    write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization 0)"
     write_file "$base_dir/helmrelease.yaml" "$(render_helmrelease "$INSTANCE")"
     cat >&2 <<EOF
 
@@ -548,8 +549,7 @@ This shape has exactly one live precedent in this repo
 (actions-runner-system/gha-runner-scale-set) and its parent app/kustomization.yaml
 resources list is hand-maintained, not machine-generated here - merging a new
 resources: entry into an existing, possibly hand-edited kustomization.yaml
-safely is not something this script attempts. Add manually:
-  $base_dir/kustomization.yaml (resources: [./helmrelease.yaml])
+safely is not something this script attempts. The instance kustomization.yaml is written; add manually:
   a resources: entry for it in $BASE_NS_DIR/$APP/app/kustomization.yaml
 A parameterized instance is rare: in almost every case shape=app or shape=family is the better fit.
 EOF
