@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: tailscale-operator
 spec:
-  targetNamespace: &namespace network
+  targetNamespace: network
   dependsOn:
     - name: onepassword-store
       namespace: security
