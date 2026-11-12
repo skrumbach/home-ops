@@ -12,7 +12,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: embedding-gpu
   install:
     remediation:
       retries: 3

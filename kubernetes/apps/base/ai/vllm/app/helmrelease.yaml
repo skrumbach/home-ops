@@ -12,7 +12,7 @@ spec:
   timeout: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: vllm
   maxHistory: 2
   install:
     remediation:

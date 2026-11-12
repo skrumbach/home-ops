@@ -9,8 +9,7 @@ spec:
   timeout: 10m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: lidarr
   values:
     controllers:
       lidarr:

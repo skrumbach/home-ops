@@ -32,6 +32,7 @@ resources:
   - ./ciliumnetworkpolicy.yaml
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
   - ./priorityclass.yaml
   - ./prometheusrule.yaml
   - ./servicemonitor.yaml
