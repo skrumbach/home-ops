@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pocket-id
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Security
+    gethomepage.dev/name: Pocket ID
+    gethomepage.dev/icon: pocket-id.png
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=pocket-id
+    # /healthz is unauthenticated and answers 204.
+    gatus.home-operations.com/endpoint: |-
+      url: https://id.sklab.dev/healthz
+      conditions: ["[STATUS] == 204"]
+spec:
+  # Never change this hostname: every registered passkey is bound to it.
+  hostnames: ["id.sklab.dev"]
+  # Internal only until the owner has claimed the admin account: Pocket ID
+  # serves an open /setup page while it has no user. envoy-external is added
+  # with the first externally exposed client (echo).
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: pocket-id
+          namespace: security
+          port: 1411

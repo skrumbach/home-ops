@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# The CRDs (pocketid.internal/v1alpha1) ship in the chart's crds/ directory; the cluster-apps
+# HelmRelease defaults apply them with CreateReplace. The API is v1alpha1: read the release
+# notes on every bump.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pocket-id-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: pocket-id-operator
+  interval: 1h
+  values:
+    # The chart's deprecated root `instance` block defaults to enabled and would render a second
+    # PocketIDInstance with an empty spec. The instance lives in security/pocket-id.
+    instance:
+      enabled: false
+    # Feeds the chart's own PrometheusRule, which renders whenever the CRD exists.
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true

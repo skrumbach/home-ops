@@ -36,3 +36,7 @@ releases:
 
   - name: kube-prometheus-stack
     namespace: monitoring
+
+  # Each app that logs in with Pocket ID carries its own PocketIDOIDCClient CR.
+  - name: pocket-id-operator
+    namespace: security
