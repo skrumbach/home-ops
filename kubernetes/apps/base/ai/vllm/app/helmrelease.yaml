@@ -70,7 +70,6 @@ spec:
               - "8000"
               - --ctx-size
               # Model max. Do not pin --parallel or --kv-unified: an explicit pin collapses decode.
-              # vllm-embed stays at replicas 0.
               - "262144"
               - -ngl
               - "99"
@@ -121,7 +120,7 @@ spec:
               # Numeric only. "false" or "off" parse as the default and leave the leak on.
               # Lift only when this tag bounds fattn-onednn.cpp.
               GGML_SYCL_FA_ONEDNN: "0"
-            envFrom: &envFrom
+            envFrom:
               - secretRef:
                   name: vllm-secret
             # readOnlyRootFilesystem stays off: llama.cpp, the SYCL/Level Zero runtime and glibc
@@ -168,87 +167,24 @@ spec:
                   failureThreshold: 3
               liveness: *probe
 
-      vllm-embed:
-        # replicas 0. No live consumer, and it shares the one B70 with chat.
-        # --gpu-memory-utilization belongs only on this controller.
-        replicas: 0
-        strategy: Recreate
-        containers:
-          app:
-            image:
-              repository: docker.io/intel/llm-scaler-vllm
-              tag: 0.14.0-b8.3.1@sha256:4304f64f2a9a38994cf1e824d8fa0c61769c87c8b7ecfd2965d9a01b46c8bc8a
-            command:
-              - vllm
-              - serve
-              - Qwen/Qwen3-VL-Embedding-2B
-              # --task was removed in vLLM 0.14; needs both runner + convert here
-              # (convert alone leaves pooler_config unset -> AssertionError)
-              - --runner=pooling
-              - --convert=embed
-              - --served-model-name=qwen3-vl-embedding-2b
-              - --host=0.0.0.0
-              - --port=8000
-              - --dtype=float16
-              # 0.15 (4.8GB) only covers the fp16 weights; no room for cache blocks
-              - --gpu-memory-utilization=0.20
-              - --max-model-len=8192
-            env:
-              HF_HOME: /models
-              VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
-              VLLM_WORKER_MULTIPROC_METHOD: spawn
-              ZES_ENABLE_SYSMAN: "1"
-            envFrom: *envFrom
-            resources:
-              requests:
-                cpu: "1"
-                memory: 4Gi
-                devic.es/b70: 1
-              limits:
-                memory: 16Gi
-                devic.es/b70: 1
-            probes:
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: 8000
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-                  failureThreshold: 20
-              readiness: *probe
-              liveness: *probe
-
+    # suffix pins the names vllm-app and vllm-models. With one service and one claim the
+    # chart would name both `vllm`, and Helm would delete the 50Gi model cache.
     service:
       app:
+        suffix: app
         controller: vllm
-        ports:
-          http:
-            port: 8000
-      embed:
-        controller: vllm-embed
         ports:
           http:
             port: 8000
 
     persistence:
       models:
+        suffix: models
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: ceph-block
         size: 50Gi
         advancedMounts:
           vllm:
-            app:
-              - path: /models
-      embed-models:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        storageClass: ceph-block
-        size: 20Gi
-        advancedMounts:
-          vllm-embed:
             app:
               - path: /models

@@ -14,9 +14,6 @@ spec:
       namespace: rook-ceph
     - name: onepassword-store
       namespace: security
-  # Only the main "vllm" controller - "vllm-embed" is deliberately pinned to
-  # replicas: 0 (mutually exclusive with vllm on the single GPU), so it must
-  # not be health-checked.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
