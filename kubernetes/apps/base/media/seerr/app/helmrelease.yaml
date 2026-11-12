@@ -106,7 +106,6 @@ spec:
           gethomepage.dev/icon: seerr.svg
           gethomepage.dev/description: Request movies and shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=seerr
-          external-dns.kubernetes.io/target: "external.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             url: https://seerr.sklab.dev/api/v1/status
             conditions:
@@ -115,7 +114,8 @@ spec:
         hostnames:
           - seerr.sklab.dev
         parentRefs:
-          - name: envoy-external
+          # Internal only since 2026-11-12 (owner decision): reachable on the LAN, not through the Cloudflare tunnel.
+          - name: envoy-internal
             namespace: network
             sectionName: https
         rules:

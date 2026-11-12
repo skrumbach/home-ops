@@ -116,7 +116,6 @@ spec:
           gethomepage.dev/icon: plex.svg
           gethomepage.dev/description: "Movies, shows and music"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=plex
-          external-dns.kubernetes.io/target: "external.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             url: https://plex.sklab.dev/identity
             conditions:
@@ -125,7 +124,9 @@ spec:
         hostnames:
           - plex.sklab.dev
         parentRefs:
-          - name: envoy-external
+          # Internal only since 2026-11-12 (owner decision): reachable on the LAN and over the
+          # tailnet Ingress plex-tailscale, not through the Cloudflare tunnel.
+          - name: envoy-internal
             namespace: network
             sectionName: https
         rules:

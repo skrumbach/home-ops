@@ -18,8 +18,6 @@ ALLOWED: dict[str, set[str]] = {
     "coder.sklab.dev": {"/"},
     "flux-webhook.sklab.dev": {"/hook/"},
     "hass.sklab.dev": {"/"},
-    "plex.sklab.dev": {"/"},
-    "seerr.sklab.dev": {"/"},
     "kromgo.sklab.dev": {"/badges/"},  # public read-only badges only
     "echo.sklab.dev": {"/"},
     "n8n-webhook.sklab.dev": {"/webhook", "/rest/oauth2-credential"},  # not the editor
