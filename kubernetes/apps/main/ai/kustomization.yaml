@@ -22,8 +22,8 @@ resources:
   - ./embedding-gpu.yaml
   - ./gpu-node-dashboard.yaml
   - ./hermes.yaml
-  - ./litellm-operator.yaml
   - ./litellm.yaml
+  - ./litellm-operator.yaml
   - ./litellm-pgvector.yaml
   - ./opencode.yaml
   - ./pvc.yaml

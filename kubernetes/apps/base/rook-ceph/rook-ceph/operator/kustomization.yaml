@@ -5,5 +5,5 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
-  - ./csi-driver-rbac.yaml
-  - ./csi-driver-tolerations.yaml
+  - ./rbac.yaml
+  - ./driver.yaml

@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/envoyproxy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: envoy
+spec:
+  logging:
+    level:
+      default: info
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyDeployment:
+        replicas: 2
+        container:
+          # renovate: datasource=docker depName=envoyproxy/envoy
+          image: mirror.gcr.io/envoyproxy/envoy:v1.40.2@sha256:8de97e654644827d62afdbf7e1d3dc9fee01a8690d410dd1c63a30dc6b6cecbb
+          resources:
+            requests:
+              cpu: 100m
+              # Explicit memory request: without one, requests.memory defaults to the 1Gi limit and every envoy pod
+              # (4 in total) reserves all of it. The request tracks observed peak; the limit still absorbs spikes.
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+        # Hard per-gateway spread: replicas of one gateway never share a node (externalTrafficPolicy Local means a
+        # node with no endpoint does not advertise the VIP). matchLabelKeys scopes the count per gateway in this
+        # shared spec.
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: envoy
+              matchLabelKeys:
+                - gateway.envoyproxy.io/owning-gateway-name
+        # The gateway-helm CRD does not expose envoyDeployment.container.lifecycle or
+        # pod.terminationGracePeriodSeconds, so the strategic-merge `patch` replaces the chart-injected envoy
+        # preStop.
+        patch:
+          type: StrategicMerge
+          value:
+            spec:
+              template:
+                spec:
+                  terminationGracePeriodSeconds: 360
+                  containers:
+                    - name: envoy
+                      lifecycle:
+                        preStop:
+                          $patch: replace
+                          exec:
+                            command: ["/bin/sleep", "210"]
+      envoyService:
+        externalTrafficPolicy: Local
+  shutdown:
+    drainTimeout: 180s
+    minDrainDuration: 60s
+  telemetry:
+    metrics:
+      prometheus:
+        compression:
+          type: Gzip

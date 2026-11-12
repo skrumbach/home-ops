@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/banner.svg" width="100%" alt="cert-manager: issues and renews the wildcard certificate every Gateway serves, through Let's Encrypt DNS-01 on Cloudflare.">
+  <img src="./app/resources/banner.svg" width="100%" alt="cert-manager: issues and renews the wildcard certificate every Gateway serves, through Let's Encrypt DNS-01 on Cloudflare.">
 </p>
 
 > **One certificate, never expired.** cert-manager gets a Let's Encrypt wildcard certificate for the lab domain,
@@ -47,11 +47,11 @@
 ## How it works
 
 <p align="center">
-  <img src="./assets/infographic.jpg" width="100%" alt="Infographic: how cert-manager issues TLS in five stations. 1 Token: a key from a vault. 2 Request: a wildcard certificate. 3 Prove: a DNS TXT record. 4 Sign: a seal stamps the certificate. 5 Serve: two gateway arches with a padlock.">
+  <img src="./app/resources/infographic.jpg" width="100%" alt="Infographic: how cert-manager issues TLS in five stations. 1 Token: a key from a vault. 2 Request: a wildcard certificate. 3 Prove: a DNS TXT record. 4 Sign: a seal stamps the certificate. 5 Serve: two gateway arches with a padlock.">
 </p>
 
 <p align="center">
-  <img src="./assets/explainer.svg" width="100%" alt="Step by step: 1 Token, ExternalSecret pulls the Cloudflare DNS token from 1Password. 2 Request, Certificate sklab-dev-production asks ClusterIssuer letsencrypt-production for the apex and wildcard. 3 Prove, cert-manager writes an _acme-challenge TXT record and checks it over DNS-over-HTTPS. 4 Sign, Let's Encrypt signs a 90-day certificate. 5 Serve, Secret sklab-dev-production-tls feeds both Envoy Gateways. Certificates live 90 days, renew at 30 days left, alert at 21 days left; controller, webhook and cainjector run 2 replicas each.">
+  <img src="./app/resources/explainer.svg" width="100%" alt="Step by step: 1 Token, ExternalSecret pulls the Cloudflare DNS token from 1Password. 2 Request, Certificate sklab-dev-production asks ClusterIssuer letsencrypt-production for the apex and wildcard. 3 Prove, cert-manager writes an _acme-challenge TXT record and checks it over DNS-over-HTTPS. 4 Sign, Let's Encrypt signs a 90-day certificate. 5 Serve, Secret sklab-dev-production-tls feeds both Envoy Gateways. Certificates live 90 days, renew at 30 days left, alert at 21 days left; controller, webhook and cainjector run 2 replicas each.">
 </p>
 
 <details>

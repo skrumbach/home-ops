@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/persistentvolumeclaim.json
+# Shared download scratch (RWX) on `ceph-filesystem-rwx` (group `csi-rwx`): the
+# default `csi` subvolumegroup is broken by Ceph Tentacle v20.2.1 subvolume
+# corruption. Repoint to `ceph-filesystem` once a fixed Ceph release lands.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-downloads
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Ti
+  storageClassName: ceph-filesystem-rwx

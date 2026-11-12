@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
 # Second, OFF-SITE copy of the postgres-18 barman archive.
 apiVersion: batch/v1
 kind: CronJob

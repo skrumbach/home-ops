@@ -17,7 +17,7 @@ spec:
       namespace: *namespace
     - name: external-secrets
       namespace: security
-  path: ./kubernetes/apps/base/actions-runner-system/maintenance
+  path: ./kubernetes/apps/base/actions-runner-system/maintenance/app
   prune: true
   retryInterval: 2m
   sourceRef:

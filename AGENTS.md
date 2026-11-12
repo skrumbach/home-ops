@@ -43,6 +43,10 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 
 ## CONVENTIONS
 
+- Naming (enforced by `scripts/ci/naming-test.py`): base is `apps/base/<ns>/<app>/<piece>/`, one piece level, each piece has a `kustomization.yaml`, the main piece is `app/` (`crds/` for a CRD-only app). The overlay `apps/main/<ns>/<app>.yaml` holds every Flux Kustomization into that app (plus `-db`/`-kopiur`), no subdirectories. New Kustomization names: `<app>`, `<app>-<piece>`, `<app>-db`, `<claim>-kopiur`; existing names, `metadata.name`s, ExternalSecret `target.name`s, generator names and HelmRelease names are never renamed.
+- A manifest is named for its lowercase kind (`helmrelease.yaml`), `<kind>-<qualifier>.yaml` for a second one, with `pvc`, `pdb` and `rbac` as the only abbreviations. One kind per file, except a helper that only serves it (HTTPRoute + HTTPRouteFilter, ExternalSecret + Password). The chart source is `ocirepository.yaml` / `helmrepository.yaml` next to the HelmRelease, never inline.
+- Collection directories (`alerts/ models/ networks/ repos/ rules/ virtualkeys/`) hold one object per file, named after it. Generator payload lives in `resources/` (or `dashboards/ hooks/ runbooks/ skills/`) and keeps the consumer's filename.
+- New names: ConfigMap `<app>-configmap`; ExternalSecret `metadata.name: <app>`, `target.name: <app>-secret`. Paths are lowercase kebab-case (`README.md` upper-case, `_` only in importable Python), `.yaml` not `.yml`. Line 1 `---`, line 2 the schema header; every `resources:`/`components:` entry starts `./` or `../`; overlay namespace lists are sorted.
 - Every manifest starts with a `# yaml-language-server: $schema=...` comment. Prefer `kubernetes-schemas.pages.dev`, fall back to `k8s-schemas.home-operations.com`, never `crd.movishell.pl` or `fluxcd-community`.
 - Commits: `type(scope): description`, types feat/fix/chore/ci/docs/refactor/test, scope is a container, helm, github-action, mise, talos, flux, deps or an app/namespace (`.commitlintrc.yaml`).
 - The parent Gateway's `external-dns.kubernetes.io/target` decides the DNS record, not a route annotation.

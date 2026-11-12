@@ -170,10 +170,6 @@ spec:
   install:
     remediation:
       retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     controllers:
       $app:
@@ -332,9 +328,6 @@ spec:
       retries: -1
   upgrade:
     crds: CreateReplace
-    cleanupOnFail: true
-    remediation:
-      retries: 3
 EOF
 }
 
@@ -421,13 +414,11 @@ add_namespace_resource_entry() {
     return
   fi
   if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "--- would append '  - $entry' to the resources: list in $ns_kustomization ---"
+    echo "--- would insert '  - $entry' into the resources: list in $ns_kustomization ---"
     return
   fi
-  # Appended at the end of the existing resources: block, not inserted
-  # alphabetically - this repo's namespaces don't agree on an order (ai/
-  # and downloads/ sort alphabetically, selfhosted/ is roughly
-  # chronological), so append is the only assumption that holds everywhere.
+  # Inserted in sorted position (name with the extension stripped), the order
+  # scripts/ci/naming-test.py enforces for every overlay resources: list.
   python3 - "$ns_kustomization" "$entry" <<'PYEOF'
 import sys
 path, entry = sys.argv[1], sys.argv[2]
@@ -440,11 +431,17 @@ except StopIteration:
 end = start + 1
 while end < len(lines) and (lines[end].startswith("  - ") or lines[end].startswith("  #")):
     end += 1
-lines.insert(end, f"  - {entry}\n")
+key = lambda e: e.removeprefix("./").removesuffix(".yaml")
+pos = end
+for i in range(start + 1, end):
+    if lines[i].startswith("  - ") and key(lines[i][4:].strip()) > key(entry):
+        pos = i
+        break
+lines.insert(pos, f"  - {entry}\n")
 with open(path, "w") as f:
     f.writelines(lines)
 PYEOF
-  echo "appended '  - $entry' to the resources: list in $ns_kustomization"
+  echo "inserted '  - $entry' into the resources: list in $ns_kustomization"
 }
 
 write_or_append_overlay() {
@@ -544,6 +541,7 @@ EOF
       exit 1
     fi
     base_dir="$BASE_NS_DIR/$APP/app/$KEY/$INSTANCE"
+    write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization 0)"
     write_file "$base_dir/helmrelease.yaml" "$(render_helmrelease "$INSTANCE")"
     cat >&2 <<EOF
 
@@ -551,8 +549,7 @@ This shape has exactly one live precedent in this repo
 (actions-runner-system/gha-runner-scale-set) and its parent app/kustomization.yaml
 resources list is hand-maintained, not machine-generated here - merging a new
 resources: entry into an existing, possibly hand-edited kustomization.yaml
-safely is not something this script attempts. Add manually:
-  $base_dir/kustomization.yaml (resources: [./helmrelease.yaml])
+safely is not something this script attempts. The instance kustomization.yaml is written; add manually:
   a resources: entry for it in $BASE_NS_DIR/$APP/app/kustomization.yaml
 A parameterized instance is rare: in almost every case shape=app or shape=family is the better fit.
 EOF
@@ -572,7 +569,7 @@ Next steps:
   - decide whether this app needs a backup component (components/kopiur;
     VolSync is removed) - that requires measuring the live file
     ownership after first deploy, so it is deliberately not auto-generated;
-    see kubernetes/components/kopiur/Readme.md (one components/kopiur include
+    see kubernetes/components/kopiur/README.md (one components/kopiur include
     covers one volume; a second PVC is a second Kustomization)
   - validate: mise exec -- task flux:test:all
 EOF

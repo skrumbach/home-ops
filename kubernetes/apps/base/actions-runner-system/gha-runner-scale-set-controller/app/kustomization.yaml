@@ -1,8 +1,9 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 configMapGenerator:
   - files:
-      - arc-dashboard.json
+      - resources/arc-dashboard.json
     name: arc-dashboard
 generatorOptions:
   annotations:
@@ -42,6 +43,6 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./pdb.yaml
-  - ./pod-monitor.yaml
+  - ./podmonitor.yaml
   - ./prometheusrule.yaml
   - ./priorityclass.yaml

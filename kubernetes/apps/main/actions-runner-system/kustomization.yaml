@@ -9,6 +9,6 @@ components:
   - ../../../components/alerts
 
 resources:
-  - ./gha-runner-scale-set-controller.yaml
   - ./gha-runner-scale-set.yaml
+  - ./gha-runner-scale-set-controller.yaml
   - ./maintenance.yaml

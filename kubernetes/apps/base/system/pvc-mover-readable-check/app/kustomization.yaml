@@ -13,4 +13,4 @@ configMapGenerator:
   - name: pvc-mover-readable-check-walk
     namespace: system
     files:
-      - walk.sh
+      - resources/walk.sh

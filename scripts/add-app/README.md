@@ -22,7 +22,7 @@ placeholders (image/tag, ports, uid/gid, 1Password keys), not a finished app. Af
    kopiur-only with `components/kopiur` alone and a chart-owned PVC (example:
    `downloads/cleanuparr`); `components/kopiur/pvc` is the VolSync-retirement takeover shape only.
    VolSync and `components/volsync` are removed (issue #2202). This is deliberately **not** auto-generated - it requires measuring the app's live file
-   ownership after first deploy (see `kubernetes/components/kopiur/Readme.md`), which a template
+   ownership after first deploy (see `kubernetes/components/kopiur/README.md`), which a template
    can't know in advance.
 3. Validate: `mise exec -- task flux:test:all`.
 

@@ -7,5 +7,5 @@ resources:
   - ./ocirepository.yaml
   - ./pushsecret.yaml
   - ./rbac.yaml
-  - ./route.yaml
+  - ./httproute.yaml
   - ./securitypolicy.yaml

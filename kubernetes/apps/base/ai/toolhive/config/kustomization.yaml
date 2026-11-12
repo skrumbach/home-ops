@@ -1,3 +1,4 @@
+---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -5,7 +6,7 @@ resources:
   - ./embeddingserver.yaml
   - ./externalsecret.yaml
   - ./httproute.yaml
-  - ./mcp-telemetry.yaml
+  - ./mcptelemetryconfig.yaml
   - ./mcpgroup.yaml
   - ./networkpolicy.yaml
   - ./podmonitor.yaml

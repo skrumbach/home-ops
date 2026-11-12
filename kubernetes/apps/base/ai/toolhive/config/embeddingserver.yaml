@@ -1,3 +1,4 @@
+---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/toolhive.stacklok.dev/embeddingserver_v1alpha1.json
 #
 # Tool-selection index for vmcp only. Keep BAAI/bge-small-en-v1.5: Qwen3-Embedding-0.6B

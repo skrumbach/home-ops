@@ -5,5 +5,5 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
-  - ./prometheus-rule.yaml
+  - ./prometheusrule.yaml
   - ./networkpolicy.yaml

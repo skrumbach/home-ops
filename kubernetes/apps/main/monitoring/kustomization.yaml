@@ -10,16 +10,16 @@ components:
 
 resources:
   - ./alertmanager.yaml
+  - ./blackbox-exporter.yaml
+  - ./gatus.yaml
   - ./grafana.yaml
   - ./grafana-sa-provisioner.yaml
+  - ./graphite-exporter.yaml
   - ./keda.yaml
-  - ./kube-state-metrics.yaml
+  - ./kromgo.yaml
   - ./kube-prometheus-stack.yaml
+  - ./kube-state-metrics.yaml
   - ./loki.yaml
   - ./prometheus-operator.yaml
   - ./promtail.yaml
-  - ./gatus.yaml
-  - ./kromgo.yaml
   - ./unpoller.yaml
-  - ./exporters/blackbox-exporter.yaml
-  - ./exporters/graphite-exporter.yaml

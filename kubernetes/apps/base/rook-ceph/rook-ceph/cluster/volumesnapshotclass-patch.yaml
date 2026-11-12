@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/snapshot.storage.k8s.io/volumesnapshotclass_v1.json
 # Overrides the Helm-generated class to add the pool parameter; without it the CSI driver searches .rgw.root.
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass

@@ -11,7 +11,7 @@ resources:
 configMapGenerator:
   - name: wizarr-seed
     files:
-      - seed.py
+      - resources/seed.py
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

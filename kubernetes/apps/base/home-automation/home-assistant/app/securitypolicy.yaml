@@ -1,8 +1,8 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 # Only the code-server route is gated by Authentik ExtAuth. The Home Assistant route is not:
 # the companion app, Google and /auth/token cannot follow a browser SSO redirect, so
 # Authentik signs in inside Home Assistant (auth_oidc, resources/auth_oidc.yaml).
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
