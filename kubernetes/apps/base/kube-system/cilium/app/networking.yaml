@@ -69,7 +69,8 @@ kind: Service
 metadata:
   name: kube-api
   annotations:
-    external-dns.kubernetes.io/hostname: k8s.{SECRET_DOMAIN}
+    # Only unifi-dns reads Service annotations, so this is an internal-only record.
+    external-dns.kubernetes.io/hostname: k8s.sklab.dev
     lbipam.cilium.io/ips: 10.50.0.121
 spec:
   type: LoadBalancer
