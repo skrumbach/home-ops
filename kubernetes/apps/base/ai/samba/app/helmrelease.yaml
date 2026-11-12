@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: samba
-  install:
-    remediation:
-      retries: -1
   values:
     controllers:
       samba:

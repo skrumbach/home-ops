@@ -18,9 +18,6 @@ spec:
       namespace: rook-ceph
     - name: snapshot-controller
       namespace: kube-system
-  install:
-    remediation:
-      retries: -1
   values:
     monitoring:
       enabled: true

@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: playwright
-  install:
-    remediation:
-      retries: 3
   values:
     controllers:
       playwright:

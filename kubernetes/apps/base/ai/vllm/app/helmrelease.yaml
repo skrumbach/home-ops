@@ -14,9 +14,6 @@ spec:
     kind: OCIRepository
     name: vllm
   maxHistory: 2
-  install:
-    remediation:
-      retries: 3
   values:
     # Placement is the devic.es/b70 request, not hostname affinity. KV at ctx
     # 262144 is 2720 MiB at q8_0 (10 of 40 layers are full attention), about twice that at f16.

@@ -12,9 +12,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: cilium
-  install:
-    remediation:
-      retries: -1
   values:
     cluster:
       id: 1

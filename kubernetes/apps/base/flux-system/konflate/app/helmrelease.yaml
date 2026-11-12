@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: *app
-  install:
-    remediation:
-      retries: 3
   values:
     fullnameOverride: *app
     # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)

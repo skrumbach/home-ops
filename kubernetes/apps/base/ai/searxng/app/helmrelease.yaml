@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: searxng
-  install:
-    remediation:
-      retries: -1
   values:
     controllers:
       searxng:

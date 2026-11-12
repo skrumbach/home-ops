@@ -168,9 +168,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: $app
-  install:
-    remediation:
-      retries: -1
   values:
     controllers:
       $app:
@@ -355,8 +352,6 @@ spec:
     name: $app-crds
   install:
     crds: CreateReplace
-    remediation:
-      retries: -1
   upgrade:
     crds: CreateReplace
 EOF

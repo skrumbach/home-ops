@@ -10,9 +10,6 @@ spec:
     kind: OCIRepository
     name: changedetection
   maxHistory: 3
-  install:
-    remediation:
-      retries: 3
   values:
     # Identity is declared pod-level like the rest of the fleet; `browser` (browserless/chrome) overrides
     # back to its image's `blessuser` uid 999 (see below). This does NOT earn kopiur's

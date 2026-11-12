@@ -16,9 +16,6 @@ spec:
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
-  install:
-    remediation:
-      retries: 3
   values:
     defaultPodOptions:
       securityContext:
