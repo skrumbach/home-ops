@@ -5,9 +5,9 @@ version: '3'
 set: [pipefail]
 shopt: [globstar]
 
-# Same defaults as .mise.toml: read-only agent credentials unless the owner sets HOME_OPS_*.
+# Same defaults as .mise.toml: admin kubeconfig, read-only talosconfig, unless HOME_OPS_* says otherwise.
 env:
-  KUBECONFIG: '{{env "HOME_OPS_KUBECONFIG" | default (print (env "HOME") "/.kube/home-ops-agent")}}'
+  KUBECONFIG: '{{env "HOME_OPS_KUBECONFIG" | default (print (env "HOME") "/.kube/home-ops-admin")}}'
   TALOSCONFIG: '{{env "HOME_OPS_TALOSCONFIG" | default (print (env "HOME") "/.talos/home-ops-agent")}}'
 
 includes:
