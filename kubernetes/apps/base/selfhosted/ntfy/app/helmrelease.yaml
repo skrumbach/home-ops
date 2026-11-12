@@ -71,7 +71,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
         existingClaim: ${KOPIUR_CLAIM:-ntfy}
         globalMounts:
           - path: /var/cache/ntfy

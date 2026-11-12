@@ -62,9 +62,6 @@ spec:
     - name: syncthing
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: syncthing-data
       KOPIUR_CLAIM: syncthing-data

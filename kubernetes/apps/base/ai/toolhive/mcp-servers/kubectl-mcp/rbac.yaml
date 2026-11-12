@@ -111,7 +111,6 @@ rules:
       - gateway.networking.k8s.io
       - gateway.networking.x-k8s.io
       - generators.external-secrets.io
-      - grafana.integreatly.org
       - groupsnapshot.storage.k8s.io
       - helm.toolkit.fluxcd.io
       - image.toolkit.fluxcd.io
@@ -138,8 +137,6 @@ rules:
       - talos.dev
       - toolhive.stacklok.dev
       - tuppr.home-operations.com
-      - upgrade.cattle.io
-      - volsync.backube
     resources:
       - "*"
     verbs:

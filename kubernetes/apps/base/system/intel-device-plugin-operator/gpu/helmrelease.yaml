@@ -16,10 +16,6 @@ spec:
   install:
     remediation:
       retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     name: xe
     # Chart default nodeSelector (intel.feature.node.kubernetes.io/gpu=true) is a hand-set Talos nodeLabel, not NFD (talos/machineconfig.yaml.j2).

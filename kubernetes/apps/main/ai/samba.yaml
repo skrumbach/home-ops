@@ -24,11 +24,7 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/ai/samba/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
-      APP: *app
       CONFIG_TIMEZONE: America/New_York
   prune: true
   retryInterval: 2m

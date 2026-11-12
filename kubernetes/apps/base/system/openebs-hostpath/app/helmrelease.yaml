@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
@@ -28,10 +28,7 @@ spec:
     remediation:
       retries: 3
   upgrade:
-    cleanupOnFail: true
     disableHooks: true
-    remediation:
-      retries: 3
   values:
     localpv-provisioner:
       localpv:

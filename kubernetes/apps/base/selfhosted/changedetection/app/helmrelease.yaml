@@ -11,15 +11,8 @@ spec:
     name: app-template
   maxHistory: 3
   install:
-    createNamespace: true
     remediation:
       retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     # Identity is declared pod-level like the rest of the fleet; `browser` (browserless/chrome) overrides
     # back to its image's `blessuser` uid 999 (see below). This does NOT earn kopiur's
@@ -144,8 +137,7 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM. This token has no `:-default`, so a stale VOLSYNC_CLAIM would render an
-        # EMPTY existingClaim.
+        # No `:-default`: an undefined KOPIUR_CLAIM renders an EMPTY existingClaim.
         existingClaim: "${KOPIUR_CLAIM}"
         advancedMounts:
           main:

@@ -13,11 +13,6 @@ spec:
   install:
     remediation:
       retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   # Patch deployment to use Recreate strategy for RWO volume compatibility.
   # RollingUpdate creates new pods before terminating old ones, which fails
   # when the PVC can only attach to one node at a time.

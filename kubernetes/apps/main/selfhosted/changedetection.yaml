@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://homelab-schemas-epg.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -30,8 +30,7 @@ spec:
     substitute:
       APP: *app
       KOPIUR_CLAIM: changedetection-config
-      # Inherited from the retired VOLSYNC_CAPACITY, not the component's 5Gi default (which would provision a
-      # rebuilt claim at 5x the live 1Gi).
+      # The live claim is 1Gi; the component's 5Gi default would provision a rebuilt claim at 5x that.
       KOPIUR_CAPACITY: 1Gi
       # 2Gi default clears this snapshot. Namespace r2 hour; ceph stays on the component default.
       KOPIUR_SCHEDULE_R2: "H 14 * * *"

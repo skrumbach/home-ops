@@ -75,6 +75,4 @@ spec:
 
     persistence:
       data:
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key, and the
-        # `:-matter-server` default would hide a token naming a variable nothing defines.
         existingClaim: ${KOPIUR_CLAIM:-matter-server}

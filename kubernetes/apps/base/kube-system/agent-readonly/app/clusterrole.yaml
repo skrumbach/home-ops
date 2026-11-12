@@ -23,7 +23,6 @@ rules:
       - gateway.networking.k8s.io
       - gateway.envoyproxy.io
       - kopiur.home-operations.com
-      - volsync.backube
       - postgresql.cnpg.io
       - tuppr.home-operations.com
       - deviceplugin.intel.com

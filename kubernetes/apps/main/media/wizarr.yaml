@@ -27,7 +27,6 @@ spec:
         kind: Secret
     substitute:
       APP: *app
-      KOPIUR_CAPACITY: 1Gi
       KOPIUR_PUID: "2000"
       KOPIUR_PGID: "2000"
       KOPIUR_SCHEDULE_R2: "H 15 * * *"
