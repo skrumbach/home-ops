@@ -10,7 +10,7 @@ resources:
 configMapGenerator:
   - name: alertmanager
     files:
-      - config/alertmanager.yml
+      - resources/alertmanager.yml
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

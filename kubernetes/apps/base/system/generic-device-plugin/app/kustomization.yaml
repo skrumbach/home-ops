@@ -7,7 +7,7 @@ resources:
 configMapGenerator:
   - name: generic-device-plugin
     files:
-      - ./config/config.yaml
+      - ./resources/config.yaml
 # The name-suffix hash is deliberately ENABLED here. The config is mounted with
 # subPath, and kubelet never refreshes a subPath mount, so with a static name a
 # config-only change is inert until someone restarts the DaemonSet by hand. The

@@ -5,7 +5,7 @@ kind: Kustomization
 configMapGenerator:
   - name: gpu-node-dashboard
     files:
-      - gpu-node.json
+      - resources/gpu-node.json
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

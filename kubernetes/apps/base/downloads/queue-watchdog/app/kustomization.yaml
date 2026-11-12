@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
   - name: queue-watchdog
     files:
-      - watchdog.py
+      - resources/watchdog.py
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled
