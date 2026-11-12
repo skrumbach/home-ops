@@ -21,6 +21,8 @@ kind: Kustomization
 metadata:
   name: victoria-logs-collector
 spec:
+  # Orders, does not gate: victoria-logs has no wait or healthChecks, so this can start before the
+  # server is ready. Harmless: vlagent buffers to disk (maxDiskUsagePerURL) until it is.
   dependsOn:
     - name: victoria-logs
   interval: 1h
