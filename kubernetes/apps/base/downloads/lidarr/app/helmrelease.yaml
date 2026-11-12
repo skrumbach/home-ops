@@ -140,8 +140,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/description: Music Downloads
+          gethomepage.dev/name: Lidarr
+          gethomepage.dev/description: Music
+          gethomepage.dev/icon: lidarr.svg
           gatus.home-operations.com/endpoint: |-
             url: https://lidarr.${SECRET_DOMAIN}/ping
             conditions:

@@ -58,9 +58,10 @@ spec:
       matter-server:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: matter-server
-          gethomepage.dev/icon: matter.svg
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: Matter Server
+          gethomepage.dev/icon: matter-light.svg
+          gethomepage.dev/description: Matter device controller
           gatus.home-operations.com/enabled: "false"
         hostnames:
           - *host

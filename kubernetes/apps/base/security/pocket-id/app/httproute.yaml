@@ -6,9 +6,10 @@ metadata:
   name: pocket-id
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Security
+    gethomepage.dev/group: Infrastructure
     gethomepage.dev/name: Pocket ID
-    gethomepage.dev/icon: pocket-id.png
+    gethomepage.dev/icon: pocket-id-light.svg
+    gethomepage.dev/description: Passkey sign-in
     gethomepage.dev/pod-selector: app.kubernetes.io/name=pocket-id
     # /healthz is unauthenticated and answers 204.
     gatus.home-operations.com/endpoint: |-

@@ -6,10 +6,10 @@ metadata:
   name: &app coder
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Services
-    gethomepage.dev/name: *app
-    gethomepage.dev/icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/f222c55843b888a82e9f2fe2697365841cbe6025/svg/coder.svg
-    gethomepage.dev/description: "Coder Platform"
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: Coder
+    gethomepage.dev/icon: coder-light.svg
+    gethomepage.dev/description: Dev workspaces
     gethomepage.dev/pod-selector: app.kubernetes.io/name=coder
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN},external.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-

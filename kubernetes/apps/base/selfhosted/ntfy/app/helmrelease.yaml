@@ -90,9 +90,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: ntfy
           gethomepage.dev/icon: ntfy.svg
+          gethomepage.dev/description: Push notifications
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
         hostnames:
           - "ntfy.${SECRET_DOMAIN}"

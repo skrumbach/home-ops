@@ -603,9 +603,10 @@ spec:
           gethomepage.dev/icon: grafana.svg
           gethomepage.dev/name: Grafana
           gethomepage.dev/group: Observability
-          gethomepage.dev/description: Monitoring Dashboards
+          gethomepage.dev/description: Dashboards
           gethomepage.dev/widget.type: grafana
-          gethomepage.dev/widget.url: "http://grafana.${SECRET_DOMAIN}"
+          # In-cluster Service: the public host redirects http to https and the widget proxy fails on it.
+          gethomepage.dev/widget.url: http://grafana.monitoring
           gethomepage.dev/widget.username: "{{`{{HOMEPAGE_VAR_GRAFANA_USERNAME}}`}}"
           gethomepage.dev/widget.password: "{{`{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}`}}"
         enabled: true

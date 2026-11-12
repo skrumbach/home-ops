@@ -146,9 +146,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/icon: calibre-web.png
-          gethomepage.dev/name: *app
+          gethomepage.dev/icon: sh-shelfmark.svg
+          gethomepage.dev/name: Shelfmark
           gethomepage.dev/group: Downloads
+          gethomepage.dev/description: Book search and download
           gatus.home-operations.com/endpoint: |-
             url: https://books.${SECRET_DOMAIN}/api/health
             conditions:

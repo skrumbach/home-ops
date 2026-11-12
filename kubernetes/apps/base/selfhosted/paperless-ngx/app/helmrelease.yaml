@@ -230,9 +230,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Paperless-ngx
-          gethomepage.dev/icon: paperless-ngx.svg
+          gethomepage.dev/icon: sh-paperless-ngx-light.svg
+          gethomepage.dev/description: Document archive
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
           # that /api still bypasses Authentik (a gated path would end on a 200 login page).

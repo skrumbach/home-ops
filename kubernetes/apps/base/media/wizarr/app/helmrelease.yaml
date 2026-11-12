@@ -162,9 +162,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: wizarr.png
-          gethomepage.dev/description: "Wizarr sends invite links that give friends a Plex library share."
+          gethomepage.dev/name: Wizarr
+          gethomepage.dev/icon: wizarr.svg
+          gethomepage.dev/description: Plex invitations
           gethomepage.dev/pod-selector: app.kubernetes.io/name=wizarr
           gatus.home-operations.com/endpoint: |-
             url: https://wizarr.${SECRET_DOMAIN}/health

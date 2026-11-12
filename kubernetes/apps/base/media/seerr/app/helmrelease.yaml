@@ -103,9 +103,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/jellyseerr.svg
-          gethomepage.dev/description: "Seerr is a unified request manager for Jellyfin, Plex, and Emby."
+          gethomepage.dev/name: Seerr
+          gethomepage.dev/icon: seerr.svg
+          gethomepage.dev/description: Request movies and shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=seerr
           external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hostnames:

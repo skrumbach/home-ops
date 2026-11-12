@@ -7,3 +7,9 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./rbac.yaml
+configMapGenerator:
+  - name: homepage-theme
+    files:
+      - ./resources/custom.css
+generatorOptions:
+  disableNameSuffixHash: true

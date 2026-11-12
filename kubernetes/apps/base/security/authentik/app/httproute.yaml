@@ -6,10 +6,11 @@ metadata:
   name: authentik
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Security
+    gethomepage.dev/group: Infrastructure
     gethomepage.dev/name: Authentik
-    gethomepage.dev/icon: authentik.png
+    gethomepage.dev/icon: authentik.svg
     gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik
+    gethomepage.dev/description: Single sign-on
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN},external.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == 200"]

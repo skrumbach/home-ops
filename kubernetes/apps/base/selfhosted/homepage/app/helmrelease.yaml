@@ -15,7 +15,7 @@ spec:
       homepage:
         annotations:
           secret.reloader.stakater.com/reload: &secret homepage-secret
-          configmap.reloader.stakater.com/reload: &configmap homepage-config
+          configmap.reloader.stakater.com/reload: homepage-config,homepage-theme
         strategy: RollingUpdate
         serviceAccount:
           identifier: myServiceAccount
@@ -46,9 +46,11 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 64Mi
+                memory: 128Mi
               limits:
-                memory: 256Mi
+                # v2.8.0 (Next.js 16) idles near 110Mi but was OOM-killed 7 times at
+                # 256Mi on 2026-11-12, on page loads that query every tile at once.
+                memory: 512Mi
             probes:
               liveness: &probes
                 enabled: true
@@ -80,10 +82,10 @@ spec:
         labels:
           app.kubernetes.io/name: *app
         annotations:
-          gethomepage.dev/description: Dynamically Detected Homepage
+          gethomepage.dev/description: This dashboard
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Cluster Management
-          gethomepage.dev/icon: homepage.png
+          gethomepage.dev/group: Platform
+          gethomepage.dev/icon: sh-homepage.svg
           gethomepage.dev/name: Homepage
           gatus.home-operations.com/endpoint: |-
             url: https://homepage.${SECRET_DOMAIN}/api/healthcheck
@@ -106,7 +108,7 @@ spec:
       config:
         enabled: true
         type: configMap
-        name: *configmap
+        name: homepage-config
         globalMounts:
           - subPath: bookmarks.yaml
             path: /app/config/bookmarks.yaml
@@ -120,5 +122,11 @@ spec:
             path: /app/config/settings.yaml
           - subPath: widgets.yaml
             path: /app/config/widgets.yaml
+      theme:
+        type: configMap
+        name: homepage-theme
+        globalMounts:
+          - subPath: custom.css
+            path: /app/config/custom.css
     serviceAccount:
       myServiceAccount: {}
