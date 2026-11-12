@@ -9,6 +9,10 @@
   extends: [
     // Community base, pinned to a tag so an upstream push cannot change merge behaviour unreviewed. Bump the tag deliberately.
     "github>home-operations/renovate-presets#11.0.0",
+    // Opt-in app preset, same tag as the base: Talos Factory datasource, the factory.talos.dev installer manager (siderolabs/talos)
+    // and separateMinorPatch, so a Talos jump to a new minor is proposed alongside the last patch of the current one.
+    // Local Talos quirks stay in .renovate/talos.json5; it never automerges (autoMerge.json5).
+    "github>home-operations/renovate-presets//apps/talosFactory.json5#11.0.0",
     // The base sets no timezone; schedules (rsshub) have always run on America/New_York.
     ":timezone(America/New_York)",
     ":enablePreCommit",
