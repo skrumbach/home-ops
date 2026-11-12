@@ -199,24 +199,32 @@ spec:
       data:
         enabled: true
         existingClaim: ${KOPIUR_CLAIM:-paperless-ngx}
-        globalMounts:
-          - path: /usr/src/paperless/data
+        # Only `app` mounts the volumes: paperless reaches tika and gotenberg over
+        # HTTP, and tika (uid 35002) cannot write them, which fails pvc-writable-check.
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/data
       media:
         enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 50Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /usr/src/paperless/media
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/media
       consume:
         enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 10Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /usr/src/paperless/consume
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/consume
 
     route:
       app:
