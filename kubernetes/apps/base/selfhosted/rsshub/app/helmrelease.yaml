@@ -36,9 +36,6 @@ spec:
               SENTRY: false
               PIXIV_IMG_PROXY: "https://i.yuki.sh"
               HOTLINK_TEMPLATE: "https://rsstt-img-relay-cqf.pages.dev/$${href_ue}"
-            envFrom:
-              - secretRef:
-                  name: rsshub-secret
             probes:
               liveness: &probes
                 enabled: true
