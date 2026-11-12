@@ -159,14 +159,13 @@ spec:
               # The CPU health-check worker does the same job.
               - name: healthcheckgpuWorkers
                 value: "0"
-              # Paused 2026-11-12. The thorough check (ffmpeg -f null) of one 4K
-              # 10-bit AV1 output passed 7 GB RSS in 30s and grew until the 12Gi
-              # limit killed the container, taking every running transcode with
-              # it, about every 6 minutes. Not known whether every 4K AV1 file
-              # does this or only that one. Back to "1" once that file's health
-              # check is skipped in Tdarr and one 4K AV1 check has passed.
+              # On 2026-11-12 the thorough check (ffmpeg -f null) of one 4K 10-bit
+              # AV1 file ("Fall 2 Deadpoint") passed 7 GB RSS in 30s and grew until
+              # the 12Gi limit killed the container, with every running transcode,
+              # about every 6 minutes. That file's check was skipped in Tdarr. If a
+              # 4K AV1 check does it again, the cause is general: set this to "0".
               - name: healthcheckcpuWorkers
-                value: "0"
+                value: "1"
             securityContext:
               allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
