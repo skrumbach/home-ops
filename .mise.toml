@@ -6,13 +6,13 @@ _.python.venv = { path = "{{config_root}}/.venv", create = true, uv_create_args 
 # Optional env file holding the 1Password service-account token for vals/op
 # (e.g. OP_SERVICE_ACCOUNT_TOKEN). Gitignored; see .secrets.env.example.
 _.file = ["{{config_root}}/.secrets.env"]
-# kubectl defaults to the admin kubeconfig (owner decision 2026-11-11); talosctl stays on the
-# read-only agent config. Both files live outside the repo, one copy shared by every worktree.
-# Read-only kubectl: export HOME_OPS_KUBECONFIG=~/.kube/home-ops-agent (scripts/agent-credentials.sh).
-# Talos writes: export HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin.
+# kubectl and talosctl default to the admin credentials (owner decision 2026-11-11). The files
+# live outside the repo, one copy shared by every worktree.
+# Read-only instead: export HOME_OPS_KUBECONFIG=~/.kube/home-ops-agent
+# HOME_OPS_TALOSCONFIG=~/.talos/home-ops-agent (scripts/agent-credentials.sh).
 # A plain KUBECONFIG=... prefix does not work here: mise [env] overrides it.
 KUBECONFIG = "{{ get_env(name='HOME_OPS_KUBECONFIG', default=get_env(name='HOME') ~ '/.kube/home-ops-admin') }}"
-TALOSCONFIG = "{{ get_env(name='HOME_OPS_TALOSCONFIG', default=get_env(name='HOME') ~ '/.talos/home-ops-agent') }}"
+TALOSCONFIG = "{{ get_env(name='HOME_OPS_TALOSCONFIG', default=get_env(name='HOME') ~ '/.talos/home-ops-admin') }}"
 # minijinja-cli config used by the `just` render path (talos/*.j2 templates)
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 # `mod` imports in the root .justfile require unstable features on older `just`
