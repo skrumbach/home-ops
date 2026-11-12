@@ -18,6 +18,7 @@ Options:
   --key=<name>            parameterized shape only: the grouping directory under app/
   --instance=<name>       parameterized shape only: the instance directory under app/<key>/
   --secrets               also write an externalsecret.yaml stub and depend on onepassword-store
+                          (not supported with --shape=parameterized)
   --dragonfly             add the components/dragonfly include with a correctly computed
                           relative path (namespace-scoped cache; see components/dragonfly)
   --dry-run               print what would be written/changed, write nothing
@@ -487,16 +488,16 @@ case "$SHAPE" in
       echo "error: --shape=family requires --piece=<name>" >&2
       exit 1
     fi
-    # Live family pieces name the HelmRelease/controller after the piece
-    # (playwright), and the overlay Kustomization after app-piece
-    # (rsshub-playwright). Naming both after the parent app collides with the
-    # main piece and leaves healthChecks looking for the wrong Deployment.
+    # The overlay Kustomization and the HelmRelease/controller are both named
+    # app-piece (rsshub-playwright): a bare piece name (operator) can collide with
+    # another app's in the same namespace. Older pieces (rsshub's playwright) keep
+    # the bare name; they are not renamed.
     if [[ "$PIECE" == "app" ]]; then
       ks_name="$APP"
       hr_name="$APP"
     else
       ks_name="$APP-$PIECE"
-      hr_name="$PIECE"
+      hr_name="$APP-$PIECE"
     fi
     base_dir="$BASE_NS_DIR/$APP/$PIECE"
     write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization "$WITH_SECRETS")"
@@ -553,6 +554,11 @@ EOF
   parameterized)
     if [[ -z "$KEY" || -z "$INSTANCE" ]]; then
       echo "error: --shape=parameterized requires --key=<name> and --instance=<name>" >&2
+      exit 1
+    fi
+    if [[ "$WITH_SECRETS" -eq 1 ]]; then
+      echo "error: --secrets is not supported with --shape=parameterized (no ExternalSecret is written);" >&2
+      echo "  add the externalsecret.yaml and its dependsOn by hand" >&2
       exit 1
     fi
     base_dir="$BASE_NS_DIR/$APP/app/$KEY/$INSTANCE"
