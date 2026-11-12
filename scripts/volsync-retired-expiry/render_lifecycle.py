@@ -30,7 +30,8 @@ edit that breaks the structure fail loudly instead of quietly.
 
 Nothing here deletes anything, reads any credential, or talks to any network.
 It prints JSON. Applying that JSON is a separate, deliberate operator action -
-see .agents/skills/kopiur-backups/references/retired-repo-expiry.md.
+see apply_lifecycle.py; the decision and tiers are in
+scripts/volsync-retired-expiry/ledger.yaml.
 """
 
 from __future__ import annotations

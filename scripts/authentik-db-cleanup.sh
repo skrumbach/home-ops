@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time Authentik DB cleanup: the expired rows clean_expired_models never got through.
+# Authentik DB cleanup: the expired rows clean_expired_models never got through.
 #   scripts/authentik-db-cleanup.sh          -> dry run: counts + FK check only (read-only)
 #   scripts/authentik-db-cleanup.sh --apply  -> delete expired rows in batches, then VACUUM FULL
 # Owner-run (admin kubeconfig).

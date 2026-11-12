@@ -87,7 +87,7 @@ MAIN_NS_DIR="kubernetes/apps/main/$NAMESPACE"
 if [[ ! -d "$BASE_NS_DIR" ]]; then
   echo "error: namespace '$NAMESPACE' has no kubernetes/apps/base/$NAMESPACE - this scaffold" >&2
   echo "  only adds apps to existing namespaces. A new top-level namespace needs a manual" >&2
-  echo "  entry on kubernetes/apps/main/kustomization.yaml first (see AGENTS.md NOTES)." >&2
+  echo "  entry on kubernetes/apps/main/kustomization.yaml first." >&2
   exit 1
 fi
 if [[ ! -d "$MAIN_NS_DIR" ]]; then

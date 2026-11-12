@@ -60,8 +60,8 @@ spec:
               PAPERLESS_AI_LLM_BACKEND: openai-like
               PAPERLESS_AI_LLM_ENDPOINT: "http://litellm.ai.svc.cluster.local:4000/v1"
               PAPERLESS_AI_LLM_MODEL: chat-local
-              # Suggestions in English so they match the English taxonomy in scripts/paperless-seed, also for
-              # German documents.
+              # Suggestions in English so they match the English tag and type names, also for German
+              # documents.
               PAPERLESS_AI_LLM_OUTPUT_LANGUAGE: English
               # The local chat model can think before answering; the 120s default is too short for it.
               PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"

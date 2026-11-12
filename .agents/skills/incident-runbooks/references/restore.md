@@ -156,8 +156,8 @@ A lost or corrupt claim, or one whose snapshots cannot be cloned (movers stuck `
 
 - Read only, `restic --no-lock` `snapshots`/`ls`/`dump`/`restore`, into scratch only: some hold
   the only copy. Repository = exact segment `<name>/` (`paperless-ngx` is not `paperless-ngx-media`).
-- Restore by snapshot ID, never `latest`: the Paperless documents exist only in the 2025-05 R2
-  `paperless-ngx/` snapshots (UNVERIFIED IDs `96e0f6fc`, `e937408e`); later ones hold none.
+- Restore by snapshot ID, never `latest`: the 2025-05 R2 `paperless-ngx/` snapshots (UNVERIFIED IDs
+  `96e0f6fc`, `e937408e`) fed the 2026-11-08 Paperless re-import and stay the fallback; later ones hold none.
 
 1. Credentials: item `volsync-template`, vault `Homelab` (never delete or rotate it: the only
    restic passwords; never print a value). Unset `OP_SERVICE_ACCOUNT_TOKEN`: it cannot read `Homelab`.
