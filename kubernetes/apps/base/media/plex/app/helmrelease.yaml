@@ -42,7 +42,7 @@ spec:
               TZ: America/New_York
               PLEX_UID: "2000"
               PLEX_GID: "2000"
-              ADVERTISE_IP: "https://plex.${SECRET_DOMAIN}:443,http://10.50.0.52:32400"
+              ADVERTISE_IP: "https://plex.sklab.dev:443,http://10.50.0.52:32400"
               ALLOWED_NETWORKS: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
               HOSTNAME: plex
             probes:
@@ -105,7 +105,7 @@ spec:
           - path: /tmp
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -120,14 +120,14 @@ spec:
           gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/plex.svg
           gethomepage.dev/description: "Plex is a media server for streaming to Plex clients."
           gethomepage.dev/pod-selector: app.kubernetes.io/name=plex
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          external-dns.kubernetes.io/target: "external.sklab.dev"
           gatus.home-operations.com/endpoint: |-
-            url: https://plex.${SECRET_DOMAIN}/identity
+            url: https://plex.sklab.dev/identity
             conditions:
               - "[STATUS] == 200"
             group: media
         hostnames:
-          - plex.${SECRET_DOMAIN}
+          - plex.sklab.dev
         parentRefs:
           - name: envoy-external
             namespace: network
