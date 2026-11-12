@@ -1,22 +1,8 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  customDatasources: {
-    "talos-factory": {
-      defaultRegistryUrlTemplate: "https://factory.talos.dev/versions",
-      format: "json",
-      transformTemplates: ['{"releases": [$.{"version": $}]}'],
-    },
-  },
+  // The talos-factory datasource and the factory.talos.dev installer manager (depName siderolabs/talos) come from
+  // github>home-operations/renovate-presets//apps/talosFactory.json5 (.renovaterc.json5). This file keeps what it does not cover.
   customManagers: [
-    {
-      description: "Talos Factory installer image (schematic id is templated, so match only the tag)",
-      customType: "regex",
-      managerFilePatterns: ["/(^|/)talos/.+\\.ya?ml(?:\\.j2)?$/"],
-      matchStrings: ["factory\\.talos\\.dev/[^:]+:(?<currentValue>v\\d\\S*)"],
-      datasourceTemplate: "custom.talos-factory",
-      depNameTemplate: "siderolabs/talos",
-      versioningTemplate: "semver",
-    },
     {
       description: "Annotated container images in Talos machine config templates",
       customType: "regex",
@@ -29,8 +15,9 @@
   ],
   packageRules: [
     {
-      // The base preset points the kubernetes manager at every *.yaml(.j2); the regex managers above own talos/, so a second extraction would only duplicate them.
-      description: "Talos templates are owned by the regex managers in this file, not the kubernetes manager",
+      // The base preset points the kubernetes manager at every *.yaml(.j2); the regex managers own talos/, so a second extraction would only duplicate them.
+      // Wider than the upstream preset's rule, which disables only factory.talos.dev refs: this also covers the kubelet and control-plane images.
+      description: "Talos templates are owned by the regex managers, not the kubernetes manager",
       matchManagers: ["kubernetes"],
       matchFileNames: ["talos/**"],
       enabled: false,

@@ -48,12 +48,6 @@
       versioning: "semver",
     },
     {
-      description: "Override Talos Installer Package Name",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/factory\\.talos\\.dev/"],
-      overridePackageName: "ghcr.io/siderolabs/installer",
-    },
-    {
       // 2.3.x calls an Enterprise-only API and sticks the OSS broker (emqx/emqx-operator#1202).
       description: "Pin EMQX operator to 2.2.x (Open-Source broker compat)",
       matchPackageNames: ["emqx-operator", "ghcr.io/emqx/emqx-operator"],
