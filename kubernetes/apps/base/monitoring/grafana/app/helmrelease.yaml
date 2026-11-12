@@ -265,12 +265,17 @@ spec:
           url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
           datasource: Prometheus
 
-        flux-logs:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/logs.json
-          # LogQL dashboard: string mode would rewrite the Loki datasource to Prometheus.
+        # Replaces Flux's Loki-only logs.json. Flux controllers: Namespace flux-system, Container
+        # manager, then the Filter variable kubernetes.pod_labels.app = <controller>. Its Level
+        # panels read `log.level`; zap-logging controllers (Flux) write `level`, so they show
+        # "unknown" there.
+        victoria-logs-explorer:
+          # renovate: depName="VictoriaLogs - Explorer for Kubernetes logs"
+          gnetId: 25747
+          revision: 1
           datasource:
-            - name: DS_LOKI
-              value: Loki
+            - name: DS_VICTORIALOGS
+              value: VictoriaLogs
 
         k8s-system-api-server:
           # renovate: depName="Kubernetes / System / API Server"
@@ -503,11 +508,8 @@ spec:
               # Must match scrapeInterval in kube-prometheus-stack. Unset, Grafana assumes 15s and
               # $__rate_interval resolves to 1m, one scrape, so rate() panels are empty.
               timeInterval: 1m
-          - access: proxy
-            name: Loki
-            type: loki
-            url: http://loki-headless.monitoring.svc.cluster.local:3100
-          # Beside Loki while both run (phase 1); needs the victoriametrics-logs-datasource plugin below.
+          # The only log store; needs the victoriametrics-logs-datasource plugin below. Never list
+          # it under deleteDatasources.
           - access: proxy
             name: VictoriaLogs
             type: victoriametrics-logs-datasource
@@ -520,7 +522,8 @@ spec:
             jsonData:
               implementation: prometheus
 
-        # Tempo is retired (2026-10-25); it stays here only so Grafana drops the stale datasource.
+        # Tempo (retired 2026-10-25) and Loki (replaced by VictoriaLogs) stay here only so Grafana
+        # drops the stale datasources.
         deleteDatasources:
           - name: Alertmanager
             orgId: 1
@@ -591,7 +594,9 @@ spec:
 
     plugins:
       - grafana-clock-panel
-      - victoriametrics-logs-datasource
+      # "<id> <version>", space not @: Grafana 12 reads GF_INSTALL_PLUGINS entries as id, then
+      # an optional space-separated version. Not tracked by Renovate; 0.34.0 needs Grafana >=10.4.
+      - victoriametrics-logs-datasource 0.34.0
 
     rbac:
       pspEnabled: false
