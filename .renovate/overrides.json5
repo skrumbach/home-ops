@@ -27,20 +27,10 @@
       },
     },
     {
-      // Held for the litellm[proxy] CI tests (litellm requires python <3.15); those tests are gone, so lift the hold when convenient.
-      // mise only; images are judged per consumer (repo-wiki is stdlib-only).
-      description: "Hold the mise python tool below 3.15",
-      matchManagers: ["mise"],
-      matchPackageNames: ["python"],
-      allowedVersions: "<3.15",
-    },
-    {
-      // Floor >=1.93.0 or classifier_type llm is ignored.
-      description: "LiteLLM plain vX.Y.Z tags; floor >=1.93.0 for LLM classifier",
+      description: "LiteLLM plain vX.Y.Z tags",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/berriai/litellm-non_root"],
       versioning: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-      allowedVersions: ">=1.93.0",
     },
     {
       description: "Override Helmfile Dependency Name",
@@ -106,17 +96,6 @@
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/github/github-mcp-server"],
       allowedVersions: "<2",
-    },
-    {
-      // Negated regex excludes exactly v1.13.3 (PR #867). A bare <X.Y.Z ceiling goes silent once the tracked value passes it. This rule proposes; automerge is the separate rule in autoMerge.json5.
-      description: "Exclude Talos v1.13.3 only (permanent upgrade failure on talos-1, see #867) - not a version ceiling",
-      matchPackageNames: [
-        "ghcr.io/siderolabs/installer",
-        "ghcr.io/siderolabs/talosctl",
-        "siderolabs/talos",
-        "/factory\\.talos\\.dev/",
-      ],
-      allowedVersions: "!/^v?1\\.13\\.3$/",
     },
     {
       // Provider is generated from the server OpenAPI schema. Bump it with the server tag. automerge stays false.

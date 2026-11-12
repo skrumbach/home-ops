@@ -31,11 +31,13 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 ├── kubernetes/
 │   ├── apps/           # Flux apps at apps/base/<ns> + overlay apps/main/<ns>
 │   ├── clusters/main/  # Flux entry point (cluster-meta + cluster-apps)
-│   └── components/     # Reusable Kustomize components (alerts, common, dragonfly, kopiur (+ pvc))
+│   └── components/     # Reusable Kustomize components
 ├── talos/              # minijinja machine config, node overlays, factory schematic
 ├── bootstrap/          # just bootstrap stages (nodes, k8s, base, apps)
 ├── .agents/skills/     # incident-runbooks skill (.claude/skills is a symlink)
-├── .taskfiles/         # task recipes (flux, rook, network, 1password, actions-runner)
+├── .taskfiles/         # task recipes (flux, rook, network, actions-runner)
+├── scripts/            # CI guards (scripts/ci), add-app scaffold, agent credentials
+├── terraform/          # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
 └── .mise.toml          # workstation tool versions
 ```
 

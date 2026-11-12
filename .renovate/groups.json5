@@ -8,7 +8,6 @@
         "docker"
       ],
       matchPackageNames: [
-        "/gha-runner-scale-set-controller/",
         "/gha-runner-scale-set/"
       ],
       group: {
@@ -137,8 +136,7 @@
         "docker"
       ],
       matchPackageNames: [
-        "/rook-ceph/",
-        "/rook-ceph-cluster/"
+        "/rook-ceph/"
       ],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
@@ -166,7 +164,6 @@
         "docker"
       ],
       "matchPackageNames": [
-        "/siderolabs/talosctl/",
         "/siderolabs/installer/",
         "/skrumbach/talosctl-busybox/"
       ],

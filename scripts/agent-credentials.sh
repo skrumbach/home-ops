@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mint read-only credentials for agent sessions (goal §3, task 0.4). OWNER runs this
+# Mint read-only credentials for agent sessions . OWNER runs this
 # with admin credentials; agents never do:
 #
 #   HOME_OPS_KUBECONFIG=~/.kube/home-ops-admin HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin \

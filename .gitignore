@@ -3,18 +3,11 @@
 *.pub
 *.key
 /.secrets.env
-*.decrypted~*.yaml
-/age.key
-/cloudflare-tunnel.json
-/github-deploy.key
-/github-deploy.key.pub
-/github-push-token.txt
-# Template config files
-/cluster.yaml
-/nodes.yaml
 # Kubernetes
 kubeconfig
 talosconfig
+# `just talos download-image` output
+talos/*.iso
 # Misc.
 .private/
 .task/
@@ -23,18 +16,8 @@ talosconfig
 __pycache__/
 .DS_Store
 Thumbs.db
-1password-credential.json
-
-# Auto Claude data directory
-.auto-claude/
 
 # Claude Code artifacts
 .claude/*
 !.claude/skills
 !.claude/settings.json
-!.claude/hooks/
-logs/
-specs/
-reports/
-kubernetes/AGENTS.md
-.omc/

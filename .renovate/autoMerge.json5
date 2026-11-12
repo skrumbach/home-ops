@@ -111,7 +111,6 @@
       description: "Never auto merge Talos - node upgrades are attended captain operations, and ghcr.io/siderolabs/installer's docker versioning does not treat -alpha/-beta/-rc suffixes as unstable",
       matchPackageNames: [
         "ghcr.io/siderolabs/installer",
-        "ghcr.io/siderolabs/talosctl",
         "siderolabs/talos",
         "/factory\\.talos\\.dev/",
       ],

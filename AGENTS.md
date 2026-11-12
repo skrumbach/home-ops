@@ -16,7 +16,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 ├── talos/                      # minijinja templates, rendered by `just talos`, not Flux
 ├── bootstrap/                  # just bootstrap stages
 ├── .agents/skills/             # one skill, incident-runbooks (.claude/skills is a symlink)
-├── .taskfiles/                 # task domains: 1password, flux, rook, network, actions-runner
+├── .taskfiles/                 # task domains: flux, rook, network, actions-runner
 ├── terraform/                  # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
 └── .renovate/                  # Renovate presets
 ```
@@ -57,7 +57,7 @@ Each is a warning needed before deciding to touch the subsystem.
 **Secrets and access**
 - **NEVER put plaintext secrets in Git.** App secrets are ExternalSecret + 1Password; bootstrap/Talos secrets are `ref+op://Home-Lab/...` via `vals`. Never seed a Secret with client-side `kubectl apply`. There is no SOPS/age path. Do not store secrets in `**/resources/**` (Renovate ignores it).
 - **`Home-Lab` (vals, mise's `OP_SERVICE_ACCOUNT_TOKEN`) and `Homelab` (Connect/ESO) are different vaults: Connect cannot see `Home-Lab`, `op read` of Homelab needs `env -u OP_SERVICE_ACCOUNT_TOKEN`, and `SecretSynced` does not mean non-empty.**
-- **NEVER run `find /Users/coder`, `find $HOME` or any unbounded home search.** Tools are mise-managed; `kubeconfig` and `talosconfig` are absent in fresh worktrees and that is normal - report and continue.
+- **NEVER run `find $HOME` or any other unbounded home-directory search.** Tools are mise-managed; `kubeconfig` and `talosconfig` are absent in fresh worktrees and that is normal - report and continue.
 - **`kubectl`/`talosctl` default to `.mise.toml`'s read-only `~/.kube/home-ops-agent` / `~/.talos/home-ops-agent`.** `Forbidden` on a write means the read-only default is in use; a missing file means the owner has not run `scripts/agent-credentials.sh`. For a write the owner has approved in the current session, prefix `KUBECONFIG=~/.kube/home-ops-admin` / `TALOSCONFIG=~/.talos/home-ops-admin` (a `HOME_OPS_*` prefix does nothing in an agent shell).
 - **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/`, `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead; a green PR is not approval, and the only apply is a saved plan from `secrets-apply.vals.yaml`.** A UniFi apply can cut the cluster's VLANs (never over WiFi), an Authentik apply can lock out SSO, and a TrueNAS `force_destroy`/`allow_*` opt-in is never set unasked.
 - **NEVER commit without the pre-commit hooks** (`task setup-dev-env`).

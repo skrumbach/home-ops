@@ -25,8 +25,6 @@ repos:
         name: Fix EOF
       - id: mixed-line-ending
         name: Check mixed line endings
-      # - id: check-case-conflict
-      #   name: Check case conflicts
       - id: check-executables-have-shebangs
         name: Check executable shebangs
       - id: check-shebang-scripts-are-executable
@@ -40,8 +38,6 @@ repos:
         name: Check JSON
       - id: check-toml
         name: Check TOML
-      - id: check-xml
-        name: Check XML
       - id: check-yaml
         name: Check YAML
         args: [--allow-multiple-documents, --unsafe]
