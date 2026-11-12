@@ -99,7 +99,7 @@ fresh Ceph gets an empty `ceph` repository, so every standing Restore fails clos
     the newest snapshot. Make sure step 5 is live (r2 `ReadOnly`, policies suspended), then hand-restore that claim as in step 11.
 11. Hand-restore the claims with no populator (they start empty): `database/surrealdb`,
     `selfhosted/paperless-ngx-media`, `selfhosted/syncthing-data`, `media/wizarr`,
-    `downloads/cleanuparr`, `ai/cliproxyapi`. Per claim: `flux suspend ks` and `flux suspend hr`
+    `ai/cliproxyapi`. Per claim: `flux suspend ks` and `flux suspend hr`
     the app that mounts it and scale it to 0; apply the hand-written Restore (`r2`, `<APP>-r2`,
     `asOf: "<T_LOSS>"` never `offset: 0`, `pvcRef`, `enableFileDeletion: true`, overlay
     uid/gid/cache); wait, check `.status.resolved.kopiaSnapshotID`, delete it, resume both.
