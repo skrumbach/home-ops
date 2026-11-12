@@ -17,7 +17,18 @@ spec:
       kind: Deployment
       name: pocket-id
       namespace: security
+    - # Pocket ID serves an open /setup page while it has no user, so this is
+      # not Ready until the owner account exists.
+      apiVersion: pocketid.internal/v1alpha1
+      kind: PocketIDUser
+      name: owner
+      namespace: security
+  healthCheckExprs:
+    - apiVersion: pocketid.internal/v1alpha1
+      kind: PocketIDUser
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
   interval: 30m
+  retryInterval: 1m
   timeout: 5m
   path: ./kubernetes/apps/base/security/pocket-id/app
   prune: true

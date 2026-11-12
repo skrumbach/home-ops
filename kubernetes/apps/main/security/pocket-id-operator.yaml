@@ -13,6 +13,7 @@ spec:
       name: pocket-id-operator
       namespace: security
   interval: 1h
+  retryInterval: 1m
   timeout: 5m
   path: ./kubernetes/apps/base/security/pocket-id-operator/app
   prune: true

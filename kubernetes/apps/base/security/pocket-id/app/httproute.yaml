@@ -17,11 +17,11 @@ metadata:
 spec:
   # Never change this hostname: every registered passkey is bound to it.
   hostnames: ["id.sklab.dev"]
+  # Internal only until the owner has claimed the admin account: Pocket ID
+  # serves an open /setup page while it has no user. envoy-external is added
+  # with the first externally exposed client (echo).
   parentRefs:
     - name: envoy-internal
-      namespace: network
-      sectionName: https
-    - name: envoy-external
       namespace: network
       sectionName: https
   rules:
