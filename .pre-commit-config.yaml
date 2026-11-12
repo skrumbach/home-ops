@@ -31,11 +31,14 @@ repos:
         name: Check files with shebangs being executable
       - id: trailing-whitespace
         name: Fix trailing whitespace
+      # docs/layouts/*.json are Hugo templates that emit JSON, not JSON files.
       - id: pretty-format-json
         name: Format JSON
         args: [--autofix, --no-sort-keys]
+        exclude: ^docs/layouts/
       - id: check-json
         name: Check JSON
+        exclude: ^docs/layouts/
       - id: check-toml
         name: Check TOML
       - id: check-yaml

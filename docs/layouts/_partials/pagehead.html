@@ -1,0 +1,15 @@
+{{- /* Breadcrumbs, title, and where the page comes from. */ -}}
+<nav class="crumbs" aria-label="Breadcrumb">
+  {{- range .Ancestors.Reverse }}
+  <a href="{{ .RelPermalink }}">{{ if .IsHome }}home-ops{{ else }}{{ .Title }}{{ end }}</a><span>/</span>
+  {{- end }}
+</nav>
+<h1>{{ .Title }}</h1>
+{{- /* App pages repeat their description as the first line of the body. */ -}}
+{{ if ne .Params.kind "app" }}{{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}{{ end }}
+<p class="meta">
+  {{- if .Params.generated }}<span class="chip chip-gen">Generated from manifests</span>{{ else if eq .Params.kind "guide" }}<span class="chip">Written by hand</span>{{ end }}
+  {{- with .Params.source }}
+  <a class="chip chip-src" href="https://github.com/{{ site.Params.repo }}/{{ if strings.HasSuffix . ".md" }}blob{{ else }}tree{{ end }}/{{ site.Params.branch }}/{{ . }}" rel="noopener">{{ . }}</a>
+  {{- end }}
+</p>

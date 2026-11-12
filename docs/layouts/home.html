@@ -1,0 +1,44 @@
+{{ define "main" }}
+<section class="hero">
+  <p class="eyebrow">{{ site.Params.eyebrow }}</p>
+  <p class="wordmark" aria-hidden="true">HOME-OPS</p>
+  <h1 class="sr-only">{{ site.Title }}</h1>
+  <p class="tagline">{{ site.Params.tagline }}</p>
+  {{ with site.Params.badges }}
+  <ul class="live" aria-label="Live cluster numbers">
+    {{ range . }}
+    <li><span class="live-label">{{ .label }}</span><span class="live-value" data-kromgo="{{ site.Params.kromgo }}/{{ .id }}?format=json">…</span></li>
+    {{ end }}
+  </ul>
+  {{ end }}
+</section>
+
+{{ with .Params.stats }}
+<section class="stats" aria-label="What the manifests declare">
+  {{ range . }}
+  <div class="stat"><span class="stat-value">{{ .value }}</span><span class="stat-label">{{ .label }}</span></div>
+  {{ end }}
+</section>
+{{ end }}
+
+<section class="home-sections">
+  {{ range .Sections.ByWeight }}
+  <a class="card card-lg" href="{{ .RelPermalink }}">
+    <span class="card-title">{{ .Title }}</span>
+    {{ with .Description }}<span class="card-desc">{{ . }}</span>{{ end }}
+    <span class="card-count">{{ len .RegularPagesRecursive }} pages</span>
+  </a>
+  {{ end }}
+</section>
+
+<div class="prose home-prose">{{ .Content }}</div>
+
+{{ with .Params.versions }}
+<section class="versions">
+  <h2>Versions</h2>
+  <ul class="chips">
+    {{ range . }}<li><span class="chip-k">{{ .name }}</span><span class="chip-v">{{ .version }}</span></li>{{ end }}
+  </ul>
+</section>
+{{ end }}
+{{ end }}

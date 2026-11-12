@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+
+  build:
+    desc: Generate the documentation content from the manifests and build the site into docs/.build/public
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - uv run --script scripts/docs/build.py
+      - hugo --source docs --gc
+
+  serve:
+    desc: Generate the content, then serve the site on http://localhost:1313 with live reload of the theme
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - uv run --script scripts/docs/build.py
+      - hugo server --source docs
