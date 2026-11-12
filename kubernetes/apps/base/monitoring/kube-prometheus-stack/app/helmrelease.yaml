@@ -42,12 +42,13 @@ spec:
         PrometheusDuplicateTimestamps:
           # The counter is global and unlabelled, so the offending target can
           # only be named from Prometheus's own log - which is lost when the pod
-          # is replaced. Promtail ships it to Loki, so read it there first.
+          # is replaced. vlagent ships it to VictoriaLogs, so read it there first.
           attribution: >-
             The dropped samples are attributable ONLY from Prometheus's own log,
             not from any metric label. Capture it before the pod is replaced:
-            LogQL `{namespace="monitoring", pod=~"prometheus-.*"} |= "different
-            value but same timestamp"` names the scrape_pool, the target URL and
+            LogsQL `{kubernetes.pod_namespace="monitoring"}
+            kubernetes.pod_name:="prometheus-"* "different value but same
+            timestamp"` names the scrape_pool, the target URL and
             num_dropped per scrape. Last occurrence: rook-ceph-exporter on
             talos-2 (http://10.10.10.12:9926/metrics), 90 samples per 10s scrape
             = 540/min, from 2026-09-06 until it cleared at 2026-09-14T21:29Z.

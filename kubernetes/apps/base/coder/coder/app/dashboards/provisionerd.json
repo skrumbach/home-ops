@@ -789,10 +789,10 @@
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victoria-logs"
       },
-      "description": "This panel shows all logs across built-in and external provisioners.",
+      "description": "This panel shows all logs across built-in and external provisioners. VictoriaLogs has no logger field for coderd's human-format log lines: this matches the provisioner logger names (runner, terraform, provisioner) in the message text of the coder container.",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -818,12 +818,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "loki"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victoria-logs"
           },
           "editorMode": "code",
-          "expr": "{namespace=~`(coder|coder)`, logger=~\"(.*runner|terraform|provisioner.*)\"}",
-          "queryType": "range",
+          "expr": "{kubernetes.pod_namespace=\"coder\", kubernetes.container_name=\"coder\"} _msg:~\"runner|terraform|provisioner\"",
+          "queryType": "instant",
           "refId": "A"
         }
       ],

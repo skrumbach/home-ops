@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+# No disk alert: kube-prometheus-stack's KubePersistentVolumeFillingUp already covers
+# server-volume-victoria-logs-0, and retentionDiskSpaceUsage (45GiB of 50Gi) keeps it near 90%
+# by design once 14 days outgrow it, so upstream's DiskRunsOutOfSpace (> 80%) would never clear.
+# A scrape failure of a ready server is TargetDown's.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: victoria-logs-rules
+spec:
+  groups:
+    - name: victoria-logs.rules
+      rules:
+        # kube-state-metrics, not `up`: a crashlooping or pending pod has no scrape target and
+        # so no up series. vlagent buffers up to 2GiB per node meanwhile, then drops the oldest.
+        - alert: VictoriaLogsDown
+          expr: |
+            kube_statefulset_status_replicas_ready{namespace="monitoring", statefulset="victoria-logs"} < 1
+          for: 10m
+          annotations:
+            summary: >-
+              VictoriaLogs has no ready replica; new logs are buffered on the nodes
+              and nothing can be queried
+          labels:
+            severity: warning
+
+        # vlagent's remote-write metrics (VictoriaLogs docs/victorialogs/vlagent-metrics.md;
+        # the first two are upstream's RejectedRemoteWriteDataBlocksAreDropped and
+        # TooManyRemoteWriteErrors in deployment/docker/rules/alerts-vlagent.yml): blocks the
+        # server rejected (lost), failed pushes being retried, and a full 2GiB node buffer
+        # dropping new logs.
+        - alert: VictoriaLogsCollectorNotDelivering
+          expr: |
+            sum by (namespace, pod) (increase(vlagent_remotewrite_packets_dropped_total[5m])) > 0
+            or
+            sum by (namespace, pod) (rate(vlagent_remotewrite_retries_count_total[5m])) > 0
+            or
+            max by (namespace, pod) (vlagent_remotewrite_queue_blocked) > 0
+          for: 15m
+          annotations:
+            summary: >-
+              vlagent {{ $labels.pod }} is not delivering logs to VictoriaLogs
+              (rejected blocks, retrying pushes or a full buffer)
+          labels:
+            severity: warning

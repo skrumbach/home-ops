@@ -49,7 +49,7 @@ spec:
     # on purpose: NetworkPolicy `ports` matches the DESTINATION port on this
     # pod, and a DNS reply arrives on emqx's ephemeral source port, never 53
     # - a port:53 restriction can never match a reply and
-    # silently drops every DNS response. See loki-ingress and AGENTS.md for
+    # silently drops every DNS response. See victoria-logs-ingress and AGENTS.md for
     # the full mechanism (Cilium reply-conntrack fails to correlate a DNS
     # reply back to its request when the client pod's node also hosts a
     # CoreDNS replica).
