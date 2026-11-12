@@ -197,7 +197,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: aqua:mikefarah/yq
           cache: false
@@ -218,7 +218,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform
           cache: false
@@ -266,7 +266,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: opentofu
           cache: false
@@ -289,7 +289,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python uv aqua:rhysd/actionlint pipx:zizmor aqua:koalaman/shellcheck pipx:yamllint
           cache: false
@@ -320,7 +320,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python uv
           cache: false
