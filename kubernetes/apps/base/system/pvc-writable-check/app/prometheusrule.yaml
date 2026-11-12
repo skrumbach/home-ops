@@ -16,7 +16,6 @@ spec:
       rules:
         - alert: PVCVolumeNotWritable
           # kube-state-metrics v2: - A Job that fails once then succeeds (restartPolicy:OnFailure + backoffLimit) emits a bare kube_job_status_failed{job_name=.
-          # Skill `pvc-integrity-checks`.
           expr: |-
             kube_job_status_failed{namespace="system", job_name=~"^pvc-writable-check-.+", reason!=""} > 0
               unless on (namespace, job_name)

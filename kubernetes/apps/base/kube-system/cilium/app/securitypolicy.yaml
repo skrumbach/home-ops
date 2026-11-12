@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 # The forward_domain proxy provider covers every host under the cluster domain, so no
 # Authentik change is needed. The cross-namespace backendRef needs the kube-system
-# entry in security/allow-authentik-access. Skill authentik-terraform.
+# entry in security/allow-authentik-access.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

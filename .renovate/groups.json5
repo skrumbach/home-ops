@@ -113,6 +113,7 @@
       },
     },
     {
+      // One PR for kubelet and the control plane: scripts/ci/version-consistency.sh fails any PR that bumps only some of them.
       description: "Kubernetes Group",
       groupName: "Kubernetes",
       matchDatasources: [

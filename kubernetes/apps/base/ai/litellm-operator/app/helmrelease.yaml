@@ -37,8 +37,8 @@ spec:
     # LLMKube is not installed here; a chart-default flip must not mint undeclared LiteLLMModels.
     llmkube:
       autoRegister: false
-    # Operator pod hardening comes from the chart. The proxy pod it renders has none (CRD gap):
-    # skill litellm-proxy (references/platform.md). Its webhook is failurePolicy Fail for every LiteLLM kind.
+    # Operator pod hardening comes from the chart. The proxy pod it renders has none (CRD gap).
+    # Its webhook is failurePolicy Fail for every LiteLLM kind.
     resources:
       requests:
         cpu: 25m

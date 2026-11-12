@@ -18,6 +18,5 @@ spec:
     name: flux-system
     namespace: flux-system
   # No targetNamespace. Flux would rewrite metadata.namespace and collapse every RoleBinding into system.
-  # Skill `pvc-integrity-checks`.
   timeout: 5m
   wait: false

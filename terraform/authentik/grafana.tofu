@@ -2,7 +2,7 @@
 # client: client_id is a plain literal the HelmRelease repeats; the secret is generated here and
 # copied once into 1Password Homelab/grafana-oidc (never Git). Role mapping and the deny-by-default
 # rule (role_attribute_strict) live on the Grafana side:
-# kubernetes/apps/base/monitoring/grafana/app/helmrelease.yaml (skill `observability`).
+# kubernetes/apps/base/monitoring/grafana/app/helmrelease.yaml.
 
 locals {
   # Public identifier. Must match grafana.ini auth.generic_oauth.client_id in the HelmRelease.

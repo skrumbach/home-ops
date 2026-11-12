@@ -36,7 +36,6 @@ spec:
           # /metrics returns 500, and that is load-bearing: the pod stays Ready, Prometheus
           # keeps scraping, records up=0 and TargetDown fires honestly. Probing /metrics
           # would make the pod NotReady, drop the target entirely, and silence the alert.
-          # Skill observability.
           startupProbe:
             httpGet:
               path: /

@@ -3,7 +3,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # Backup-only bundle: a SnapshotPolicy + SnapshotSchedule per destination (plus the ceph Restore) for an EXISTING PVC named ${KOPIUR_CLAIM:-${APP}}.
-# Skill `kopiur-backups`.
 resources:
   - ../ceph
   - ../r2

@@ -60,8 +60,8 @@ spec:
               PAPERLESS_AI_LLM_BACKEND: openai-like
               PAPERLESS_AI_LLM_ENDPOINT: "http://litellm.ai.svc.cluster.local:4000/v1"
               PAPERLESS_AI_LLM_MODEL: chat-local
-              # Suggestions in English so they match the English taxonomy in scripts/paperless-seed, also for
-              # German documents.
+              # Suggestions in English so they match the English tag and type names, also for German
+              # documents.
               PAPERLESS_AI_LLM_OUTPUT_LANGUAGE: English
               # The local chat model can think before answering; the 120s default is too short for it.
               PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
@@ -70,7 +70,7 @@ spec:
               # embedding-local is a 512-token llama-server context; over-length input fails the whole document's
               # embedding ("Context size has been exceeded"). Paperless counts chunk tokens with a different
               # tokenizer than Qwen and llama-index prepends document metadata, so 384 still overflowed ~1 in 20
-              # documents (2026-11-08); 256 leaves the margin. Skill b70-llm-serving.
+              # documents (2026-11-08); 256 leaves the margin.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "256"
               PAPERLESS_WEBSERVER_WORKERS: "2"
               # Authentik SSO; the provider JSON with the client secret is in paperless-ngx-secret. SSO users

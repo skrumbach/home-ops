@@ -1,7 +1,7 @@
 # renovate-operator UI single sign-on. CREATED by this stack (no import block). Confidential client:
 # client_id is a plain literal the HelmRelease repeats; the secret and the UI session key are
 # generated here and copied once into 1Password Homelab/renovate-operator-oidc (never Git).
-# Kubernetes side: kubernetes/apps/base/renovate/renovate-operator/app (skill `renovate`).
+# Kubernetes side: kubernetes/apps/base/renovate/renovate-operator/app.
 
 locals {
   # Public identifier. Must match auth.oidc.clientId in the renovate-operator HelmRelease.

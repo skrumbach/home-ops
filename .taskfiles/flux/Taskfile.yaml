@@ -15,7 +15,7 @@ tasks:
     dir: '{{.ROOT_DIR}}'
     vars:
       NAMESPACE: '{{.NAMESPACE | default "flux-system"}}'
-    # Two runs on purpose: --namespace filters the exit code too, so the scoped run is readable output only and the unscoped run is the gate. Skill `flux-gitops`.
+    # Two runs on purpose: --namespace filters the exit code too, so the scoped run is readable output only and the unscoped run is the gate.
     cmds:
       - flate test all --path kubernetes/clusters/main --namespace {{.NAMESPACE}}
       - flate test all --path kubernetes/clusters/main

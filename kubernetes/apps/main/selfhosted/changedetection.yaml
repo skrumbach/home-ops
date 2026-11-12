@@ -21,7 +21,6 @@ spec:
     - name: kopiur-repository
       namespace: system
   components:
-    # Proof: proof-ledger.md row 22.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
@@ -35,7 +34,6 @@ spec:
       # rebuilt claim at 5x the live 1Gi).
       KOPIUR_CAPACITY: 1Gi
       # 2Gi default clears this snapshot. Namespace r2 hour; ceph stays on the component default.
-      # Skill `kopiur-backups`.
       KOPIUR_SCHEDULE_R2: "H 14 * * *"
   prune: true
   wait: false

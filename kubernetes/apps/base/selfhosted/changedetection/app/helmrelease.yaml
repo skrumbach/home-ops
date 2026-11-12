@@ -124,7 +124,7 @@ spec:
           gethomepage.dev/group: Selfhosted
           gethomepage.dev/name: *app
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the Service in-cluster instead. Skill observability.
+          # login page. Probe the Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://changedetection.selfhosted.svc.cluster.local:5000/
             conditions:
@@ -145,7 +145,7 @@ spec:
       config:
         enabled: true
         # KOPIUR_CLAIM, not VOLSYNC_CLAIM. This token has no `:-default`, so a stale VOLSYNC_CLAIM would render an
-        # EMPTY existingClaim. Skill `kopiur-backups`, references/onboarding.md.
+        # EMPTY existingClaim.
         existingClaim: "${KOPIUR_CLAIM}"
         advancedMounts:
           main:

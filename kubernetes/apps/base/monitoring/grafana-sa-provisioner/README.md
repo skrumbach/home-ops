@@ -4,7 +4,6 @@
 A pod restart wipes admin-created service accounts and tokens.
 `GF_SECURITY_ADMIN_USER` / `PASSWORD` apply only when Grafana bootstraps a
 fresh database. A UI password change stays drifted until that restart.
-Skill `observability`.
 
 This CronJob (`*/5 * * * *`) heals only the Viewer token `ai/grafana-mcp`
 uses:

@@ -8,7 +8,6 @@ metadata:
 spec:
   targetNamespace: *namespace
   components:
-    # Proof: proof-ledger.md row 15.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   commonMetadata:

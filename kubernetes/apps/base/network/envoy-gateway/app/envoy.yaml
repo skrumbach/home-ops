@@ -26,7 +26,7 @@ spec:
               memory: 1Gi
         # Hard per-gateway spread: replicas of one gateway never share a node (externalTrafficPolicy Local means a
         # node with no endpoint does not advertise the VIP). matchLabelKeys scopes the count per gateway in this
-        # shared spec. Skill `networking`, references/envoy-gateway.md.
+        # shared spec.
         pod:
           topologySpreadConstraints:
             - maxSkew: 1
@@ -39,7 +39,7 @@ spec:
                 - gateway.envoyproxy.io/owning-gateway-name
         # The gateway-helm CRD does not expose envoyDeployment.container.lifecycle or
         # pod.terminationGracePeriodSeconds, so the strategic-merge `patch` replaces the chart-injected envoy
-        # preStop. Skill `networking`, references/envoy-gateway.md.
+        # preStop.
         patch:
           type: StrategicMerge
           value:

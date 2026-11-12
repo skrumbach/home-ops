@@ -1,6 +1,6 @@
 # Local users and groups, without the built-in ones, `admin` and `tofu-read-only`.
 # Group references are TrueNAS ids. Email, real name and password stay out of
-# Git: full_name is a placeholder and all three are ignore_changes. Skill `truenas-nas`.
+# Git: full_name is a placeholder and all three are ignore_changes.
 
 resource "truenas_user" "cluster_sklab_proxmox" {
   group                  = 119

@@ -10,8 +10,6 @@ fails closed. The VolSync branch is gone: VolSync stages writable and
 `fsGroup` repairs the clone before restic reads, so its unreadables were
 only ever printed, never alerted.
 
-Skill `pvc-integrity-checks`, reference `references/mover-readable.md`.
-
 ## What a page means
 
 Read the Job log. `UNMEASURED` is not a pass: no running pod, a subPath-only
@@ -19,8 +17,7 @@ mount (`ntfy`), or an RBAC exclusion. `database/pgadmin` is a permanent gap.
 The walk binds `pods/exec` only in `ai`, `downloads`, `home-automation`,
 `media`, and `selfhosted`.
 
-`recyclarr-config` has no long-lived pod. The one-off measure script is
-`scripts/ci/fixtures/recyclarr-measure.sh`. The CronJob reports that claim
+`recyclarr-config` has no long-lived pod. The CronJob reports that claim
 unmeasured most of the day. That is not a failure.
 
 Do not shell-interpolate the mount path. The four walk traps (no `find -uid`,

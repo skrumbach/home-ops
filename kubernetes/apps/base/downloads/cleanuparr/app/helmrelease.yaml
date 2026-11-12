@@ -40,8 +40,7 @@ spec:
               tag: 2.11.0@sha256:1898c3219e7e7ecaf9fcb8474691b6d67d56d0798b01b85690975bae14df11b5
             env:
               # Only the port is set here. Instances, the SABnzbd client and the queue rules
-              # live in Cleanuparr's own database (UI/REST API), backed up by kopiur, see
-              # .agents/skills/media-stack/references/stuck-downloads.md.
+              # live in Cleanuparr's own database (UI/REST API), backed up by kopiur.
               PORT: &port 11011
             probes:
               liveness:
@@ -87,13 +86,14 @@ spec:
     persistence:
       config:
         # Created here (app-template names it after the release: cleanuparr) and backed up
-        # by components/kopiur.
+        # by components/kopiur. A second persistentVolumeClaim entry renames this claim to
+        # cleanuparr-config and orphans the backed-up one.
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
         # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
+        # delete the only live copy of this born-kopiur claim.
         retain: true
         advancedMounts:
           cleanuparr:

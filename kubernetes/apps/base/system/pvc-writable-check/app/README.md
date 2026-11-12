@@ -5,8 +5,6 @@ mount a PVC. The Job fails, and the PrometheusRule fires, when a mount is
 not writable. An app can be `Ready`, probed, and Gatus-green while it cannot
 write its volume. Nothing else in CI sees that.
 
-Skill `pvc-integrity-checks`, reference `references/writable.md`.
-
 ## What a page means
 
 The alert is `kube_job_status_failed` for this CronJob's Job, with a

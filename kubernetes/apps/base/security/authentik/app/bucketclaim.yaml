@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/objectbucket.io/objectbucketclaim_v1alpha1.json
 # The ceph-bucket class has reclaimPolicy Delete: deleting this claim deletes the bucket and every object in it (the Authentik media files).
 # prune: disabled stops Flux from deleting it when this manifest leaves Git or the Kustomization is removed. It does NOT
-# stop `kubectl delete obc` or a namespace delete. Skill `authentik-terraform`.
+# stop `kubectl delete obc` or a namespace delete.
 apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:

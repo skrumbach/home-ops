@@ -34,7 +34,7 @@ spec:
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
-      # Identity is measured from the files. Do not fall back to 1000. Skill `kopiur-backups`.
+      # Identity is measured from the files. Do not fall back to 1000.
       KOPIUR_PUID: "5984"
       KOPIUR_PGID: "5984"
       KOPIUR_SCHEDULE_R2: "H 14 * * *"

@@ -1,20 +1,17 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kopiur.home-operations.com/snapshotpolicy_v1alpha1.json
 # The CEPH (local, in-cluster RGW) destination for ${KOPIUR_CLAIM:-${APP}}.
-# Skill `kopiur-backups`.
 apiVersion: kopiur.home-operations.com/v1alpha1
 kind: SnapshotPolicy
 metadata:
   name: "${APP}-ceph"
 spec:
-  # Pinned though it is the CRD default. Skill `kopiur-backups` references/onboarding.md.
   copyMethod: Snapshot
   volumeSnapshotClassName: "${KOPIUR_SNAPSHOTCLASS:-csi-ceph-blockpool}"
   repository:
     kind: ClusterRepository
     name: ceph
   # Consumer half of credential projection. enabled stays true.
-  # Skill `kopiur-backups`.
   credentialProjection:
     enabled: true
   sources:
@@ -37,6 +34,5 @@ spec:
     keepWeekly: 10
     keepMonthly: 6
   # onPolicyDelete Retain. Prune drops the CRs and keeps the kopia data.
-  # Skill `kopiur-backups`.
   deletion:
     onPolicyDelete: Retain

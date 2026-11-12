@@ -5,7 +5,7 @@ kind: CiliumNetworkPolicy
 metadata:
   name: paperless-ngx
 spec:
-  # Ingress fence only: egress (postgres-18, dragonfly, LiteLLM, Authentik via envoy-external, DNS) stays open. Skill `networking`.
+  # Ingress fence only: egress (postgres-18, dragonfly, LiteLLM, Authentik via envoy-external, DNS) stays open.
   # Each of those peers is also admitted on ingress with no toPorts, for its replies (cilium/cilium#47913).
   # The controller label keeps the operator-managed paperless-ngx-dragonfly pods out of this selector.
   endpointSelector:
@@ -27,7 +27,7 @@ spec:
               protocol: TCP
     # Session and task broker (PAPERLESS_REDIS paperless-ngx-dragonfly:6379). Both replicas, so a
     # failover keeps working. No toPorts: a same-node Service reply arrives with the ClusterIP as
-    # source after reverse NAT and is re-checked here. Skill `networking` references/dns-ownership.md.
+    # source after reverse NAT and is re-checked here.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

@@ -23,7 +23,6 @@ spec:
           annotations:
             # Static IP only, no MAC pin: a pinned MAC on bond0.3 makes the kernel reject the
             # new pod's net1 while the dying pod's veth holds it. IoT devices key on IP.
-            # Skill home-automation.
             k8s.v1.cni.cncf.io/networks: |
               [{
                 "name":"multus-iot",
@@ -34,7 +33,6 @@ spec:
           # Installs the hass-oidc-auth custom component into /config. The zip is verified against
           # OIDC_SHA256 (GitHub release asset digest); bump both together. A failed download or
           # checksum keeps the installed copy so HA still boots, and fails the pod on a fresh PVC.
-          # Skill home-automation.
           install-oidc:
             image:
               repository: docker.io/library/busybox
@@ -81,7 +79,7 @@ spec:
                   name: home-assistant
             # /manifest.json is served without authentication, so the probe measures HA's own
             # HTTP server, not the ext_authz chain in front of the public route. Pod readiness
-            # then drives the upstream KubePodNotReady rule. Skill home-automation.
+            # then drives the upstream KubePodNotReady rule.
             probes:
               liveness: &probes
                 enabled: true
@@ -114,7 +112,7 @@ spec:
               requests:
                 cpu: 10m
                 # Explicit memory request: without one Kubernetes reserves the full 2Gi limit on
-                # the node. 768Mi is ~2x the 30-day peak working set of 393Mi. Skill node-scheduling.
+                # the node. 768Mi is ~2x the 30-day peak working set of 393Mi.
                 memory: 768Mi
               limits:
                 memory: 2Gi
@@ -142,7 +140,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute taints. The talos-3
       # dedicated taint is PreferNoSchedule, so talos-3 stays in the spread domains and
-      # the TaintToleration score penalty keeps this workload off it. Skill node-scheduling.
+      # the TaintToleration score penalty keeps this workload off it.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname

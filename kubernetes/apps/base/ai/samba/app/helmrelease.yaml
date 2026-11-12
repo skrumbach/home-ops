@@ -29,7 +29,6 @@ spec:
         initContainers:
           # Non-recursive. setgid 2770 is load-bearing: OnRootMismatch walks the volume without it.
           # The entrypoint resets empty /shared to 0770; postStart puts 2770 back.
-          # See skill hermes-agent references/shared-storage.md.
           chown-share:
             image:
               repository: docker.io/library/alpine
@@ -63,7 +62,6 @@ spec:
               # Password arrives as a file at /run/secrets/pass (see persistence
               # below), which the entrypoint prefers over the PASS env.
             # Re-assert 2770 after smbd is up. The entrypoint strips setgid on an empty /shared.
-            # See skill hermes-agent references/shared-storage.md.
             lifecycle:
               postStart:
                 exec:

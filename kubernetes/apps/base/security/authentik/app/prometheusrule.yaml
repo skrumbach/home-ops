@@ -22,7 +22,7 @@ spec:
               Almost always expired rows the clean_expired_models task stopped getting through
               (authentik_core_session, django_channels_postgres_message). They inflate every
               base backup and the R2 mirror. Check the task in Admin > System Tasks, then run the
-              bulk cleanup in skill `authentik-terraform` references/db-bloat.md.
+              bulk cleanup in scripts/authentik-db-cleanup.sh.
             summary: The authentik database is over 2 GiB; expired-row cleanup has fallen behind.
           expr: max(cnpg_pg_database_size_bytes{namespace="database", datname="authentik"}) > 2 * 1024 ^ 3
           for: 6h

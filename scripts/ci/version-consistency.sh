@@ -61,6 +61,15 @@ while read -r image; do
     }
 done < <(grep -oE '(ghcr\.io/siderolabs/kubelet|registry\.k8s\.io/kube-[a-z-]+):v[0-9.]+' "${machineconfig}")
 
+# Both tuppr CRs gate each node on HEALTH_OK exactly: widening to HEALTH_WARN lets the next reboot go below min_size.
+for cr in "${talos_cr}" "${kubernetes_cr}"; do
+    got="$(yq -e '.spec.healthChecks[] | select(.kind == "CephCluster") | .expr' "${cr}")" || got="(missing)"
+    [[ "${got}" == "status.ceph.health in ['HEALTH_OK']" ]] || {
+        printf 'MISMATCH  %s  CephCluster health check is %s, want HEALTH_OK only\n' "${cr}" "${got}"
+        fail=1
+    }
+done
+
 # A refactor that renames or drops the pins must fail loudly, not pass silently.
 expected=6
 [[ "${checked}" -eq "${expected}" ]] || {

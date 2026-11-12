@@ -12,7 +12,9 @@ components:
 # (2026-08-22), agentmemory (2026-08-31), comfyui and comfyui-mcp (2026-09-15),
 # agentgateway app, dashboards and CRDs (2026-10-25; stateless).
 # Flux prunes their workloads and PVCs; comfyui's five PVCs are deleted with
-# their RBD images. Retained data and revival: skill ai-stack, references/retirement.md.
+# their RBD images.
+# Retained backups outlive these apps: kopiur Snapshot CRs in ai (agentmemory, comfyui-user) own their kopia snapshots; deleting a CR deletes the backup.
+# Retired VolSync restic repos (scripts/volsync-retired-expiry/ledger.yaml) hold agentmemory's older copy; revival restores into a new PVC before the app writes.
 
 resources:
   - ./chat-model.yaml

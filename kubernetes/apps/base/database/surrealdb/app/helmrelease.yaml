@@ -25,7 +25,6 @@ spec:
     remediation:
       retries: 3
       # Never roll back: the last good release points at TiKV, which is gone.
-      # Skill `databases`.
       strategy: uninstall
   uninstall:
     keepHistory: false
@@ -81,13 +80,13 @@ spec:
     resources:
       requests:
         # Re-measure at [14d:30s] before trimming cpu: coarser sampling under-reads
-        # the peak. Skill `databases`.
+        # the peak.
         cpu: 100m
         memory: 512Mi
       limits:
         memory: 2Gi
 
-    # Preferred anti-affinity only. replicaCount stays 1. Skill databases.
+    # Preferred anti-affinity only. replicaCount stays 1.
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -99,7 +98,7 @@ spec:
               topologyKey: kubernetes.io/hostname
 
     # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute; talos-3 is
-    # PreferNoSchedule, so the score penalty keeps this off talos-3. Skill `node-scheduling`.
+    # PreferNoSchedule, so the score penalty keeps this off talos-3.
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -110,7 +109,7 @@ spec:
             app.kubernetes.io/name: surrealdb
 
     # route: does not work on this chart. Leave it unset. A real HTTPRoute
-    # is its own manifest. Skill databases.
+    # is its own manifest.
     livenessProbe:
       httpGet:
         path: /health
@@ -128,7 +127,7 @@ spec:
     serviceMonitor:
       enabled: true
 
-    # storageClassName omitted on purpose: chart 0.4.0 renders it twice. Skill `databases`.
+    # storageClassName omitted on purpose: chart 0.4.0 renders it twice.
     persistence:
       enabled: true
       accessModes:

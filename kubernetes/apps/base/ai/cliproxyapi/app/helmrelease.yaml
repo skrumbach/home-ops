@@ -111,12 +111,13 @@ spec:
     persistence:
       data:
         # Created here (app-template names it after the release) and backed up by components/kopiur.
+        # A second persistentVolumeClaim entry renames this claim to cliproxyapi-data and orphans the backed-up one.
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
         # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
+        # delete the only live copy of this born-kopiur claim.
         retain: true
         globalMounts:
           - path: /data

@@ -10,8 +10,7 @@ Cloudflare R2, so the cluster's only Postgres backup copy stops being a single L
 Every one of the fleet's file volumes already has both a Ceph copy and an off-site copy;
 Postgres was the outlier.
 
-Why a mirror and not a second destination is below; CNPG backup rules are skill `databases`,
-[`references/cnpg.md`](../../../../../../.agents/skills/databases/references/cnpg.md).
+Why a mirror and not a second destination is below.
 
 ## Why a mirror and not a second CNPG destination
 
@@ -56,9 +55,9 @@ candidate count exceeds `PRUNE_CEILING`. Upload time is never earlier than the L
 every object stays at least 35d in R2, a seed of old objects is not pruned on arrival, an
 R2 bucket lock shorter than 35d never blocks the prune, and no per-object `HEAD` is needed.
 
-`scripts/ci/postgres-offsite-mirror-test.py` pins all three, plus `SERVER_NAME` and the
-bucket against the live archiver: a restore that bumps the Cluster's `serverName` must bump
-this CronJob in the same commit, or the mirror keeps copying the old path and succeeding.
+`scripts/ci/postgres-offsite-mirror-test.py` pins `SERVER_NAME` against the live archiver:
+a restore that bumps the Cluster's `serverName` must bump this CronJob in the same commit,
+or the mirror keeps copying the old path and succeeding.
 
 ## Storage and cost
 
@@ -111,7 +110,7 @@ lock costs nothing extra.
 
 Fields are fetched by explicit `data` + `property`, so a missing field fails the
 `ExternalSecret` loudly. An empty field does not: `SecretSynced` is reported with a
-zero-length value (skill `secrets-1password`), so check key lengths, not the status.
+zero-length value, so check key lengths, not the status.
 
 ## Alerting
 
@@ -124,5 +123,5 @@ returns a series for a CronJob more than 4h stale and none for a fresh one.
 ## Known follow-ups
 
 - **The restore path remains unproven.** No CNPG restore has ever been exercised on this
-  cluster; all restore runbooks (skill `kopiur-backups`) are kopiur or retired VolSync. The drill was
+  cluster; all restore runbooks (`.agents/skills/incident-runbooks/references/restore.md`) are kopiur or retired VolSync. The drill was
   deliberately deferred by the captain on 2026-09-11 and is out of scope here.

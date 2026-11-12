@@ -109,7 +109,6 @@ spec:
   path: "./kubernetes/apps/base/ai/toolhive/mcp-servers"
   prune: true
   # Check the proxy Deployment and the stdio StatefulSet. The proxy /health does not cover the backend.
-  # Skill `ai-stack`.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment

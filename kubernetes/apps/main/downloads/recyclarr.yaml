@@ -25,7 +25,6 @@ spec:
     - name: kopiur-repository
       namespace: system
   components:
-    # Proof: proof-ledger.md row 11.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:

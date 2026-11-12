@@ -1,6 +1,6 @@
 # The two DHCP uplinks. Internet 1 is weighted, Internet 2 failover-only.
 # A change here re-provisions the WAN and can drop internet for the whole
-# house and the cluster (Cloudflare Tunnel, image pulls). Skill `unifi-network`.
+# house and the cluster (Cloudflare Tunnel, image pulls).
 
 resource "unifi_wan" "internet_1" {
   dhcpv6 = {

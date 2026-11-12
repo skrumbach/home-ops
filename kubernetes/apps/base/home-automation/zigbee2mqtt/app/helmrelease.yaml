@@ -189,7 +189,7 @@ spec:
       app:
         annotations:
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the frontend Service in-cluster instead. Skill observability.
+          # login page. Probe the frontend Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://zigbee2mqtt.home-automation.svc.cluster.local:8080/
             conditions:

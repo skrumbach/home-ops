@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 # BerriAI/litellm-pgvector: the stateless server behind LiteLLM's pg_vector store (data lives in
-# postgres-18). ClusterIP only, no HTTPRoute. See skill litellm-proxy (references/vector-store.md).
+# postgres-18). ClusterIP only, no HTTPRoute.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -39,7 +39,7 @@ spec:
               tag: b553f84-324c8c4b2f85@sha256:5d532e747182a5fd95d19a7903958f8fad42ad7bfbb56d9d0b3336595145a3d7
             env:
               # INVARIANT: model, EMBEDDING__DIMENSIONS, schema.sql's vector(N) and the litellm-pgvector
-              # key's one-model allow-list move together (CI-enforced); 2000 is pgvector's HNSW limit.
+              # key's one-model allow-list move together; 2000 is pgvector's HNSW limit.
               EMBEDDING__MODEL: openai/qwen/qwen3-embedding-8b
               EMBEDDING__BASE_URL: http://litellm.ai.svc.cluster.local:4000
               EMBEDDING__DIMENSIONS: "2000"

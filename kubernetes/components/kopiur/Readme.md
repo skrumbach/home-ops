@@ -4,9 +4,6 @@ Per-claim backup objects: `SnapshotPolicy`, `SnapshotSchedule`, the standing
 ceph `Restore`, and (for a VolSync retirement) the PVC takeover. The operator
 and repositories are `kubernetes/apps/base/system/kopiur/`.
 
-Read skill `kopiur-backups` before changing this directory. The tripwires are
-in `SKILL.md`. Procedures are in `references/`.
-
 ## Invariants
 
 - One include protects one volume. A second PVC is a second Flux Kustomization
@@ -21,7 +18,4 @@ in `SKILL.md`. Procedures are in `references/`.
 - The standing `Restore` stays `Ready=False` for its whole life on a bound
   claim. Do not put this component in a Kustomization with `wait: true`.
 
-Fleet proof rows ("row N") are
-`.agents/skills/kopiur-backups/references/proof-ledger.md`.
-Human restore: `.agents/skills/kopiur-backups/references/kopiur-scratch-drill.md`.
-Corrupt-claim rebuild: `.agents/skills/kopiur-backups/references/corrupt-claim-recreation.md`.
+Restores (whole cluster, one claim, scratch proof): `.agents/skills/incident-runbooks/references/restore.md`.

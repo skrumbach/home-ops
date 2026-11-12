@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# One-time Authentik DB cleanup: the expired rows clean_expired_models never got through.
+# Authentik DB cleanup: the expired rows clean_expired_models never got through.
 #   scripts/authentik-db-cleanup.sh          -> dry run: counts + FK check only (read-only)
 #   scripts/authentik-db-cleanup.sh --apply  -> delete expired rows in batches, then VACUUM FULL
-# Owner-run (admin kubeconfig). Skill `authentik-terraform` references/db-bloat.md.
+# Owner-run (admin kubeconfig).
 # Deletes only what upstream clean_expired_models (2026.8.5 authentik/core/tasks.py) deletes:
 # django_channels_postgres Message/GroupChannel with expires < now(), and expired expiring Sessions.
 # Sessions that still have an AuthenticatedSession row are left for the task (Django-side cascade).

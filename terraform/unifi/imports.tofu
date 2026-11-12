@@ -2,7 +2,6 @@
 # kept so a lost state reattaches instead of creating duplicates. Networks and
 # WLANs import as `name=<name>` (Network 11 IDs are UUIDs and the provider's ID
 # path expects 24-hex); ports as `<switch mac>/<index>`; clients by MAC.
-# Skill `unifi-network`.
 
 import {
   to = unifi_network.home_default

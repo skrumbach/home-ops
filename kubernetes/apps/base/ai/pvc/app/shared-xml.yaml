@@ -1,6 +1,5 @@
 ---
 # Mac-authoritative XML corpus. ceph-filesystem-rwx. Unbacked on purpose.
-# See skill hermes-agent references/shared-storage.md.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

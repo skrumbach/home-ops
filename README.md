@@ -22,8 +22,7 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 | Day-to-day commands, app layout, secrets, backups, agent-facing conventions and anti-patterns | [`AGENTS.md`](AGENTS.md) (`CLAUDE.md` is a symlink to it) |
 | Talos templates, render/apply/upgrade | [`talos/AGENTS.md`](talos/AGENTS.md) |
 | First-time / disaster-recovery bootstrap | [`bootstrap/AGENTS.md`](bootstrap/AGENTS.md) |
-| Runbooks | skill references under [`.agents/skills/`](.agents/skills/); [`docs/README.md`](docs/README.md) for the exceptions |
-| Agent skills (one per subsystem) | [`.agents/skills/`](.agents/skills/) - indexed in `AGENTS.md` |
+| Incident runbooks (restore, power-down/up, Ceph OSD, EMQX) | [`.agents/skills/incident-runbooks/`](.agents/skills/incident-runbooks/) |
 
 ## Layout
 
@@ -35,9 +34,8 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 │   └── components/     # Reusable Kustomize components (alerts, common, dragonfly, kopiur (+ pvc))
 ├── talos/              # minijinja machine config, node overlays, factory schematic
 ├── bootstrap/          # just bootstrap stages (nodes, k8s, base, apps)
-├── .agents/skills/     # agent skills, one per subsystem (.claude/skills is a symlink)
+├── .agents/skills/     # incident-runbooks skill (.claude/skills is a symlink)
 ├── .taskfiles/         # task recipes (flux, rook, network, 1password, actions-runner)
-├── docs/               # tdarr harness files and a runbook pointer
 └── .mise.toml          # workstation tool versions
 ```
 
@@ -73,7 +71,7 @@ Do not pass the control-plane VIP `10.10.10.10` as a node target. Node addresses
 
 ## Adding an app
 
-Directory shapes and authoring traps: [`.agents/skills/flux-gitops/references/app-shapes.md`](.agents/skills/flux-gitops/references/app-shapes.md). Prefer the scaffold over hand-copying a sibling:
+Prefer the scaffold over hand-copying a sibling:
 
 ```bash
 scripts/add-app/generate-app.sh <namespace> <app> [--shape=app|family|crd-split|parameterized] [--secrets] [--dragonfly] [--dry-run]

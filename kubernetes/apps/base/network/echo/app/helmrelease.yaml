@@ -44,7 +44,7 @@ spec:
               requests:
                 cpu: 10m
                 # Declared equal to the limit on purpose: peak usage sits near the 64Mi limit so there is nothing to
-                # reclaim, and a limit with no request silently reserves the whole limit (scripts/ci/memory-request-declared-test.py).
+                # reclaim, and a limit with no request silently reserves the whole limit.
                 memory: 64Mi
               limits:
                 memory: 64Mi

@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumclusterwidenetworkpolicy_v2.json
 # Subtractive host firewall for host-netns ports: Ceph, plus unauthenticated etcd/node/Cilium metrics (the name predates those). enableDefaultDeny stays false in both directions. Removing it, or adding another nodeSelector CCNP that defaults deny on, locks the nodes out: default-deny is OR-ed across policies.
 # fromEntities world does not match host, remote-node, or pods. Enforcing while policyAuditMode is false. Rollback: set policyAuditMode true, or delete this policy.
-# Skill `cilium-host-policy`.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -14,7 +13,7 @@ spec:
     Subtractive only - enableDefaultDeny is false in both directions so the
     host endpoint never enters default-deny and management access cannot break.
   # Host-endpoint labels are not node labels. kubernetes.io/os and kubernetes.io/hostname are stripped, so a selector on them is accepted and matches nothing. control-plane covers all three nodes today.
-  # Verify a selector change with cilium-dbg bpf policy get. Skill `cilium-host-policy`.
+  # Verify a selector change with cilium-dbg bpf policy get.
   nodeSelector:
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
@@ -71,8 +70,8 @@ spec:
             # Non-Ceph: plain-HTTP, unauthenticated metrics on the node IP. The only reader is
             # the Prometheus pod, whose source is its pod (or a node) identity, never `world`;
             # 9283/9926 above are scraped the same way and stay up. Each listener port is
-            # pinned explicitly (cilium and kube-prometheus-stack values, Talos template), and
-            # scripts/ci/hostpolicy-ceph-selector-test.py fails if a pin leaves this list.
+            # pinned explicitly (cilium and kube-prometheus-stack values, Talos template); keep
+            # this list in sync with those pins.
             # etcd listen-metrics-urls (talos/machineconfig.yaml.j2), job kube-etcd.
             - port: "2381"
               protocol: TCP

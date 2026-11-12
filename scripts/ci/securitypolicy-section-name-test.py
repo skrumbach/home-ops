@@ -11,7 +11,7 @@ valid, and a Gatus check on the in-cluster Service stays green.
 Routes are read from raw HTTPRoute manifests and from app-template HelmRelease
 `values.route.<key>` in the same app directory (`nameOverride`, else the release name
 when the release has one route, else `<release>-<key>`; matched against the live
-cluster). Skill `networking`.
+cluster).
 """
 
 from __future__ import annotations

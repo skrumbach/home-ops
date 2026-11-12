@@ -1,6 +1,6 @@
 ---
 # RWX class for group csi-rwx. clusterID must match that group's status.info.clusterID.
-# Do not point a new RWX claim at ceph-filesystem. See skill rook-ceph.
+# Do not point a new RWX claim at ceph-filesystem.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:

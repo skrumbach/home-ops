@@ -37,12 +37,11 @@ credential Secrets are pruned when the last claim leaves VolSync, so nothing rea
   AWS_SECRET_ACCESS_KEY), the bucket owner. The OBC is `prune: disabled`, so it
   outlives the operator.
 - minio and r2: `--credentials env` only, AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
-  exported from the 1Password item `volsync-template` (see the apply plan for the
-  exact `op read` invocation). R2's in-cluster token has object read/write but not
-  the `Workers R2 Storage Write` permission group that lifecycle management needs,
-  so a dry run with it stops at the lifecycle read, by design.
-
-See .agents/skills/kopiur-backups/references/retired-expiry-apply-plan.md.
+  exported from the 1Password item `volsync-template` (for the `op read` invocation
+  see .agents/skills/incident-runbooks/references/restore.md section C). R2's
+  in-cluster token has object read/write but not the `Workers R2 Storage Write`
+  permission group that lifecycle management needs, so a dry run with it stops at
+  the lifecycle read, by design.
 """
 
 from __future__ import annotations

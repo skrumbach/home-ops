@@ -3,7 +3,7 @@
 # Gates the whole zigbee2mqtt route: the /code/ editor runs code-server with --auth none, and the
 # frontend has no login of its own and can permit-join or remove devices. Home Assistant talks to
 # Zigbee2MQTT over MQTT, not this route. The forward_domain proxy provider covers every host, so no
-# Authentik change is needed. Skill authentik-terraform.
+# Authentik change is needed.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

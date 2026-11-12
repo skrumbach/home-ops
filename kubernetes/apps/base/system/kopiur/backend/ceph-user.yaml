@@ -9,7 +9,6 @@ spec:
   displayName: kopiur-user
   quotas:
     # 500G headroom. Do not copy volsync's 20G quota; that quota was already exceeded.
-    # Skill `kopiur-backups`.
     maxSize: 500G
     maxObjects: 1000000
     maxBuckets: 10

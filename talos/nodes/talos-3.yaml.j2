@@ -4,7 +4,7 @@ machine:
   install:
     disk: /dev/disk/by-id/nvme-WD_BLACK_SN770M_1TB_251211800007
   # PreferNoSchedule is a score penalty, not a filter. A hard NoSchedule strands the general fleet on a drain.
-  # Takes effect only on apply-node. See skill node-scheduling.
+  # Takes effect only on apply-node.
   nodeTaints:
     home-operations.com/dedicated: PreferNoSchedule
 ---

@@ -4,7 +4,6 @@
 # uses the `sync` LoadBalancer Service (22000 TCP/UDP), not this route, so pairing and transfers are
 # unaffected. The forward_domain proxy provider covers every host, so no Authentik change is needed;
 # the cross-namespace backendRef needs the selfhosted entry in security/allow-authentik-access.
-# Skill authentik-terraform.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

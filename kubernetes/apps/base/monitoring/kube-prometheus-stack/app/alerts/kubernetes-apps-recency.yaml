@@ -3,7 +3,6 @@
 #
 # Recency replacements for KubeJobFailed and KubeContainerWaiting (the chart
 # copies stay disabled). Names, severity, for, and runbook_url stay.
-# Skill observability.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

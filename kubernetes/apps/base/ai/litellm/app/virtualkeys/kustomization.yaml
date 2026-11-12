@@ -2,9 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# One LiteLLMVirtualKey + PushSecret per consumer (D4). The keys allowed to omit maxBudget are an
-# exact set asserted by scripts/ci/litellm-claude-code-subscription-test.py (claude-code-subscription,
-# agent-swarm-captain, mac-gnhf). See skill litellm-proxy (references/governance-keys.md).
+# One LiteLLMVirtualKey + PushSecret per consumer (D4). A key without maxBudget may reach only
+# free-credential models (scripts/ci/litellm-billing-guard-test.py).
 resources:
   - ./claude-code-subscription.yaml
   - ./demo.yaml

@@ -9,7 +9,7 @@
 # BLOCK), so the order changes nothing today. A pair that mixes ALLOW and
 # BLOCK needs its order set in the UI. Updates are a full PUT from this
 # config: check `matching_target` (WEB, APP, REGION) is modelled before
-# adopting a policy. Skill `unifi-network`.
+# adopting a policy.
 
 locals {
   builtin_zone_ids = {

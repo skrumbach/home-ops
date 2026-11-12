@@ -9,7 +9,6 @@ spec:
     - name: kopiur-absent.rules
       rules:
         # The chart's own 12 alerts (group kopiur.rules) are all evaluated over kopiur_* series, so every one of them goes SILENT rather than firing when the operator itself disappears.
-        # Skill `kopiur-backups`.
         - alert: KopiurComponentAbsent
           expr: |
             absent(up{job="kopiur-controller-metrics"})
@@ -35,7 +34,6 @@ spec:
             severity: critical
 
         # Projected credential Secrets still present across two sweeps. Aggregate before min_over_time.
-        # Skill `kopiur-backups`.
         - alert: KopiurProjectedCredentialsLeaking
           expr: |
             min_over_time(
@@ -50,8 +48,8 @@ spec:
           labels:
             severity: critical
 
-        # Succeeded snapshot with zero files. SecurityContextCompatible is not a Prometheus series.
-        # Skill `kopiur-backups`.
+        # Fires only at 0 files: a near-empty volume (paperless-ngx-media, 1 file/0 B) still passes; compare
+        # .status.stats with what the app should hold. SecurityContextCompatible is not a Prometheus series.
         - alert: KopiurBackupEmpty
           expr: |
             kopiur_policy_last_backup_files == 0
@@ -67,8 +65,9 @@ spec:
             severity: warning
 
         # Chart KopiurBackupStale waits 48h for every policy. Ceph fires here at 6h; r2 stays at 48h.
-        # Skill `kopiur-backups`.
         - alert: KopiurBackupStaleCeph
+          # The metric has no repository label: select on the policy suffix, never repository="ceph",
+          # or this matches nothing and ceph staleness falls back to 48h.
           expr: |
             time() - kopiur_policy_last_backup_success_timestamp_seconds{policy=~".+-ceph$"} > 21600
           for: 5m
@@ -93,7 +92,6 @@ spec:
             severity: warning
 
         # Staleness cannot see a series that has disappeared. This fires when a policy's last-success series vanishes while the controller is up.
-        # Skill `kopiur-backups`.
         - alert: KopiurPolicyVanished
           expr: |
             (

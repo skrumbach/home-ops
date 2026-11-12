@@ -1,5 +1,6 @@
+# Bucket is hand-made, not an OBC: the ceph-bucket class deletes the bucket with its claim (authentik/app/bucketclaim.yaml).
 # State holds every adopted client_secret in plaintext. Bucket stays private. Do not re-add an endpoints block: AWS_ENDPOINT_URL_S3 must win.
-# Never point OpenTofu at https://s3.sklab.dev (SignatureDoesNotMatch through Envoy). Skill `authentik-terraform` references/state-and-credentials.md.
+# Never point OpenTofu at https://s3.sklab.dev (SignatureDoesNotMatch through Envoy).
 terraform {
   backend "s3" {
     bucket = "terraform-state"

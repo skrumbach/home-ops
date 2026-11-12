@@ -96,7 +96,6 @@ spec:
       config:
         enabled: true
         # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-syncthing}
         globalMounts:
           - path: /var/syncthing/config
@@ -115,7 +114,7 @@ spec:
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           # securitypolicy.yaml gates this route, so the auto-discovered route check would measure
           # the Authentik login page. Probe the GUI Service's unauthenticated health endpoint
-          # in-cluster instead. Skill observability.
+          # in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://syncthing-app.selfhosted.svc.cluster.local:8384/rest/noauth/health
             conditions:

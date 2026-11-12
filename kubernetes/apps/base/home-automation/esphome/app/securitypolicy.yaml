@@ -3,7 +3,7 @@
 # Gates the whole esphome route: the /code/ editor runs code-server with --auth none and the
 # dashboard has no login of its own either. The forward_domain proxy provider covers every host,
 # so no Authentik change is needed; the cross-namespace backendRef needs the home-automation entry
-# in security/allow-authentik-access. Skill authentik-terraform.
+# in security/allow-authentik-access.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

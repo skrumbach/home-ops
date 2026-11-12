@@ -3,7 +3,7 @@
 # ai/hermes' `home-assistant` profile (its own Discord channel, its own MCP group). One key per app so its
 # traffic is attributable and can be cut off alone. chat-local plus the flat-rate go-* models only: no metered
 # route, so spend is $0 by construction and maxBudget is an inert guard (same reasoning as linkwarden);
-# rpm/tpm are the real bound. No spec.metadata. See skill litellm-proxy (references/governance-keys.md).
+# rpm/tpm are the real bound. No spec.metadata.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

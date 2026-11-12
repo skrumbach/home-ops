@@ -5,10 +5,6 @@ GitHub Actions workflow is rollback only (manual dispatch). UI at
 `renovate.${SECRET_DOMAIN}`, internal route, Authentik OIDC
 (`terraform/authentik/renovate-operator.tofu`, 1Password `Homelab/renovate-operator-oidc`).
 
-Skill `renovate`
-([operations.md](../../../../.agents/skills/renovate/references/operations.md),
-[versioning-traps.md](../../../../.agents/skills/renovate/references/versioning-traps.md)).
-
 ## Rollback
 
 1. Set `spec.suspend: true` on `renovate-operator/jobs/renovatejob.yaml` and merge.

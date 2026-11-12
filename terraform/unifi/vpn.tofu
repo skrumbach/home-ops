@@ -3,7 +3,6 @@
 # it and break every paired client. A recreate generates a new key, so clients
 # re-pair. The NordVPN clients (2 WireGuard, 1 OpenVPN) stay in the UI: this
 # provider models WireGuard only and their peer settings are vendor configs.
-# Skill `unifi-network`.
 
 resource "unifi_vpn_server" "one_click_vpn" {
   dns = {

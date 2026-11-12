@@ -8,7 +8,7 @@ spec:
   groups:
     - name: ceph-reliability
       rules:
-        # container_spec_* is absent here; the limit comes from kube-state-metrics via an explicit on(...) join. See skill observability.
+        # container_spec_* is absent here; the limit comes from kube-state-metrics via an explicit on(...) join.
         - alert: CephMonitorMemoryHigh
           expr: |
             container_memory_working_set_bytes{namespace="rook-ceph", container="mon"}
@@ -159,7 +159,6 @@ spec:
             description: "Placement group recovery is blocked because the cluster is too full."
 
     # Do not re-add life-expectancy alerts. diskprediction_local has no NVMe model, so the series never exists.
-    # See skill rook-ceph.
 
     - name: ceph-crash-detection
       rules:

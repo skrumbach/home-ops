@@ -36,7 +36,6 @@ spec:
     - name: dragonfly-operator
       namespace: database
   components:
-    # Proof: proof-ledger.md row 27, re-drilled 2026-11-01 from ceph, r2 and the populator path.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/dragonfly
@@ -54,7 +53,6 @@ spec:
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # kopiur backup for the SECOND volume, `paperless-ngx-media` - the scanned originals and their archived PDFs, which are not reconstructible from the database.
 # The `paperless-ngx-consume` inbox is deliberately NOT backed up: paperless deletes files from it once they are ingested into media.
-# Skill `kopiur-backups`.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -91,7 +89,7 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

@@ -1,4 +1,4 @@
-# Periodic snapshot, scrub and cron tasks. Skill `truenas-nas`.
+# Periodic snapshot, scrub and cron tasks.
 
 resource "truenas_periodic_snapshot_task" "storage_photos" {
   allow_empty    = true

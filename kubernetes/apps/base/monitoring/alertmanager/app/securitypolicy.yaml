@@ -3,7 +3,7 @@
 # Gates the browser route only (UI and the silence API behind it). Prometheus (alertingEndpoints),
 # the Grafana datasource and the Flux alert Providers reach alertmanager through the in-cluster
 # Service, which this policy does not touch. The cross-namespace backendRef needs the monitoring
-# entry in security/allow-authentik-access. Skill authentik-terraform.
+# entry in security/allow-authentik-access.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

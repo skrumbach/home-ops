@@ -14,7 +14,6 @@ spec:
       imageRegistry: mirror.gcr.io
     # Controller resources MUST live under `deployment.envoyGateway`; a `resources:` block under
     # `config.envoyGateway` is part of the config-file schema and is silently IGNORED.
-    # Skill `networking`, references/envoy-gateway.md.
     deployment:
       envoyGateway:
         resources:

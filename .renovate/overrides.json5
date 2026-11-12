@@ -7,7 +7,7 @@
       // and flux chart refs are OCIRepository tags. kubernetes/** only, so Talos, mise and CI images are untouched.
       // rsshub and browserless/chrome float on latest with their own digest rule. quay.io/ceph/ceph: a CephCluster image change restarts every Ceph daemon, pin it with an attended Ceph bump.
       // Verified 2026-11-07: operator CRs (LiteLLMProxy, MCPServer, EMQX, Dragonfly, Envoy) accept digests, pin PR #2411.
-      // Adding a digest changes the pod spec, so each newly pinned workload rolls once. Skill `renovate`.
+      // Adding a digest changes the pod spec, so each newly pinned workload rolls once.
       description: "Pin container image digests in kubernetes/**",
       matchDatasources: ["docker"],
       matchManagers: ["helm-values", "kubernetes"],
@@ -27,15 +27,15 @@
       },
     },
     {
-      // tests.yaml installs litellm[proxy] on this interpreter: litellm declares requires-python <3.15 and fastuuid 0.14.0 has no cp315 wheel (checked 2026-11-07).
-      // mise only; images are judged per consumer (repo-wiki is stdlib-only). Lift once both ship 3.15 support. Skill `renovate-review`.
-      description: "Hold the mise python tool below 3.15 until litellm supports it",
+      // Held for the litellm[proxy] CI tests (litellm requires python <3.15); those tests are gone, so lift the hold when convenient.
+      // mise only; images are judged per consumer (repo-wiki is stdlib-only).
+      description: "Hold the mise python tool below 3.15",
       matchManagers: ["mise"],
       matchPackageNames: ["python"],
       allowedVersions: "<3.15",
     },
     {
-      // Floor >=1.93.0 or classifier_type llm is ignored. Skill `litellm-proxy` references/auto-router.md.
+      // Floor >=1.93.0 or classifier_type llm is ignored.
       description: "LiteLLM plain vX.Y.Z tags; floor >=1.93.0 for LLM classifier",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/berriai/litellm-non_root"],
@@ -49,7 +49,7 @@
       overrideDepName: "{{packageName}}",
     },
     {
-      // No GitHub repo. Resolve via docker 1password/op with semver, or a -beta tag ranks as stable. Skill `renovate` references/versioning-traps.md.
+      // No GitHub repo. Resolve via docker 1password/op with semver, or a -beta tag ranks as stable.
       description: "1Password CLI has no GitHub repo; resolve via the official docker image",
       matchManagers: ["mise"],
       matchDepNames: ["1password-cli"],
@@ -70,7 +70,7 @@
       allowedVersions: "<2.3.0",
     },
     {
-      // A major bump needs a new archive serverName and matching extension images in the same change. Skill `databases`.
+      // A major bump needs a new archive serverName and matching extension images in the same change.
       description: "Keep CloudNativePG Postgres operand images on major 18",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
@@ -101,14 +101,14 @@
       allowedVersions: "/^3\\./",
     },
     {
-      // 2.x is untested against the ToolHive vmcp gateway; lift this after a test. Skill `ai-stack`.
+      // 2.x is untested against the ToolHive vmcp gateway; lift this after a test.
       description: "Keep github-mcp-server on major 1",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/github/github-mcp-server"],
       allowedVersions: "<2",
     },
     {
-      // Negated regex excludes exactly v1.13.3 (PR #867). A bare <X.Y.Z ceiling goes silent once the tracked value passes it. This rule proposes; automerge is the separate rule in autoMerge.json5. Skill `renovate` references/versioning-traps.md.
+      // Negated regex excludes exactly v1.13.3 (PR #867). A bare <X.Y.Z ceiling goes silent once the tracked value passes it. This rule proposes; automerge is the separate rule in autoMerge.json5.
       description: "Exclude Talos v1.13.3 only (permanent upgrade failure on talos-1, see #867) - not a version ceiling",
       matchPackageNames: [
         "ghcr.io/siderolabs/installer",
@@ -119,21 +119,21 @@
       allowedVersions: "!/^v?1\\.13\\.3$/",
     },
     {
-      // Provider is generated from the server OpenAPI schema. Bump it with the server tag. automerge stays false. Skill `renovate` references/versioning-traps.md.
+      // Provider is generated from the server OpenAPI schema. Bump it with the server tag. automerge stays false.
       description: "Keep the Authentik OpenTofu provider aligned with the server release line",
       matchDatasources: ["terraform-provider"],
       matchPackageNames: ["goauthentik/authentik"],
       automerge: false,
     },
     {
-      // x.0.z is dev, x.1.z is RC; registry tags surface RCs as upgrades (#1396). Not for ghcr.io/rook/ceph. Skill `renovate` references/versioning-traps.md.
+      // x.0.z is dev, x.1.z is RC; registry tags surface RCs as upgrades (#1396). Not for ghcr.io/rook/ceph.
       description: "Keep quay.io/ceph/ceph on stable x.2.z tags (skip x.0.z dev and x.1.z RC)",
       matchDatasources: ["docker"],
       matchPackageNames: ["quay.io/ceph/ceph"],
       allowedVersions: "/^v?\\d+\\.2\\.\\d+$/",
     },
     {
-      // Docker compatibility treats the per-release hash as a qualifier, so leave it uncaptured. Do not name the group compatibility. Skill `renovate` references/versioning-traps.md.
+      // Docker compatibility treats the per-release hash as a qualifier, so leave it uncaptured. Do not name the group compatibility.
       description: "Plex uses X.Y.Z.BUILD-HASH tags; regex-version them so Renovate can see updates past the per-release commit hash",
       matchDatasources: ["docker"],
       matchPackageNames: ["docker.io/plexinc/pms-docker"],

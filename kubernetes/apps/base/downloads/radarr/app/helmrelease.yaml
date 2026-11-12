@@ -87,7 +87,7 @@ spec:
     # home-operations.com/dedicated taint (talos/nodes/talos-3.yaml.j2) and this app
     # has no toleration, so the TaintToleration score gap keeps it off talos-3. That is
     # not an absolute exclusion, but a per-app deny-list would fail open for anything
-    # that forgets to carry it. Skill node-scheduling.
+    # that forgets to carry it.
     service:
       app:
         controller: *app

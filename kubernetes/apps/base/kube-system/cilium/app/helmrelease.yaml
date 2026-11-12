@@ -77,8 +77,8 @@ spec:
     endpointRoutes:
       enabled: true
     # The four metrics ports (prometheus, operator, envoy, hubble.metrics) are pinned at the
-    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965, and
-    # scripts/ci/hostpolicy-ceph-selector-test.py fails if a pin leaves that list.
+    # chart defaults: hostpolicy-ceph.yaml world-denies 9962-9965; keep the pins in sync
+    # with that list.
     envoy:
       enabled: false
       prometheus:
@@ -182,7 +182,7 @@ spec:
           memory: 512Mi
     pmtuDiscovery:
       enabled: true
-    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in hostpolicy-ceph.yaml, not this flag. Rollback: set this true, or delete the CCNP. Skill `cilium-host-policy`.
+    # false means host and pod policy are enforcing. Lockout safety is enableDefaultDeny false in hostpolicy-ceph.yaml, not this flag. Rollback: set this true, or delete the CCNP.
     policyAuditMode: false
     prometheus:
       enabled: true
@@ -209,7 +209,6 @@ spec:
     # Guaranteed QoS (requests == limits on EVERY container, init containers
     # included) so the Talos OOMController never selects the agent: a kill
     # takes the node network plane down. CPU limit is required for Guaranteed.
-    # See skill node-scheduling.
     resources:
       requests:
         cpu: 500m

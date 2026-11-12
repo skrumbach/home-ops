@@ -2,8 +2,7 @@
 
 Homelab operator. Image tag stays on the `-desktop` suffix (Chromium and
 the VNC stack are baked in; the process cannot `apt install` after it
-drops to uid 10000). Skill `hermes-agent` owns restarts, `state.db`,
-routing, and Samba. This page is the human setup.
+drops to uid 10000). This page is the human setup.
 
 | Container | URL |
 | --- | --- |
@@ -37,12 +36,11 @@ inside the 6Gi app limit.
 Probes are TCP on `9119`. The pod stays Running and Gatus stays green
 while the gateway is stuck. Read
 `/opt/data/logs/gateway-startup-watchdog.log`. Do not add a gateway
-liveness probe. Skill `hermes-agent` references/restarts.md.
+liveness probe.
 
 `sessions.vacuum_after_prune` stays false. Narrowing `retention_days`
 is the dial. Reclaiming disk is an offline
-`hermes sessions optimize-storage` after there is free space. Skill
-`hermes-agent` references/state-db.md.
+`hermes sessions optimize-storage` after there is free space.
 
 ## Cluster RBAC
 
@@ -55,7 +53,7 @@ namespace `ai` only. Widen that Role on purpose. It is not read-only.
 
 Long-term memory is the bundled `holographic` provider
 (`memory.provider: holographic`), a SQLite store on this pod. It is not
-shared with other agents. `agentmemory` is retired. Skill `ai-stack`.
+shared with other agents. `agentmemory` is retired.
 
 Runtime skills live in `app/skills/` and are copied to `/opt/data/skills`
 on start. Shipped: `homelab-commit-watcher` (Discord digest). Register
@@ -78,7 +76,7 @@ DM the bot from an allowed user. `TELEGRAM_BOT_TOKEN` and
 | `GITHUB_LLM_WIKI_TOKEN` | Fine-grained PAT, one repo, Contents read and write. Not a classic PAT |
 | `API_SERVER_KEY` | `openssl rand -hex 32` for the `:8642` API |
 | `HOMELAB_GH_READ_TOKEN` | Fine-grained PAT, **read-only** (issue and file writes answer 403). Hermes' `HOMELAB_GH_TOKEN` env (commit-watcher) and the GitHub MCP render from it. Distinct from the wiki token |
-| `HOMELAB_GH_TOKEN` | Fine-grained PAT that **can write** to home-ops. OpenCode's `GITHUB_TOKEN` only. Hermes must never render from it (`hermes-secret-scope-test.py`) |
+| `HOMELAB_GH_TOKEN` | Fine-grained PAT that **can write** to home-ops. OpenCode's `GITHUB_TOKEN` only. Hermes must never render from it (`scripts/ci/hermes-github-token-test.py`) |
 | `DISCORD_WEBHOOK` | Channel webhook for the commit digest |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS` | BotFather token and numeric user ids |
 
@@ -97,7 +95,7 @@ it. The key is Hermes' alone, so its spend is attributable; its $50 per
 OpenCode Go `go-*` models are $0). Hermes sends `x-opencode-session` for
 the `go-*` models (`session_affinity_header`). Do not name that env var
 `OPENAI_API_KEY` or `GH_TOKEN`: Hermes scrubs built-in provider
-credential names. Skill `hermes-agent`.
+credential names.
 
 Git access is that one repo-scoped fine-grained PAT, rendered to
 `/secrets/git/.git-credentials`. GitHub rejects it for every other repo.

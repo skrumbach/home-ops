@@ -1,15 +1,14 @@
 # CloudNativePG
 
-Tripwires, the single barman destination, and the health gate live in skill
-`databases` (`references/cnpg.md`). The operator chart tag is the
+The operator chart tag is the
 OCIRepository `ref.tag` in `operator/helmrelease.yaml`, not a version written
 here. The `gatus.io/enabled` ConfigMap in `cluster-18/` is not a live Gatus
-check (skill `observability`).
+check.
 
 ## Restore into a fresh cluster
 
 postgres-18 is the only Cluster (postgres-17 was retired 2026-11-07). The
-rebuild-in-place shape is "Restore shape" in `references/cnpg.md`.
+rebuild-in-place rule is the comment above `bootstrap:` in `cluster-18/cluster-18.yaml`.
 
 1. Apply a manual `Backup` (`method: plugin`, `cluster.name: postgres-18`) and
    wait for `phase=completed`.

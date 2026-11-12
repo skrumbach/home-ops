@@ -4,7 +4,7 @@
 # RSS token. No consumer of /rss or /api was found (Git, Envoy access logs), so nothing is exempt.
 # A future RSS reader or API client gets a named route rule plus sectionName, never the proxy
 # provider's skip_path_regex. The cross-namespace backendRef needs the selfhosted entry in
-# security/allow-authentik-access. Skill authentik-terraform.
+# security/allow-authentik-access.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

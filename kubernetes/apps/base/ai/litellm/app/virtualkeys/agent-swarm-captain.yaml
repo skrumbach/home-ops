@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
-# Captain-owned key for off-cluster agent-swarm runs; budgetless by captain decision (CI-asserted).
+# Captain-owned key for off-cluster agent-swarm runs; budgetless by captain decision, so free models only (CI-asserted).
 # Brought under Git by forced rotation (no adopt-by-alias); consumers re-copy it from 1Password.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey

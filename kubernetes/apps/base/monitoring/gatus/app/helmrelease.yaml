@@ -36,7 +36,7 @@ spec:
               requests:
                 cpu: 10m
                 # Equal to the limit on purpose: a limit with no request reserves the whole limit
-                # silently (scripts/ci/memory-request-declared-test.py). restartPolicy Always makes
+                # silently. restartPolicy Always makes
                 # this a native sidecar, so its request ADDS to the pod total.
                 memory: 64Mi
               limits:
@@ -90,7 +90,7 @@ spec:
       # init container (--auto-httproute/--enable-service) watches the K8s API and needs the token.
       automountServiceAccountToken: true
       # fsGroup 65532: the nonroot sidecar must write the shared config PVC
-      # or HTTPRoute auto-discovery stops silently. Skill observability.
+      # or HTTPRoute auto-discovery stops silently.
       securityContext:
         fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch

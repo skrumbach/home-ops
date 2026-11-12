@@ -1,7 +1,6 @@
 ---
 # Scratch drop folder at smb://10.50.0.55/files. ceph-filesystem-rwx.
 # Deliberately unbacked: there is no second copy. Do not add kopiur without being asked.
-# See skill hermes-agent references/shared-storage.md.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

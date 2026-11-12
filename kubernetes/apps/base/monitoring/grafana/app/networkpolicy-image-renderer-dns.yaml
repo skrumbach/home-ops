@@ -18,7 +18,7 @@ spec:
   ingress:
     # DNS replies from CoreDNS. No ports restriction on purpose: `ports` matches the
     # destination port and a reply arrives on an ephemeral one, so port:53 drops every
-    # reply. Skill networking.
+    # reply.
     - from:
         - namespaceSelector:
             matchLabels:

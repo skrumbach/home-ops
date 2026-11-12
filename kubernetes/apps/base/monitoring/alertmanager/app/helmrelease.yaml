@@ -100,7 +100,7 @@ spec:
           gethomepage.dev/weight: "10"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=alertmanager
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe readiness on the in-cluster Service instead. Skill observability.
+          # login page. Probe readiness on the in-cluster Service instead.
           gatus.home-operations.com/endpoint: |-
             url: http://alertmanager.monitoring.svc.cluster.local:9093/-/ready
             conditions: ["[STATUS] == 200"]

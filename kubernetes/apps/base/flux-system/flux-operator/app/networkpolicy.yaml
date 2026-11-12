@@ -7,7 +7,7 @@ metadata:
 spec:
   # Supplemental policy for the chart-owned `flux-operator-web` NetworkPolicy (Helm-managed, not in git),
   # which does not admit kube-dns. Policies on the same pod OR-combine; this matches the chart policy's
-  # podSelector exactly. Do not disable or replace the chart's policy. Skill `networking`.
+  # podSelector exactly. Do not disable or replace the chart's policy.
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: flux-operator
@@ -17,7 +17,6 @@ spec:
   ingress:
     # Allow DNS replies from CoreDNS. No ports restriction on purpose: `ports` matches the DESTINATION port,
     # and a reply arrives on the pod's ephemeral port, so `port: 53` would silently drop every reply.
-    # Skill `networking`.
     - from:
         - namespaceSelector:
             matchLabels:

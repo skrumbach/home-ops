@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold a new app's manifests to match this repo's app-structure convention.
-# See .agents/skills/flux-gitops/references/app-shapes.md for the three shapes this generates and the traps
-# it encodes by construction. Run from the repo root.
+# Run from the repo root.
 set -euo pipefail
 
 usage() {
@@ -34,7 +33,7 @@ Examples:
   # add a second family member ("playwright") to an existing app ("rsshub")
   scripts/add-app/generate-app.sh selfhosted rsshub --shape=family --piece=playwright
 
-  # parameterized instance (rare - see .agents/skills/flux-gitops/references/app-shapes.md "Parameterized instance")
+  # parameterized instance (rare: nested app/<key>/<instance>/)
   scripts/add-app/generate-app.sh actions-runner-system gha-runner-scale-set \
     --shape=parameterized --key=skrumbach --instance=home-ops
 EOF
@@ -88,7 +87,7 @@ MAIN_NS_DIR="kubernetes/apps/main/$NAMESPACE"
 if [[ ! -d "$BASE_NS_DIR" ]]; then
   echo "error: namespace '$NAMESPACE' has no kubernetes/apps/base/$NAMESPACE - this scaffold" >&2
   echo "  only adds apps to existing namespaces. A new top-level namespace needs a manual" >&2
-  echo "  entry on kubernetes/apps/main/kustomization.yaml first (see AGENTS.md NOTES)." >&2
+  echo "  entry on kubernetes/apps/main/kustomization.yaml first." >&2
   exit 1
 fi
 if [[ ! -d "$MAIN_NS_DIR" ]]; then
@@ -124,8 +123,7 @@ append_file() {
 }
 
 # Relative-path depth from a base kustomize directory up to kubernetes/: a
-# components: include's ../ count depends on how deep the base path is
-# (trap in .agents/skills/flux-gitops/references/app-shapes.md).
+# components: include's ../ count depends on how deep the base path is: copy a sibling at the same depth.
 components_relpath() {
   local dir="$1" name="$2"
   # dir is repo-relative, e.g. kubernetes/apps/base/ai/my-app/app
@@ -216,9 +214,8 @@ spec:
                 memory: 256Mi
     # Pod-level security lives here, spelled exactly "defaultPodOptions" and
     # a sibling of controllers:/service: - not nested inside controllers:.
-    # A wrong key or wrong nesting here is silently dropped by Helm (no
-    # warning from flate, no error from Flux; see .agents/skills/flux-gitops/references/app-shapes.md "A
-    # pod-options key the chart doesn't recognize is silently discarded").
+    # A wrong key or wrong nesting here is silently dropped by Helm (no warning from flate,
+    # no error from Flux): check the chart's values.yaml.
     # Fill in the real uid/gid this image runs as.
     defaultPodOptions:
       securityContext:
@@ -396,10 +393,8 @@ $components_block  commonMetadata:
   timeout: 5m
   path: ./$base_path
   prune: true
-  # healthChecks target the rendered workload, not the HelmRelease - a
-  # HelmRelease-kind check stays Ready through a live crashloop (see
-  # .agents/skills/flux-gitops/references/app-shapes.md). wait: false so Flux uses this list instead of
-  # assessing the whole inventory.
+  # healthChecks target the rendered workload, not the HelmRelease: a HelmRelease check stays
+  # Ready through a crashloop. wait: false so Flux uses this list instead of assessing the whole inventory.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -559,8 +554,7 @@ resources: entry into an existing, possibly hand-edited kustomization.yaml
 safely is not something this script attempts. Add manually:
   $base_dir/kustomization.yaml (resources: [./helmrelease.yaml])
   a resources: entry for it in $BASE_NS_DIR/$APP/app/kustomization.yaml
-See .agents/skills/flux-gitops/references/app-shapes.md "Parameterized instance" before using this shape -
-in almost every case shape=app or shape=family is the better fit.
+A parameterized instance is rare: in almost every case shape=app or shape=family is the better fit.
 EOF
     ;;
 
@@ -578,7 +572,7 @@ Next steps:
   - decide whether this app needs a backup component (components/kopiur;
     VolSync is removed) - that requires measuring the live file
     ownership after first deploy, so it is deliberately not auto-generated;
-    see kubernetes/components/kopiur/Readme.md, and the "one component include
-    covers one volume" trap in .agents/skills/flux-gitops/references/app-shapes.md
+    see kubernetes/components/kopiur/Readme.md (one components/kopiur include
+    covers one volume; a second PVC is a second Kustomization)
   - validate: mise exec -- task flux:test:all
 EOF

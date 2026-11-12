@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # selfhosted/linkwarden's key (AI tagging on the local model). chat-local only, so spend is $0 by
 # construction and maxBudget is an inert guard (same reasoning as repo-wiki); rpm/tpm are the real
-# bound on the shared B70. See skill litellm-proxy (references/governance-keys.md).
+# bound on the shared B70.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

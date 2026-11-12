@@ -131,7 +131,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    # Proof: proof-ledger.md row 4.
     - ../../../../../components/kopiur/pvc
   interval: 30m
   dependsOn:
@@ -144,7 +143,6 @@ spec:
     - name: external-secrets
       namespace: security
   # Workload health signal only. wait:false is required for Flux to honour healthChecks at all (wait:true assesses the whole inventory instead).
-  # Skill `databases`.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -158,7 +156,7 @@ spec:
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
-      # Cache stays at the 2Gi default, which clears this snapshot. Skill `kopiur-backups`.
+      # Cache stays at the 2Gi default, which clears this snapshot.
   prune: true
   sourceRef:
     kind: GitRepository
@@ -207,7 +205,6 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Second, OFF-SITE copy of the postgres-18 barman archive (LAN MinIO -> R2).
-# Skill `databases`.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

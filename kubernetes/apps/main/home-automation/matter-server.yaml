@@ -11,7 +11,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    # Proof: proof-ledger.md row 16.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   interval: 10m
@@ -34,7 +33,7 @@ spec:
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi
-      # 2Gi default clears this snapshot. Root mover needs privileged-movers. Skill `kopiur-backups`.
+      # 2Gi default clears this snapshot. Root mover needs privileged-movers.
       KOPIUR_PUID: "0"
       KOPIUR_PGID: "0"
       KOPIUR_SCHEDULE_R2: "H 10 * * *"

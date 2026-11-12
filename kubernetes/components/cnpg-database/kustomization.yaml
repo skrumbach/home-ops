@@ -6,7 +6,6 @@ kind: Kustomization
 # Flux Kustomization `<app>-db` (targetNamespace: database) in the app's own overlay.
 # Variables: APP, CNPG_ROLE, CNPG_DATABASE, optional CNPG_OP_ITEM (1Password item,
 # default APP) and CNPG_PASSWORD_KEY (default POSTGRES_DB_USER_PASSWORD).
-# Skill `databases`.
 resources:
   - ./externalsecret.yaml
   - ./databaserole.yaml

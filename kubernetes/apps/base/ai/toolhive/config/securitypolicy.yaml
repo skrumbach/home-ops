@@ -3,7 +3,6 @@
 # Bearer token on the MCP route. vmcp has no static-token mode, so Envoy enforces it here and
 # callers of the in-cluster Service bypass it. Envoy strips "Bearer " before comparing, and
 # sanitize drops the header before vmcp. Only rule `mcp`: `health` stays open for Gatus.
-# Skill ai-stack references/toolhive.md.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

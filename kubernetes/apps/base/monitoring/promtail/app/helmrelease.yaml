@@ -13,7 +13,7 @@ spec:
     fullnameOverride: promtail
 
     # talos-3 carries a home-operations.com/dedicated taint (PreferNoSchedule, a score
-    # penalty not a filter - .agents/skills/node-scheduling/references/talos-3-ledger.md).
+    # penalty not a filter).
     # Helm does not merge lists, so this block replaces the chart's default tolerations
     # (control-plane/master) wholesale; both defaults are restated alongside the new one.
     tolerations:

@@ -1,4 +1,4 @@
-# Adopted providers omit client_secret and grant_types. Declaring client_secret rotates the live secret. Created providers must declare grant_types. Skill `authentik-terraform`.
+# Adopted providers omit client_secret and grant_types. Declaring client_secret rotates the live secret. Created providers must declare grant_types.
 
 locals {
   oauth2_applications = {

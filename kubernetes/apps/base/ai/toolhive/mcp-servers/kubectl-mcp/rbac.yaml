@@ -6,7 +6,6 @@ metadata:
 ---
 # aggregationRule discards hand-written rules. Grants live on kubectl-mcp-readonly-base,
 # labeled rbac.home-operations.com/aggregate-to-kubectl-mcp-readonly. Core Secrets are omitted.
-# See skill ai-stack references/toolhive.md.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

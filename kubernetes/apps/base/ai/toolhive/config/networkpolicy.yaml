@@ -4,7 +4,7 @@
 # `mcp` route from being bypassed through the Service. Only envoy-internal and Prometheus (for
 # /metrics) reach 4483. Ingress default-deny also drops the REPLIES to vmcp's own outbound calls
 # (DNS, backend proxies, embedding server) on this cluster, so those sources are admitted with no
-# `ports:` (a reply arrives on an ephemeral port). Skill ai-stack references/toolhive.md.
+# `ports:` (a reply arrives on an ephemeral port).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

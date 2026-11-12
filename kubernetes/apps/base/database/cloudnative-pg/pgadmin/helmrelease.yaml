@@ -93,7 +93,7 @@ spec:
         fsGroup: 5050
         fsGroupChangePolicy: OnRootMismatch
       # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute; talos-3 is
-      # PreferNoSchedule, so the score penalty keeps this off talos-3. Skill `node-scheduling`.
+      # PreferNoSchedule, so the score penalty keeps this off talos-3.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname

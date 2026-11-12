@@ -1,8 +1,8 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # Captain's off-cluster gnhf agent loop. chat-local only: zero-priced and terminal, so it can never
-# reach a paid API. Budgetless by CI-asserted exception; rpm/tpm are the captain's live values and only
-# stop spurious throttling. Skill litellm-proxy (references/governance-keys.md).
+# reach a paid API. Budgetless, so free models only (CI-asserted); rpm/tpm are the captain's live values and only
+# stop spurious throttling.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

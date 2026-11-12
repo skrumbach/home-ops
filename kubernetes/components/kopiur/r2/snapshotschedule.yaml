@@ -8,10 +8,10 @@ spec:
   policyRef:
     name: "${APP}-r2"
   schedule:
-    # Daily at hour 4. Do not hand-assign the H minute. Skill `kopiur-backups` references/onboarding.md.
+    # Daily at hour 4. Do not hand-assign the H minute.
     cron: "${KOPIUR_SCHEDULE_R2:-H 4 * * *}"
     jitter: 5m
-    # Without a timezone the hour is read as UTC and the stagger breaks at DST. Skill `kopiur-backups`.
+    # kopiur reads cron as UTC unless timezone is set; the pin keeps the slot hours fixed across DST.
     timezone: "${KOPIUR_SCHEDULE_TIMEZONE:-America/New_York}"
   deletion:
     onScheduleDelete: Retain

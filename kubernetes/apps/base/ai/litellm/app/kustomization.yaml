@@ -4,7 +4,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ai
 # The operator creates the proxy Deployment, Service and config ConfigMap from these CRs.
-# See skill litellm-proxy.
 resources:
   - ./externalsecret.yaml
   - ./pushsecret-sso.yaml

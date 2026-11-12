@@ -10,7 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   # No `components: [../../../../../components/kopiur]`.
-  # Skill `ai-stack`.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment

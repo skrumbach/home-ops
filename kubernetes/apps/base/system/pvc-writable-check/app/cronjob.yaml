@@ -1,6 +1,5 @@
 ---
 # An app can be Ready, probed, and backed up while unable to write its volume.
-# Skill `pvc-integrity-checks`.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -269,6 +268,5 @@ spec:
                   memory: 64Mi
                 limits:
                   # 1000m. A tight CFS quota throttled every run while the node was idle.
-                  # Skill `pvc-integrity-checks`.
                   cpu: 1000m
                   memory: 256Mi
