@@ -21,6 +21,8 @@ spec:
       # Chat stays llama.cpp SYCL. This GPTQ cannot finish vLLM warmup on one B70
       # (intel/llm-scaler#382). The controller name stays vllm so the Service does not move.
       vllm:
+        annotations:
+          reloader.stakater.com/auto: "true"
         strategy: Recreate
         pod:
           terminationGracePeriodSeconds: 60
