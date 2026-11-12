@@ -51,7 +51,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 - Commits: `type(scope): description`, types feat/fix/chore/ci/docs/refactor/test, scope is a container, helm, github-action, mise, talos, flux, deps or an app/namespace (`.commitlintrc.yaml`).
 - The parent Gateway's `external-dns.kubernetes.io/target` decides the DNS record, not a route annotation.
 - Task runner split is deliberate: `just` owns Talos, bootstrap and `kube` recipes; `task` owns the Rook suite and network diagnostics. Do not port one to the other.
-- Storage classes: `ceph-block` (RWO), `ceph-filesystem-rwx` (RWX), `openebs-hostpath` (local); leave new claims off `ceph-filesystem`.
+- Storage classes: `ceph-block` (RWO), `ceph-filesystem-rwx` (RWX), `openebs-hostpath` (local), `ceph-bucket` (ObjectBucketClaims); leave new claims off `ceph-filesystem`.
 - Nodes `talos-1|2|3` are `10.10.10.11/12/13`; never target the VIP `10.10.10.10`.
 
 ## TRIPWIRES
