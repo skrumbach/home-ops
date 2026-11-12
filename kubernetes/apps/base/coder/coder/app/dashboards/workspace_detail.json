@@ -22,8 +22,8 @@
   "panels": [
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victoria-logs"
       },
       "description": "",
       "gridPos": {
@@ -1224,9 +1224,10 @@
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victoria-logs"
       },
+      "description": "VictoriaLogs has no logger field for coderd's human-format log lines: this matches the provisioner logger names (runner, terraform, provisioner) in the message text of the coder container.",
       "gridPos": {
         "h": 10,
         "w": 20,
@@ -1247,24 +1248,24 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "loki"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victoria-logs"
           },
           "editorMode": "code",
-          "expr": "{namespace=~`(coder|coder)`, logger=~\"(.*runner|terraform|provisioner.*)\"} |~ \"$workspace_name\" | line_format `{{ printf \"[\\033[35m\" }}{{.pod}}{{ printf \"\\033[0m]\\t\" }}{{ __line__ }}`",
+          "expr": "{kubernetes.pod_namespace=\"coder\", kubernetes.container_name=\"coder\"} _msg:~\"runner|terraform|provisioner\" _msg:~\"$workspace_name\" | format \"[<kubernetes.pod_name>] <_msg>\" as _msg",
           "hide": false,
-          "queryType": "range",
+          "queryType": "instant",
           "refId": "A"
         },
         {
           "datasource": {
-            "type": "loki",
-            "uid": "loki"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victoria-logs"
           },
           "editorMode": "code",
-          "expr": "{namespace=`coder-workspaces`, pod=~\".*($workspace_name).*\"} | line_format `{{ printf \"[\\033[32m\" }}{{.pod}}{{ printf \"\\033[0m]\\t\" }}{{ __line__ }}`",
+          "expr": "{kubernetes.pod_namespace=\"coder-workspaces\"} kubernetes.pod_name:~\"$workspace_name\" | format \"[<kubernetes.pod_name>] <_msg>\" as _msg",
           "hide": false,
-          "queryType": "range",
+          "queryType": "instant",
           "refId": "B"
         }
       ],
