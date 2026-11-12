@@ -93,9 +93,9 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/description: Alerting system that works with Prometheus
+          gethomepage.dev/description: Alert routing
           gethomepage.dev/group: Observability
-          gethomepage.dev/icon: alertmanager
+          gethomepage.dev/icon: alertmanager.svg
           gethomepage.dev/name: Alertmanager
           gethomepage.dev/weight: "10"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=alertmanager

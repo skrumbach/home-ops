@@ -11,9 +11,9 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/description: Cilium network flows
-    gethomepage.dev/group: observe
-    gethomepage.dev/icon: sh-cilium
-    gethomepage.dev/name: hubble
+    gethomepage.dev/group: Platform
+    gethomepage.dev/icon: cilium.svg
+    gethomepage.dev/name: Hubble
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: k8s-app=hubble-ui
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"

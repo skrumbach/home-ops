@@ -198,9 +198,10 @@ spec:
             ui:
               hide-url: true
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: zigbee2mqtt
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: Zigbee2MQTT
           gethomepage.dev/icon: zigbee2mqtt.svg
+          gethomepage.dev/description: Zigbee devices over MQTT
         hostnames:
           - zigbee2mqtt.${SECRET_DOMAIN}
         parentRefs:

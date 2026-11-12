@@ -9,10 +9,11 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/description: Rendered Flux PR diffs
-    gethomepage.dev/group: observe
-    gethomepage.dev/name: konflate
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: Konflate
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: app.kubernetes.io/name=konflate
+    gethomepage.dev/icon: konflate.svg
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == 200"]

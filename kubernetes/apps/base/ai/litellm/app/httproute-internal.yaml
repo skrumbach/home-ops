@@ -11,8 +11,9 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: AI
     gethomepage.dev/name: LiteLLM
-    gethomepage.dev/description: "LLM governance proxy - virtual keys, budgets, fallback chains"
-    gethomepage.dev/icon: litellm.png
+    gethomepage.dev/description: "LLM gateway, keys and budgets"
+    gethomepage.dev/icon: sh-litellm.svg
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=litellm
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     # /health/readiness also covers the Postgres dependency.
     gatus.home-operations.com/endpoint: |-

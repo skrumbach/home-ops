@@ -32,30 +32,19 @@ data:
     traefik: false # enable traefik ingressRoute
     gateway: true
   services.yaml: |
-    - Calendar:
-        - Agenda:
-            widget:
-              type: calendar
-              view: agenda # optional - possible values monthly, agenda
-              maxEvents: 20 # optional - defaults to 10
-              integrations: # optional
-                - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Sonarr # service name for that widget
-                - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Radarr # service name for that widget
     - Infrastructure:
-        - Unifi:
+        - UniFi:
             href: {{HOMEPAGE_VAR_UNIFI_HOST_URL}}
-            icon: unifi.png
+            icon: unifi.svg
+            description: Network controller
             widget:
               type: unifi
               url: {{HOMEPAGE_VAR_UNIFI_HOST_URL}}
               key: {{HOMEPAGE_VAR_UNIFI_API_KEY}}
         - TrueNAS:
             href: https://nas.${SECRET_DOMAIN}
-            icon: truenas.png
+            icon: truenas.svg
+            description: NAS storage
             widget:
               type: truenas
               url: https://nas.${SECRET_DOMAIN}
@@ -63,36 +52,41 @@ data:
               enablePools: true
               nasType: scale
   settings.yaml: |
-    title: Dashboard
-    background: https://images.unsplash.com/photo-1502790671504-542ad42d5189?auto=format&fit=crop&w=2560&q=80
+    title: home-ops
     theme: dark
     color: slate
+    # The look is resources/custom.css. It restyles the boxed header and the text
+    # status badge, so headerStyle and statusStyle stay at these values.
     headerStyle: boxed
+    useEqualHeights: true
+    hideVersion: true
+    # Group order on the page. Tiles join a group through the gethomepage.dev/group
+    # annotation on their HTTPRoute; a group not listed here lands at the bottom.
     layout:
-      Calendar:
-        style: columns
-      Automation:
-        style: columns
+      Home Automation:
+        style: row
+        columns: 4
       Media:
-        style: columns
-        columns: 3
-      Selfhosted:
         style: row
-        columns: 2
-      Security:
-        style: row
-        columns: 2
+        columns: 4
       Downloads:
         style: row
-        columns: 3
-      Games:
+        columns: 4
+      AI:
         style: row
+        columns: 4
+      Apps:
+        style: row
+        columns: 4
+      Platform:
+        style: row
+        columns: 4
+      Observability:
+        style: row
+        columns: 4
       Infrastructure:
         style: row
-        columns: 2
-      Monitoring:
-        style: row
-        columns: 3
+        columns: 4
   widgets.yaml: |
     - resources:
         backend: kubernetes

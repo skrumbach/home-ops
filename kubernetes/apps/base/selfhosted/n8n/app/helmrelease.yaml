@@ -123,9 +123,11 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Automation
-          gethomepage.dev/name: N8N
+          gethomepage.dev/group: Apps
+          gethomepage.dev/name: n8n
           gethomepage.dev/icon: n8n.svg
+          gethomepage.dev/description: Workflow automation
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           # /healthz/readiness, NOT /healthz: /healthz is an unconditional 200 upstream and stayed green
           # through a database outage. See the probes block above.
@@ -148,10 +150,11 @@ spec:
       webhooks:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: APIs
-          gethomepage.dev/description: N8N Webhook API
-          gethomepage.dev/name: N8N Webhook
-          gethomepage.dev/icon: n8n.svg
+          gethomepage.dev/group: Apps
+          gethomepage.dev/description: Inbound webhook endpoint
+          gethomepage.dev/name: n8n Webhook
+          gethomepage.dev/icon: "mdi-webhook-#22D8F0"
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
           external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           gatus.home-operations.com/endpoint: |-
             url: https://n8n-webhook.${SECRET_DOMAIN}/webhook/any

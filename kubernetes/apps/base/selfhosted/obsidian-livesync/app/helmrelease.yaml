@@ -90,9 +90,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Obsidian LiveSync
           gethomepage.dev/icon: obsidian.svg
+          gethomepage.dev/description: Vault sync
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           gatus.home-operations.com/endpoint: |-
             url: https://sync.${SECRET_DOMAIN}/

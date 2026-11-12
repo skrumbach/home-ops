@@ -56,8 +56,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Excalidraw
+          gethomepage.dev/icon: excalidraw.svg
+          gethomepage.dev/description: Whiteboard
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
           # login page. Probe the Service in-cluster instead.

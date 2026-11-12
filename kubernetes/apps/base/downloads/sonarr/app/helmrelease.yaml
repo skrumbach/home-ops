@@ -126,9 +126,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/sonarr.svg
-          gethomepage.dev/description: "Sonarr is a PVR for Usenet and BitTorrent users to manage and download TV shows."
+          gethomepage.dev/name: Sonarr
+          gethomepage.dev/icon: sonarr.svg
+          gethomepage.dev/description: TV shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sonarr
         hostnames:
           - sonarr.${SECRET_DOMAIN}

@@ -116,9 +116,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/plex.svg
-          gethomepage.dev/description: "Plex is a media server for streaming to Plex clients."
+          gethomepage.dev/name: Plex
+          gethomepage.dev/icon: plex.svg
+          gethomepage.dev/description: "Movies, shows and music"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=plex
           external-dns.kubernetes.io/target: "external.sklab.dev"
           gatus.home-operations.com/endpoint: |-

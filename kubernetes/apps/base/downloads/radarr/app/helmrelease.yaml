@@ -118,9 +118,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/radarr.svg
-          gethomepage.dev/description: "Radarr is a PVR for Usenet and BitTorrent users to manage and download movies."
+          gethomepage.dev/name: Radarr
+          gethomepage.dev/icon: radarr.svg
+          gethomepage.dev/description: Movies
           gethomepage.dev/pod-selector: app.kubernetes.io/name=radarr
         hostnames:
           - radarr.${SECRET_DOMAIN}

@@ -37,11 +37,12 @@ spec:
       enabled: true
       annotations:
         gethomepage.dev/enabled: "true"
-        gethomepage.dev/description: Renovate runs and logs
-        gethomepage.dev/group: observe
-        gethomepage.dev/name: renovate
+        gethomepage.dev/description: Dependency update runs
+        gethomepage.dev/group: Platform
+        gethomepage.dev/name: Renovate
         gethomepage.dev/app: *app
-        gethomepage.dev/pod-selector: app.kubernetes.io/name=renovate-operator
+        gethomepage.dev/pod-selector: app=renovate-operator
+        gethomepage.dev/icon: renovate.svg
         gatus.home-operations.com/endpoint: |-
           conditions: ["[STATUS] == 200"]
       hostnames:

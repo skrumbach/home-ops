@@ -112,9 +112,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/cleanuparr.svg
-          gethomepage.dev/description: "Removes stalled and failed downloads from the arr queues so they are searched again."
+          gethomepage.dev/name: Cleanuparr
+          gethomepage.dev/icon: cleanuparr.png
+          gethomepage.dev/description: Clears stalled downloads
           gethomepage.dev/pod-selector: app.kubernetes.io/name=cleanuparr
         hostnames:
           - cleanuparr.${SECRET_DOMAIN}

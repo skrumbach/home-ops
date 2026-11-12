@@ -97,9 +97,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/icon: calibre-web.png
-          gethomepage.dev/name: *app
+          gethomepage.dev/icon: calibre-web.svg
+          gethomepage.dev/name: Calibre-Web
           gethomepage.dev/group: Media
+          gethomepage.dev/description: E-book library
           gatus.home-operations.com/endpoint: |-
             url: https://calibre.${SECRET_DOMAIN}/login
             conditions:

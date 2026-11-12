@@ -6,12 +6,12 @@ metadata:
   name: &app pgadmin
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Services
-    gethomepage.dev/name: *app
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: pgAdmin
     gethomepage.dev/pod-selector: app.kubernetes.io/name=pgadmin
-    gethomepage.dev/icon: si-postgresql
+    gethomepage.dev/icon: pgadmin.svg
     gethomepage.dev/siteMonitor: "https://pgadmin.${SECRET_DOMAIN}"
-    gethomepage.dev/description: "PostgreSQL administration"
+    gethomepage.dev/description: PostgreSQL admin
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-
       url: https://pgadmin.${SECRET_DOMAIN}/misc/ping

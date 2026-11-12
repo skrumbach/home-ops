@@ -11,8 +11,9 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: AI
     gethomepage.dev/name: OpenCode
-    gethomepage.dev/description: "Interactive coding workspace"
+    gethomepage.dev/description: Coding workspace
     gethomepage.dev/pod-selector: app.kubernetes.io/name=opencode
+    gethomepage.dev/icon: opencode.svg
     external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == any(200, 302, 401)"]

@@ -114,8 +114,10 @@ spec:
       internal:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
-          gethomepage.dev/name: *app
+          gethomepage.dev/group: Apps
+          gethomepage.dev/name: Changedetection
+          gethomepage.dev/icon: changedetection.svg
+          gethomepage.dev/description: Web page change alerts
           # securitypolicy.yaml gates this route, so a route check would measure the Authentik
           # login page. Probe the Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-

@@ -168,9 +168,11 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: home-assistant
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant.svg
+          gethomepage.dev/description: Smart home hub
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
         hostnames:
           - "hass.${SECRET_DOMAIN}"
         parentRefs:
@@ -184,9 +186,11 @@ spec:
       code-server:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: home-assistant-code
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: HA Code Server
           gethomepage.dev/icon: vscode.svg
+          gethomepage.dev/description: Edit the Home Assistant config
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
         hostnames:
           - "hass-code.${SECRET_DOMAIN}"
         parentRefs:

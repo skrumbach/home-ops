@@ -281,9 +281,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/tdarr.svg
-          gethomepage.dev/description: "Tdarr is a distributed transcoding system for automating media library optimization."
+          gethomepage.dev/name: Tdarr
+          gethomepage.dev/icon: tdarr.svg
+          gethomepage.dev/description: Library transcoding to AV1
           gethomepage.dev/pod-selector: app.kubernetes.io/name=tdarr
         hostnames:
           - tdarr.${SECRET_DOMAIN}

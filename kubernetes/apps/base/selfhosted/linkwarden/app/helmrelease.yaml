@@ -114,9 +114,10 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Linkwarden
-          gethomepage.dev/icon: linkwarden.svg
+          gethomepage.dev/icon: sh-linkwarden.svg
+          gethomepage.dev/description: Bookmarks and page archives
           external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a
           # Linkwarden body field the Authentik login page cannot match, and proves /api still
