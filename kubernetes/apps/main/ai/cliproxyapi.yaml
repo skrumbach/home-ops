@@ -7,8 +7,8 @@ metadata:
 spec:
   targetNamespace: &namespace ai
   components:
-    # kopiur ONLY: the app's own persistence block creates the claim.
     - ../../../../../components/kopiur
+    - ../../../../../components/kopiur/pvc
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -30,6 +30,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      KOPIUR_CAPACITY: 1Gi
       KOPIUR_CACHE_CAPACITY: 2Gi
       KOPIUR_SCHEDULE_R2: "H 19 * * *"
       KOPIUR_PUID: "1000"
