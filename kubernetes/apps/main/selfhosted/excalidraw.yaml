@@ -12,7 +12,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  interval: 90m
+  interval: 1h
   postBuild:
     substitute:
       APP: *app
