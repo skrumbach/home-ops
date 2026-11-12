@@ -3,7 +3,6 @@
 # .build/content from the rendered manifests and the Markdown already in the repo.
 baseURL: /
 title: home-ops
-languageCode: en
 contentDir: .build/content
 publishDir: .build/public
 disableKinds: [taxonomy, term, rss]

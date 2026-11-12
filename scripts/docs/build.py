@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["pyyaml"]
+# dependencies = ["pyyaml>=6,<7"]
 # ///
 """Generate the documentation site's Markdown content tree from the repository.
 
@@ -62,6 +62,7 @@ OPS_REST = [
     "scripts/add-app/README.md",
     "scripts/ci/README.md",
     ".github/workflows/README.md",
+    "scripts/docs/README.md",
 ]
 
 
@@ -873,9 +874,9 @@ def build_app_page(key, app, model, ctx, weight) -> tuple[str, list[str]]:
         rows = []
         for r in routes:
             hosts = "\n".join(f"[{h}](https://{h}/)" if "." in h else h for h in r["hosts"]) or "(any host)"
-            rows.append([hosts, gateway_label(r["gateways"]), "\n".join(code(p) for p in r["paths"]), "\n".join(r["policies"]) or "none",
+            rows.append([hosts, gateway_label(r["gateways"]), "\n".join(code(p) for p in r["paths"]), "\n".join(r["policies"]) or "none at the gateway",
                          f"{r['kind']} {code(r['name'])}"])
-        return table(["Host", "Gateway", "Paths", "Security policy", "Object"], rows) if rows else ""
+        return table(["Host", "Gateway", "Paths", "Gateway policy", "Object"], rows) if rows else ""
 
     def storage():
         rows = []
@@ -1282,8 +1283,8 @@ def exposure_page(ctx: dict) -> str:
     def row(r: dict) -> list[str]:
         hosts = "\n".join(f"[{h}](https://{h}/)" if "." in h else h for h in r["hosts"]) or "(any host)"
         return [r["ns"], app_link(r["app"]) if r["app"] else "", hosts, "\n".join(code(p) for p in r["paths"]) or "/",
-                "\n".join(r["policies"]) or "none", code(r["name"])]
-    headers = ["Namespace", "App", "Host", "Paths", "Security policy", "Route"]
+                "\n".join(r["policies"]) or "none at the gateway", code(r["name"])]
+    headers = ["Namespace", "App", "Host", "Paths", "Gateway policy", "Route"]
     body = (f"{len(public)} routes are attached to the public gateway `{PUBLIC_GATEWAY}` and {len(internal)} only to internal "
             "gateways. A route on both counts as public.\n\n## Public\n\n" + table(headers, [row(r) for r in public]) +
             f"\n\n## Internal\n\n{len(internal)} routes.\n\n")
@@ -1451,6 +1452,15 @@ def main() -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
 
+    # A page that silently went empty is worse than a red build: a hand-kept name that no longer
+    # matches, or a manifest shape this script no longer understands, fails the run.
+    found = {v["name"] for v in ctx["versions"]}
+    warnings += [f"VERSION_RELEASES: no HelmRelease {ns}/{name} for {label!r}" for label, ns, name in VERSION_RELEASES if label not in found]
+    warnings += [f"{path}: listed for Operations but missing" for path in [*OPS_ORDER, OPS_RECOVERY, *OPS_REST] if not (ROOT / path).is_file()]
+    if model["by_kind"].get("SnapshotPolicy") and not ctx["backups"]:
+        warnings.append("SnapshotPolicy objects exist but no backup was recognised")
+    if model["by_kind"].get("HTTPRoute") and "| " not in pages.get("reference/exposure.md", ""):
+        warnings.append("HTTPRoute objects exist but the exposure page has no table")
     for warning in warnings:
         print(f"WARN {warning}", file=sys.stderr)
     kinds = collections.Counter(re.search(r"^  kind: (\w+)$", t, re.M).group(1) for t in pages.values())
@@ -1460,7 +1470,7 @@ def main() -> int:
     print(f"build.py: {len(pages)} pages in {where} at {ctx['sha']} (" + ", ".join(f"{k} {n}" for k, n in sorted(kinds.items())) +
           f"); {sum(1 for k in apps if not ctx['descriptions'].get(k))} apps without description; "
           f"{len(unbacked)} PVCs without backup ({explained} explained by a manifest comment)")
-    return 0
+    return 1 if warnings else 0
 
 
 def renovate_body(ctx: dict) -> str:
