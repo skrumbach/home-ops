@@ -47,7 +47,7 @@ flowchart LR
   pvc -->|/config| ha
   pvc --> sp["SnapshotPolicy<br/>home-assistant-ceph + -r2"]
   nad["NetworkAttachmentDefinition<br/>kube-system/multus-iot"] -->|net1 10.40.0.100| ha
-  ha <--> iot(["IoT devices<br/>10.40.0.0/16"])
+  ha <--> iot(["IoT devices<br/>on bond0.3"])
   gw["Gateway<br/>envoy-internal"] -->|hass.sklab.dev| ha
   gw -->|hass-code.sklab.dev| pol["SecurityPolicy<br/>hass-code-auth"]
   pol -->|":12321"| ha
