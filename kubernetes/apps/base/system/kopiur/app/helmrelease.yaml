@@ -37,6 +37,15 @@ spec:
     podDisruptionBudget:
       enabled: true
       minAvailable: 1
+    # Without a spread both replicas ran on talos-1 (2026-11-13), so the two replicas bought nothing.
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: kopiur
+            app.kubernetes.io/component: controller
 
     resources:
       requests:
@@ -69,6 +78,14 @@ spec:
       podDisruptionBudget:
         enabled: true
         minAvailable: 1
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: kopiur
+              app.kubernetes.io/component: webhook
       serviceMonitor:
         enabled: true
 
