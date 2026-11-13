@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/home-operations/kromgo/main/config.schema.json
 #
-# Served without auth (LAN only since 2026-11-13). kromgo 0.16 returns every label of the
+# PUBLIC: served on envoy-external without auth. kromgo 0.16 returns every label of the
 # result sample in ?format=json, so every query must aggregate away all labels except the
 # one a badge displays. Keep the badge allow-list short, every metric under a
 # label-dropping aggregation, and serve no graphs (range data) or gallery. The route

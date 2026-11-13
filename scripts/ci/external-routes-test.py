@@ -15,6 +15,7 @@ GATEWAY = "envoy-external"
 # hostname -> path prefixes it may expose ("/" is the whole app).
 ALLOWED: dict[str, set[str]] = {
     "flux-webhook.sklab.dev": {"/hook/"},
+    "kromgo.sklab.dev": {"/badges/"},  # public read-only badges only
     "echo.sklab.dev": {"/"},
     # Pocket ID, whole app: the sign-in pages, their assets and the passkey/OIDC APIs are spread
     # over the SPA's paths, and the one route also carries the LAN admin UI (one gateway per

@@ -2,6 +2,8 @@
 
 GitOps repository for a 3-node Talos Linux Kubernetes cluster, continuously reconciled by Flux v2.
 
+![Talos](https://kromgo.sklab.dev/badges/talos_version) ![Kubernetes](https://kromgo.sklab.dev/badges/kubernetes_version) ![Flux](https://kromgo.sklab.dev/badges/flux_version) ![Nodes](https://kromgo.sklab.dev/badges/cluster_node_count) ![Pods](https://kromgo.sklab.dev/badges/cluster_pod_count) ![CPU](https://kromgo.sklab.dev/badges/cluster_cpu_usage) ![Memory](https://kromgo.sklab.dev/badges/cluster_memory_usage) ![Uptime](https://kromgo.sklab.dev/badges/cluster_uptime_days) ![Alerts](https://kromgo.sklab.dev/badges/cluster_alert_count)
+
 **Documentation: <https://skrumbach.github.io/home-ops/>** (generated from the manifests on every merge; the app catalog, backups, exposure and runbooks are all there).
 
 This is a live cluster, not an upstream template. There is no Makejinja render step, no `cluster.yaml` / `nodes.yaml`, and no `task init` / `task configure` / `task bootstrap:talos` workflow. Operator commands live in the files listed below.
