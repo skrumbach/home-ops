@@ -6,6 +6,9 @@ metadata:
   name: kube-state-metrics
 spec:
   targetNamespace: monitoring
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: monitoring
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/kube-state-metrics/app
   prune: true

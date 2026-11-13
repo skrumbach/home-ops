@@ -6,6 +6,9 @@ metadata:
   name: graphite-exporter
 spec:
   targetNamespace: monitoring
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: monitoring
   path: ./kubernetes/apps/base/monitoring/graphite-exporter/app
   prune: true
   sourceRef:
