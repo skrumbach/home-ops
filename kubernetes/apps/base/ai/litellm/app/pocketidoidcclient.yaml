@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# LiteLLM UI sign-in (litellmproxy.yaml GENERIC_*). Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: litellm
+spec:
+  name: LiteLLM
+  # Must match GENERIC_CLIENT_ID in litellmproxy.yaml. Immutable once created.
+  clientID: litellm
+  # The existing 1Password value (litellm-sso LITELLM_SSO_CLIENT_SECRET, shared with the Authentik
+  # client), which the proxy already reads from litellm-secret before it starts: the operator
+  # pushes it to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  clientSecretRef:
+    name: litellm-secret
+    key: GENERIC_CLIENT_SECRET
+  launchUrl: https://litellm.sklab.dev
+  # <PROXY_BASE_URL>/sso/callback as LiteLLM builds it.
+  callbackUrls: ["https://litellm.sklab.dev/sso/callback"]
+  # No logoutCallbackUrls: PROXY_LOGOUT_URL is opened without id_token_hint, so Pocket ID never
+  # redirects back.
+  # LiteLLM sends no PKCE challenge (GENERIC_CLIENT_USE_PKCE is unset).
+  pkceEnabled: false
+  # Every SSO user gets litellm_role proxy_admin (the admins group's custom claim), so only that
+  # group may sign in.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # The proxy reads its credentials from litellm-secret and litellmproxy.yaml; no copy is needed.
+  secret:
+    enabled: false
