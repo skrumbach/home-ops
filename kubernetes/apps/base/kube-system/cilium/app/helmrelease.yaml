@@ -84,7 +84,7 @@ spec:
     # bond0.90 here) - see ./ciliumclusterwidenetworkpolicy.yaml for the full safety argument.
     hostFirewall:
       enabled: true
-    # Hubble: relay, UI (app/httproute.yaml, Authentik SSO) and metrics. Flipping
+    # Hubble: relay, UI (app/httproute.yaml, Pocket ID at Envoy) and metrics. Flipping
     # hubble.enabled rolls the agent DaemonSet (cilium-config checksum).
     hubble:
       enabled: true
