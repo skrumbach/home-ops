@@ -17,3 +17,9 @@ tasks:
     cmds:
       - uv run --script scripts/docs/build.py
       - hugo server --source docs
+
+  pictures:
+    desc: Draw header.svg and concept.svg for every app README whose comments changed (scripts/docs/README.md)
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - uv run --script scripts/docs/pictures.py {{.CLI_ARGS}}

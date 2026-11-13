@@ -583,6 +583,38 @@ EOF
     ;;
 esac
 
+# The README skeleton of scripts/docs/README.md ("App READMEs"); one per app, so a second piece keeps the first.
+render_readme() {
+  cat <<EOF
+<p align="center"><img src="header.svg" width="100%" alt="$APP"></p>
+
+> TODO: one sentence, at most 120 characters, that says what $APP does for this cluster.
+
+**Live facts:** <https://skrumbach.github.io/home-ops/apps/$NAMESPACE/$APP/> (workloads, routes, storage, backups, secrets and alerts, generated on every merge)
+
+## What it does
+
+- TODO
+
+## How it works
+
+1. TODO
+
+## Settings that matter
+
+| Setting | Value | Why |
+|---|---|---|
+| TODO | | |
+
+## Operate it
+
+\`\`\`bash
+flux -n $NAMESPACE get ks $APP
+\`\`\`
+EOF
+}
+[[ -e "$BASE_NS_DIR/$APP/README.md" ]] || write_file "$BASE_NS_DIR/$APP/README.md" "$(render_readme)"
+
 cat <<EOF
 
 Next steps:
@@ -593,5 +625,7 @@ Next steps:
     ownership after first deploy, so it is deliberately not auto-generated;
     see kubernetes/components/kopiur/README.md (one components/kopiur include
     covers one volume; a second PVC is a second Kustomization)
+  - write $BASE_NS_DIR/$APP/README.md (the standard is in scripts/docs/README.md),
+    then draw its header: mise exec -- task docs:pictures
   - validate: mise exec -- task flux:test:all
 EOF
