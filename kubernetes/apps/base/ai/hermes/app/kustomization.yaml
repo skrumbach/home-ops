@@ -8,6 +8,7 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./pocketidoidcclient.yaml
   - ./prometheusrule.yaml
   - ./securitypolicy.yaml
 configMapGenerator:
