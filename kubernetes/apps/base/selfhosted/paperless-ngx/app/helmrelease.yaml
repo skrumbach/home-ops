@@ -72,8 +72,8 @@ spec:
               # documents (2026-11-08); 256 leaves the margin.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "256"
               PAPERLESS_WEBSERVER_WORKERS: "2"
-              # Authentik SSO; the provider JSON with the client secret is in paperless-ngx-secret. SSO users
-              # are signed up on first login with no permissions; grant them in Paperless. The password
+              # Authentik and Pocket ID SSO; the provider JSON with the client secret is in
+              # paperless-ngx-secret. SSO users are signed up on first login with no permissions; grant them in Paperless. The password
               # form stays as break-glass until the admin account is linked (Profile > Connect).
               PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
               PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"

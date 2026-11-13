@@ -18,6 +18,7 @@ public listener: no `envoy-external` parentRef, ever.
 | `app/virtualkeys/` | one `LiteLLMVirtualKey` + `PushSecret` per consumer, e.g. `claude-code-subscription` |
 | `app/httproute-internal.yaml` | `litellm-internal` route + `/anthropic` 404 filter |
 | `app/externalsecret.yaml` | `litellm-secret` |
+| `app/pocketidoidcclient.yaml` | Pocket ID client for UI SSO (client ID `litellm`, secret from `litellm-sso`) |
 | `app/pushsecret-sso.yaml`, `app/pushsecret-pgvector.yaml` | one-time credentials into 1Password |
 | `app/servicemonitor.yaml`, `app/prometheusrule.yaml` | scrape and alerts |
 

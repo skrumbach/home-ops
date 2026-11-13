@@ -7,6 +7,7 @@ resources:
   - ./ocirepository.yaml
   - ./externalsecret.yaml
   - ./httproute.yaml
+  - ./pocketidoidcclient.yaml
 configMapGenerator:
   - name: servers-json
     files:
