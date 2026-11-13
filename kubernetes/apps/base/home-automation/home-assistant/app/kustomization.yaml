@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
 configMapGenerator:
   - name: home-assistant-oidc
