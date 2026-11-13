@@ -11,8 +11,8 @@ spec:
   # Must match client_id of the pocket-id APP. Immutable once created.
   clientID: paperless
   # The existing 1Password value (paperless-oidc client-secret, first issued for the retired
-  # Authentik client): PAPERLESS_SOCIALACCOUNT_PROVIDERS bakes it in, so the operator pushes it to Pocket ID and never
-  # generates or rotates one. Same-namespace Secret.
+  # Authentik client): PAPERLESS_SOCIALACCOUNT_PROVIDERS bakes it in, so the operator pushes it
+  # to Pocket ID and never generates or rotates one. Same-namespace Secret.
   clientSecretRef:
     name: paperless-ngx-secret
     key: POCKET_ID_CLIENT_SECRET

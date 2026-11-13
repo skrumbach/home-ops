@@ -18,7 +18,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 ├── .agents/skills/             # one skill, incident-runbooks (.claude/skills is a symlink)
 ├── .taskfiles/                 # task domains: flux, rook, network, actions-runner, docs
 ├── docs/                       # Hugo theme for the generated documentation site (no content)
-├── terraform/                  # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
+├── terraform/                  # OpenTofu stacks outside Flux (UniFi, TrueNAS)
 └── .renovate/                  # Renovate presets
 ```
 
@@ -36,7 +36,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 | Tasks | `Taskfile.yaml` + `.taskfiles/` (`task --list-all`), `.justfile` + `*/mod.just` |
 | CI, branch protection | `.github/workflows/`; ruleset on `main` is applied via `gh api`, not in Git |
 | Renovate | `.renovaterc.json5` + `.renovate/`; in-cluster renovate-operator is the writer |
-| Authentik SSO, UniFi network (UDM), TrueNAS NAS | `terraform/authentik/`, `terraform/unifi/`, `terraform/truenas/` |
+| UniFi network (UDM), TrueNAS NAS | `terraform/unifi/`, `terraform/truenas/` |
 | AI stack | `kubernetes/apps/{main,base}/ai/` |
 | Gatus | `monitoring/gatus`; endpoints come from the `gatus.home-operations.com/endpoint` HTTPRoute annotation |
 | konflate | `flux-system/konflate`, read-only PR-review UI, internal route only; its README owns the write-back-off invariant |
@@ -66,7 +66,8 @@ Each is a warning needed before deciding to touch the subsystem.
 - **`Home-Lab` (vals, mise's `OP_SERVICE_ACCOUNT_TOKEN`) and `Homelab` (Connect/ESO) are different vaults: Connect cannot see `Home-Lab`, `op read` of Homelab needs `env -u OP_SERVICE_ACCOUNT_TOKEN`, and `SecretSynced` does not mean non-empty.**
 - **NEVER run `find $HOME` or any other unbounded home-directory search.** Tools are mise-managed; `kubeconfig` and `talosconfig` are absent in fresh worktrees and that is normal - report and continue.
 - **`kubectl` and `talosctl` default to the admin `~/.kube/home-ops-admin` / `~/.talos/home-ops-admin` (`.mise.toml`).** Admin by default is not approval: a cluster or node write still needs the owner's go-ahead in the current session. The admin talosconfig lists all three nodes, so always pass `-n <node>`: a bare `talosctl` command runs on every node. Read-only instead: prefix `KUBECONFIG=~/.kube/home-ops-agent` / `TALOSCONFIG=~/.talos/home-ops-agent` (a `HOME_OPS_*` prefix does nothing in an agent shell); a missing agent file means the owner has not run `scripts/agent-credentials.sh`.
-- **NEVER run `tofu apply` or `tofu destroy` in `terraform/authentik/`, `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead; a green PR is not approval, and the only apply is a saved plan from `secrets-apply.vals.yaml`.** A UniFi apply can cut the cluster's VLANs (never over WiFi), an Authentik apply can lock out SSO, and a TrueNAS `force_destroy`/`allow_*` opt-in is never set unasked.
+- **NEVER run `tofu apply` or `tofu destroy` in `terraform/unifi/` or `terraform/truenas/` without an explicit, current go-ahead; a green PR is not approval, and the only apply is a saved plan from `secrets-apply.vals.yaml`.** A UniFi apply can cut the cluster's VLANs (never over WiFi), and a TrueNAS `force_destroy`/`allow_*` opt-in is never set unasked.
+- **The Pocket ID hostname `id.sklab.dev` never changes:** every passkey is bound to it, so a new hostname locks every user out of every app that signs in with Pocket ID.
 - **NEVER commit without the pre-commit hooks** (`task setup-dev-env`).
 
 **Flux and CI**
@@ -92,6 +93,7 @@ Each is a warning needed before deciding to touch the subsystem.
 
 **Network**
 - **NEVER add a `CiliumClusterwideNetworkPolicy` with a `nodeSelector` and ingress unless `enableDefaultDeny.ingress` is false, and the selector label must survive onto the host endpoint** (`kubernetes.io/os`, `kubernetes.io/hostname` are stripped).
+- **A `SecurityPolicy` whose `targetRefs` (or `sectionName`) match nothing leaves its route open:** flate renders it as valid and the app is served without sign-in.
 - **A `CiliumNetworkPolicy`/`NetworkPolicy` ingress rule must admit every Service peer's replies with no `toPorts` (cilium/cilium#47913):** `port: 53` never admits a DNS reply, and a same-node Service reply is dropped after reverse NAT.
 
 **AI and GPU**

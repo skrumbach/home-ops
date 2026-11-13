@@ -4,8 +4,8 @@ No central cluster. The operator chart tag is in `app/helmrelease.yaml`.
 Each consumer includes `kubernetes/components/dragonfly/`. Image pin, args,
 and the cache-only policy are in that component.
 
-Five consumers (authentik, litellm, paperless-ngx, rsshub, searxng), two
-replicas each. `up{job=~".*dragonfly.*"}` should return 10 series. Prometheus
+Four consumers (litellm, paperless-ngx, rsshub, searxng), two
+replicas each. `up{job=~".*dragonfly.*"}` should return 8 series. Prometheus
 needs the additive `*-allow-prometheus` NetworkPolicy from the component.
 
 `--cache_mode=true` means a restart drops the data on purpose. Do not add the
