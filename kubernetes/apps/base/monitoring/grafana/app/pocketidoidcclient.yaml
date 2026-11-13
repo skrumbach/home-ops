@@ -10,8 +10,8 @@ spec:
   name: Grafana
   # Must match auth.generic_oauth.client_id in helmrelease.yaml. Immutable once created.
   clientID: grafana
-  # The existing 1Password value (grafana-oidc client-secret, shared with the Authentik client),
-  # which Grafana already reads from grafana-oidc-secret before it starts: the operator pushes it
+  # The existing 1Password value (grafana-oidc client-secret, first issued for the retired
+  # Authentik client), which Grafana already reads from grafana-oidc-secret before it starts: the operator pushes it
   # to Pocket ID and never generates or rotates one. Same-namespace Secret.
   clientSecretRef:
     name: grafana-oidc-secret

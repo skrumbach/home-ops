@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
-# pgAdmin's second OAUTH2_CONFIG entry (externalsecret.yaml), beside Authentik. Deleting this CR
-# deletes the client in Pocket ID.
+# pgAdmin's OAUTH2_CONFIG entry (externalsecret.yaml). Deleting this CR deletes the client in
+# Pocket ID.
 apiVersion: pocketid.internal/v1alpha1
 kind: PocketIDOIDCClient
 metadata:
@@ -10,9 +10,9 @@ spec:
   name: pgAdmin
   # Must match OAUTH2_CLIENT_ID of the pocket-id entry. Immutable once created.
   clientID: pgadmin
-  # The existing 1Password value (cloudnative-pg PGADMIN_OATUH_CLIENT_SECRET, shared with the
-  # Authentik client): config_local.py bakes it in, so the operator pushes it to Pocket ID and
-  # never generates or rotates one. Same-namespace Secret.
+  # The existing 1Password value (cloudnative-pg PGADMIN_OATUH_CLIENT_SECRET, first issued for
+  # the retired Authentik client): config_local.py bakes it in, so the operator pushes it to
+  # Pocket ID and never generates or rotates one. Same-namespace Secret.
   clientSecretRef:
     name: pgadmin-secret
     key: POCKET_ID_CLIENT_SECRET

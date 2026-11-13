@@ -9,9 +9,10 @@ spec:
   name: LiteLLM
   # Must match GENERIC_CLIENT_ID in litellmproxy.yaml. Immutable once created.
   clientID: litellm
-  # The existing 1Password value (litellm-sso LITELLM_SSO_CLIENT_SECRET, shared with the Authentik
-  # client), which the proxy already reads from litellm-secret before it starts: the operator
-  # pushes it to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  # The existing 1Password value (litellm-sso LITELLM_SSO_CLIENT_SECRET, first issued for the
+  # retired Authentik client), which the proxy already reads from litellm-secret before it
+  # starts: the operator pushes it to Pocket ID and never generates or rotates one.
+  # Same-namespace Secret.
   clientSecretRef:
     name: litellm-secret
     key: GENERIC_CLIENT_SECRET
