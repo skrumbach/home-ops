@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Paperless' second django-allauth openid_connect APP "pocket-id" (externalsecret.yaml), beside
+# Authentik. Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: paperless-ngx
+spec:
+  name: Paperless-ngx
+  # Must match client_id of the pocket-id APP. Immutable once created.
+  clientID: paperless
+  # The existing 1Password value (paperless-oidc client-secret, shared with the Authentik client):
+  # PAPERLESS_SOCIALACCOUNT_PROVIDERS bakes it in, so the operator pushes it to Pocket ID and never
+  # generates or rotates one. Same-namespace Secret.
+  clientSecretRef:
+    name: paperless-ngx-secret
+    key: POCKET_ID_CLIENT_SECRET
+  # allauth builds /accounts/oidc/<provider_id>/login/callback/ for login and for Profile > Connect.
+  callbackUrls: ["https://docs.sklab.dev/accounts/oidc/pocket-id/login/callback/"]
+  # No logoutCallbackUrls: allauth's logout ends only the Paperless session.
+  # OAUTH_PKCE_ENABLED is set for every openid_connect APP, so allauth sends an S256 challenge.
+  pkceEnabled: true
+  launchUrl: https://docs.sklab.dev
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # Paperless reads the secret from PAPERLESS_SOCIALACCOUNT_PROVIDERS; no copy is needed.
+  secret:
+    enabled: false
