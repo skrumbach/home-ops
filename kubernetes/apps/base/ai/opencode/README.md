@@ -1,6 +1,7 @@
 # OpenCode
 
-Internal coding workspace. Authentik ext-auth on `envoy-internal` only.
+Internal coding workspace. Pocket ID sign-in at Envoy (native OIDC) on
+`envoy-internal` only.
 
 LLM calls go to LiteLLM
 (`http://litellm.ai.svc.cluster.local:4000/v1`). Default model
@@ -18,7 +19,7 @@ caller, including Hermes. Never a provider key.
 the server password (user `opencode`). Without it each start makes a
 random one and logs it; rotating it signs out every session.
 
-Namespace `ai` is already on the Authentik ReferenceGrant. A new
-hostname still needs a real login after merge before treating the route
-as covered. Do not add a second
-basic-auth API route.
+The gate is `app/securitypolicy.yaml` with its Pocket ID client
+`app/pocketidoidcclient.yaml`. A new hostname needs its own callback URL
+there and a real login after merge before treating the route as
+covered. Do not add a second basic-auth API route.

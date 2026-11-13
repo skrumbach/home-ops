@@ -235,7 +235,8 @@ spec:
           gethomepage.dev/description: Document archive
           external-dns.kubernetes.io/target: "internal.sklab.dev"
           # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
-          # that /api still bypasses Authentik (a gated path would end on a 200 login page).
+          # that /api still bypasses the Envoy OIDC gate (a gated path would end on the 200 Pocket ID
+          # sign-in page).
           gatus.home-operations.com/endpoint: |-
             url: https://docs.sklab.dev/api/ui_settings/
             conditions:

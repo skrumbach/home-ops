@@ -8,4 +8,5 @@ resources:
   - ./networking.yaml
   - ./ciliumclusterwidenetworkpolicy.yaml
   - ./httproute.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
