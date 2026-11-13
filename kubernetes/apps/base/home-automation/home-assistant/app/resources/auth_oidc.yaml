@@ -1,15 +1,22 @@
 # hass-oidc-auth settings, included from /config/configuration.yaml as
 #   auth_oidc: !include auth_oidc.yaml
-# Public client + PKCE, so there is no secret here. The Authentik side is
-# terraform/authentik/home-assistant.tofu; client_id must match it.
+# Public client + PKCE, so there is no secret here. The Pocket ID side is
+# pocketidoidcclient-app.yaml; client_id must match its spec.clientID.
 client_id: home-assistant
-discovery_url: https://auth.sklab.dev/application/o/home-assistant/.well-known/openid-configuration
-display_name: Authentik
+discovery_url: https://id.sklab.dev/.well-known/openid-configuration
+display_name: Pocket ID
 features:
-  # Authentik has no standalone `groups` scope; the groups claim comes with `profile`.
-  include_groups_scope: false
+  # TEMPORARY, remove after the owner's first Pocket ID login. The subject is hashed with the
+  # issuer, so the Authentik credential never matches; this links the new credential to the HA
+  # user whose local (username/password) login has Pocket ID's preferred_username. Without a
+  # match a new user is created instead. The match is case-sensitive, and HA stores local
+  # usernames lowercased, so a Pocket ID username with capitals never links.
+  # Remove once the owner's link exists: any later Pocket ID admin whose username equals an
+  # existing local HA login would take that account over on first sign-in.
+  automatic_user_linking: true
 roles:
-  # Authentik's built-in admin group. Setting `user` to the same group means any other
-  # Authentik account is rejected instead of landing as a plain HA user.
-  admin: authentik Admins
-  user: authentik Admins
+  # Pocket ID sends group names in `groups` (the groups scope is requested by default).
+  # Setting `user` to the same group means any other account is rejected instead of landing
+  # as a plain HA user. Applies to new users only; a linked user keeps its HA group.
+  admin: admins
+  user: admins
