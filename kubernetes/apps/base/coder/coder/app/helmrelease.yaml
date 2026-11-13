@@ -72,6 +72,12 @@ spec:
         # (CODER_OIDC_REPAIR_LINKS, default true); the next login re-links by email.
         - name: CODER_OIDC_ISSUER_URL
           value: "https://id.sklab.dev"
+        # Pocket ID sends email_verified=false for a user the operator created through the admin
+        # API (EMAILS_VERIFIED only covers self-signups, and the operator never sets the flag), and
+        # Coder then refuses the login with "Email not verified" (2026-11-13). Signups are disabled
+        # in Pocket ID and its only users are created from Git, so the claim adds nothing here.
+        - name: CODER_OIDC_IGNORE_EMAIL_VERIFIED
+          value: "true"
         # Not a Coder option (the role claim is CODER_OIDC_USER_ROLE_FIELD); has no effect.
         - name: CODER_OIDC_ROLE_FIELD
           value: "groups"
