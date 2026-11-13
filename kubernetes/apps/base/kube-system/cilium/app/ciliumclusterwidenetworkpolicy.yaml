@@ -83,3 +83,11 @@ spec:
             - port: "9962"
               endPort: 9965
               protocol: TCP
+            # kube-controller-manager and kube-scheduler secure ports (Kubernetes defaults),
+            # bound to 0.0.0.0 by bind-address in talos/machineconfig.yaml.j2. Metrics need
+            # authn, but /healthz answers anyone. Kubelet probes use localhost (host identity)
+            # and kube-prometheus-stack does not scrape them, so nothing in-cluster changes.
+            - port: "10257"
+              protocol: TCP
+            - port: "10259"
+              protocol: TCP
