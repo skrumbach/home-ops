@@ -19,11 +19,10 @@ metadata:
 spec:
   hostnames:
     - "coder.sklab.dev"
-  # One gateway only. On both, unifi-dns wanted two CNAME targets for the name; UniFi stores one,
-  # so the record never settled (rewritten every minute from 2026-11-08) and the LAN was sent to
-  # the external gateway anyway.
+  # LAN only since 2026-11-13; off-site use goes through the VPN. One gateway per
+  # hostname: UniFi stores one CNAME target, so a name on both gateways never settles.
   parentRefs:
-    - name: envoy-external
+    - name: envoy-internal
       namespace: network
       sectionName: https
   rules:
