@@ -31,6 +31,6 @@ spec:
               namespace/pod/claim: `kubectl -n system logs -l
               app.kubernetes.io/name=pvc-writable-check --tail=300
               --since=12h | grep -A5 'FAILURES'`. Design and known
-              limitations: kubernetes/apps/base/system/pvc-writable-check/app/README.md.
+              limitations: kubernetes/apps/base/system/pvc-writable-check/README.md.
           labels:
             severity: warning
