@@ -707,6 +707,9 @@ def rewrite_markdown(text: str, source: str, ctx: dict, demote: int = 0) -> str:
             rel = os.path.relpath(real, real_root).replace(os.sep, "/")
         suffix = f"#{anchor}" if sep else ""
         if image:
+            if (ROOT / rel).is_file():  # served by the site itself, from <out>/../static/files/
+                ctx["images"].add(rel)
+                return f"/files/{rel}"
             return f"https://raw.githubusercontent.com/{slug}/{branch}/{rel}"
         if rel in published:
             return published[rel] + suffix
@@ -754,6 +757,32 @@ def rewrite_markdown(text: str, source: str, ctx: dict, demote: int = 0) -> str:
         line = outside_code(line, html_to_markdown)
         out.append(links(line))
     return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip() + "\n"
+
+
+HEADER_IMG = re.compile(r"(?:<p[^>]*>\s*)?<img\s[^>]*src=\"(?:\./)?header\.svg\"[^>]*>(?:\s*</p>)?", re.I)
+
+
+def readme_parts(text: str) -> tuple[str, str] | None:
+    """A README in the standard shape (scripts/docs/README.md), as its tagline and its body.
+
+    The header picture, the tagline and the `Live facts` line are the README's own page head on GitHub;
+    the site has its own, so they leave the body. Any other README returns None.
+    """
+    if not HEADER_IMG.search(text):
+        return None
+    lines = HEADER_IMG.sub("", text, count=1).splitlines()
+    quote = next((i for i, line in enumerate(lines) if line.startswith(">")), None)
+    tagline = ""
+    if quote is not None and not any(line.startswith("#") for line in lines[:quote]):
+        end = quote
+        while end < len(lines) and lines[end].startswith(">"):
+            end += 1
+        tagline = plain(" ".join(line.lstrip("> ") for line in lines[quote:end]))
+        if tagline.startswith("TODO"):  # the scaffold's placeholder
+            tagline = ""
+        del lines[quote:end]
+    lines = [line for line in lines if not line.startswith("**Live facts:**")]
+    return tagline, "\n".join(lines)
 
 
 def split_title(text: str) -> tuple[str, str]:
@@ -963,9 +992,13 @@ def build_app_page(key, app, model, ctx, weight) -> tuple[str, list[str]]:
                 lines.append(f"- Gatus endpoint: <{r['gatus']}>" if r["gatus"].startswith("http") else f"- Gatus endpoint: {code(r['gatus'])}")
         return "\n".join(lines)
 
+    readme = ctx["readmes"].get(key)
+
     def notes():
         parts = []
         for src in ctx["app_docs"].get(key, []):
+            if readme and src == readme[0]:
+                continue
             text = (ROOT / src).read_text()
             title, _ = split_title(text)
             body = rewrite_markdown(text, src, ctx, demote=2)
@@ -977,6 +1010,11 @@ def build_app_page(key, app, model, ctx, weight) -> tuple[str, list[str]]:
                 parts.append(f"See also: [{ctx['ops_titles'][src]}]({url}).")
         return "\n\n".join(parts)
 
+    if readme:  # its own `##` sections lead the page and the table of contents
+        try:
+            sections.append(rewrite_markdown(readme[2], readme[0], ctx).strip() + "\n\n" + from_line(readme[0], ctx))
+        except Exception as exc:
+            warnings.append(f"{key[0]}/{key[1]}: README skipped ({type(exc).__name__}: {exc})")
     add("Flux Kustomizations", flux)
     add("Workloads", workloads)
     add("Chart", charts)
@@ -1089,7 +1127,12 @@ def link_ops(apps: dict, ctx: dict) -> None:
         for src in docs:
             published[src] = f"/apps/{ns}/"
     restore = published.get(RESTORE_RUNBOOK, f"https://github.com/{ctx['repo']}/blob/{ctx['branch']}/{RESTORE_RUNBOOK}")
-    ctx.update(ops=ops, published=published, app_docs=by_app_docs, ns_docs=by_ns_docs, ops_titles=titles,
+    readmes = {}
+    for key, docs in by_app_docs.items():
+        for src in docs:
+            if src.count("/") == 5 and src.endswith("/README.md") and (parts := readme_parts((ROOT / src).read_text())):
+                readmes[key] = (src, *parts)
+    ctx.update(ops=ops, published=published, app_docs=by_app_docs, ns_docs=by_ns_docs, ops_titles=titles, readmes=readmes,
                ops_by_appdir={src: published[src] for src in ops if src.startswith("kubernetes/apps/base/")},
                restore_url=restore, restore_title=titles.get(RESTORE_RUNBOOK, "restore runbook"))
 
@@ -1128,6 +1171,7 @@ def collect_facts(model: dict, apps: dict, ctx: dict) -> None:
     ctx.update(routes=routes, routes_by_app=routes_by_app, backups=backups, backups_by_app=backups_by_app, claims=claims,
                claims_by_app=claims_by_app, no_backup_reasons=reasons, required_by=required_by, ks_ns=ks_ns,
                descriptions={key: next((r["description"] for r in rs if r["description"]), "") for key, rs in routes_by_app.items()})
+    ctx["descriptions"].update({key: tagline for key, (_, tagline, _) in ctx["readmes"].items() if tagline})
 
 
 APP_HEADERS = ["Namespace", "App", "What it is", "Host", "Backup"]
@@ -1438,18 +1482,24 @@ def main() -> int:
         "repo": repo_slug(args.repo), "branch": args.branch, "sha": git("rev-parse", "--short", "HEAD"),
         # The commit date, not the clock: the same commit must build the same bytes.
         "built": datetime.datetime.fromtimestamp(committed, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "domain": detect_domain(objs), "versions": versions_of(model),
+        "domain": detect_domain(objs), "versions": versions_of(model), "images": set(),
     }
     link_ops(apps, ctx)
     collect_facts(model, apps, ctx)
     pages, warnings = build_pages(model, apps, ctx)
 
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
+    static_dir = out_dir.parent / "static"  # hugo.yaml: staticDir
+    for stale in (out_dir, static_dir):
+        if stale.exists():
+            shutil.rmtree(stale)
     for rel, text in sorted(pages.items()):
         path = out_dir / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
+    static_dir.mkdir(parents=True, exist_ok=True)
+    for rel in sorted(ctx["images"]):  # pictures the published Markdown shows
+        (static_dir / "files" / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / rel, static_dir / "files" / rel)
 
     # A page that silently went empty is worse than a red build: a hand-kept name that no longer
     # matches, or a manifest shape this script no longer understands, fails the run.

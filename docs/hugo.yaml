@@ -4,6 +4,8 @@
 baseURL: /
 title: home-ops
 contentDir: .build/content
+# Pictures the READMEs show, copied by build.py.
+staticDir: .build/static
 publishDir: .build/public
 disableKinds: [taxonomy, term, rss]
 enableRobotsTXT: true
