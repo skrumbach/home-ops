@@ -581,7 +581,7 @@ spec:
     plugins:
       - grafana-clock-panel
       # "<id> <version>", space not @: Grafana 12 reads GF_INSTALL_PLUGINS entries as id, then
-      # an optional space-separated version. Not tracked by Renovate; 0.34.0 needs Grafana >=10.4.
+      # an optional space-separated version. Renovate tracks it through .renovate/customManagers.json5; 0.34.0 needs Grafana >=10.4.
       - victoriametrics-logs-datasource 0.34.0
 
     rbac:

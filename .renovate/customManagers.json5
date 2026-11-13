@@ -13,5 +13,17 @@
       ],
       datasourceTemplate: "docker",
     },
+    {
+      // The plugin pin is "<id> <version>" in a YAML list, so the annotation form (needs ": " or "=") does not match it.
+      description: "Grafana VictoriaLogs datasource plugin pin in the grafana HelmRelease",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)monitoring/grafana/app/helmrelease\\.yaml$/"],
+      matchStrings: [
+        "-\\s+victoriametrics-logs-datasource\\s+(?<currentValue>\\d[^\\s]*)",
+      ],
+      depNameTemplate: "VictoriaMetrics/victorialogs-datasource",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
   ],
 }
