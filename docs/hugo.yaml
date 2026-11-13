@@ -28,7 +28,8 @@ params:
   branch: main
   eyebrow: HOMELAB • TALOS LINUX • FLUX GITOPS
   tagline: A three-node Talos cluster, reconciled by Flux. These pages are generated from its manifests.
-  # Live numbers served by kromgo on the public gateway (read-only badges).
+  # Live numbers served by kromgo. The route is LAN-only, so the strip shows on the home network
+  # and disappears everywhere else.
   kromgo: https://kromgo.sklab.dev/badges
   badges:
     - {id: talos_version, label: Talos}

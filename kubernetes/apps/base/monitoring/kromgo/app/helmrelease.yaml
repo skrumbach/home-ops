@@ -75,12 +75,10 @@ spec:
         ports:
           http:
             port: *port
-    # Public on purpose, no ExtAuth: the github.com/skrumbach profile workflow reads these
-    # badges anonymously. Only /badges/ is routed (no gallery, graphs or health paths), kromgo
-    # answers only the fixed queries in resources/config.yaml (query parameters never reach
-    # PromQL), and every query aggregates away identifying labels. Cloudflare sits in front.
-    # Access-Control-Allow-Origin: * lets a documentation site on another origin read the
-    # badges from the browser; that is safe because the data is fixed and anonymous.
+    # LAN only since 2026-11-13, no auth. Only /badges/ is routed (no gallery, graphs
+    # or health paths) and kromgo answers only the fixed queries in resources/config.yaml.
+    # Access-Control-Allow-Origin: * lets the documentation site (another origin) read the badges
+    # from a browser on the LAN; that is safe because the data is fixed and anonymous.
     route:
       app:
         annotations:
@@ -89,7 +87,7 @@ spec:
             conditions: ["[STATUS] == 200", "[BODY].id == cluster_node_count"]
         hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
-          - name: envoy-external
+          - name: envoy-internal
             namespace: network
             sectionName: https
         rules:
