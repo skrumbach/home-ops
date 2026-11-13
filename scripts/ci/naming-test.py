@@ -23,7 +23,6 @@ GRANDFATHERED = {  # path or subtree: reason (exempt from every check)
     "kubernetes/apps/main/ai/chat-model.yaml": "substitution input ConfigMap, not a Kustomization",
     "kubernetes/apps/base/flux-system/meta": "cluster-meta entry point",
     "kubernetes/apps/base/system/volsync": "retired tree, frozen until the restic repos expire",
-    "kubernetes/apps/base/security/authentik": "replaced separately; delete this line with it",
 }
 NAMED_ROOTS = ("kubernetes", "scripts", ".taskfiles", "terraform", "bootstrap")
 KIND = re.compile(r"^kind:\s*(\w+)\s*$", re.M)
