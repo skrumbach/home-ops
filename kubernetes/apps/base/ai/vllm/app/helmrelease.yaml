@@ -48,13 +48,15 @@ spec:
               tag: server-intel-b10820@sha256:35037559d99a90963d479b6e6e79764b138c76dc657341292aac6ad41d627c9f
             args:
               - -hf
-              # Q3_K_M of the official distill, not the IQ3_XXS APEX build: same quality on the
-              # graded suite and +28% decode (81 vs 63 t/s), because K-quants dequantize faster
-              # than IQ-quants on SYCL. Q4_K_M decodes 99 t/s but leaves 1.5 GiB of VRAM at 262K.
-              # Not abliterated. mmproj auto-loads.
+              # On trial since 2026-11-13: a heretic (refusal-removed) build of plain Qwen3.6-35B-A3B,
+              # in place of empero-ai/Qwen3.8-35B-A3B-Distill-GGUF:Q3_K_M (a Qwen3.8-teacher distill of
+              # the same base, not abliterated, still cached on the volume). Its card reports 10/100
+              # refusals and KL 0.0015; tool calling is not measured there.
+              # Stay on a K-quant: on SYCL they dequantize faster than IQ-quants (81 vs 63 t/s on the
+              # distill). Q4_K_M decodes 99 t/s but leaves 1.5 GiB of VRAM at 262K. mmproj auto-loads.
               # The alias is the loaded model's real name, from ConfigMap chat-model
               # (apps/main/ai/chat-model.yaml). Change both together on a swap.
-              - empero-ai/Qwen3.8-35B-A3B-Distill-GGUF:Q3_K_M
+              - llmfan46/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-GGUF:Q3_K_M
               - --alias
               - ${CHAT_MODEL_ID}
               - --host
@@ -161,7 +163,7 @@ spec:
               liveness: *probe
 
     # suffix pins the names vllm-app and vllm-models. With one service and one claim the
-    # chart would name both `vllm`, and Helm would delete the 50Gi model cache.
+    # chart would name both `vllm`, and Helm would delete the model cache.
     service:
       app:
         suffix: app
@@ -176,7 +178,8 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: ceph-block
-        size: 50Gi
+        # Each cached model is about 17 GiB with its mmproj; 75Gi holds four. A claim never shrinks.
+        size: 75Gi
         advancedMounts:
           vllm:
             app:
