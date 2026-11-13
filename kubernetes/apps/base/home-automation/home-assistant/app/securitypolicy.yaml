@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 # Only the code-server route is gated at Envoy, by Pocket ID (native OIDC). The Home Assistant
-# route is not: the companion app, Google and /auth/token cannot follow a browser SSO redirect,
+# route is not: the companion app and /auth/token cannot follow a browser SSO redirect,
 # so Home Assistant signs in itself (auth_oidc, resources/auth_oidc.yaml). A policy that fails to
 # translate (e.g. the operator has not written the credentials Secret yet) makes the route
 # answer 500, not pass through; a policy whose targetRef matches no route leaves that route open.
