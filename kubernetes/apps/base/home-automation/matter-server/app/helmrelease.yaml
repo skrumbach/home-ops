@@ -41,6 +41,27 @@ spec:
               MATTER_SERVER__PORT: &wsPort 5580
               MATTER_SERVER__APPLICATION_URL: &host matter.sklab.dev
               MATTER_SERVER__LOG_LEVEL: info
+            # TCP, not HTTP: 5580 is the WebSocket API and has no plain-HTTP path that proves health.
+            # Thresholds follow home-assistant; the startup budget (300s) covers loading the fabric.
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *wsPort
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *wsPort
+                  periodSeconds: 10
+                  failureThreshold: 30
             # 30d max working set 109Mi (2026-11-07)
             resources:
               requests:
