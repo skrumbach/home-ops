@@ -13,7 +13,7 @@ tasks:
     cmds:
       - |
         echo "=== Controller Pods ==="
-        kubectl get pods -n {{.NAMESPACE}} -l app.kubernetes.io/name=gha-runner-scale-set-controller -o wide
+        kubectl get pods -n {{.NAMESPACE}} -l app.kubernetes.io/name=gha-rs-controller -o wide
         echo ""
         echo "=== Listener Pods ==="
         kubectl get pods -n {{.NAMESPACE}} -l app.kubernetes.io/component=listener -o wide
@@ -81,7 +81,7 @@ tasks:
   logs-controller:
     desc: View controller logs
     cmds:
-      - kubectl logs -n {{.NAMESPACE}} -l app.kubernetes.io/name=gha-runner-scale-set-controller --tail=100 -f
+      - kubectl logs -n {{.NAMESPACE}} -l app.kubernetes.io/name=gha-rs-controller --tail=100 -f
 
   logs-listener:
     desc: View listener logs

@@ -9,7 +9,7 @@ spec:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   dependsOn:
-    - name: intel-device-plugin-gpu
+    - name: generic-device-plugin
       namespace: system
     - name: rook-ceph-cluster
       namespace: rook-ceph

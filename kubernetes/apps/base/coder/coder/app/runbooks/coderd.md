@@ -1,6 +1,7 @@
 # Coderd Runbooks
 
-These files are mounted as ConfigMap `coder-runbooks` (label `runbook_docs: "true"`).
+These files are generated into ConfigMap `coder-runbooks` (label `runbook_docs: "true"`),
+which no workload mounts.
 There is no `runbooks.sklab.dev` HTTPRoute. Alert `runbook_url` values
 point at this Git path.
 
@@ -14,8 +15,8 @@ This cluster's Coder HelmRelease does **not** set a CPU limit. Resources are
 `requests.cpu: 71m` and `limits.memory: 1Gi` only (`app/helmrelease.yaml`).
 The alert divides usage by `kube_pod_container_resource_limits{resource="cpu"}`,
 which is empty here, so this alert will not fire. Do not add a CPU limit as a
-first response: the 2026-06-30 outage comment on the HelmRelease is about
-memory/OOM, not CPU throttling.
+first response: the HelmRelease sizes coderd by memory (its request tracks peak
+working set), and a CPU limit would only add throttling.
 
 If CPU is actually high, check request vs usage (`kubectl -n coder top pod`)
 and node pressure. Compare against

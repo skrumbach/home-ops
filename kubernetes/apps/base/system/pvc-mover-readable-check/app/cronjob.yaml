@@ -262,11 +262,9 @@ spec:
 
                     # walk.sh is read-only (find + stat). The mount path comes
                     # from the cluster's own pod specs and is passed as its own
-                    # argv element, never spliced into a shell string. The two
-                    # -1 slots are the walker's unused legacy uid/gid arguments;
-                    # -1 switches that measurement off.
+                    # argv element, never spliced into a shell string.
                     OUT=$(timeout "${EXEC_TIMEOUT}" kubectl exec -n "${ns}" "${pod}" -c "${ctr}" -i -- \
-                            sh -s -- "${mp}" -1 -1 "${kpu}" "${kpg}" < /walk/walk.sh 2>&1)
+                            sh -s -- "${mp}" "${kpu}" "${kpg}" < /walk/walk.sh 2>&1)
                     RC=$?
 
                     # Substring tests use bash `case`, never a `<<<` here-string:

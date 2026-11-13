@@ -4,8 +4,7 @@ Scaffolds a new app's manifests to match this repo's app-structure convention (s
 `app/`, multi-component family, or CRD-split). It encodes these traps by construction (correct `# yaml-language-server: $schema=`
 headers, `healthChecks` on the workload with `wait` left unset, the correctly-computed `components:`
 relative-path depth, `defaultPodOptions` spelled and nested correctly). Each HelmRelease gets its own
-app-template `ocirepository.yaml`, the overlay CR carries no `commonMetadata`, `metadata.namespace` or
-`cluster-secrets` substitution, and route hostnames use the literal `sklab.dev`.
+app-template `ocirepository.yaml`, the overlay CR carries no `commonMetadata` or `metadata.namespace`, and route hostnames use the literal `sklab.dev`.
 
 ## Usage
 

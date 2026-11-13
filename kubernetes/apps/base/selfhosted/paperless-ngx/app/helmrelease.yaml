@@ -227,6 +227,7 @@ spec:
         accessMode: ReadWriteOnce
         size: 50Gi
         storageClass: ceph-block
+        retain: true
         advancedMounts:
           paperless-ngx:
             app:
