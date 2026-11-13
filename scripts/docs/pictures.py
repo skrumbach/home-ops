@@ -63,7 +63,7 @@ NAMESPACE_ICONS = {
     "rook-ceph": "hard-drive", "security": "lock-keyhole", "selfhosted": "box", "system": "server-cog",
     "system-controller": "clock", "system-upgrade": "circle-arrow-up",
 }
-HEADER_RE = re.compile(r"<!--\s*header:\s*icon=([a-z0-9-]+)\s*-->")
+HEADER_RE = re.compile(r"<!--\s*header:\s*(.*?)\s*-->", re.S)
 CONCEPT_RE = re.compile(r"<!--\s*concept:\s*(.+?)\s*-->", re.S)
 KEY_RE = re.compile(r"<!-- picture v\d+ [^>]*-->")
 
@@ -332,10 +332,14 @@ def wanted(key: tuple[str, str], readme: Path) -> dict[str, tuple[str, str]]:
     A README that shows no `header.svg` is not in the standard yet and gets nothing.
     """
     source = readme.read_text()
-    if "header.svg" not in source:
+    if not build.HEADER_IMG.search(source):
         return {}
     icon_match, concept_match = HEADER_RE.search(source), CONCEPT_RE.search(source)
-    icon_name = icon_match.group(1) if icon_match else NAMESPACE_ICONS.get(key[0], "box")
+    icon_name = NAMESPACE_ICONS.get(key[0], "box")
+    if icon_match:
+        if not (named := re.fullmatch(r"icon=([a-z0-9-]+)", icon_match.group(1))):
+            die(f"{readme.relative_to(ROOT)}: the header comment is '<!-- header: icon=<lucide-name> -->'")
+        icon_name = named.group(1)
     out = {"header.svg": (header_key(*key, icon_name), icon_name)}
     if concept_match:
         out["concept.svg"] = (concept_key(*key, concept_match.group(1)), concept_match.group(1))
@@ -357,13 +361,12 @@ def main() -> int:
     stale, drawn = [], 0
     for key in keys:
         readme = dirs[key] / "README.md"
-        if not readme.is_file():
-            if args.apps:
-                die(f"{readme.relative_to(ROOT)} does not exist")
-            continue
-        want = wanted(key, readme)
-        if "concept.svg" not in want and (dirs[key] / "concept.svg").exists():
-            stale.append(f"{(dirs[key] / 'concept.svg').relative_to(ROOT)}: the README has no concept comment; delete the file")
+        if not readme.is_file() and args.apps:
+            die(f"{readme.relative_to(ROOT)} does not exist")
+        want = wanted(key, readme) if readme.is_file() else {}
+        for name in ("header.svg", "concept.svg"):  # a picture nothing asks for any more
+            if name not in want and (dirs[key] / name).exists():
+                stale.append(f"{(dirs[key] / name).relative_to(ROOT)}: the README does not ask for it; delete the file")
         for name, (key_comment, source) in want.items():
             path = dirs[key] / name
             found = KEY_RE.search(path.read_text()) if path.exists() else None
