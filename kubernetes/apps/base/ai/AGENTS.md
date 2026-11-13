@@ -6,7 +6,7 @@ This page is the naming rule only.
 
 | Kind | Example | Where it is allowed |
 |---|---|---|
-| **Real model name** | `Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved` | Only as `${CHAT_MODEL_ID}`. Never typed literally. |
+| **Real model name** | `Qwen3.8-35B-A3B-Distill` | Only as `${CHAT_MODEL_ID}`. Never typed literally. |
 | **Role alias** | `chat-local` | Everywhere a consumer picks a model. |
 
 The real name is defined once: ConfigMap `chat-model`, key `CHAT_MODEL_ID` (`kubernetes/apps/main/ai/chat-model.yaml`). Flux substitutes it (`postBuild.substituteFrom`) into the `vllm` and `litellm` Kustomizations:
