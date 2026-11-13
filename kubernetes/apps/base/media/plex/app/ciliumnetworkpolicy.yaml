@@ -52,6 +52,19 @@ spec:
         - ports:
             - port: "32400"
               protocol: TCP
+    # Sonarr and Radarr tell Plex to rescan after an import (their "Plex Media Server" connection).
+    # Without this rule both logged "Failed to Update Plex host ... Operation timed out".
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+            app.kubernetes.io/name: sonarr
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+            app.kubernetes.io/name: radarr
+      toPorts:
+        - ports:
+            - port: "32400"
+              protocol: TCP
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system
