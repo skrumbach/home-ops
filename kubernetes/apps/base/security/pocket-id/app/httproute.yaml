@@ -27,6 +27,25 @@ spec:
       namespace: network
       sectionName: https
   rules:
+    # An API key (the header Pocket ID v2 reads, backend/internal/middleware/authenticator.go)
+    # never arrives through this route. Its one user, the operator, calls the Service
+    # (InternalServiceURL in the operator, http://pocket-id.security.svc:1411), so a key that
+    # leaks cannot reach the admin API from outside. A header match outranks the path-only `/`
+    # rule below.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+          headers:
+            - name: X-API-Key
+              type: RegularExpression
+              value: ".*"
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: pocket-id-setup-block
     # First-admin setup is never served. Pocket ID opens it whenever its database has no user,
     # which on a fresh install or a restore without the database is the moment this public route
     # appears: Flux applies the route with the PocketIDUser, before the operator has created the
