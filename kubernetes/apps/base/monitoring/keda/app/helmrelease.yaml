@@ -30,7 +30,8 @@ spec:
           cpu: 100m
           memory: 128Mi
         limits:
-          memory: 256Mi
+          # OOM-killed at 256Mi on 2026-11-12 and back at 163Mi within hours.
+          memory: 512Mi
       metricServer:
         requests:
           cpu: 50m
