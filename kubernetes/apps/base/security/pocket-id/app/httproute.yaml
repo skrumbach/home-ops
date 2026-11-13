@@ -21,13 +21,29 @@ spec:
   # Public: the browser of a public app (echo) must reach the issuer. One gateway per
   # hostname (the internal DNS provider stores one CNAME target); LAN clients reach
   # envoy-external directly, and pods (Envoy's OIDC filter, renovate-operator) resolve the
-  # name through CoreDNS -> LAN resolver -> envoy-external's LoadBalancer IP. /setup is closed
-  # since the owner exists (pocket-id Kustomization health check).
+  # name through CoreDNS -> LAN resolver -> envoy-external's LoadBalancer IP.
   parentRefs:
     - name: envoy-external
       namespace: network
       sectionName: https
   rules:
+    # First-admin setup is never served. Pocket ID opens it whenever its database has no user,
+    # which on a fresh install or a restore without the database is the moment this public route
+    # appears: Flux applies the route with the PocketIDUser, before the operator has created the
+    # owner. The operator creates users through its API key, so nothing needs these paths.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /setup
+        - path:
+            type: PathPrefix
+            value: /api/signup/setup
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: pocket-id-setup-block
     - matches:
         - path:
             type: PathPrefix
@@ -36,3 +52,16 @@ spec:
         - name: pocket-id
           namespace: security
           port: 1411
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: pocket-id-setup-block
+spec:
+  directResponse:
+    statusCode: 404
+    contentType: text/plain
+    body:
+      type: Inline
+      inline: "not found\n"

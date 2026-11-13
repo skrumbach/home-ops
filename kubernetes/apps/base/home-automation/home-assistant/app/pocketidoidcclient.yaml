@@ -14,6 +14,8 @@ spec:
   callbackUrls: ["https://hass-code.sklab.dev/oauth2/callback"]
   # Envoy's logout sends post_logout_redirect_uri=<scheme>://<host>/ to the end-session endpoint.
   logoutCallbackUrls: ["https://hass-code.sklab.dev/"]
+  # Envoy's OAuth2 filter always sends an S256 challenge; this makes Pocket ID require it.
+  pkceEnabled: true
   # Pocket ID refuses the authorization for anyone outside the group.
   allowedUserGroups:
     - name: admins
