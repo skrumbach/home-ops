@@ -6,12 +6,11 @@ metadata:
   namespace: security
 spec:
   from:
+    # home-automation/esphome-auth and zigbee2mqtt-auth (hass-code-auth is on Pocket ID).
+    # network left with echo-auth, now on Pocket ID.
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy
       namespace: home-automation
-    - group: gateway.envoyproxy.io
-      kind: SecurityPolicy
-      namespace: network
     # ai/opencode (and any future ai-namespace extAuth SecurityPolicy)
     - group: gateway.envoyproxy.io
       kind: SecurityPolicy

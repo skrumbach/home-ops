@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Envoy Gateway's OIDC client for the code-server route (securitypolicy.yaml). The operator
+# generates the client ID and secret and writes them to Secret
+# `home-assistant-code-server-oidc-credentials` in this namespace. Deleting this CR deletes the
+# client in Pocket ID. Home Assistant itself still signs in with Authentik (auth_oidc).
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: home-assistant-code-server
+spec:
+  name: Home Assistant Code Server
+  launchUrl: https://hass-code.sklab.dev
+  callbackUrls: ["https://hass-code.sklab.dev/oauth2/callback"]
+  # Envoy's logout sends post_logout_redirect_uri=<scheme>://<host>/ to the end-session endpoint.
+  logoutCallbackUrls: ["https://hass-code.sklab.dev/"]
+  # Pocket ID refuses the authorization for anyone outside the group.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    # The key names Envoy Gateway reads (clientIDRef `client-id`, clientSecret `client-secret`).
+    keys:
+      clientID: client-id
+      clientSecret: client-secret
