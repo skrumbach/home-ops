@@ -93,7 +93,6 @@ Each is a warning needed before deciding to touch the subsystem.
 
 **Network**
 - **NEVER add a `CiliumClusterwideNetworkPolicy` with a `nodeSelector` and ingress unless `enableDefaultDeny.ingress` is false, and the selector label must survive onto the host endpoint** (`kubernetes.io/os`, `kubernetes.io/hostname` are stripped).
-- **A `SecurityPolicy` whose `targetRefs` (or `sectionName`) match nothing leaves its route open:** flate renders it as valid and the app is served without sign-in.
 - **A `CiliumNetworkPolicy`/`NetworkPolicy` ingress rule must admit every Service peer's replies with no `toPorts` (cilium/cilium#47913):** `port: 53` never admits a DNS reply, and a same-node Service reply is dropped after reverse NAT.
 
 **AI and GPU**
