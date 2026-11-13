@@ -89,7 +89,7 @@ Each is a warning needed before deciding to touch the subsystem.
 **Backups (silent data loss)**
 - **Deleting a kopiur Snapshot CR deletes the kopia snapshot.** The PVC component is `ssa: IfNotPresent` and never sets `force: enabled`. Measure mover identity from the files or the backup fails closed. One include covers one volume. Restore: `.agents/skills/incident-runbooks/references/restore.md`.
 - **The 51 retired VolSync restic repositories outlive the operator: Flux Kustomization `system/volsync` keeps its name (the OBC stays in its inventory, `prune: disabled`). Their expiry is NOT IN FORCE; `paperless-ngx` is a string prefix of `paperless-ngx-media` (and `syncthing` of `syncthing-data`), so a bare prefix match selects the sibling repo.**
-- **kopiur snapshots are crash-consistent unless a `beforeSnapshot` hook exports first (surrealdb does), so a database backup is only as durable as its fsync setting.** CNPG writes every ScheduledBackup of a Cluster to its one live barman store.
+- **kopiur snapshots are crash-consistent unless a `beforeSnapshot` hook exports first (no app has one), so a database backup is only as durable as its fsync setting.** CNPG writes every ScheduledBackup of a Cluster to its one live barman store.
 
 **Network**
 - **NEVER add a `CiliumClusterwideNetworkPolicy` with a `nodeSelector` and ingress unless `enableDefaultDeny.ingress` is false, and the selector label must survive onto the host endpoint** (`kubernetes.io/os`, `kubernetes.io/hostname` are stripped).

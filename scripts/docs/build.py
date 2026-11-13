@@ -1306,9 +1306,6 @@ def databases_page(model: dict, ctx: dict) -> str:
         for o in model["by_kind"].get(kind, []):
             spec = o.get("spec") or {}
             other.append([kind, f"{ns_of(o)}/{name_of(o)}", owner_link(model, o), spec.get("replicas", ""), detail(spec)])
-    for hr in model["by_kind"]["HelmRelease"]:
-        if chart_of(model, hr)["chart"] == "surrealdb":
-            other.append(["HelmRelease (SurrealDB)", f"{ns_of(hr)}/{name_of(hr)}", owner_link(model, hr), "", ""])
     body = ("## CloudNativePG clusters\n\n" + ("\n\n".join(clusters) or "None in the render.") +
             f"\n\n## Databases\n\n{len(db_rows)} databases.\n\n" + table(["Cluster", "Database", "Owner role", "App"], db_rows) +
             "\n\n## Roles\n\n" + table(["Cluster", "Role", "Login", "App"], role_rows) +
