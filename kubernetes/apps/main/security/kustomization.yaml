@@ -9,7 +9,6 @@ components:
   - ../../../components/alerts
 
 resources:
-  - ./authentik.yaml
   - ./external-secrets.yaml
   - ./onepassword-connect.yaml
   - ./pocket-id.yaml

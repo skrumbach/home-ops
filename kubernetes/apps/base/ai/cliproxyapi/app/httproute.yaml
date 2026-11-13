@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Internal only. No Authentik policy: API clients send bearer keys and the management UI
+# Internal only. No sign-in SecurityPolicy: API clients send bearer keys and the management UI
 # (/management.html) has its own secret-key.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

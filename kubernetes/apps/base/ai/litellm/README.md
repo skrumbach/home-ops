@@ -19,7 +19,7 @@ public listener: no `envoy-external` parentRef, ever.
 | `app/httproute-internal.yaml` | `litellm-internal` route + `/anthropic` 404 filter |
 | `app/externalsecret.yaml` | `litellm-secret` |
 | `app/pocketidoidcclient.yaml` | Pocket ID client for UI SSO (client ID `litellm`, secret from `litellm-sso`) |
-| `app/pushsecret-sso.yaml`, `app/pushsecret-pgvector.yaml` | one-time credentials into 1Password |
+| `app/pushsecret-pgvector.yaml` | one-time credential into 1Password |
 | `app/servicemonitor.yaml`, `app/prometheusrule.yaml` | scrape and alerts |
 
 ## Prerequisites (before first sync)
@@ -36,9 +36,10 @@ the only item created by hand:
 | `POSTGRES_DB_USER_PASSWORD` | `openssl rand -hex 24` |
 
 Already existing and reused: `ai-keys` (`ANTHROPIC_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`,
-`OPENROUTER_API_KEY`, `OPENCODE_GO_API_KEY`). Written by
-PushSecrets, not by hand: `Automation/litellm-sso` (from OpenTofu), `litellm-pgvector` (seed command in
-`app/pushsecret-pgvector.yaml`) and every `litellm-consumer-*` item.
+`OPENROUTER_API_KEY`, `OPENCODE_GO_API_KEY`) and `Automation/litellm-sso`
+(`LITELLM_SSO_CLIENT_SECRET`, first written by the retired Authentik OpenTofu stack; nothing
+writes it now, so it is the only copy). Written by PushSecrets, not by hand: `litellm-pgvector`
+(seed command in `app/pushsecret-pgvector.yaml`) and every `litellm-consumer-*` item.
 
 Until `litellm` exists the ExternalSecret reports `SecretSyncedError`, the
 `litellm-db` role has no password and the proxy sits in

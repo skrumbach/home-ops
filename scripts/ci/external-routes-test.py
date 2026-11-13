@@ -14,7 +14,6 @@ GATEWAY = "envoy-external"
 
 # hostname -> path prefixes it may expose ("/" is the whole app).
 ALLOWED: dict[str, set[str]] = {
-    "auth.${SECRET_DOMAIN}": {"/", "/outpost.goauthentik.io"},  # Authentik still renders the Flux variable
     "coder.sklab.dev": {"/"},
     "flux-webhook.sklab.dev": {"/hook/"},
     "hass.sklab.dev": {"/"},

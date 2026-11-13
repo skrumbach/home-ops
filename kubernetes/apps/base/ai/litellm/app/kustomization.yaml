@@ -7,7 +7,6 @@ namespace: ai
 resources:
   - ./externalsecret.yaml
   - ./pocketidoidcclient.yaml
-  - ./pushsecret-sso.yaml
   - ./pushsecret-pgvector.yaml
   - ./litellmproxy.yaml
   - ./httproute-internal.yaml

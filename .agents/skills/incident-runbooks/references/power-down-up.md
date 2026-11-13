@@ -16,7 +16,7 @@ VIP `10.10.10.10`. Never `just talos shutdown-node`: it runs `shutdown --force`,
    `kubectl get snapshot.kopiur.home-operations.com -A -o json | jq -r '.items[] | select(.status.phase=="Running") | .metadata.namespace + "/" + .metadata.name'`
 6. Stop new backups: `flux suspend hr kopiur -n system && kubectl -n system scale deploy/kopiur-controller --replicas=0`.
    If that does not hold, suspend each `SnapshotPolicy` (`spec.suspend: true`).
-7. Long outage only: hibernate Postgres. It takes the database (and Authentik SSO) down for the
+7. Long outage only: hibernate Postgres. It takes the database (and Pocket ID sign-in) down for the
    whole window; a short cycle does not need it, since drains already switch the primary over.
    Set it only when `kubectl -n database get cluster postgres-18` is already healthy: the operator defers it otherwise.
    `kubectl -n database annotate cluster postgres-18 cnpg.io/hibernation=on --overwrite`, then check the reason:

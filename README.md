@@ -42,7 +42,7 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 ├── .agents/skills/     # incident-runbooks skill (.claude/skills is a symlink)
 ├── .taskfiles/         # task recipes (flux, rook, network, actions-runner)
 ├── scripts/            # CI guards (scripts/ci), add-app scaffold, agent credentials
-├── terraform/          # OpenTofu stacks outside Flux (Authentik, UniFi, TrueNAS)
+├── terraform/          # OpenTofu stacks outside Flux (UniFi, TrueNAS)
 └── .mise.toml          # workstation tool versions
 ```
 

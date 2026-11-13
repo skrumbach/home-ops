@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Credential-less tofu fmt and tofu validate -backend=false for every stack under terraform/.
-# A green run is not apply-safety: this never calls Authentik or the state backend. Live read-only plans are terraform-diff.yaml. Apply needs an explicit go-ahead.
+# A green run is not apply-safety: this never calls a provider API or the state backend. Live read-only plans are terraform-diff.yaml. Apply needs an explicit go-ahead.
 set -euo pipefail
 
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

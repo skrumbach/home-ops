@@ -620,8 +620,7 @@ def no_backup_reason(claim: dict, app: dict | None) -> str:
 def ops_sources() -> list[str]:
     runbooks = sorted(str(p.relative_to(ROOT)) for p in (ROOT / OPS_RUNBOOK_DIR).glob("*.md") if p.name != "SKILL.md")
     terraform = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "terraform").glob("*.md"))
-    terraform += sorted(str(p.relative_to(ROOT)) for p in (ROOT / "terraform").glob("*/README.md")
-                        if not str(p.relative_to(ROOT)).startswith("terraform/authentik/"))
+    terraform += sorted(str(p.relative_to(ROOT)) for p in (ROOT / "terraform").glob("*/README.md"))
     rest = sorted(OPS_REST + terraform)
     ordered = OPS_ORDER + runbooks + [OPS_RECOVERY] + rest
     return [p for p in ordered if (ROOT / p).is_file()]
