@@ -11,15 +11,12 @@ metadata:
     gethomepage.dev/icon: authentik.svg
     gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik
     gethomepage.dev/description: Single sign-on
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN},external.${SECRET_DOMAIN}"
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == 200"]
 spec:
   hostnames: ["auth.${SECRET_DOMAIN}"]
+  # One gateway only: on both, unifi-dns never settles the record (see coder/app/httproute.yaml).
   parentRefs:
-    - name: envoy-internal
-      namespace: network
-      sectionName: https
     - name: envoy-external
       namespace: network
       sectionName: https
