@@ -20,6 +20,10 @@ ALLOWED: dict[str, set[str]] = {
     "hass.sklab.dev": {"/"},
     "kromgo.sklab.dev": {"/badges/"},  # public read-only badges only
     "echo.sklab.dev": {"/"},
+    # Pocket ID, whole app: the sign-in pages, their assets and the passkey/OIDC APIs are spread
+    # over the SPA's paths, and the one route also carries the LAN admin UI (one gateway per
+    # hostname). Passkey-only, signups disabled, /setup closed once the owner exists.
+    "id.sklab.dev": {"/"},
     "n8n-webhook.sklab.dev": {"/webhook", "/rest/oauth2-credential"},  # not the editor
     # Wizarr invite flow only; the admin UI is wizarr.sklab.dev on envoy-internal.
     "join.sklab.dev": {
