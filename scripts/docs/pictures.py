@@ -169,6 +169,8 @@ def icon(name: str, x: float, y: float, size: float) -> str:
     except ET.ParseError:
         path.unlink()
         die(f"{name!r} is not a Lucide icon name (https://lucide.dev/icons, release 0.460.0)")
+    # The stroke gradient is in the icon's own 24 x 24 space: a bounding-box gradient would make every
+    # straight horizontal or vertical line (a box with no area) disappear.
     inner = "".join(f"<{el.tag.split('}')[-1]} " + " ".join(f'{k}="{v}"' for k, v in el.attrib.items()) + "/>" for el in root)
     k = size / 24
     return (f'<g transform="translate({x:.1f} {y:.1f}) scale({k:.3f})" fill="none" stroke="url(#neon)" '
@@ -203,7 +205,7 @@ def frame(w: int, h: int, label: str, key: str, style: str, body: list[str]) -> 
 <radialGradient id="gv" cx="88%" cy="0%" r="70%"><stop offset="0" stop-color="{C['violet']}" stop-opacity=".30"/><stop offset="1" stop-color="{C['violet']}" stop-opacity="0"/></radialGradient>
 <radialGradient id="gc" cx="0%" cy="100%" r="55%"><stop offset="0" stop-color="{C['cyan']}" stop-opacity=".10"/><stop offset="1" stop-color="{C['cyan']}" stop-opacity="0"/></radialGradient>
 <radialGradient id="halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="{C['cyan']}" stop-opacity=".22"/><stop offset=".6" stop-color="{C['violet']}" stop-opacity=".10"/><stop offset="1" stop-color="{C['violet']}" stop-opacity="0"/></radialGradient>
-<linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{C['cyan']}"/><stop offset=".5" stop-color="{C['indigo']}"/><stop offset="1" stop-color="{C['magenta']}"/></linearGradient>
+<linearGradient id="neon" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="{C['cyan']}"/><stop offset=".5" stop-color="{C['indigo']}"/><stop offset="1" stop-color="{C['magenta']}"/></linearGradient>
 <linearGradient id="hair" x1="0" x2="1"><stop offset="0" stop-color="{C['cyan']}" stop-opacity=".8"/><stop offset=".5" stop-color="{C['violet']}" stop-opacity=".6"/><stop offset="1" stop-color="{C['magenta']}" stop-opacity=".8"/></linearGradient>
 <linearGradient id="sweep" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
 <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>

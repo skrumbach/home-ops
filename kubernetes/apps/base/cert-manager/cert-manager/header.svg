@@ -6,7 +6,7 @@
 <radialGradient id="gv" cx="88%" cy="0%" r="70%"><stop offset="0" stop-color="#8B55F5" stop-opacity=".30"/><stop offset="1" stop-color="#8B55F5" stop-opacity="0"/></radialGradient>
 <radialGradient id="gc" cx="0%" cy="100%" r="55%"><stop offset="0" stop-color="#22D8F0" stop-opacity=".10"/><stop offset="1" stop-color="#22D8F0" stop-opacity="0"/></radialGradient>
 <radialGradient id="halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#22D8F0" stop-opacity=".22"/><stop offset=".6" stop-color="#8B55F5" stop-opacity=".10"/><stop offset="1" stop-color="#8B55F5" stop-opacity="0"/></radialGradient>
-<linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D8F0"/><stop offset=".5" stop-color="#6C5CFF"/><stop offset="1" stop-color="#D946E6"/></linearGradient>
+<linearGradient id="neon" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#22D8F0"/><stop offset=".5" stop-color="#6C5CFF"/><stop offset="1" stop-color="#D946E6"/></linearGradient>
 <linearGradient id="hair" x1="0" x2="1"><stop offset="0" stop-color="#22D8F0" stop-opacity=".8"/><stop offset=".5" stop-color="#8B55F5" stop-opacity=".6"/><stop offset="1" stop-color="#D946E6" stop-opacity=".8"/></linearGradient>
 <linearGradient id="sweep" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
 <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>

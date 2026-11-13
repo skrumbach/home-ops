@@ -103,7 +103,7 @@ flux -n NS get ks APP
 
 ## Invariants
 
-- Rules that must hold, kept word for word from an older README.
+- Rules that must hold. One carried over from an older README keeps its wording.
 
 ## Known gaps
 
@@ -122,7 +122,9 @@ Rules:
   image versions (Renovate owns them). Secrets by 1Password item and Secret name only. A mismatch found
   while writing goes into `Known gaps`; it is not fixed in the README change.
 - **Settings that matter** lists values that differ from the chart default or encode a decision. It is not
-  a values dump.
+  a values dump. When no manifest gives the reason for a value, say so instead of inventing one.
+- **When an alert fires** covers the alerts about this app, wherever their rule is defined.
+- **Operate it** holds commands that only read. Mark the ones that need `exec`.
 - **Length follows the app:** about 50 lines for a single-container app, up to about 180 for a platform
   component.
 - **Mermaid:** the `init` line and the two classes above, `accent` for the one object the app is about,
