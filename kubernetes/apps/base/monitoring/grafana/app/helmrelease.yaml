@@ -18,10 +18,10 @@ spec:
       configmap.reloader.stakater.com/reload: grafana
       secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-secret
 
-    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (ExternalSecret grafana-oidc). Grafana's env override
-    # beats grafana.ini, so the secret stays out of the ConfigMap and no Grafana variable-expansion
-    # token has to survive Flux envsubst. optional: a missing secret
-    # breaks only SSO, never the pod or the local break-glass login.
+    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (ExternalSecret grafana-oidc, which pocketidoidcclient.yaml
+    # also pushes to Pocket ID). Grafana's env override beats grafana.ini, so the secret stays out
+    # of the ConfigMap and no Grafana variable-expansion token has to survive Flux envsubst.
+    # optional: a missing secret breaks only SSO, never the pod or the local break-glass login.
     envFromSecrets:
       - name: grafana-oidc-secret
         optional: true
@@ -554,25 +554,26 @@ spec:
       GF_SERVER_ROOT_URL: "https://{{ .Release.Name }}.sklab.dev"
 
     grafana.ini:
-      # Authentik SSO. Client: terraform/authentik/grafana.tofu. The local admin form stays as
+      # Pocket ID SSO. Client: pocketidoidcclient.yaml. The local admin form stays as
       # break-glass (disable_login_form is not set); retire it only after SSO is proven.
       auth.generic_oauth:
         enabled: true
-        name: Authentik
+        name: Pocket ID
         icon: signin
+        # Must match spec.clientID in pocketidoidcclient.yaml.
         client_id: grafana
-        # offline_access gets a refresh token; without one Grafana logs out at the 5-minute
-        # access token expiry. profile carries the `groups` claim.
-        scopes: openid email profile offline_access
-        auth_url: https://auth.sklab.dev/application/o/authorize/
-        token_url: https://auth.sklab.dev/application/o/token/
-        api_url: https://auth.sklab.dev/application/o/userinfo/
+        # Pocket ID releases the `groups` claim (group names) only with the groups scope.
+        # offline_access is kept for the refresh token use_refresh_token needs.
+        scopes: openid email profile groups offline_access
+        auth_url: https://id.sklab.dev/authorize
+        token_url: https://id.sklab.dev/api/oidc/token
+        api_url: https://id.sklab.dev/api/oidc/userinfo
         use_pkce: true
         use_refresh_token: true
         allow_sign_up: true
-        # Only Authentik superusers sign in, as server admins. Everyone else gets '' and
+        # Only the Pocket ID admins group signs in, as server admins. Everyone else gets '' and
         # role_attribute_strict denies the login instead of landing as Viewer.
-        role_attribute_path: contains(groups[*], 'authentik Admins') && 'GrafanaAdmin' || ''
+        role_attribute_path: contains(groups[*], 'admins') && 'GrafanaAdmin' || ''
         role_attribute_strict: true
         allow_assign_grafana_admin: true
       analytics:

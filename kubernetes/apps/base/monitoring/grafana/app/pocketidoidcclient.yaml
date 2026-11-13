@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Grafana sign-in (helmrelease.yaml auth.generic_oauth). Deleting this CR deletes the client in
+# Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: grafana
+spec:
+  name: Grafana
+  # Must match auth.generic_oauth.client_id in helmrelease.yaml. Immutable once created.
+  clientID: grafana
+  # The existing 1Password value (grafana-oidc client-secret, shared with the Authentik client),
+  # which Grafana already reads from grafana-oidc-secret before it starts: the operator pushes it
+  # to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  clientSecretRef:
+    name: grafana-oidc-secret
+    key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+  launchUrl: https://grafana.sklab.dev
+  # <root_url>/login/generic_oauth; root_url is GF_SERVER_ROOT_URL.
+  callbackUrls: ["https://grafana.sklab.dev/login/generic_oauth"]
+  # No logoutCallbackUrls: no signout_redirect_url is set, so Grafana's logout is local only.
+  # use_pkce: true sends an S256 challenge.
+  pkceEnabled: true
+  # role_attribute_strict already denies everyone outside admins; this stops them at Pocket ID.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # Grafana reads the secret from grafana-oidc-secret; no copy is needed.
+  secret:
+    enabled: false
