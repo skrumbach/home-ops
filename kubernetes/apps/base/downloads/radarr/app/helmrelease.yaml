@@ -37,6 +37,10 @@ spec:
               repository: ghcr.io/home-operations/radarr
               tag: 7.0.2.10888@sha256:69ea515df6e2a3ea1490cfa127ffaaf9597a9db84fffa2fa150a6fae98fe04cb
             env:
+              # .NET caps the GC heap at 75% of the 4Gi limit by default (3GiB), which left
+              # too little room for native memory: OOM-killed 2026-11-11 at ~3.4Gi working
+              # set. 2GiB (hex, as the runtime parses it) keeps 2GiB for native allocations.
+              DOTNET_GCHeapHardLimit: "0x80000000"
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__AUTH__METHOD: External
               RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
