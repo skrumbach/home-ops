@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
-# Paperless' second django-allauth openid_connect APP "pocket-id" (externalsecret.yaml), beside
-# Authentik. Deleting this CR deletes the client in Pocket ID.
+# Paperless' own sign-in (django-allauth app `pocket-id` in externalsecret.yaml), its only SSO
+# provider. Deleting this CR deletes the client in Pocket ID.
 apiVersion: pocketid.internal/v1alpha1
 kind: PocketIDOIDCClient
 metadata:
