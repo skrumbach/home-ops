@@ -78,9 +78,6 @@ spec:
         # in Pocket ID and its only users are created from Git, so the claim adds nothing here.
         - name: CODER_OIDC_IGNORE_EMAIL_VERIFIED
           value: "true"
-        # Not a Coder option (the role claim is CODER_OIDC_USER_ROLE_FIELD); has no effect.
-        - name: CODER_OIDC_ROLE_FIELD
-          value: "groups"
         # Pocket ID releases the `groups` claim only with the groups scope.
         - name: CODER_OIDC_SCOPES
           value: "openid,profile,email,groups,offline_access"
@@ -97,8 +94,6 @@ spec:
           value: "true"
         - name: CODER_TELEMETRY_ENABLE
           value: "false"
-        - name: CODER_WILDCARD_ACCESS_URL
-          value: "*.coder.sklab.dev"
         - name: CODER_UPDATE_CHECK
           value: "false"
 
