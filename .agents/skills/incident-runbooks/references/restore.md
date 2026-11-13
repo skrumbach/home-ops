@@ -78,7 +78,7 @@ fresh Ceph gets an empty `ceph` repository, so every standing Restore fails clos
    ```
    Same commit: Postgres, per the comment above `bootstrap:` in
    `kubernetes/apps/base/database/cloudnative-pg/cluster-18/cluster-18.yaml`.
-   If the NAS is lost too, the only Postgres copy is the R2 mirror (`cloudnative-pg/offsite-mirror/README.md`).
+   If the NAS is lost too, the only Postgres copy is the R2 mirror (`kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`).
 6. Bootstrap case: `just bootstrap cluster`, wait for Ceph `HEALTH_OK`, then Kustomizations
    `kopiur` and `kopiur-repository` in `system`. In-place case (Kubernetes survived): once the DR
    commit has reconciled, run the recreate snippet (old Restores may still read `ceph`, or say

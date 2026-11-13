@@ -103,9 +103,4 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 - `SecretSynced` does not mean the value is non-empty: check the decoded length of `PLEX_TOKEN`.
 - Re-runs of the seed are safe. A missing env var aborts it before any row is written.
 
-## Known gaps
-
-- **A reference to a skill that does not exist.** [`app/resources/seed.py`](app/resources/seed.py) line 5 cites
-  "Skill media-stack references/friends.md". `.agents/skills/` holds only `incident-runbooks`.
-
 Upstream: [Wizarr](https://github.com/wizarrrr/wizarr)

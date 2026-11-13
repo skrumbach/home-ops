@@ -90,7 +90,7 @@ Values are in [`app/helmrelease.yaml`](app/helmrelease.yaml). The `cluster-apps`
 | `instance.sync.path`, `ref`, `interval` | `kubernetes/clusters/main`, `refs/heads/main`, `1h` | The entry point and branch. The webhook shortens the delay after a push. `flux-system/konflate` sets `config.clusterPath` to the same path. |
 | `instance.distribution.artifact` | `flux-operator-manifests` OCI image, `version: 2.x` | Renovate bumps the tag through the `flux-operator` group in `.renovate/customManagers.json5`. |
 | `instance.components` | source, kustomize, helm, notification | Only these four controllers are listed. The manifest records no reason for leaving others out. |
-| `--concurrent` | `10` on all three controllers, `20` on kustomize-controller | More workers for a cluster with many Kustomizations. The manifest records no reason for the numbers. |
+| `--concurrent` | `10` on helm-controller and source-controller, `20` on kustomize-controller | More workers for a cluster with many Kustomizations. The manifest records no reason for the numbers. |
 | `--requeue-dependency` | `5s` | Set to 5 s on the three controllers. The manifest records no reason. |
 | Controller `memory` limit | `2Gi` on the three controllers | Raised for the larger builds. The manifest records no reason for the number. |
 | kustomize-controller `temp` volume | `emptyDir` with `medium: Memory` | In-memory kustomize builds, per the patch title. |
@@ -137,12 +137,6 @@ Flux events at error level also reach Alertmanager and, for Kustomizations, GitH
   `spec.patches`, so an overlay patch is dropped. `scripts/ci/overlay-patches-test.py` gates this.
 - **`${...}` in a manifest must be a Flux variable.** Anything else is written `$${VAR}`, or the Kustomization sets
   `kustomize.toolkit.fluxcd.io/substitute: disabled`.
-
-## Known gaps
-
-- **`--concurrent` is set twice on kustomize-controller.** `app/helmrelease.yaml` adds `--concurrent=10` to all
-  three controllers, then `--concurrent=20` to kustomize-controller alone. The pod gets both arguments. The Git
-  files do not show which one wins.
 
 Upstream: [Flux Operator](https://fluxoperator.dev/docs/) • [Flux docs](https://fluxcd.io/flux/) •
 [Receiver](https://fluxcd.io/flux/components/notification/receivers/)

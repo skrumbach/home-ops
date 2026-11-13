@@ -227,6 +227,7 @@ spec:
         accessMode: ReadWriteOnce
         size: 50Gi
         storageClass: ceph-block
+        retain: true
         advancedMounts:
           paperless-ngx:
             app:
@@ -250,7 +251,6 @@ spec:
           gethomepage.dev/name: Paperless-ngx
           gethomepage.dev/icon: sh-paperless-ngx-light.svg
           gethomepage.dev/description: Document archive
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
           # that /api still bypasses the Envoy OIDC gate (a gated path would end on the 200 Pocket ID
           # sign-in page).

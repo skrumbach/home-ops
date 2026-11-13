@@ -22,7 +22,7 @@
   holds the CSI ServiceAccounts and RBAC, and [`operator/driver.yaml`](operator/driver.yaml) adds tolerations to the
   two `Driver` CRs.
 - **Keeps a metadata backup.** CronJob `rook-ceph-backup` dumps the mon secrets and the `CephCluster` to the PVC
-  `ceph-backup-pvc` every day at 03:00.
+  `ceph-backup-pvc` every day at 03:00 UTC.
 
 ## Why it is built this way
 
@@ -178,12 +178,5 @@ The rules are in [`cluster/prometheusrule.yaml`](cluster/prometheusrule.yaml).
 - **Leave new claims off `ceph-filesystem`.** Use `ceph-filesystem-rwx` for RWX.
 - **talos-3 has a `PreferNoSchedule` taint.** A hard `NoSchedule` strands drains. MDS and RGW have no toleration
   for it.
-
-## Known gaps
-
-- **The backup CronJob's schedule comment is false.** `backup/cronjob.yaml` says the 03:00 run is "offset from R2
-  backups at 2 AM". No kopiur schedule runs at 02:00: the R2 default in
-  [`snapshotschedule.yaml`](../../../../components/kopiur/r2/snapshotschedule.yaml) is `H 4 * * *`, and the CronJob
-  sets no timezone.
 
 Upstream: [Rook docs](https://rook.io/docs/rook/latest-release/), [Ceph docs](https://docs.ceph.com/)

@@ -107,9 +107,3 @@ kubectl -n system get rolebinding -A | grep pvc-writable-check-exec
 
 - Expected read-only is `volumeMounts[].readOnly: true` (headlamp). The skip
   annotation is unused. Do not use it to silence a real failure.
-
-## Known gaps
-
-- **The comment on the alert is cut off.** In [`app/prometheusrule.yaml`](app/prometheusrule.yaml) the comment above
-  `PVCVolumeNotWritable` ends mid-sentence (`kube_job_status_failed{job_name=.`), so it no longer explains the
-  `reason!=""` filter.

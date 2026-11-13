@@ -117,7 +117,6 @@ spec:
           gethomepage.dev/name: Linkwarden
           gethomepage.dev/icon: sh-linkwarden.svg
           gethomepage.dev/description: Bookmarks and page archives
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a
           # Linkwarden body field the Pocket ID sign-in page cannot match, and proves /api still
           # bypasses the Envoy OIDC gate.

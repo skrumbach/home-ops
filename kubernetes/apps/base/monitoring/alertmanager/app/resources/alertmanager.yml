@@ -1,7 +1,7 @@
 ---
 # critical is Pushover priority 2, warning 0, info -2. retry/expire
 # apply only at priority 2; ttl does not. Resolved notifications stay
-# quieter than firing ones. Skill observability.
+# quieter than firing ones.
 receivers:
   - name: "null"
 
@@ -85,7 +85,7 @@ receivers:
 
   # Watchdog heartbeat. url_file is read per send. A missing file fails
   # only this receiver; Alertmanager still starts and Pushover still routes.
-  # Period 5m, grace >= 15m. Skill observability.
+  # Period 5m, grace >= 15m.
   - name: "healthchecks-io"
     webhook_configs:
       - url_file: /etc/secrets/healthchecks_ping_url
@@ -119,7 +119,7 @@ route:
 
     # Watchdog is matched by name (severity none). repeat_interval 5m is
     # the Healthchecks.io period; grace >= 15m. Do not inherit the root
-    # route's 12h repeat. Skill observability.
+    # route's 12h repeat.
     - receiver: "healthchecks-io"
       matchers:
         - alertname = "Watchdog"
@@ -152,7 +152,7 @@ route:
 
 # InfoInhibitor suppresses info only while the namespace has no warning
 # or critical. The same-alertname inhibit rules stay and almost never
-# match. Skill observability.
+# match.
 inhibit_rules:
   - source_matchers:
       - severity = "critical"

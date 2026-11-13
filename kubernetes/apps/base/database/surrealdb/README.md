@@ -82,7 +82,6 @@ Values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | `KOPIUR_SCHEDULE_R2` (overlay) | `H 7 * * *` | The namespace's r2 hour in the kopiur schedule table. |
 | `surrealdb.extraArgs` | `--allow-all`, `--allow-funcs` | The manifest records no reason. |
 | `resources` | request `100m` CPU, `512Mi`; limit `2Gi` memory, no CPU limit | The comment says to re-measure at `[14d:30s]` before trimming CPU, because coarser sampling under-reads the peak. |
-| `topologySpreadConstraints` | `ScheduleAnyway`, `nodeTaintsPolicy: Honor` | `Honor` only filters `NoSchedule`/`NoExecute`. talos-3 is `PreferNoSchedule`, so the score penalty keeps the pod off it. |
 | `persistence.storageClassName` | omitted | The comment says the chart renders it twice. |
 
 ## Operate it
@@ -120,9 +119,9 @@ kubectl -n database exec deploy/surrealdb -- ls -l /data
   `open_notebook` and fails the whole snapshot if that export fails.
   [`apps/main/ai/kustomization.yaml`](../../../main/ai/kustomization.yaml) lists `open-notebook` under "Retired", and
   nothing else in `kubernetes/` names SurrealDB.
-- **A ServiceMonitor for a port with no metrics.** `serviceMonitor.enabled: true` in
-  [`app/helmrelease.yaml`](app/helmrelease.yaml), while a comment in [`app/prometheusrule.yaml`](app/prometheusrule.yaml)
-  says SurrealDB serves no `/metrics` on its only port, 8000.
+- **The chart drops `topologySpreadConstraints`.** [`app/helmrelease.yaml`](app/helmrelease.yaml) sets a spread
+  constraint whose comment says it keeps the pod off talos-3, but chart 0.4.0 does not read the key (flate reports it
+  as a stale value) and the rendered Deployment has no spread constraint. Only the preferred anti-affinity applies.
 
 Upstream: [SurrealDB docs](https://surrealdb.com/docs) •
 [SurrealDB Helm chart](https://github.com/surrealdb/helm-charts)

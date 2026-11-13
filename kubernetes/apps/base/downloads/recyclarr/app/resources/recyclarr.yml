@@ -144,7 +144,7 @@ radarr:
       # 2026-10-18). A release without English audio is hard-rejected on every profile; a
       # German dual-audio release lists English too, so it still passes. German alone never
       # rescues a release, so no German-only format is scored. Which movie sits on which
-      # profile is Radarr state, see media-stack/references/recyclarr.md.
+      # profile is Radarr state, set per movie in Radarr, not here.
       - trash_ids:
           - 0dc8aec3bd1c47cd6c40c46ecd27e846 # Language: Not English
           - 263943bc5d99550c68aad0c4278ba1c7 # German LQ

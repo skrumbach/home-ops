@@ -15,4 +15,4 @@ spec:
   targetNamespace: database
   wait: true
 # Per-cluster Dragonfly instances are provisioned by consuming apps via the
-# components/dragonfly Kustomize component (one cluster per consumer namespace).
+# components/dragonfly Kustomize component (one cluster per consumer app, named <APP>-dragonfly).

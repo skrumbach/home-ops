@@ -130,10 +130,6 @@ lowercase username. Restores: [`restore.md`](../../../../../.agents/skills/incid
   Google as a client of the HA route, and Secret `home-assistant` carries `HASS_GOOGLE_PROJECT_ID`. The route has
   been on `envoy-internal` only since 2026-11-13 (`app/helmrelease.yaml` lines 182-186). Git does not say whether
   Google still needs to call in from outside.
-- **Two Gatus checks, one with a stale reason.** The route annotation adds a status-only check on
-  `https://hass.sklab.dev/manifest.json`. `monitoring/gatus` `app/resources/config.yaml` lines 87-90 add a second,
-  in-cluster check, because "status-only on the HTTPRoute stays green through ext_authz". The HA route has no
-  SecurityPolicy, so that reason no longer holds for it.
 
 Upstream: [Home Assistant docs](https://www.home-assistant.io/docs/) •
 [hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth) •

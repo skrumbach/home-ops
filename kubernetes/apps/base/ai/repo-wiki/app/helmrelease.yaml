@@ -146,7 +146,6 @@ spec:
           gethomepage.dev/name: Repo Wiki
           gethomepage.dev/description: Generated repo documentation
           gethomepage.dev/icon: "mdi-book-open-page-variant-#22D8F0"
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
         hostnames:

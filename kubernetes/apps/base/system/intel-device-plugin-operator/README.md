@@ -17,7 +17,7 @@
 - **Serves the iGPU only.** `allowIDs: "0xa7a0"` limits the pool to that device ID. The B70 is not in it.
 
 Consumers (`git grep gpu.intel.com/xe`): `media/plex` and `selfhosted/rsshub` (playwright). Their Kustomizations
-depend on `intel-device-plugin-gpu`, and so does `media/tdarr`.
+depend on `intel-device-plugin-gpu`.
 
 ## Why it is built this way
 
@@ -92,11 +92,5 @@ kubectl get nodes -o custom-columns='NAME:.metadata.name,XE:.status.allocatable.
 ## Invariants
 
 - This pool is the iGPU only. Do not widen `allowIDs` to the B70.
-
-## Known gaps
-
-- **Dependency without a request.** Kustomization `tdarr` ([`main/media/tdarr.yaml`](../../../main/media/tdarr.yaml))
-  `dependsOn` `intel-device-plugin-gpu`, and no `tdarr` manifest requests `gpu.intel.com/xe`. Its worker uses
-  `devic.es/b70-vaapi`.
 
 Upstream: [intel/intel-device-plugins-for-kubernetes](https://github.com/intel/intel-device-plugins-for-kubernetes)

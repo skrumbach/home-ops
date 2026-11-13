@@ -109,10 +109,3 @@ spec:
         globalMounts:
           - path: /host/proc
             readOnly: true
-      netfs:
-        type: hostPath
-        hostPath: /sys
-        hostPathType: Directory
-        globalMounts:
-          - path: /host/net
-            readOnly: true
