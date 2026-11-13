@@ -2,7 +2,7 @@
 .terraform/
 .terraform.tfstate.lock.info
 
-# State never lives in Git - it is in the S3 backend (see authentik/backend.tofu)
+# State never lives in Git - it is in the S3 backend (see unifi/backend.tofu)
 # and it contains secrets in plaintext.
 *.tfstate
 *.tfstate.*
