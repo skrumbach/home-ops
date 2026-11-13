@@ -5,15 +5,10 @@
 client_id: home-assistant
 discovery_url: https://id.sklab.dev/.well-known/openid-configuration
 display_name: Pocket ID
-features:
-  # TEMPORARY, remove after the owner's first Pocket ID login. The subject is hashed with the
-  # issuer, so the Authentik credential never matches; this links the new credential to the HA
-  # user whose local (username/password) login has Pocket ID's preferred_username. Without a
-  # match a new user is created instead. The match is case-sensitive, and HA stores local
-  # usernames lowercased, so a Pocket ID username with capitals never links.
-  # Remove once the owner's link exists: any later Pocket ID admin whose username equals an
-  # existing local HA login would take that account over on first sign-in.
-  automatic_user_linking: true
+# No `features.automatic_user_linking`: it was on for the owner's first Pocket ID login on
+# 2026-11-13, which linked the owner account. Left on, any later Pocket ID admin whose username
+# equals a local Home Assistant login would take that account over on first sign-in. A new
+# local account needs it again for one login: the match is on the exact, lowercase username.
 roles:
   # Pocket ID sends group names in `groups` (the groups scope is requested by default).
   # Setting `user` to the same group means any other account is rejected instead of landing
