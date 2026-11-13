@@ -3,7 +3,7 @@
 # Envoy Gateway's OIDC client for the code-server route (securitypolicy.yaml). The operator
 # generates the client ID and secret and writes them to Secret
 # `home-assistant-code-server-oidc-credentials` in this namespace. Deleting this CR deletes the
-# client in Pocket ID. Home Assistant itself still signs in with Authentik (auth_oidc).
+# client in Pocket ID. Home Assistant's own sign-in has its own client (pocketidoidcclient-app.yaml).
 apiVersion: pocketid.internal/v1alpha1
 kind: PocketIDOIDCClient
 metadata:
