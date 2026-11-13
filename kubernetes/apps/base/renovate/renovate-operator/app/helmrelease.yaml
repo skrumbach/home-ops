@@ -23,7 +23,7 @@ spec:
         enabled: true
         issuerUrl: "https://id.sklab.dev"
         clientId: renovate-operator
-        existingSecret: renovate-operator-oidc
+        existingSecret: renovate-operator-oidc-client
         secretKey: client-secret
         sessionSecretKey: session-secret
         # TLS ends at envoy-internal; the auto-detected redirect would be http.
@@ -32,7 +32,7 @@ spec:
       enabled: false
     deployment:
       annotations:
-        secret.reloader.stakater.com/reload: renovate-operator-oidc
+        secret.reloader.stakater.com/reload: renovate-operator-oidc-client
     # Internal route only.
     route:
       enabled: true

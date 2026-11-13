@@ -6,6 +6,7 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./externalsecret.yaml
+  - ./externalsecret-oidc.yaml
   - ./networkpolicy-image-renderer-dns.yaml
   - ./pocketidoidcclient.yaml
   - ./dashboards/ceph

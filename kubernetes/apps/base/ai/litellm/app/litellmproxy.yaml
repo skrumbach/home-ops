@@ -21,14 +21,15 @@ spec:
   # would create a second one.
 
   envFrom:
-    # Master/salt key, DATABASE_URL, the four provider keys and the SSO client
-    # secret. Models resolve provider keys via `apiKey: os.environ/<VAR>`.
+    # Master/salt key, DATABASE_URL and the provider keys. Models resolve provider
+    # keys via `apiKey: os.environ/<VAR>`.
     - secretRef:
         name: litellm-secret
 
   # UI SSO through Pocket ID (pocketidoidcclient.yaml). Only the client secret is
-  # secret (GENERIC_CLIENT_SECRET in litellm-secret, which pocketidoidcclient.yaml
-  # also pushes to Pocket ID), so nothing here waits on the operator.
+  # secret: externalsecret-oidc.yaml generates it in the cluster and
+  # pocketidoidcclient.yaml pushes the same value to Pocket ID, so nothing here
+  # waits on the operator.
   env:
     # Per-string cap on stored prompt/response bodies (default 2048 chars).
     - name: MAX_STRING_LENGTH_PROMPT_IN_DB
@@ -36,6 +37,11 @@ spec:
     # Must match spec.clientID in pocketidoidcclient.yaml.
     - name: GENERIC_CLIENT_ID
       value: litellm
+    - name: GENERIC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: litellm-oidc-client
+          key: client-secret
     - name: GENERIC_AUTHORIZATION_ENDPOINT
       value: https://id.sklab.dev/authorize
     - name: GENERIC_TOKEN_ENDPOINT

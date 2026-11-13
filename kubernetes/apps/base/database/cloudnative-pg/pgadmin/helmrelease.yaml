@@ -59,6 +59,13 @@ spec:
                   secretKeyRef:
                     name: pgadmin-secret
                     key: PGADMIN_DEFAULT_PASSWORD
+              # Read by config_local.py (externalsecret.yaml). Not a PGADMIN_CONFIG_* name: the
+              # entrypoint would write that into config_distro.py.
+              PGADMIN_OAUTH_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: pgadmin-oidc-client
+                    key: client-secret
             probes:
               liveness: &probes
                 enabled: true
