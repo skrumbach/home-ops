@@ -59,7 +59,7 @@ flowchart LR
 1. Flux applies `app/`. The HelmRelease depends on `onepassword-connect` and installs the controller, the webhook and the cert controller.
 2. Flux then applies `stores/`. Both stores point at `http://onepassword-connect.security.svc.cluster.local:8080` and read the token from key `token` in Secret `onepassword-secret`.
 3. An `ExternalSecret` names store `onepassword`, an item and fields. ESO asks Connect, which returns the item from the first vault that has it, and ESO writes the target Secret.
-4. A `PushSecret` that names `onepassword-automation` writes an item into `Automation`. Four do: `ai/toolhive`, `media/seerr`, `media/plex` and `media/wizarr`. The others still name `onepassword`, see [Known gaps](#known-gaps).
+4. A `PushSecret` that names `onepassword-automation` writes an item into `Automation`. Three do: `ai/toolhive`, `media/seerr` and `media/wizarr`. The others still name `onepassword`, see [Known gaps](#known-gaps).
 5. The generated-secret pattern holds no 1Password item. The `Password` generator and `refreshPolicy: CreatedOnce` produce the value once; `monitoring/grafana` is one example.
 
 The Connect token Secret `onepassword-secret` is the only pre-ESO secret. Bootstrap applies it from `ref+op://Home-Lab/1password/...` (see [`bootstrap/README.md`](../../../../../bootstrap/README.md)).
@@ -105,11 +105,11 @@ Defined in `monitoring/kube-prometheus-stack` ([`silent-failure-gaps.yaml`](../.
 
 ## Known gaps
 
-- **Most PushSecrets still write through the read store.** 25 `PushSecret`s name store `onepassword`, among them the
+- **Most PushSecrets still write through the read store.** 26 `PushSecret`s name store `onepassword`, among them the
   LiteLLM virtual keys, `flux-system/headlamp`, `monitoring/grafana-sa-provisioner`, `network/certificates`,
   `system/kopiur` and `system/volsync`. The comment in
   [`stores/clustersecretstore-automation.yaml`](stores/clustersecretstore-automation.yaml) says a push through that
-  store resolves by vault priority and could land in `Homelab`. Only four use `onepassword-automation`.
+  store resolves by vault priority and could land in `Homelab`. Only three use `onepassword-automation`.
 
 Upstream: [External Secrets docs](https://external-secrets.io/latest/) •
 [1Password provider](https://external-secrets.io/latest/provider/1password-automation/)
