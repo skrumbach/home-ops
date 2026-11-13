@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
-# Paperless' own sign-in (django-allauth app `pocket-id` in externalsecret.yaml), its only SSO
+# Paperless' own sign-in (django-allauth app `pocket-id` in helmrelease.yaml), its only SSO
 # provider. Deleting this CR deletes the client in Pocket ID.
 apiVersion: pocketid.internal/v1alpha1
 kind: PocketIDOIDCClient
@@ -10,12 +10,15 @@ spec:
   name: Paperless-ngx
   # Must match client_id of the pocket-id APP. Immutable once created.
   clientID: paperless
-  # The existing 1Password value (paperless-oidc client-secret, first issued for the retired
-  # Authentik client): PAPERLESS_SOCIALACCOUNT_PROVIDERS bakes it in, so the operator pushes it
-  # to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  # The cluster-generated value (externalsecret-oidc.yaml), which the pod puts into
+  # PAPERLESS_SOCIALACCOUNT_PROVIDERS: the operator pushes it to Pocket ID and never generates or
+  # rotates one. Same-namespace Secret.
   clientSecretRef:
-    name: paperless-ngx-secret
-    key: POCKET_ID_CLIENT_SECRET
+    name: paperless-ngx-oidc-client
+    key: client-secret
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
   # allauth builds /accounts/oidc/<provider_id>/login/callback/ for login and for Profile > Connect.
   callbackUrls: ["https://docs.sklab.dev/accounts/oidc/pocket-id/login/callback/"]
   # No logoutCallbackUrls: allauth's logout ends only the Paperless session.

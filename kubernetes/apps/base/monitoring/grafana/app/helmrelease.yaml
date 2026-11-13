@@ -16,15 +16,17 @@ spec:
 
     annotations:
       configmap.reloader.stakater.com/reload: grafana
-      secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-secret
+      secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-client
 
-    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (ExternalSecret grafana-oidc, which pocketidoidcclient.yaml
-    # also pushes to Pocket ID). Grafana's env override beats grafana.ini, so the secret stays out
-    # of the ConfigMap and no Grafana variable-expansion token has to survive Flux envsubst.
-    # optional: a missing secret breaks only SSO, never the pod or the local break-glass login.
+    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (externalsecret-oidc.yaml, generated in the cluster;
+    # pocketidoidcclient.yaml pushes the same value to Pocket ID). Grafana's env override beats
+    # grafana.ini, so the secret stays out of the ConfigMap and no Grafana variable-expansion token
+    # has to survive Flux envsubst.
+    # Not optional: an optional Secret that appears after the pod started is never picked up
+    # (Reloader ignores creation). ESO generates it without 1Password, so it adds no dependency
+    # the pod does not already have through grafana-admin-secret.
     envFromSecrets:
-      - name: grafana-oidc-secret
-        optional: true
+      - name: grafana-oidc-client
 
     replicas: 1
 

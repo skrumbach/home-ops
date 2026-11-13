@@ -9,11 +9,15 @@ spec:
   name: Renovate
   # Must match auth.oidc.clientId in helmrelease.yaml. Immutable once created.
   clientID: renovate-operator
-  # The existing 1Password value (externalsecret.yaml), which the HelmRelease already reads: the
-  # operator pushes it to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  # The cluster-generated value (externalsecret.yaml), which the HelmRelease reads from the same
+  # Secret: the operator pushes it to Pocket ID and never generates or rotates one.
+  # Same-namespace Secret.
   clientSecretRef:
-    name: renovate-operator-oidc
+    name: renovate-operator-oidc-client
     key: client-secret
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
   # Path fixed by the operator: <route host>/auth/callback.
   callbackUrls: ["https://renovate.sklab.dev/auth/callback"]
   # The operator's logout sends the redirect URL cut before /auth/ as post_logout_redirect_uri.
@@ -28,6 +32,6 @@ spec:
       namespace: security
   logo:
     nameOverride: renovate
-  # The app reads its credentials from renovate-operator-oidc; no copy is needed.
+  # The app reads its credentials from renovate-operator-oidc-client; no copy is needed.
   secret:
     enabled: false

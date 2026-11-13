@@ -9,13 +9,15 @@ spec:
   name: LiteLLM
   # Must match GENERIC_CLIENT_ID in litellmproxy.yaml. Immutable once created.
   clientID: litellm
-  # The existing 1Password value (litellm-sso LITELLM_SSO_CLIENT_SECRET, first issued for the
-  # retired Authentik client), which the proxy already reads from litellm-secret before it
-  # starts: the operator pushes it to Pocket ID and never generates or rotates one.
-  # Same-namespace Secret.
+  # The cluster-generated value (externalsecret-oidc.yaml), which the proxy reads from the same
+  # Secret before it starts: the operator pushes it to Pocket ID and never generates or rotates
+  # one. Same-namespace Secret.
   clientSecretRef:
-    name: litellm-secret
-    key: GENERIC_CLIENT_SECRET
+    name: litellm-oidc-client
+    key: client-secret
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
   launchUrl: https://litellm.sklab.dev
   # <PROXY_BASE_URL>/sso/callback as LiteLLM builds it.
   callbackUrls: ["https://litellm.sklab.dev/sso/callback"]
@@ -28,6 +30,6 @@ spec:
   allowedUserGroups:
     - name: admins
       namespace: security
-  # The proxy reads its credentials from litellm-secret and litellmproxy.yaml; no copy is needed.
+  # The proxy reads its credentials from litellm-oidc-client and litellmproxy.yaml; no copy is needed.
   secret:
     enabled: false

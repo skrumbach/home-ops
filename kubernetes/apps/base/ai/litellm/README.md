@@ -18,7 +18,7 @@ public listener: no `envoy-external` parentRef, ever.
 | `app/virtualkeys/` | one `LiteLLMVirtualKey` + `PushSecret` per consumer, e.g. `claude-code-subscription` |
 | `app/httproute-internal.yaml` | `litellm-internal` route + `/anthropic` 404 filter |
 | `app/externalsecret.yaml` | `litellm-secret` |
-| `app/pocketidoidcclient.yaml` | Pocket ID client for UI SSO (client ID `litellm`, secret from `litellm-sso`) |
+| `app/pocketidoidcclient.yaml` | Pocket ID client for UI SSO (client ID `litellm`, secret from `app/externalsecret-oidc.yaml`) |
 | `app/pushsecret-pgvector.yaml` | one-time credential into 1Password |
 | `app/servicemonitor.yaml`, `app/prometheusrule.yaml` | scrape and alerts |
 
@@ -36,9 +36,8 @@ the only item created by hand:
 | `POSTGRES_DB_USER_PASSWORD` | `openssl rand -hex 24` |
 
 Already existing and reused: `ai-keys` (`ANTHROPIC_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`,
-`OPENROUTER_API_KEY`, `OPENCODE_GO_API_KEY`) and `Automation/litellm-sso`
-(`LITELLM_SSO_CLIENT_SECRET`, first written by the retired Authentik OpenTofu stack; nothing
-writes it now, so it is the only copy). Written by PushSecrets, not by hand: `litellm-pgvector`
+`OPENROUTER_API_KEY`, `OPENCODE_GO_API_KEY`). The UI's SSO client secret is generated in the
+cluster (`app/externalsecret-oidc.yaml`), not kept in 1Password. Written by PushSecrets, not by hand: `litellm-pgvector`
 (seed command in `app/pushsecret-pgvector.yaml`) and every `litellm-consumer-*` item.
 
 Until `litellm` exists the ExternalSecret reports `SecretSyncedError`, the

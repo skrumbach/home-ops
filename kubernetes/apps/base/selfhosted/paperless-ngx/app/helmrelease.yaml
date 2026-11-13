@@ -72,10 +72,27 @@ spec:
               # documents (2026-11-08); 256 leaves the margin.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "256"
               PAPERLESS_WEBSERVER_WORKERS: "2"
-              # Pocket ID SSO; the provider JSON with the client secret is in
-              # paperless-ngx-secret. SSO users are signed up on first login with no permissions; grant them in Paperless. The password
-              # form stays as break-glass until the admin account is linked (Profile > Connect).
+              # Pocket ID SSO (django-allauth openid_connect), the only provider. SSO users are signed up
+              # on first login with no permissions; grant them in Paperless. The password form stays as
+              # break-glass until the admin account is linked (Profile > Connect).
               PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              # The client secret, generated in the cluster (externalsecret-oidc.yaml);
+              # pocketidoidcclient.yaml pushes the same value to Pocket ID.
+              PAPERLESS_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: paperless-ngx-oidc-client
+                    key: client-secret
+              # The kubelet fills $(PAPERLESS_OIDC_CLIENT_SECRET) in, which only works for a variable
+              # listed before this one (dependsOn orders them). provider_id "pocket-id" is part of the
+              # client's callback URL: change both together.
+              PAPERLESS_SOCIALACCOUNT_PROVIDERS:
+                value: >-
+                  {"openid_connect": {"OAUTH_PKCE_ENABLED": true, "APPS": [{"provider_id": "pocket-id",
+                  "name": "Pocket ID", "client_id": "paperless",
+                  "secret": "$(PAPERLESS_OIDC_CLIENT_SECRET)", "settings": {"server_url":
+                  "https://id.sklab.dev/.well-known/openid-configuration"}}]}}
+                dependsOn: PAPERLESS_OIDC_CLIENT_SECRET
               PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"
               PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
               # Office documents (.docx/.xlsx/.doc/.odt/.rtf) and e-mail (.eml) go through the tika and

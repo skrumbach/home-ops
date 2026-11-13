@@ -10,12 +10,15 @@ spec:
   name: Grafana
   # Must match auth.generic_oauth.client_id in helmrelease.yaml. Immutable once created.
   clientID: grafana
-  # The existing 1Password value (grafana-oidc client-secret, first issued for the retired
-  # Authentik client), which Grafana already reads from grafana-oidc-secret before it starts:
-  # the operator pushes it to Pocket ID and never generates or rotates one. Same-namespace Secret.
+  # The cluster-generated value (externalsecret-oidc.yaml), which Grafana reads from the same
+  # Secret before it starts: the operator pushes it to Pocket ID and never generates or rotates
+  # one. Same-namespace Secret.
   clientSecretRef:
-    name: grafana-oidc-secret
+    name: grafana-oidc-client
     key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
   launchUrl: https://grafana.sklab.dev
   # <root_url>/login/generic_oauth; root_url is GF_SERVER_ROOT_URL.
   callbackUrls: ["https://grafana.sklab.dev/login/generic_oauth"]
@@ -26,6 +29,6 @@ spec:
   allowedUserGroups:
     - name: admins
       namespace: security
-  # Grafana reads the secret from grafana-oidc-secret; no copy is needed.
+  # Grafana reads the secret from grafana-oidc-client; no copy is needed.
   secret:
     enabled: false
