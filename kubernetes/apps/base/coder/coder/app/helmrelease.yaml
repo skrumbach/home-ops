@@ -10,9 +10,11 @@ spec:
     kind: OCIRepository
     name: *app
   values:
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *app
     coder:
+      # Deployment metadata (the chart's coder.annotations; a top-level podAnnotations is never
+      # rendered). Restarts Coder when Secret coder or coder-oidc-credentials changes.
+      annotations:
+        reloader.stakater.com/auto: "true"
       podAnnotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2112"
@@ -41,28 +43,48 @@ spec:
           value: "true"
         - name: CODER_LOGGING_HUMAN
           value: "/dev/stderr"
+        # Exact, case-sensitive match on the `groups` claim; checked on every OIDC login.
+        - name: CODER_OIDC_ALLOWED_GROUPS
+          value: "admins"
+        # pocketidoidcclient.yaml; the operator writes this Secret.
+        - name: CODER_OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: coder-oidc-credentials
+              key: client-id
+        - name: CODER_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: coder-oidc-credentials
+              key: client-secret
+        # Group and role sync need a Premium license (entitlements: not_entitled), so the group
+        # and role mappings below do nothing today; only CODER_OIDC_ALLOWED_GROUPS is enforced.
         - name: CODER_OIDC_GROUP_AUTO_CREATE
           value: "true"
         - name: CODER_OIDC_GROUP_FIELD
           value: "groups"
         - name: CODER_OIDC_GROUP_MAPPING
           value: |
-            {"Admins": "CoderAdmins"}
+            {"admins": "CoderAdmins"}
         - name: CODER_OIDC_ICON_URL
-          value: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/refs/heads/main/svg/authentik.svg"
+          value: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/refs/heads/main/svg/pocket-id.svg"
+        # On start, Coder resets the linked_id of every OIDC user linked to another issuer
+        # (CODER_OIDC_REPAIR_LINKS, default true); the next login re-links by email.
         - name: CODER_OIDC_ISSUER_URL
-          value: "https://auth.sklab.dev/application/o/coder/"
+          value: "https://id.sklab.dev"
+        # Not a Coder option (the role claim is CODER_OIDC_USER_ROLE_FIELD); has no effect.
         - name: CODER_OIDC_ROLE_FIELD
           value: "groups"
+        # Pocket ID releases the `groups` claim only with the groups scope.
         - name: CODER_OIDC_SCOPES
-          value: "openid,profile,email,offline_access"
+          value: "openid,profile,email,groups,offline_access"
         - name: CODER_OIDC_SIGN_IN_TEXT
-          value: "Sign in with Authentik"
+          value: "Sign in with Pocket ID"
         - name: CODER_OIDC_AUTH_URL_PARAMS
           value: ""
         - name: CODER_OIDC_USER_ROLE_MAPPING
           value: |
-            {"Admins": ["owner"]}
+            {"admins": ["owner"]}
         - name: CODER_PROMETHEUS_ENABLE
           value: "true"
         - name: CODER_PROMETHEUS_COLLECT_AGENT_STATS
