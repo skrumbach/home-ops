@@ -15,10 +15,8 @@ metadata:
       conditions: ["[STATUS] == 204"]
 spec:
   hostnames: ["auth.${SECRET_DOMAIN}"]
+  # One gateway only: on both, unifi-dns never settles the record (see coder/app/httproute.yaml).
   parentRefs:
-    - name: envoy-internal
-      namespace: network
-      sectionName: https
     - name: envoy-external
       namespace: network
       sectionName: https

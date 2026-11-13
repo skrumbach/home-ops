@@ -11,7 +11,6 @@ metadata:
     gethomepage.dev/icon: coder-light.svg
     gethomepage.dev/description: Dev workspaces
     gethomepage.dev/pod-selector: app.kubernetes.io/name=coder
-    external-dns.kubernetes.io/target: "internal.sklab.dev,external.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       url: https://coder.sklab.dev/healthz
       conditions:
@@ -20,10 +19,10 @@ metadata:
 spec:
   hostnames:
     - "coder.sklab.dev"
+  # One gateway only. On both, unifi-dns wanted two CNAME targets for the name; UniFi stores one,
+  # so the record never settled (rewritten every minute from 2026-11-08) and the LAN was sent to
+  # the external gateway anyway.
   parentRefs:
-    - name: envoy-internal
-      namespace: network
-      sectionName: https
     - name: envoy-external
       namespace: network
       sectionName: https
