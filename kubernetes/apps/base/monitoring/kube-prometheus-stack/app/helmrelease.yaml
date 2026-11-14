@@ -221,6 +221,7 @@ spec:
         scrapeConfigSelectorNilUsesHelmValues: false
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         serviceMonitorSelectorNilUsesHelmValues: false
+        # Not backed up: metrics are kept only 14 days and are scraped again, so a lost claim loses only history.
         storageSpec:
           volumeClaimTemplate:
             metadata:
