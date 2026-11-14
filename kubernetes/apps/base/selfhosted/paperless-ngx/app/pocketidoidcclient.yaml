@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Paperless' own sign-in (django-allauth app `pocket-id` in helmrelease.yaml), its only SSO
+# provider. Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: paperless-ngx
+spec:
+  name: Paperless-ngx
+  # Must match client_id of the pocket-id APP. Immutable once created.
+  clientID: paperless
+  # The cluster-generated value (externalsecret-oidc.yaml), which the pod puts into
+  # PAPERLESS_SOCIALACCOUNT_PROVIDERS: the operator pushes it to Pocket ID and never generates or
+  # rotates one. Same-namespace Secret.
+  clientSecretRef:
+    name: paperless-ngx-oidc-client
+    key: client-secret
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
+  # allauth builds /accounts/oidc/<provider_id>/login/callback/ for login and for Profile > Connect.
+  callbackUrls: ["https://docs.sklab.dev/accounts/oidc/pocket-id/login/callback/"]
+  # No logoutCallbackUrls: allauth's logout ends only the Paperless session.
+  # OAUTH_PKCE_ENABLED is set for every openid_connect APP, so allauth sends an S256 challenge.
+  pkceEnabled: true
+  launchUrl: https://docs.sklab.dev
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # Paperless reads the secret from PAPERLESS_SOCIALACCOUNT_PROVIDERS; no copy is needed.
+  secret:
+    enabled: false

@@ -46,6 +46,7 @@ spec:
     env:
       - name: HEADLAMP_CONFIG_BACKEND_PROXY_TIMEOUT
         value: "30s"
+    # The headlamp claim is the plugin directory that the headlamp-plugins init container re-copies on every start: disposable, not backed up.
     persistentVolumeClaim:
       enabled: true
       accessModes: ["ReadWriteOnce"]

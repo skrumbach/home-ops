@@ -120,16 +120,10 @@ spec:
 
     persistence:
       config:
-        # Created here (app-template names it after the release) and backed up by
-        # components/kopiur. Invites, servers and libraries live in this SQLite database.
-        # A second persistentVolumeClaim entry renames this claim to wizarr-config and orphans the backed-up one.
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-        # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim.
-        retain: true
+        # components/kopiur/pvc owns this claim (restore-on-create). Invites, servers and libraries
+        # live in this SQLite database. Born chart-owned; the live claim keeps
+        # helm.sh/resource-policy: keep, so Helm did not delete it on the switch.
+        existingClaim: wizarr
         advancedMounts:
           wizarr:
             app:
@@ -156,8 +150,10 @@ spec:
                 readOnly: true
 
     route:
-      # Admin UI: LAN/VPN only.
+      # The only route since the public invite host (join.sklab.dev) went 2026-11-13: LAN only.
+      # forceRename keeps the name the route had while there were two.
       admin:
+        forceRename: wizarr-admin
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
@@ -178,38 +174,5 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - name: wizarr
-                port: *port
-      # Invite flow only, reachable from the internet. Everything else (admin login,
-      # settings, plex scan, API) is not routed on this host.
-      join:
-        annotations:
-          external-dns.kubernetes.io/target: "external.sklab.dev"
-          # "/" is not routed on this host, so the default probe of the bare hostname always 404s.
-          # /favicon.ico is an Exact route straight to the app.
-          gatus.home-operations.com/endpoint: |-
-            url: https://join.sklab.dev/favicon.ico
-            conditions:
-              - "[STATUS] == 200"
-            group: media
-        hostnames:
-          - join.sklab.dev
-        parentRefs:
-          - name: envoy-external
-            namespace: network
-            sectionName: https
-        rules:
-          - matches:
-              - path: {type: PathPrefix, value: /j}
-              - path: {type: PathPrefix, value: /join}
-              - path: {type: PathPrefix, value: /invitation}
-              - path: {type: PathPrefix, value: /wizard}
-              - path: {type: PathPrefix, value: /static}
-              - path: {type: PathPrefix, value: /image-proxy}
-              - path: {type: PathPrefix, value: /cinema-posters}
-              - path: {type: PathPrefix, value: /reset}
-              - path: {type: Exact, value: /favicon.ico}
-              - path: {type: Exact, value: /plex/callback}
-            backendRefs:
               - name: wizarr
                 port: *port

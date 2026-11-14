@@ -6,7 +6,8 @@ namespace: ai
 # The operator creates the proxy Deployment, Service and config ConfigMap from these CRs.
 resources:
   - ./externalsecret.yaml
-  - ./pushsecret-sso.yaml
+  - ./externalsecret-oidc.yaml
+  - ./pocketidoidcclient.yaml
   - ./pushsecret-pgvector.yaml
   - ./litellmproxy.yaml
   - ./httproute-internal.yaml

@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Internal only. No Authentik policy: API clients send bearer keys and the management UI
+# Internal only. No sign-in SecurityPolicy: API clients send bearer keys and the management UI
 # (/management.html) has its own secret-key.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -13,7 +13,6 @@ metadata:
     gethomepage.dev/description: Subscription OAuth API proxy
     gethomepage.dev/pod-selector: app.kubernetes.io/name=cliproxyapi
     gethomepage.dev/icon: "mdi-api-#22D8F0"
-    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       url: https://cliproxyapi.sklab.dev/healthz
       conditions:

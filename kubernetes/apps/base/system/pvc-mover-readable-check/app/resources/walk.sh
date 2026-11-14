@@ -6,10 +6,10 @@
 # Strictly read-only: `find` and `stat` only. It never writes, chowns, or
 # chmods anything, so it is safe against live application data.
 #
-#   argv: <root> <vsUid> <vsGid> <kpUid> <kpGid>
+#   argv: <root> <kpUid> <kpGid>
 #
-# Pass -1 for both of an engine's ids when that engine does not cover the
-# claim; its counters then report NA instead of a misleading 0.
+# Pass -1 for both ids when kopiur does not cover the claim; the counters then
+# report NA instead of a misleading 0.
 #
 # Readable  = owner and owner-read, or in the owning group and group-read, or
 #             other-read.
@@ -32,7 +32,7 @@
 #  4. busybox `stat -c %F` prints "regular empty file" for a zero-byte file,
 #     so an exact "regular file" match silently drops every empty file from
 #     BOTH the readable and the unreadable totals. Matched by prefix instead.
-ROOT=$1; VS_UID=$2; VS_GID=$3; KP_UID=$4; KP_GID=$5
+ROOT=$1; KP_UID=$2; KP_GID=$3
 LF="$ROOT/lost+found"
 
 # Everything that feeds awk goes inside this block. fd 9 is the block's own
@@ -53,7 +53,7 @@ LF="$ROOT/lost+found"
       | xargs -0 -r stat -c '%F|%a|%u|%g|%n'
   ) 2>&1 1>&9 | sed 's/^/WALKERR|/'
 } 9>&1 | awk -F'|' \
-    -v root="$ROOT" -v vsu="$VS_UID" -v vsg="$VS_GID" -v kpu="$KP_UID" -v kpg="$KP_GID" '
+    -v root="$ROOT" -v kpu="$KP_UID" -v kpg="$KP_GID" '
 function oct2dec(s,   i,n,c) {
   n = 0
   for (i = 1; i <= length(s); i++) {
@@ -79,7 +79,6 @@ function can_exec(mode, uid, gid, muid, mgid) {
 function count(n, on) { return on ? n "" : "NA" }
 BEGIN {
   lf = root "/lost+found"
-  vs_on = (vsu >= 0)
   kp_on = (kpu >= 0)
 }
 $1 == "WALKERR" {
@@ -99,13 +98,11 @@ $1 == "WALKERR" {
 
   if (substr(type, 1, 7) == "regular") {          # trap 4: "regular empty file"
     files++
-    if (vs_on && !can_read(mode, uid, gid, vsu, vsg)) vs_f++
     if (kp_on && !can_read(mode, uid, gid, kpu, kpg)) kp_f++
     next
   }
   if (type == "directory") {
     dirs++
-    if (vs_on && !(can_read(mode, uid, gid, vsu, vsg) && can_exec(mode, uid, gid, vsu, vsg))) vs_d++
     if (kp_on && !(can_read(mode, uid, gid, kpu, kpg) && can_exec(mode, uid, gid, kpu, kpg))) kp_d++
     next
   }
@@ -119,7 +116,6 @@ $1 == "WALKERR" {
 END {
   printf "FILES=%d DIRS=%d SYMLINKS=%d UNCLASSIFIED=%d LOST_FOUND=%d\n", \
     files, dirs, symlinks, unclassified, lost_found
-  printf "VS_UNREADABLE_FILES=%s VS_UNTRAVERSABLE_DIRS=%s\n", count(vs_f + 0, vs_on), count(vs_d + 0, vs_on)
   printf "KP_UNREADABLE_FILES=%s KP_UNTRAVERSABLE_DIRS=%s\n", count(kp_f + 0, kp_on), count(kp_d + 0, kp_on)
   printf "WALK_ERRORS=%d\n", walk_errors
   for (i = 1; i <= walk_errors && i <= 10; i++) printf "WALKERR_SAMPLE=%s\n", errs[i]

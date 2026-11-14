@@ -1,8 +1,10 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Only the code-server route is gated by Authentik ExtAuth. The Home Assistant route is not:
-# the companion app, Google and /auth/token cannot follow a browser SSO redirect, so
-# Authentik signs in inside Home Assistant (auth_oidc, resources/auth_oidc.yaml).
+# Only the code-server route is gated at Envoy, by Pocket ID (native OIDC). The Home Assistant
+# route is not: the companion app and /auth/token cannot follow a browser SSO redirect,
+# so Home Assistant signs in itself (auth_oidc, resources/auth_oidc.yaml). A policy that fails to
+# translate (e.g. the operator has not written the credentials Secret yet) makes the route
+# answer 500, not pass through; a policy whose targetRef matches no route leaves that route open.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -12,24 +14,19 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: home-assistant-code-server
-  extAuth:
-    headersToExtAuth:
-      - cookie
-      - authorization
-      - x-forwarded-for
-      - x-forwarded-host
-      - x-forwarded-proto
-      - x-forwarded-uri
-    http:
-      backendRefs:
-        - name: ak-outpost-authentik-embedded-outpost
-          namespace: security
-          port: 9000
-      path: /outpost.goauthentik.io/auth/envoy
-      headersToBackend:
-        - set-cookie
-        - authorization
-        - x-authentik-username
-        - x-authentik-email
-        - x-authentik-name
-        - x-authentik-uid
+  oidc:
+    provider:
+      issuer: https://id.sklab.dev
+      # Explicit endpoints skip discovery: without them the Envoy Gateway controller fetches
+      # the issuer's openid-configuration on every translation, and a failed fetch turns the
+      # route into a 500 until the next one.
+      authorizationEndpoint: https://id.sklab.dev/authorize
+      tokenEndpoint: https://id.sklab.dev/api/oidc/token
+      endSessionEndpoint: https://id.sklab.dev/api/oidc/end-session
+    # Both from the Secret pocketidoidcclient.yaml generates.
+    clientIDRef:
+      name: home-assistant-code-server-oidc-credentials
+    clientSecret:
+      name: home-assistant-code-server-oidc-credentials
+    redirectURL: https://hass-code.sklab.dev/oauth2/callback
+    logoutPath: /oauth2/logout

@@ -18,12 +18,13 @@ RBAC = {"serviceaccount", "role", "clusterrole", "rolebinding", "clusterrolebind
 HELPERS = {"httproute": {"httproutefilter"}, "externalsecret": {"password"}}  # primary: kinds that only serve it
 COLLECTIONS = {"alerts", "models", "networks", "repos", "rules", "virtualkeys"}
 PAYLOAD_DIRS = {"resources", "dashboards", "hooks", "runbooks", "skills"}
+# Drawn by scripts/docs/pictures.py from the README they sit next to.
+README_PICTURES = {"header.svg", "concept.svg"}
 GRANDFATHERED = {  # path or subtree: reason (exempt from every check)
     "kubernetes/apps/base/kube-system/cilium/app/networking.yaml": "bootstrap/helmfile/apps.yaml applies it by path",
     "kubernetes/apps/main/ai/chat-model.yaml": "substitution input ConfigMap, not a Kustomization",
     "kubernetes/apps/base/flux-system/meta": "cluster-meta entry point",
     "kubernetes/apps/base/system/volsync": "retired tree, frozen until the restic repos expire",
-    "kubernetes/apps/base/security/authentik": "replaced separately; delete this line with it",
 }
 NAMED_ROOTS = ("kubernetes", "scripts", ".taskfiles", "terraform", "bootstrap")
 KIND = re.compile(r"^kind:\s*(\w+)\s*$", re.M)
@@ -80,7 +81,7 @@ for f in files:
         continue
     # 2: payload next to manifests
     under = f.startswith((BASE, "kubernetes/components/"))
-    if under and not payload and ext not in (".yaml", ".md"):
+    if under and not payload and ext not in (".yaml", ".md") and name not in README_PICTURES:
         fail(f, "non-YAML file belongs in resources/ (or dashboards/ hooks/ runbooks/ skills/)")
     if under and "config" in parts[:-1] and not payload:
         d = "/".join(parts[: parts.index("config") + 1])
@@ -155,8 +156,8 @@ for d, members in sorted(dirs.items()):
         for s in subs:
             if f"{d}/{s}/kustomization.yaml" not in members:
                 fail(f"{d}/{s}", "app subdirectory is not a piece (no kustomization.yaml): grouping directory or loose payload")
-        if loose := sorted(n for n in direct if not n.endswith(".md")):
-            fail(d, f"only *.md sits directly in an app directory, not {loose[0]}: wrap the manifests in a piece (app/)")
+        if loose := sorted(n for n in direct if not n.endswith(".md") and n not in README_PICTURES):
+            fail(d, f"only *.md and the README pictures sit directly in an app directory, not {loose[0]}: wrap the manifests in a piece (app/)")
         pieces = [s for s in subs if f"{d}/{s}/kustomization.yaml" in members]
         if len(pieces) == 1 and pieces[0] not in ("app", "crds"):
             fail(f"{d}/{pieces[0]}", "single piece must be named app (or crds)")

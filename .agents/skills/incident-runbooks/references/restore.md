@@ -78,7 +78,7 @@ fresh Ceph gets an empty `ceph` repository, so every standing Restore fails clos
    ```
    Same commit: Postgres, per the comment above `bootstrap:` in
    `kubernetes/apps/base/database/cloudnative-pg/cluster-18/cluster-18.yaml`.
-   If the NAS is lost too, the only Postgres copy is the R2 mirror (`cloudnative-pg/offsite-mirror/README.md`).
+   If the NAS is lost too, the only Postgres copy is the R2 mirror (`kubernetes/apps/base/database/cloudnative-pg/offsite-mirror/README.md`).
 6. Bootstrap case: `just bootstrap cluster`, wait for Ceph `HEALTH_OK`, then Kustomizations
    `kopiur` and `kopiur-repository` in `system`. In-place case (Kubernetes survived): once the DR
    commit has reconciled, run the recreate snippet (old Restores may still read `ceph`, or say
@@ -98,9 +98,8 @@ fresh Ceph gets an empty `ceph` repository, so every standing Restore fails clos
 10. Any `NoSnapshotContinue`: that app got an empty volume, which the next r2 backup would make
     the newest snapshot. Make sure step 5 is live (r2 `ReadOnly`, policies suspended), then hand-restore that claim as in step 11.
 11. Hand-restore the claims with no populator (they start empty): `database/surrealdb`,
-    `selfhosted/paperless-ngx-media`, `selfhosted/syncthing-data`, `media/wizarr`,
-    `downloads/cleanuparr`, `ai/cliproxyapi`. Per claim: `flux suspend ks` and `flux suspend hr`
-    the app that mounts it and scale it to 0; apply the hand-written Restore (`r2`, `<APP>-r2`,
+    `selfhosted/paperless-ngx-media`, `selfhosted/syncthing-data`. Per claim: `flux suspend ks`
+    and `flux suspend hr` the app that mounts it and scale it to 0; apply the hand-written Restore (`r2`, `<APP>-r2`,
     `asOf: "<T_LOSS>"` never `offset: 0`, `pvcRef`, `enableFileDeletion: true`, overlay
     uid/gid/cache); wait, check `.status.resolved.kopiaSnapshotID`, delete it, resume both.
 12. Verify each claim: expected snapshot ID, the app shows its data, `.status.stats` matches what

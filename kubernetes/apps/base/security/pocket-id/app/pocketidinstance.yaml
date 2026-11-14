@@ -25,7 +25,8 @@ spec:
   fileBackend: database
   # Any userManagement field also sets UI_CONFIG_DISABLED: settings live here, not in the UI.
   userManagement:
-    # Coder rejects email_verified=false.
+    # Covers self-signups only (disabled below). A PocketIDUser is created through the admin API
+    # with email_verified=false whatever this says; Coder ignores the claim (its helmrelease.yaml).
     emailsVerified: true
     allowUserSignups: disabled
   # The route is ours (httproute.yaml), so the operator's default trust does not apply.

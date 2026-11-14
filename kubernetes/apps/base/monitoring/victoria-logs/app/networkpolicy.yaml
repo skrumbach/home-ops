@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/networking.k8s.io/networkpolicy_v1.json
+# Nothing in monitoring is default-deny, so this only narrows who can
+# write to or query the unauthenticated API: the collector, Grafana and Prometheus all run in
+# monitoring. The Service is headless, so peers reach the pod IP directly and no Service reply is
+# reverse-NATed (cilium/cilium#47913). No HTTPRoute: an envoy-internal route would need a network
+# namespace rule here.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: victoria-logs-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: victoria-logs
+      app.kubernetes.io/name: victoria-logs-single
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9428
+    # DNS replies from CoreDNS. No ports restriction on purpose: `ports` matches the
+    # destination port and a reply arrives on an ephemeral one, so port:53 drops every
+    # reply.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns

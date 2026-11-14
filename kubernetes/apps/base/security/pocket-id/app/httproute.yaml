@@ -18,14 +18,51 @@ metadata:
 spec:
   # Never change this hostname: every registered passkey is bound to it.
   hostnames: ["id.sklab.dev"]
-  # Internal only until the owner has claimed the admin account: Pocket ID
-  # serves an open /setup page while it has no user. envoy-external is added
-  # with the first externally exposed client (echo).
+  # Public: the browser of a public app (echo) must reach the issuer. One gateway per
+  # hostname (the internal DNS provider stores one CNAME target); LAN clients reach
+  # envoy-external directly, and pods (Envoy's OIDC filter, renovate-operator) resolve the
+  # name through CoreDNS -> LAN resolver -> envoy-external's LoadBalancer IP.
   parentRefs:
-    - name: envoy-internal
+    - name: envoy-external
       namespace: network
       sectionName: https
   rules:
+    # An API key (the header Pocket ID v2 reads, backend/internal/middleware/authenticator.go)
+    # never arrives through this route. Its one user, the operator, calls the Service
+    # (InternalServiceURL in the operator, http://pocket-id.security.svc:1411), so a key that
+    # leaks cannot reach the admin API from outside. A header match outranks the path-only `/`
+    # rule below.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+          headers:
+            - name: X-API-Key
+              type: RegularExpression
+              value: ".*"
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: pocket-id-setup-block
+    # First-admin setup is never served. Pocket ID opens it whenever its database has no user,
+    # which on a fresh install or a restore without the database is the moment this public route
+    # appears: Flux applies the route with the PocketIDUser, before the operator has created the
+    # owner. The operator creates users through its API key, so nothing needs these paths.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /setup
+        - path:
+            type: PathPrefix
+            value: /api/signup/setup
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: pocket-id-setup-block
     - matches:
         - path:
             type: PathPrefix
@@ -34,3 +71,16 @@ spec:
         - name: pocket-id
           namespace: security
           port: 1411
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: pocket-id-setup-block
+spec:
+  directResponse:
+    statusCode: 404
+    contentType: text/plain
+    body:
+      type: Inline
+      inline: "not found\n"

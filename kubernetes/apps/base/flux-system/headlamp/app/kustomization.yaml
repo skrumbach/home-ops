@@ -8,4 +8,5 @@ resources:
   - ./pushsecret.yaml
   - ./rbac.yaml
   - ./httproute.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml

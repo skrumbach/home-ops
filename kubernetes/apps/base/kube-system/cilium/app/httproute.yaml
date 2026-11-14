@@ -1,8 +1,8 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Internal only, behind Authentik ExtAuth (./securitypolicy.yaml): Hubble UI has
+# Internal only, behind Pocket ID at Envoy (./securitypolicy.yaml): Hubble UI has
 # no login of its own and shows every flow in the cluster. The Gatus check goes
-# to the in-cluster Service, because the ext_authz route answers 302 before the
+# to the in-cluster Service, because the OIDC gate answers 302 before the
 # backend and would stay green through an outage.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -16,7 +16,6 @@ metadata:
     gethomepage.dev/name: Hubble
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: k8s-app=hubble-ui
-    external-dns.kubernetes.io/target: "internal.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       url: http://hubble-ui.kube-system.svc.cluster.local/
       conditions: ["[STATUS] == 200"]

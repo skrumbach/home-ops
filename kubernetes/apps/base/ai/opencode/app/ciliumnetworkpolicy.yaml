@@ -20,7 +20,7 @@ spec:
     # kubelet tcpSocket probes on :4096 come from the local host.
     - fromEntities:
         - host
-    # The opencode HTTPRoute (envoy-internal only, Authentik ext-auth at Envoy). Gatus probes through it too.
+    # The opencode HTTPRoute (envoy-internal only, Pocket ID OIDC at Envoy). Gatus probes through it too.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network

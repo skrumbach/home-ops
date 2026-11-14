@@ -15,7 +15,10 @@ spec:
     - name: pvc-writable-check.rules
       rules:
         - alert: PVCVolumeNotWritable
-          # kube-state-metrics v2: - A Job that fails once then succeeds (restartPolicy:OnFailure + backoffLimit) emits a bare kube_job_status_failed{job_name=.
+          # reason!="" matches every real terminal-failure series from kube-state-metrics v2. A Job that fails
+          # once then succeeds emits a bare series with no reason label, and a reason="" series counts failed
+          # pods rather than a terminal failure; both are excluded. The `unless ... >= 43200` bound (12h, longer
+          # than the 6h cron period) stops a failed Job kept by failedJobsHistoryLimit from firing forever.
           expr: |-
             kube_job_status_failed{namespace="system", job_name=~"^pvc-writable-check-.+", reason!=""} > 0
               unless on (namespace, job_name)
@@ -31,6 +34,6 @@ spec:
               namespace/pod/claim: `kubectl -n system logs -l
               app.kubernetes.io/name=pvc-writable-check --tail=300
               --since=12h | grep -A5 'FAILURES'`. Design and known
-              limitations: kubernetes/apps/base/system/pvc-writable-check/app/README.md.
+              limitations: kubernetes/apps/base/system/pvc-writable-check/README.md.
           labels:
             severity: warning

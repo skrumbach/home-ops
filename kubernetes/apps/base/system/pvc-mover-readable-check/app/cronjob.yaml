@@ -50,7 +50,7 @@ spec:
           containers:
             - name: check
               # renovate: datasource=docker depName=alpine/k8s
-              image: alpine/k8s:1.37.2@sha256:dcb7185e112a453aa72f426754849a97357727ef8f40168fb208c8cf59952042
+              image: alpine/k8s:1.37.2@sha256:7a82aeefea3d554a43a8676b137f2b88bae6c1fe11c13862b191b3a086cc28c0
               imagePullPolicy: IfNotPresent
               securityContext:
                 allowPrivilegeEscalation: false
@@ -262,11 +262,9 @@ spec:
 
                     # walk.sh is read-only (find + stat). The mount path comes
                     # from the cluster's own pod specs and is passed as its own
-                    # argv element, never spliced into a shell string. The two
-                    # -1 slots are the walker's unused legacy uid/gid arguments;
-                    # -1 switches that measurement off.
+                    # argv element, never spliced into a shell string.
                     OUT=$(timeout "${EXEC_TIMEOUT}" kubectl exec -n "${ns}" "${pod}" -c "${ctr}" -i -- \
-                            sh -s -- "${mp}" -1 -1 "${kpu}" "${kpg}" < /walk/walk.sh 2>&1)
+                            sh -s -- "${mp}" "${kpu}" "${kpg}" < /walk/walk.sh 2>&1)
                     RC=$?
 
                     # Substring tests use bash `case`, never a `<<<` here-string:

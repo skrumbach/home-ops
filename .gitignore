@@ -21,3 +21,7 @@ Thumbs.db
 .claude/*
 !.claude/skills
 !.claude/settings.json
+
+# Documentation site build output (scripts/docs/build.py, hugo)
+docs/.build/
+docs/.hugo_build.lock

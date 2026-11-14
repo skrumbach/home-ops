@@ -39,11 +39,16 @@ spec:
           app.kubernetes.io/name: flux
       kustomize:
         patches:
-          - # Increase the number of workers
+          - # Increase the number of workers (kustomize-controller gets --concurrent=20 below)
             patch: |
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --concurrent=10
+            target:
+              kind: Deployment
+              name: (helm-controller|source-controller)
+          - # Retry dependants sooner
+            patch: |
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --requeue-dependency=5s

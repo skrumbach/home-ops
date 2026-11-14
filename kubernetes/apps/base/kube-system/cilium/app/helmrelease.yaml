@@ -84,7 +84,7 @@ spec:
     # bond0.90 here) - see ./ciliumclusterwidenetworkpolicy.yaml for the full safety argument.
     hostFirewall:
       enabled: true
-    # Hubble: relay, UI (app/httproute.yaml, Authentik SSO) and metrics. Flipping
+    # Hubble: relay, UI (app/httproute.yaml, Pocket ID at Envoy) and metrics. Flipping
     # hubble.enabled rolls the agent DaemonSet (cilium-config checksum).
     hubble:
       enabled: true
@@ -191,8 +191,6 @@ spec:
     socketLB:
       enabled: true
       hostNamespaceOnly: true
-    tunneling:
-      mtu: 9000
     # Chart default maxUnavailable: 2 would restart two thirds of the datapath
     # at once on 3 nodes. 1 keeps two healthy nodes (and etcd quorum) through a bad bpf_host load.
     updateStrategy:

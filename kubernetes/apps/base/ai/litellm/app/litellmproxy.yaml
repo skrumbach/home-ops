@@ -8,7 +8,7 @@ metadata:
 spec:
   # `file` keeps Git the source of truth; `api` would turn store_model_in_db on.
   applyMode: file
-  image: ghcr.io/berriai/litellm-non_root:v1.108.3@sha256:36e4ec234cf279efa525f229417d8443499464f796d25f19ac5847cd7f16d316
+  image: ghcr.io/berriai/litellm-non_root:v1.109.1@sha256:e9e15fe17b66fc8cda6ff7e18914e1d452785ca404fa20336ec447152f86daba
   # ^ Floor v1.93.0 (auto-router LLM classifier; below it the config is silently
   # ignored). Enforced by .renovate/overrides.json5.
   replicas: 1
@@ -21,38 +21,51 @@ spec:
   # would create a second one.
 
   envFrom:
-    # Master/salt key, DATABASE_URL, the four provider keys and SSO client
-    # credentials. Models resolve provider keys via `apiKey: os.environ/<VAR>`.
+    # Master/salt key, DATABASE_URL and the provider keys. Models resolve provider
+    # keys via `apiKey: os.environ/<VAR>`.
     - secretRef:
         name: litellm-secret
 
-  # UI SSO through Authentik (terraform/authentik/litellm.tofu). Only the two
-  # credential halves are secret; these must keep matching that provider.
+  # UI SSO through Pocket ID (pocketidoidcclient.yaml). Only the client secret is
+  # secret: externalsecret-oidc.yaml generates it in the cluster and
+  # pocketidoidcclient.yaml pushes the same value to Pocket ID, so nothing here
+  # waits on the operator.
   env:
     # Per-string cap on stored prompt/response bodies (default 2048 chars).
     - name: MAX_STRING_LENGTH_PROMPT_IN_DB
       value: "1000000"
+    # Must match spec.clientID in pocketidoidcclient.yaml.
+    - name: GENERIC_CLIENT_ID
+      value: litellm
+    - name: GENERIC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: litellm-oidc-client
+          key: client-secret
     - name: GENERIC_AUTHORIZATION_ENDPOINT
-      value: https://auth.sklab.dev/application/o/authorize/
+      value: https://id.sklab.dev/authorize
     - name: GENERIC_TOKEN_ENDPOINT
-      value: https://auth.sklab.dev/application/o/token/
+      value: https://id.sklab.dev/api/oidc/token
     - name: GENERIC_USERINFO_ENDPOINT
-      value: https://auth.sklab.dev/application/o/userinfo/
+      value: https://id.sklab.dev/api/oidc/userinfo
     # Redirect URI is <PROXY_BASE_URL>/sso/callback: change it only together
-    # with allowed_redirect_uris in litellm.tofu.
+    # with callbackUrls in pocketidoidcclient.yaml.
     - name: PROXY_BASE_URL
       value: https://litellm.sklab.dev
-    # Must include litellm_role (litellm.tofu property mapping), or first login
-    # lands as INTERNAL_USER_VIEW_ONLY.
+    # Must include profile: Pocket ID releases the admins group's custom claim
+    # litellm_role only with it (userinfo and ID token), or first login lands as
+    # INTERNAL_USER_VIEW_ONLY. Pocket ID has no litellm_role scope.
     - name: GENERIC_SCOPE
-      value: openid email profile litellm_role
+      value: openid email profile
     - name: GENERIC_USER_ROLE_ATTRIBUTE
       value: litellm_role
     # Master-key browser login moves to /fallback/login.
     - name: AUTO_REDIRECT_UI_LOGIN_TO_SSO
       value: "true"
+    # The UI sends no id_token_hint, so Pocket ID redirects to its /logout
+    # confirmation page instead of back to LiteLLM.
     - name: PROXY_LOGOUT_URL
-      value: https://auth.sklab.dev/application/o/litellm/end-session/
+      value: https://id.sklab.dev/api/oidc/end-session
 
   # The operator mints and syncs virtual keys through the admin API with this.
   apiAccess:

@@ -8,19 +8,14 @@ spec:
   groups:
     - name: CPU Usage
       rules:
+        # coderd has a CPU request (71m) and no CPU limit, so the old usage/limit ratio had an
+        # empty denominator and could never fire. Usage above the request is only a sizing
+        # signal (the pod bursts into spare node CPU), so this is one warning, not a page.
         - alert: CoderdCPUUsage
-          expr: max by (pod) (rate(container_cpu_usage_seconds_total{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`}[10m])) / max by(pod) (kube_pod_container_resource_limits{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`, resource="cpu"}) > 0.9
+          expr: max by (pod) (rate(container_cpu_usage_seconds_total{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`}[10m])) / max by (pod) (kube_pod_container_resource_requests{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`, resource="cpu"}) > 1
           for: 10m
           annotations:
-            summary: The Coder instance {{ $labels.pod }} is using high amounts of CPU, which may impact application performance.
-          labels:
-            severity: critical
-            runbook_url: https://github.com/skrumbach/home-ops/blob/main/kubernetes/apps/base/coder/coder/app/runbooks/coderd.md#coderdcpuusage
-        - alert: CoderdCPUUsage
-          expr: max by (pod) (rate(container_cpu_usage_seconds_total{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`}[10m])) / max by(pod) (kube_pod_container_resource_limits{pod=~`coder.*`, pod!~`.*provisioner.*`, namespace=`coder`, resource="cpu"}) > 0.8
-          for: 10m
-          annotations:
-            summary: The Coder instance {{ $labels.pod }} is using high amounts of CPU, which may impact application performance.
+            summary: The Coder instance {{ $labels.pod }} has used more CPU than it requests for 10 minutes, so the request is too low.
           labels:
             severity: warning
             runbook_url: https://github.com/skrumbach/home-ops/blob/main/kubernetes/apps/base/coder/coder/app/runbooks/coderd.md#coderdcpuusage

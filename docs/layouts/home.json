@@ -1,0 +1,14 @@
+{{- /* Search index: one record per page, read by assets/js/site.js. */ -}}
+{{- $pages := slice -}}
+{{- range site.Pages -}}
+  {{- if and (not .IsHome) .Title -}}
+    {{- $pages = $pages | append (dict
+      "t" .Title
+      "u" .RelPermalink
+      "s" (cond (eq .Section "") "" (title .Section))
+      "d" (.Description | default "")
+      "c" (.Plain | strings.Truncate 1500 "")
+    ) -}}
+  {{- end -}}
+{{- end -}}
+{{- $pages | jsonify -}}

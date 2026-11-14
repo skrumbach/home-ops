@@ -52,6 +52,9 @@ spec:
               # graded suite and +28% decode (81 vs 63 t/s), because K-quants dequantize faster
               # than IQ-quants on SYCL. Q4_K_M decodes 99 t/s but leaves 1.5 GiB of VRAM at 262K.
               # Not abliterated. mmproj auto-loads.
+              # Tried 2026-11-13: llmfan46's heretic build of plain Qwen3.6-35B-A3B at Q3_K_M (still
+              # cached). Same decode speed and tool-call score, but 5x the completion tokens on the
+              # same 50 tasks (82k vs 16k, thinking), so each answer took about 2.7x as long.
               # The alias is the loaded model's real name, from ConfigMap chat-model
               # (apps/main/ai/chat-model.yaml). Change both together on a swap.
               - empero-ai/Qwen3.8-35B-A3B-Distill-GGUF:Q3_K_M
@@ -161,7 +164,7 @@ spec:
               liveness: *probe
 
     # suffix pins the names vllm-app and vllm-models. With one service and one claim the
-    # chart would name both `vllm`, and Helm would delete the 50Gi model cache.
+    # chart would name both `vllm`, and Helm would delete the model cache.
     service:
       app:
         suffix: app
@@ -176,7 +179,10 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: ceph-block
-        size: 50Gi
+        # Model cache (LLAMA_CACHE): `-hf` re-downloads the GGUF at start, so this claim is re-downloadable and not backed up.
+        # Each cached model is about 17 GiB with its mmproj; 75Gi holds four. A claim never
+        # shrinks: lowering this fails the Helm upgrade.
+        size: 75Gi
         advancedMounts:
           vllm:
             app:

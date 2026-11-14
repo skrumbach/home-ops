@@ -11,7 +11,6 @@ metadata:
     gethomepage.dev/icon: coder-light.svg
     gethomepage.dev/description: Dev workspaces
     gethomepage.dev/pod-selector: app.kubernetes.io/name=coder
-    external-dns.kubernetes.io/target: "internal.sklab.dev,external.sklab.dev"
     gatus.home-operations.com/endpoint: |-
       url: https://coder.sklab.dev/healthz
       conditions:
@@ -20,11 +19,10 @@ metadata:
 spec:
   hostnames:
     - "coder.sklab.dev"
+  # LAN only since 2026-11-13; off-site use goes through the VPN. One gateway per
+  # hostname: UniFi stores one CNAME target, so a name on both gateways never settles.
   parentRefs:
     - name: envoy-internal
-      namespace: network
-      sectionName: https
-    - name: envoy-external
       namespace: network
       sectionName: https
   rules:

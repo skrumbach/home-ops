@@ -1,9 +1,11 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Gates the browser route only (UI and the silence API behind it). Prometheus (alertingEndpoints),
-# the Grafana datasource and the Flux alert Providers reach alertmanager through the in-cluster
-# Service, which this policy does not touch. The cross-namespace backendRef needs the monitoring
-# entry in security/allow-authentik-access.
+# Gates the browser route only (UI and the silence API behind it) with Pocket ID at Envoy (native
+# OIDC). Prometheus (alertingEndpoints), the Grafana datasource and the Flux alert Providers reach
+# alertmanager through the in-cluster Service, which this policy does not touch.
+# A policy that fails to translate (e.g. the operator has not written alertmanager-oidc-credentials
+# yet) makes the route answer 500, not pass through; a policy whose targetRef matches no route
+# leaves that route open.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -13,24 +15,19 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: alertmanager
-  extAuth:
-    headersToExtAuth:
-      - cookie
-      - authorization
-      - x-forwarded-for
-      - x-forwarded-host
-      - x-forwarded-proto
-      - x-forwarded-uri
-    http:
-      backendRefs:
-        - name: ak-outpost-authentik-embedded-outpost
-          namespace: security
-          port: 9000
-      path: /outpost.goauthentik.io/auth/envoy
-      headersToBackend:
-        - set-cookie
-        - authorization
-        - x-authentik-username
-        - x-authentik-email
-        - x-authentik-name
-        - x-authentik-uid
+  oidc:
+    provider:
+      issuer: https://id.sklab.dev
+      # Explicit endpoints skip discovery: without them the Envoy Gateway controller fetches
+      # the issuer's openid-configuration on every translation, and a failed fetch turns the
+      # route into a 500 until the next one.
+      authorizationEndpoint: https://id.sklab.dev/authorize
+      tokenEndpoint: https://id.sklab.dev/api/oidc/token
+      endSessionEndpoint: https://id.sklab.dev/api/oidc/end-session
+    # Both from the Secret pocketidoidcclient.yaml generates.
+    clientIDRef:
+      name: alertmanager-oidc-credentials
+    clientSecret:
+      name: alertmanager-oidc-credentials
+    redirectURL: https://alertmanager.sklab.dev/oauth2/callback
+    logoutPath: /oauth2/logout

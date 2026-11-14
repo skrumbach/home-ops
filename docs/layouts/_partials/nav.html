@@ -1,0 +1,28 @@
+{{- /* Sidebar: the three top sections; Apps is nested one level by namespace. */ -}}
+{{- $current := . -}}
+<ul class="nav-root">
+  {{- range site.Home.Sections.ByWeight }}
+  {{- $section := . }}
+  <li class="nav-section">
+    <a class="nav-head{{ if eq $current $section }} is-current{{ end }}" href="{{ .RelPermalink }}">{{ .Title }}</a>
+    <ul>
+      {{- range .Sections.ByTitle }}
+      {{- $open := or (eq $current .) (.IsAncestor $current) }}
+      <li>
+        <details{{ if $open }} open{{ end }}>
+          <summary><a class="{{ if eq $current . }}is-current{{ end }}" href="{{ .RelPermalink }}">{{ .Title }}</a><span class="count">{{ len .RegularPages }}</span></summary>
+          <ul>
+            {{- range .RegularPages.ByTitle }}
+            <li><a class="{{ if eq $current . }}is-current{{ end }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+            {{- end }}
+          </ul>
+        </details>
+      </li>
+      {{- end }}
+      {{- range .RegularPages.ByWeight }}
+      <li><a class="{{ if eq $current . }}is-current{{ end }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{- end }}
+    </ul>
+  </li>
+  {{- end }}
+</ul>

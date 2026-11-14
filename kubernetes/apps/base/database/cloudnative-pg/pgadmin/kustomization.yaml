@@ -6,7 +6,9 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./externalsecret.yaml
+  - ./externalsecret-oidc.yaml
   - ./httproute.yaml
+  - ./pocketidoidcclient.yaml
 configMapGenerator:
   - name: servers-json
     files:

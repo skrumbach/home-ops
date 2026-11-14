@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Talos, Kubernetes, Cilium, Rook, Ceph and kopiur bumps never automerge, for any update type.
+"""Talos, Kubernetes, Cilium, Rook, Ceph, kopiur and trust-path bumps never automerge, for any update type.
 
-Prevents: an unattended node upgrade, CNI or storage bump. Replays local presets; the remote base is not covered.
+Prevents: an unattended node upgrade, CNI or storage bump, or an unreviewed identity, secret, edge, TLS, Renovate, runner-controller or Flux bump. Replays local presets; the remote base is not covered.
 """
 
 import fnmatch
@@ -19,6 +19,22 @@ LIVE = {  # package -> the manifest Renovate tracks it in (all docker datasource
     "ghcr.io/rook/rook-ceph-cluster": "kubernetes/apps/base/rook-ceph/rook-ceph/cluster/ocirepository.yaml",
     "quay.io/ceph/ceph": "kubernetes/apps/base/rook-ceph/rook-ceph/cluster/helmrelease.yaml",
     "ghcr.io/home-operations/charts/kopiur": "kubernetes/apps/base/system/kopiur/app/ocirepository.yaml",
+    "ghcr.io/pocket-id/pocket-id": "kubernetes/apps/base/security/pocket-id/app/pocketidinstance.yaml",
+    "ghcr.io/aclerici38/charts/pocket-id-operator": "kubernetes/apps/base/security/pocket-id-operator/app/ocirepository.yaml",
+    "ghcr.io/external-secrets/charts/external-secrets": "kubernetes/apps/base/security/external-secrets/app/ocirepository.yaml",
+    "docker.io/1password/connect-api": "kubernetes/apps/base/security/onepassword-connect/app/helmrelease.yaml",
+    "docker.io/1password/connect-sync": "kubernetes/apps/base/security/onepassword-connect/app/helmrelease.yaml",
+    "mirror.gcr.io/envoyproxy/gateway-helm": "kubernetes/apps/base/network/envoy-gateway/app/ocirepository.yaml",
+    "mirror.gcr.io/envoyproxy/envoy": "kubernetes/apps/base/network/envoy-gateway/app/envoyproxy.yaml",
+    "docker.io/cloudflare/cloudflared": "kubernetes/apps/base/network/cloudflare-tunnel/app/helmrelease.yaml",
+    "quay.io/jetstack/charts/cert-manager": "kubernetes/apps/base/cert-manager/cert-manager/app/ocirepository.yaml",
+    "ghcr.io/mogenius/helm-charts/renovate-operator": "kubernetes/apps/base/renovate/renovate-operator/app/ocirepository.yaml",
+    "ghcr.io/renovatebot/renovate": "kubernetes/apps/base/renovate/renovate-operator/jobs/renovatejob.yaml",
+    "ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller":
+        "kubernetes/apps/base/actions-runner-system/gha-runner-scale-set-controller/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/charts/flux-operator": "kubernetes/apps/base/flux-system/flux-operator/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/charts/flux-instance": "kubernetes/apps/base/flux-system/flux-instance/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/flux-operator-manifests": "kubernetes/apps/base/flux-system/flux-instance/app/helmrelease.yaml",
 }
 STR = r"""\"(?:\\.|[^"\\])*\"|'(?:\\.|[^'\\])*'"""  # JSON5 strings, both quote styles
 

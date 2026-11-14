@@ -110,9 +110,8 @@ spec:
           gethomepage.dev/name: Syncthing
           gethomepage.dev/icon: syncthing.svg
           gethomepage.dev/description: File sync
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # securitypolicy.yaml gates this route, so the auto-discovered route check would measure
-          # the Authentik login page. Probe the GUI Service's unauthenticated health endpoint
+          # the Pocket ID sign-in page. Probe the GUI Service's unauthenticated health endpoint
           # in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://syncthing-app.selfhosted.svc.cluster.local:8384/rest/noauth/health

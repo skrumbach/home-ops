@@ -16,15 +16,17 @@ spec:
 
     annotations:
       configmap.reloader.stakater.com/reload: grafana
-      secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-secret
+      secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-client
 
-    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (ExternalSecret grafana-oidc). Grafana's env override
-    # beats grafana.ini, so the secret stays out of the ConfigMap and no Grafana variable-expansion
-    # token has to survive Flux envsubst. optional: a missing secret
-    # breaks only SSO, never the pod or the local break-glass login.
+    # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (externalsecret-oidc.yaml, generated in the cluster;
+    # pocketidoidcclient.yaml pushes the same value to Pocket ID). Grafana's env override beats
+    # grafana.ini, so the secret stays out of the ConfigMap and no Grafana variable-expansion token
+    # has to survive Flux envsubst.
+    # Not optional: an optional Secret that appears after the pod started is never picked up
+    # (Reloader ignores creation). ESO generates it without 1Password, so it adds no dependency
+    # the pod does not already have through grafana-admin-secret.
     envFromSecrets:
-      - name: grafana-oidc-secret
-        optional: true
+      - name: grafana-oidc-client
 
     replicas: 1
 
@@ -101,14 +103,6 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/monitoring
-          - name: security
-            orgId: 1
-            folder: Security
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/security
           - name: storage
             orgId: 1
             folder: Storage
@@ -205,10 +199,10 @@ spec:
                   "id": 4,
                   "options": {
                     "code": {"language": "plaintext", "showLineNumbers": false, "showMiniMap": false},
-                    "content": "## 🔒 Security\n- [Authentik](/d/authentik)\n\n## 📊 Monitoring\n- [Gatus](/d/KPI7Qj1Wk)\n- [UniFi Sites](/d/9WaGWZaZk)\n- [UniFi Clients](/d/jMfvAjxWz)",
+                    "content": "## 📊 Monitoring\n- [Gatus](/d/KPI7Qj1Wk)\n- [UniFi Sites](/d/9WaGWZaZk)\n- [UniFi Clients](/d/jMfvAjxWz)",
                     "mode": "markdown"
                   },
-                  "title": "Security & Monitoring",
+                  "title": "Monitoring",
                   "type": "text"
                 }
               ],
@@ -265,12 +259,17 @@ spec:
           url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
           datasource: Prometheus
 
-        flux-logs:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/logs.json
-          # LogQL dashboard: string mode would rewrite the Loki datasource to Prometheus.
+        # Replaces Flux's Loki-only logs.json. Flux controllers: Namespace flux-system, Container
+        # manager, then the Filter variable kubernetes.pod_labels.app = <controller>. Its Level
+        # panels read `log.level`; zap-logging controllers (Flux) write `level`, so they show
+        # "unknown" there.
+        victoria-logs-explorer:
+          # renovate: depName="VictoriaLogs - Explorer for Kubernetes logs"
+          gnetId: 25747
+          revision: 1
           datasource:
-            - name: DS_LOKI
-              value: Loki
+            - name: DS_VICTORIALOGS
+              value: VictoriaLogs
 
         k8s-system-api-server:
           # renovate: depName="Kubernetes / System / API Server"
@@ -454,15 +453,6 @@ spec:
             - name: DS_UNIFI_POLLER
               value: Prometheus
 
-      security:
-        authentik:
-          # renovate: depName="authentik"
-          gnetId: 23043
-          revision: 1
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
       storage:
         ceph-cluster:
           # renovate: depName="Ceph Cluster"
@@ -503,10 +493,13 @@ spec:
               # Must match scrapeInterval in kube-prometheus-stack. Unset, Grafana assumes 15s and
               # $__rate_interval resolves to 1m, one scrape, so rate() panels are empty.
               timeInterval: 1m
+          # The only log store; needs the victoriametrics-logs-datasource plugin below. Never list
+          # it under deleteDatasources.
           - access: proxy
-            name: Loki
-            type: loki
-            url: http://loki-headless.monitoring.svc.cluster.local:3100
+            name: VictoriaLogs
+            type: victoriametrics-logs-datasource
+            uid: victoria-logs
+            url: http://victoria-logs.monitoring.svc.cluster.local:9428
           - name: Alertmanager
             type: alertmanager
             access: proxy
@@ -514,15 +507,10 @@ spec:
             jsonData:
               implementation: prometheus
 
-        # Tempo is retired (2026-10-25); it stays here only so Grafana drops the stale datasource.
         deleteDatasources:
           - name: Alertmanager
             orgId: 1
           - name: Prometheus
-            orgId: 1
-          - name: Loki
-            orgId: 1
-          - name: Tempo
             orgId: 1
 
     env:
@@ -545,25 +533,26 @@ spec:
       GF_SERVER_ROOT_URL: "https://{{ .Release.Name }}.sklab.dev"
 
     grafana.ini:
-      # Authentik SSO. Client: terraform/authentik/grafana.tofu. The local admin form stays as
+      # Pocket ID SSO. Client: pocketidoidcclient.yaml. The local admin form stays as
       # break-glass (disable_login_form is not set); retire it only after SSO is proven.
       auth.generic_oauth:
         enabled: true
-        name: Authentik
+        name: Pocket ID
         icon: signin
+        # Must match spec.clientID in pocketidoidcclient.yaml.
         client_id: grafana
-        # offline_access gets a refresh token; without one Grafana logs out at the 5-minute
-        # access token expiry. profile carries the `groups` claim.
-        scopes: openid email profile offline_access
-        auth_url: https://auth.sklab.dev/application/o/authorize/
-        token_url: https://auth.sklab.dev/application/o/token/
-        api_url: https://auth.sklab.dev/application/o/userinfo/
+        # Pocket ID releases the `groups` claim (group names) only with the groups scope.
+        # offline_access is kept for the refresh token use_refresh_token needs.
+        scopes: openid email profile groups offline_access
+        auth_url: https://id.sklab.dev/authorize
+        token_url: https://id.sklab.dev/api/oidc/token
+        api_url: https://id.sklab.dev/api/oidc/userinfo
         use_pkce: true
         use_refresh_token: true
         allow_sign_up: true
-        # Only Authentik superusers sign in, as server admins. Everyone else gets '' and
+        # Only the Pocket ID admins group signs in, as server admins. Everyone else gets '' and
         # role_attribute_strict denies the login instead of landing as Viewer.
-        role_attribute_path: contains(groups[*], 'authentik Admins') && 'GrafanaAdmin' || ''
+        role_attribute_path: contains(groups[*], 'admins') && 'GrafanaAdmin' || ''
         role_attribute_strict: true
         allow_assign_grafana_admin: true
       analytics:
@@ -579,12 +568,27 @@ spec:
         preinstall_auto_update: false
     imageRenderer:
       enabled: true
+      # Pinned to the digest the chart's floating `latest` was running on 2026-11-13. Idles at
+      # about 6Mi; Chromium spikes while it renders a panel.
+      image:
+        registry: docker.io
+        repository: grafana/grafana-image-renderer
+        tag: v5.12.11@sha256:cfa6c8f63e6d626f90208f2880f15bd5facc279daec1b9bb642af07aa850d95e
+        pullPolicy: IfNotPresent
+      resources:
+        limits:
+          memory: 512Mi
+        requests:
+          memory: 64Mi
 
     persistence:
       enabled: false
 
     plugins:
       - grafana-clock-panel
+      # "<id> <version>", space not @: Grafana 12 reads GF_INSTALL_PLUGINS entries as id, then
+      # an optional space-separated version. Renovate tracks it through .renovate/customManagers.json5; 0.34.0 needs Grafana >=10.4.
+      - victoriametrics-logs-datasource 0.34.0
 
     rbac:
       pspEnabled: false

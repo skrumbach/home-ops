@@ -19,7 +19,7 @@ spec:
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
-            gateway.envoyproxy.io/owning-gateway-name: envoy-external
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
     # Tailscale ProxyGroup pods (tailnet Ingress plex-tailscale), TCP 32400 only.
     - fromEndpoints:
         - matchLabels:
@@ -48,6 +48,19 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: media
             app.kubernetes.io/name: seerr
+      toPorts:
+        - ports:
+            - port: "32400"
+              protocol: TCP
+    # Sonarr and Radarr tell Plex to rescan after an import (their "Plex Media Server" connection).
+    # Without this rule both logged "Failed to Update Plex host ... Operation timed out".
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+            app.kubernetes.io/name: sonarr
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+            app.kubernetes.io/name: radarr
       toPorts:
         - ports:
             - port: "32400"

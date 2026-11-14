@@ -4,8 +4,7 @@ Scaffolds a new app's manifests to match this repo's app-structure convention (s
 `app/`, multi-component family, or CRD-split). It encodes these traps by construction (correct `# yaml-language-server: $schema=`
 headers, `healthChecks` on the workload with `wait` left unset, the correctly-computed `components:`
 relative-path depth, `defaultPodOptions` spelled and nested correctly). Each HelmRelease gets its own
-app-template `ocirepository.yaml`, the overlay CR carries no `commonMetadata`, `metadata.namespace` or
-`cluster-secrets` substitution, and route hostnames use the literal `sklab.dev`.
+app-template `ocirepository.yaml`, the overlay CR carries no `commonMetadata` or `metadata.namespace`, and route hostnames use the literal `sklab.dev`.
 
 ## Usage
 
@@ -20,9 +19,9 @@ This is a plain script, not an interactive generator - it produces a skeleton wi
 placeholders (image/tag, ports, uid/gid, 1Password keys), not a finished app. After running it:
 
 1. Fill in every `TODO` in the generated files.
-2. Decide whether the app needs backups. The normal path for a **new** never-VolSync app is
-   kopiur-only with `components/kopiur` alone and a chart-owned PVC (example:
-   `downloads/cleanuparr`); `components/kopiur/pvc` is the VolSync-retirement takeover shape only.
+2. Decide whether the app needs backups. A **new** app takes `components/kopiur` alone and a
+   chart-owned PVC with `retain: true`: `components/kopiur/pvc` fails closed on a claim with no
+   snapshot, so the app moves to it only once it has snapshots (component README).
    VolSync and `components/volsync` are removed (issue #2202). This is deliberately **not** auto-generated - it requires measuring the app's live file
    ownership after first deploy (see `kubernetes/components/kopiur/README.md`), which a template
    can't know in advance.

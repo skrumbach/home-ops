@@ -14,20 +14,15 @@ GATEWAY = "envoy-external"
 
 # hostname -> path prefixes it may expose ("/" is the whole app).
 ALLOWED: dict[str, set[str]] = {
-    "auth.${SECRET_DOMAIN}": {"/", "/outpost.goauthentik.io"},  # Authentik still renders the Flux variable
-    "coder.sklab.dev": {"/"},
     "flux-webhook.sklab.dev": {"/hook/"},
-    "hass.sklab.dev": {"/"},
-    "plex.sklab.dev": {"/"},
-    "seerr.sklab.dev": {"/"},
     "kromgo.sklab.dev": {"/badges/"},  # public read-only badges only
     "echo.sklab.dev": {"/"},
+    # Pocket ID, whole app: the sign-in pages, their assets and the passkey/OIDC APIs are spread
+    # over the SPA's paths, and the one route also carries the LAN admin UI (one gateway per
+    # hostname). Passkey-only, signups disabled, /setup answers 404 at the route.
+    # The two setup paths are rules that answer 404 at the route, not exposed paths.
+    "id.sklab.dev": {"/", "/setup", "/api/signup/setup"},
     "n8n-webhook.sklab.dev": {"/webhook", "/rest/oauth2-credential"},  # not the editor
-    # Wizarr invite flow only; the admin UI is wizarr.sklab.dev on envoy-internal.
-    "join.sklab.dev": {
-        "/j", "/join", "/invitation", "/wizard", "/static", "/image-proxy",
-        "/cinema-posters", "/reset", "/favicon.ico", "/plex/callback",
-    },
 }
 
 

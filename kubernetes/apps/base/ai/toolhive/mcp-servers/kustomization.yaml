@@ -13,4 +13,4 @@ resources:
   - ./seerr-mcp
   # ha-mcp sits in the shared mcp-tools group for now; it should move to its own Hermes profile and
   # ToolHive group. garmin-connect-mcp was removed (never used).
-  # seerr-mcp needs the `seerr` item to carry SEERR_API_KEY before it becomes Ready.
+  # seerr-mcp reads item `seerr-api` (vault Automation), written by the media/seerr PushSecret.

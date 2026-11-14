@@ -108,7 +108,6 @@ spec:
           gethomepage.dev/description: Status page
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.monitoring
-          external-dns.kubernetes.io/target: internal.sklab.dev
           gatus.home-operations.com/endpoint: |-
             url: https://status.sklab.dev/health
             conditions:

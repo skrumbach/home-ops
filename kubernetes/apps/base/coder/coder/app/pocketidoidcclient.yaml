@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Coder sign-in (CODER_OIDC_* in helmrelease.yaml). The operator generates the client ID and secret
+# and writes them to Secret `coder-oidc-credentials`, which the HelmRelease reads directly.
+# Deleting this CR deletes the client in Pocket ID; a re-created client has a new secret and Coder
+# only picks it up on its next restart.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: coder
+spec:
+  name: Coder
+  launchUrl: https://coder.sklab.dev
+  # Path fixed by Coder: <CODER_ACCESS_URL>/api/v2/users/oidc/callback.
+  callbackUrls: ["https://coder.sklab.dev/api/v2/users/oidc/callback"]
+  # No logoutCallbackUrls: Coder's sign-out is local only.
+  # Coder sends an S256 challenge when the discovery document lists it, which Pocket ID's does.
+  pkceEnabled: true
+  # CODER_OIDC_ALLOWED_GROUPS rejects everyone outside admins too; this stops them at Pocket ID.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  secret:
+    keys:
+      clientID: client-id
+      clientSecret: client-secret

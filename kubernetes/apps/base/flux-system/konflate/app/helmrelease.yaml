@@ -33,6 +33,7 @@ spec:
     # No secret.* : anonymous GitHub reads on this public repo. No write
     # credential enters the cluster.
     persistence:
+      # The konflate-cache claim caches a read-only review UI that reads the public repo anonymously and writes nothing back: not backed up.
       enabled: true
       storageClass: ceph-block
       size: 5Gi
@@ -45,4 +46,5 @@ spec:
         # per-pod 14d median ~370-390Mi, 30d max 1.67Gi (2026-11-07)
         memory: 512Mi
       limits:
-        memory: 2Gi
+        # OOM-killed at 2Gi on 2026-11-12 while rendering repo-wide PRs (280 changed resources).
+        memory: 3Gi

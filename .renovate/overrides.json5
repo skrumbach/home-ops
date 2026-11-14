@@ -92,13 +92,6 @@
       allowedVersions: "<2",
     },
     {
-      // Provider is generated from the server OpenAPI schema. Bump it with the server tag. automerge stays false.
-      description: "Keep the Authentik OpenTofu provider aligned with the server release line",
-      matchDatasources: ["terraform-provider"],
-      matchPackageNames: ["goauthentik/authentik"],
-      automerge: false,
-    },
-    {
       // x.0.z is dev, x.1.z is RC; registry tags surface RCs as upgrades (#1396). Not for ghcr.io/rook/ceph.
       description: "Keep quay.io/ceph/ceph on stable x.2.z tags (skip x.0.z dev and x.1.z RC)",
       matchDatasources: ["docker"],
