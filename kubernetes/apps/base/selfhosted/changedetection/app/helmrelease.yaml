@@ -50,6 +50,21 @@ spec:
               # The browser sidecar's DevTools socket is token-gated (TOKEN on `browser`); port 3000 is not in the Service.
               - name: PLAYWRIGHT_DRIVER_URL
                 value: "ws://localhost:3000/?stealth=1&--disable-web-security=true&--user-data-dir=~/browserless-cache-123&token=$(BROWSER_TOKEN)"
+            # `/` answers 200 without login on the Service port (the in-cluster Gatus check below proves it);
+            # the login gate is the route's securitypolicy.yaml. Thresholds follow paperless-ngx.
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 5000
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 6
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               # Writes Python bytecode and temp files outside /datastore.

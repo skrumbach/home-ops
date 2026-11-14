@@ -39,6 +39,32 @@ spec:
                   printf '%s\n' '# Home Ops Repo Wikis' '' 'Waiting for the first generator run.' > /app-data/repository/index.md
                 fi
                 exec mkdocs serve --dirty -f /config/mkdocs.yml -a 0.0.0.0:8000
+            # `/` is what the route's Gatus check expects 200 from. Thresholds follow searxng; the startup
+            # probe covers the full site build mkdocs runs before it binds, which grows with the wiki.
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 8000
+                  initialDelaySeconds: 0
+                  periodSeconds: 5
+                  timeoutSeconds: 3
+                  failureThreshold: 12
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
