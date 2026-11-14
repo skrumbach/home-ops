@@ -94,9 +94,4 @@ From [`app/prometheusrule.yaml`](app/prometheusrule.yaml).
 - Never filter mounts with `grep -v kubelet`. Every Ceph PV is under `/var/lib/kubelet`.
 - Keep `activeDeadlineSeconds` equal to the alert's `for:` window, or a hung run blocks later runs silently.
 
-## Known gaps
-
-- **Unused mount.** [`app/helmrelease.yaml`](app/helmrelease.yaml) mounts host `/sys` at `/host/net`, and nothing in
-  the script reads that path (it uses `/host/proc/<pid>/ns/net`).
-
 Upstream: [fstrim(8)](https://man7.org/linux/man-pages/man8/fstrim.8.html)

@@ -106,10 +106,4 @@ For alerts on this scale set see the controller README: its rules cover every sc
 
 - Do not reintroduce a shared cluster-admin binding for runners (`app/rbac.yaml`).
 
-## Known gaps
-
-- **The runner secret carries a CNPG reload label.** `app/skrumbach/externalsecret.yaml` sets `cnpg.io/reload: "true"`
-  on `skrumbach-runner-secret`. Only CloudNativePG databases use that label (`git grep cnpg.io/reload` finds the
-  database component and operator), so it has no effect here.
-
 Upstream: [Actions Runner Controller](https://docs.github.com/en/actions/tutorials/use-actions-runner-controller)

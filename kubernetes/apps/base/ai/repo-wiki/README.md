@@ -121,9 +121,4 @@ allow-list have to move together.
 - The model string (`WIKI_MODEL`) and the `repo-wiki` key's allow-list have to move together.
 - Never give the key the `auto` model (comment in the virtual key manifest).
 
-## Known gaps
-
-- **Dangling README reference.** `app/resources/generate.py` (line 5) says "see this app's README.md for what
-  changed" against the joryirving/home-ops original. No version of this README has recorded those changes.
-
 Upstream: [mkdocs-material](https://squidfunk.github.io/mkdocs-material/)

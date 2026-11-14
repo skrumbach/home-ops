@@ -100,11 +100,5 @@ In Prometheus, `up{job=~".*dragonfly.*"}` should return 8 series: four consumers
 - A NetworkPolicy ingress rule must admit DNS replies with no `toPorts` (the component's DNS rule has none on
   purpose; see `AGENTS.md`).
 
-## Known gaps
-
-- **A comment says one instance per namespace.** [`kubernetes/apps/main/database/dragonfly.yaml`](../../../main/database/dragonfly.yaml)
-  ends with "one cluster per consumer namespace", but the component names the instance `${APP}-dragonfly`, and
-  `ai/litellm` and `ai/searxng` share the namespace `ai`. It is one instance per consumer app.
-
 Upstream: [Dragonfly docs](https://www.dragonflydb.io/docs) •
 [Dragonfly operator](https://github.com/dragonflydb/dragonfly-operator)

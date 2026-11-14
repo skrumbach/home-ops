@@ -9,7 +9,7 @@
 ## What it does
 
 - **Reaches devices directly** on the IoT network: Multus attaches a second interface from `multus-iot`
-  (macvlan on `bond0.3`) with the fixed address `10.40.0.100/16`.
+  (macvlan on `bond0.3`) with the fixed address `10.40.0.100/22`.
 - **Serves the UI** at `hass.sklab.dev` on `envoy-internal` only. Off-site, the companion app needs the VPN.
 - **Signs people in itself** with the `auth_oidc` custom component against Pocket ID (client `home-assistant`).
   Only members of the Pocket ID group `admins` get in.
@@ -25,7 +25,7 @@
 |---|---|
 | **A second interface on the IoT network, not the pod network only** | Devices key on IP, so Home Assistant needs one stable address on their network. The macvlan interface puts the pod on that network directly. |
 | **Static IP, no MAC pin** | With a pinned MAC on `bond0.3`, the kernel rejects the new pod's `net1` while the old pod's veth still holds it, and a rollout stalls. |
-| **Home Assistant signs in, not Envoy** | The companion app, the Google integration and `/auth/token` cannot follow a browser SSO redirect. So the HA route has no SecurityPolicy, and HA runs OIDC itself. |
+| **Home Assistant signs in, not Envoy** | The companion app and `/auth/token` cannot follow a browser SSO redirect. So the HA route has no SecurityPolicy, and HA runs OIDC itself. |
 | **A public OIDC client with PKCE** | `hass-oidc-auth` sends no client secret. Nothing secret is needed, so the settings live in Git as a ConfigMap. |
 | **Envoy OIDC in front of code-server** | code-server runs with `--auth none` and can edit every file in `/config`. Pocket ID refuses anyone outside `admins` before the request reaches it. |
 | **hass-oidc-auth pinned by checksum, never auto-merged** | It is third-party code in the login path. Renovate bumps `OIDC_VERSION`, and the PR must also set `OIDC_SHA256` ([`.renovate/autoMerge.json5`](../../../../../.renovate/autoMerge.json5)). |
@@ -87,7 +87,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 
 | Setting | Value | Why |
 |---|---|---|
-| Pod annotation `k8s.v1.cni.cncf.io/networks` | `multus-iot`, `ips: ["10.40.0.100/16"]`, no `mac` | One stable IoT address; no MAC pin (see above). |
+| Pod annotation `k8s.v1.cni.cncf.io/networks` | `multus-iot`, `ips: ["10.40.0.100/22"]`, no `mac` | One stable IoT address; no MAC pin (see above). |
 | `HASS_HTTP_TRUSTED_PROXY_1..3` | `10.10.10.0/24`, `10.50.0.0/24`, `10.42.0.0/16` | Node, LoadBalancer pool and pod ranges. HA believes `X-Forwarded-For` (`HASS_HTTP_USE_X_FORWARDED_FOR: "true"`) only from these, so it sees the client address, not Envoy's. |
 | Liveness and readiness probes | `GET /manifest.json :8123`, every 10s, 5 failures | The path needs no login, so the probe tests HA's own HTTP server and nothing in front of it. |
 | Startup probe | same path, `failureThreshold: 30` | Up to 300s for integrations to load on first boot before liveness counts. |
@@ -123,17 +123,6 @@ lowercase username. Restores: [`restore.md`](../../../../../.agents/skills/incid
 | `KopiurBackupStaleCeph` | no ceph backup of `home-assistant-ceph` in 6h | `kubectl -n home-automation describe snapshotpolicy home-assistant-ceph`. |
 | `KopiurBackupStaleR2` | no r2 backup of `home-assistant-r2` in 48h | Same, for `home-assistant-r2`. |
 | `KopiurBackupEmpty` | the latest backup holds zero files | The claim was empty or unreadable when the snapshot ran. |
-
-## Known gaps
-
-- **The Google integration may not reach HA.** [`app/securitypolicy.yaml`](app/securitypolicy.yaml) line 4 names
-  Google as a client of the HA route, and Secret `home-assistant` carries `HASS_GOOGLE_PROJECT_ID`. The route has
-  been on `envoy-internal` only since 2026-11-13 (`app/helmrelease.yaml` lines 182-186). Git does not say whether
-  Google still needs to call in from outside.
-- **Two Gatus checks, one with a stale reason.** The route annotation adds a status-only check on
-  `https://hass.sklab.dev/manifest.json`. `monitoring/gatus` `app/resources/config.yaml` lines 87-90 add a second,
-  in-cluster check, because "status-only on the HTTPRoute stays green through ext_authz". The HA route has no
-  SecurityPolicy, so that reason no longer holds for it.
 
 Upstream: [Home Assistant docs](https://www.home-assistant.io/docs/) •
 [hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth) •

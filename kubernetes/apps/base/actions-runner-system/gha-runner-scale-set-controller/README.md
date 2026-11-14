@@ -73,7 +73,7 @@ flux -n actions-runner-system get ks gha-runner-scale-set-controller
 flux -n actions-runner-system get hr
 kubectl -n actions-runner-system get pods -o wide
 kubectl -n actions-runner-system get autoscalingrunnerset
-task actions-runner:diagnose            # listener, runners, events, GitHub registrations (controller section is empty, see Known gaps)
+task actions-runner:diagnose            # controller, listener, runners, events, GitHub registrations
 kubectl -n actions-runner-system logs deploy/gha-runner-scale-set-controller --tail=100
 ```
 
@@ -90,12 +90,5 @@ From [`app/prometheusrule.yaml`](app/prometheusrule.yaml), routed by the `alerts
 | `GithubActionsRunnerShortLifetimeDetected` | more than 3 runners exited in under 30s, for 5m | The rule comment: a very short runner lifetime means a stale job assignment. |
 | `GithubActionsRunnerListenerDisconnected` | listener restarted over 3 times in 15m | The listener log: broker connection problems. |
 | `GithubActionsRunnerAssignedJobsStuck` | jobs assigned, none running, no idle runner, for 10m | The listener and controller logs. |
-
-## Known gaps
-
-- **The Taskfile selects controller pods by a label they do not carry.** `.taskfiles/actions-runner/Taskfile.yaml`
-  uses `app.kubernetes.io/name=gha-runner-scale-set-controller` in `diagnose` and `logs-controller`. The PDB in
-  `app/pdb.yaml` selects the same pods with `app.kubernetes.io/name: gha-rs-controller`, the label the chart's pod
-  template sets (`helm template` of the pinned chart), so both Taskfile commands find no pods.
 
 Upstream: [Actions Runner Controller](https://docs.github.com/en/actions/tutorials/use-actions-runner-controller)

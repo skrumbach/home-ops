@@ -12,7 +12,8 @@
 - **Caches** results in Redis protocol (`CACHE_TYPE: redis`) on Dragonfly `rsshub-dragonfly`, from the shared
   `dragonfly` component. The app keeps no volume.
 - **Renders JavaScript pages** through a second Flux Kustomization, `rsshub-playwright`, which runs browserless
-  Chromium as Deployment `playwright`. The app reaches it through `PUPPETEER_WS_ENDPOINT`.
+  Chromium as Deployment `playwright`. The app reaches it through `PUPPETEER_WS_ENDPOINT`. `playwright` has no
+  route: browserless has no token and runs as root with `SYS_ADMIN`, so only the Service `playwright:3000` serves it.
 - **Gives the browser a GPU.** `playwright` requests `gpu.intel.com/xe: 1`, served by the Intel device plugin.
 
 ## How it works
@@ -28,7 +29,6 @@ flowchart LR
   gw["Gateway<br/>envoy-internal"] -->|rsshub.sklab.dev| app{{"Pod rsshub"}}
   app -->|"redis://rsshub-dragonfly:6379"| df["Dragonfly<br/>rsshub-dragonfly"]
   app -->|"ws://playwright:3000"| pw["Pod playwright<br/>browserless Chromium"]
-  gw -->|playwright.sklab.dev| pw
   gpu["Intel GPU plugin<br/>gpu.intel.com/xe"] --> pw
   app -.->|fetch| web(["Source sites"])
   pw -.->|render| web
@@ -60,7 +60,6 @@ flowchart LR
 | `resources` (`rsshub`) | request 10m CPU, 512Mi; limit 2048Mi | The manifest records no reason. |
 | `playwright` `defaultPodOptions.securityContext` | uid, gid and fsGroup `0`, `runAsNonRoot: false` | The manifest records no reason for root. Keep it under `defaultPodOptions` (see Invariants). |
 | `playwright` `dev-shm` | emptyDir, `medium: Memory`, `sizeLimit: 1Gi` | The manifest records no reason. |
-| `playwright` route annotation | `gatus.home-operations.com/enabled: "false"` | Keeps Gatus off the browserless route. The manifest records no further reason. |
 
 ## Operate it
 

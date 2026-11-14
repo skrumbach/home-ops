@@ -88,9 +88,4 @@ token before the expiry the script prints.
   purpose of this identity. The comment in `app/clusterrole.yaml` lists the groups kept out on purpose.
 - **Agents never run `scripts/agent-credentials.sh`.** It needs admin credentials, so the owner runs it.
 
-## Known gaps
-
-- **The ServiceAccount comment names an old file.** [`app/serviceaccount.yaml`](app/serviceaccount.yaml) says the
-  token goes into "the gitignored kubeconfig-agent". The script writes `~/.kube/home-ops-agent`, outside the repo.
-
 Upstream: [Kubernetes RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)

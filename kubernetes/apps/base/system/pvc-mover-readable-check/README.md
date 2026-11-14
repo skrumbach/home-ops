@@ -109,8 +109,3 @@ kubectl get snapshotpolicy -A -o yaml | grep -E 'runAs(User|Group)'
   only ever printed, never alerted.
 - A namespace that gains a `SnapshotPolicy` and has no RoleBinding in `rbac.yaml` is reported `UNMEASURED (rbac)`, so
   `EXCLUDED_NAMESPACES` and the RoleBindings move together.
-
-## Known gaps
-
-- **`walk.sh` still carries the VolSync arguments.** It takes `<vsUid> <vsGid>` and counts `VS_*` fields; the CronJob
-  passes `-1` for both to switch them off. See [`app/resources/walk.sh`](app/resources/walk.sh).

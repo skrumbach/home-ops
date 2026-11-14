@@ -88,10 +88,4 @@ Zero pods while the NAS is down is expected. Restores:
 - `calibre-web-automated-kopiur` never depends on `calibre-web-automated`.
 - The Kustomization keeps `wait` unset: it owns a kopiur claim.
 
-## Known gaps
-
-- **A namespace that never applies.** [`app/helmrelease.yaml`](app/helmrelease.yaml) (`metadata.namespace: default`) and
-  [`app/kustomization.yaml`](app/kustomization.yaml) (`namespace: default`) name `default`. The overlay's
-  `targetNamespace: media` overrides both, so the app runs in `media` and the two lines have no effect.
-
 Upstream: [Calibre-Web Automated](https://github.com/crocodilestick/calibre-web-automated)

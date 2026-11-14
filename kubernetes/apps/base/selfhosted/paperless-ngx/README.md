@@ -74,8 +74,8 @@ flowchart LR
    `kopiur`, `kopiur/pvc` and `dragonfly` components. Kustomization `paperless-ngx-media-kopiur` follows once
    `paperless-ngx` exists. The HelmRelease waits for `rook-ceph-cluster`.
 2. The `kopiur/pvc` component owns PVC `paperless-ngx` (`/usr/src/paperless/data`), so a recreated claim is filled
-   from the newest ceph snapshot. `media` (`ceph-block`, 50Gi) and `consume` (`ceph-block`, 10Gi) are chart-owned
-   claims in the HelmRelease. Only the `app` container mounts them.
+   from the newest ceph snapshot. `media` (`ceph-block`, 50Gi, `retain: true`, so a Helm uninstall keeps it) and `consume`
+   (`ceph-block`, 10Gi) are chart-owned claims in the HelmRelease. Only the `app` container mounts them.
 3. A file dropped in `consume` is found by polling every 60 seconds (`PAPERLESS_CONSUMER_POLLING`), because Ceph has
    no inotify. Sub-directories become tags (`PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS`). Paperless moves the file into
    `media`, so the inbox needs no backup.
@@ -143,13 +143,6 @@ Rules are in `system/kopiur`, routed by the `alerts` component.
   that owns a kopiur claim never sets `wait: true`.
 - The network policy's selector includes the `controller` label, which keeps the operator-managed
   `paperless-ngx-dragonfly` pods out of it.
-
-## Known gaps
-
-- **The media claim has no `retain`.** [`app/helmrelease.yaml`](app/helmrelease.yaml) creates `media` as a plain
-  chart-owned claim that kopiur backs up, while the invariants in
-  [`kopiur/README.md`](../../../../components/kopiur/README.md) give such a claim app-template `retain: true`
-  (`helm.sh/resource-policy: keep`). Uninstalling the HelmRelease would delete the claim that holds the scans.
 
 Upstream: [Paperless-ngx docs](https://docs.paperless-ngx.com/) •
 [Configuration](https://docs.paperless-ngx.com/configuration/) •

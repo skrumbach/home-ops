@@ -10,8 +10,8 @@
 
 - **Adds interfaces.** A pod that carries the annotation `k8s.v1.cni.cncf.io/networks` gets an extra interface
   (`net1`) next to its Cilium interface. Multus runs as DaemonSet `multus` and calls the other CNI plugins.
-- **Defines two networks** in [`networks/`](networks/): `multus-iot` (macvlan on `bond0.3`) and `vpn` (macvlan on
-  `bond0.90`). Both are `NetworkAttachmentDefinition` objects in `kube-system`.
+- **Defines one network** in [`networks/`](networks/): `multus-iot` (macvlan on `bond0.3`), a
+  `NetworkAttachmentDefinition` in `kube-system`.
 - **Serves four apps today**, all in `home-automation`: `home-assistant`, `zigbee2mqtt`, `matter-server` and
   `esphome` attach `multus-iot` with a fixed address each.
 
@@ -39,27 +39,24 @@ flowchart LR
   hr --> ds{{"DaemonSet<br/>multus"}}
   ds -.->|health check| crd["CRD<br/>network-attachment-definitions"]
   iot["NetworkAttachmentDefinition<br/>multus-iot"] --> crd
-  vpn["NetworkAttachmentDefinition<br/>vpn"] --> crd
   pod["Pod annotation<br/>k8s.v1.cni.cncf.io/networks"] -->|names| iot
   ds -->|adds net1| pod
   iot -->|macvlan bond0.3| lan(["IoT VLAN<br/>10.40.0.0/22"])
-  vpn -->|macvlan bond0.90| vl(["VPN VLAN<br/>192.168.90.0/24"])
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class ds accent
-  class lan,vl ext
+  class lan ext
 ```
 
 </details>
 
 1. **Flux.** Kustomization `multus` applies `app/` and waits for DaemonSet `multus` and the CRD
-   `network-attachment-definitions.k8s.cni.cncf.io`. Then `multus-networks` applies the two NADs.
+   `network-attachment-definitions.k8s.cni.cncf.io`. Then `multus-networks` applies NAD `multus-iot`.
 2. **Pod start.** The pod annotation names a NAD (`name`, `namespace: kube-system`) and an address (`ips`).
    Multus reads the NAD and runs the macvlan plugin on the node, then `sbr` for `multus-iot`.
 3. **Routing.** `multus-iot` has a default route via `10.40.0.1`; `sbr` applies it by source address.
    `zigbee2mqtt` adds a route in the main table at start (init container `init-iot-route`), because its bridge
    at `10.40.2.101` must be reached through `net1`.
-4. **VPN network.** `vpn` lists 31 routes through `192.168.90.1` and no `0.0.0.0/0` route. The manifest records no reason for the split.
 
 ## Settings that matter
 
@@ -69,7 +66,6 @@ flowchart LR
 | `postRenderers` toleration | `home-operations.com/dedicated`, `Exists`, `PreferNoSchedule` | The manifest says the chart merge drops a values `tolerations` list, so this patch is the only way. The effect must stay `PreferNoSchedule`, matching the taint in `talos/nodes/talos-3.yaml.j2`. |
 | `multus.resources` | request 10m CPU and 64Mi, limit 512Mi | The memory request is explicit: a limit with no request reserves the whole limit. |
 | NAD `multus-iot` `master` | `bond0.3` | The IoT VLAN sub-interface from the node templates. |
-| NAD `vpn` `master`, routes | `bond0.90`, via `192.168.90.1` | The `192.168.90.0/24` VLAN. The manifest records no reason for the route list. |
 
 ## Operate it
 
@@ -85,14 +81,6 @@ kubectl -n home-automation get pod -l app.kubernetes.io/name=home-assistant -o j
 
 - **The toleration effect stays `PreferNoSchedule`.** A hard `NoSchedule` strands drains (root `AGENTS.md`).
 - **Attach apps depend on `multus-networks`.** An app that names a NAD before it exists fails to start.
-
-## Known gaps
-
-- **NAD `vpn` has no consumer.** No manifest under `kubernetes/` names it in `k8s.v1.cni.cncf.io/networks`
-  (`networks/vpn.yaml`).
-- **`home-assistant` takes the wrong prefix length.** Its annotation asks for `10.40.0.100/16`
-  (`home-automation/home-assistant/app/helmrelease.yaml`). The IoT network is `10.40.0.1/22` in
-  `terraform/unifi/networks.tofu`, and the other three consumers take `/22`.
 
 Upstream: [Multus CNI](https://github.com/k8snetworkplumbingwg/multus-cni) •
 [bjw-s multus chart](https://github.com/bjw-s-labs/helm-charts)

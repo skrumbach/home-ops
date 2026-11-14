@@ -16,8 +16,8 @@
 - **Renews** automatically about 30 days before the 90-day certificate expires, and rewrites the Secret
   `sklab-dev-production-tls` in place. The `envoy-internal` and `envoy-external` HTTPS listeners read that Secret, so
   a renewal needs no restart.
-- **Serves internal PKI** for workloads that need their own CA. `system-controller/k8tz` builds a self-signed CA for
-  its webhook, and the CloudNativePG `barman-cloud` plugin gets its mTLS certificates from here.
+- **Serves internal PKI** for workloads that need their own CA. `system-controller/k8tz` signs its webhook certificate
+  with a self-signed `Issuer`, and the CloudNativePG `barman-cloud` plugin gets its mTLS certificates from here.
 
 ## Why it is built this way
 

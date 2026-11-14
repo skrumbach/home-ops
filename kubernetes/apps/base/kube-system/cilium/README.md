@@ -151,12 +151,7 @@ change to `bgp.conf`.
 
 ## Known gaps
 
-- **`tunneling.mtu: 9000` sets nothing.** The pinned chart's values have no `tunneling` key; the MTU
-  override is the top-level `MTU`. The line in `app/helmrelease.yaml` is ignored, and Cilium uses its
-  detected MTU. Routing is native, so there is no tunnel to size either way.
 - **`localRedirectPolicy: true` has no user.** No `CiliumLocalRedirectPolicy` exists in Git, and no comment
   says what the flag is for.
-- **`kube-api` has no schema header.** The `Service` document in `app/networking.yaml` is the only one in
-  the file without a `# yaml-language-server` line.
 
 Upstream: [Cilium docs](https://docs.cilium.io/en/stable/)
