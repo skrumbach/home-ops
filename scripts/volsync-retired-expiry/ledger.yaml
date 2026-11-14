@@ -11,7 +11,7 @@ buckets:
     endpoint: https://604128bd389364580b3208006c949072.r2.cloudflarestorage.com
     bucket: volsync
   minio:
-    endpoint: https://nas.${SECRET_DOMAIN}:9000
+    endpoint: https://nas.sklab.dev:9000
     bucket: volsync
 
 # LIVE repositories. These still have ReplicationSources writing to them. Empty since

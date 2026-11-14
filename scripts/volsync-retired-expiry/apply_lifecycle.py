@@ -61,14 +61,14 @@ import render_lifecycle  # noqa: E402
 # `credentials` is the default source.
 #
 # `ceph` is deliberately NOT the in-cluster service URL: that resolves only inside
-# the cluster. The external S3 route is used instead, and --endpoint must resolve
-# its ${SECRET_DOMAIN}. An endpoint that is None falls back to ledger.yaml `buckets`.
+# the cluster. The external S3 route is used instead. An endpoint that is None
+# falls back to ledger.yaml `buckets`.
 DESTINATIONS: dict[str, dict[str, Any]] = {
     "ceph": {
         "secret": ("system", "volsync"),
         "credentials": "secret",
         "region": "us-east-1",
-        "endpoint_override": "https://s3.${SECRET_DOMAIN}",
+        "endpoint_override": "https://s3.sklab.dev",
         "note": "credential is the OBC bucket owner, so lifecycle management is authorised",
     },
     "r2": {
@@ -159,10 +159,6 @@ def main(argv: list[str] | None = None) -> int:
         or dest["endpoint_override"]
         or render_lifecycle.load_ledger()["buckets"][args.destination]["endpoint"]
     )
-    if "${SECRET_DOMAIN}" in endpoint:
-        print(f"\nendpoint {endpoint!r} still contains ${{SECRET_DOMAIN}}; pass --endpoint "
-              "with the resolved host.", file=sys.stderr)
-        return 2
     print(f"endpoint    : {endpoint}")
 
     if source == "env":
