@@ -38,7 +38,6 @@ spec:
               N8N_HIRING_BANNER_ENABLED: false
               N8N_RUNNERS_ENABLED: true
 
-              DB_SQLITE_VACUUM_ON_STARTUP: true
               EXECUTIONS_DATA_PRUNE: true
               # EXECUTIONS_DATA_MAX_AGE is in HOURS: 168 = 7 days.
               EXECUTIONS_DATA_MAX_AGE: 168

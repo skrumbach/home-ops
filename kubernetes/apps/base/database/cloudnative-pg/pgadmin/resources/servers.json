@@ -1,7 +1,7 @@
 {
   "Servers": {
     "1": {
-      "Name": "Postgres 17 Cluster",
+      "Name": "Postgres 18 Cluster",
       "Group": "Servers",
       "Host": "postgres-18-rw.database.svc.cluster.local",
       "Port": 5432,

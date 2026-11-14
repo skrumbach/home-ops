@@ -40,8 +40,10 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 ├── talos/              # minijinja machine config, node overlays, factory schematic
 ├── bootstrap/          # just bootstrap stages (nodes, k8s, base, apps)
 ├── .agents/skills/     # incident-runbooks skill (.claude/skills is a symlink)
-├── .taskfiles/         # task recipes (flux, rook, network, actions-runner)
-├── scripts/            # CI guards (scripts/ci), add-app scaffold, agent credentials
+├── .renovate/          # Renovate presets
+├── .taskfiles/         # task recipes (flux, rook, network, actions-runner, docs)
+├── docs/               # Hugo theme for the generated documentation site
+├── scripts/            # CI guards (scripts/ci), add-app scaffold, docs generator, agent credentials, VolSync expiry ledger
 ├── terraform/          # OpenTofu stacks outside Flux (UniFi, TrueNAS)
 └── .mise.toml          # workstation tool versions
 ```
@@ -68,7 +70,7 @@ just talos render-config talos-1
 just talos apply-node talos-1 --dry-run
 just talos apply-node talos-1
 just talos upgrade-node talos-1
-just talos upgrade-k8s v1.36.5
+just talos upgrade-k8s <version>
 
 # Bootstrap is DR / first-time only. Never run against a healthy cluster.
 just bootstrap cluster

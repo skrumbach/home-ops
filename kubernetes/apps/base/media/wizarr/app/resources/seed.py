@@ -2,7 +2,6 @@
 
 Wizarr has no env-based provisioning: the admin account, media server, integrations and API keys are database rows
 that its setup wizard creates. This script writes the same rows through Wizarr's own models, from GitOps secrets.
-Skill media-stack references/friends.md.
 
 Re-runs are safe. The Plex token and Seerr key follow rotation; an admin password changed in the UI is left alone.
 Libraries and invite design stay in the UI. A missing env var aborts the seed (KeyError) before any row is written.

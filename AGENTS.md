@@ -18,6 +18,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 ├── .agents/skills/             # one skill, incident-runbooks (.claude/skills is a symlink)
 ├── .taskfiles/                 # task domains: flux, rook, network, actions-runner, docs
 ├── docs/                       # Hugo theme for the generated documentation site (no content)
+├── scripts/                    # CI guards (ci/), add-app scaffold, docs generator, agent credentials
 ├── terraform/                  # OpenTofu stacks outside Flux (UniFi, TrueNAS)
 └── .renovate/                  # Renovate presets
 ```
