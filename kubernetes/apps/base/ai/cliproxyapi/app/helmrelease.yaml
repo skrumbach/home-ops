@@ -8,14 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: cliproxyapi
   values:
     defaultPodOptions:
       automountServiceAccountToken: false
@@ -39,7 +32,7 @@ spec:
           seed:
             image: &image
               repository: docker.io/eceasy/cli-proxy-api
-              tag: v8.0.62@sha256:c3384886597346937da7d3697150895e0c91ee563172a6053e057d3a1ba9e79c
+              tag: v8.0.69@sha256:e77c1eecc0e364c1885a4441cdd6487ef305852851f70da723548736065c2e9b
             command: ["/bin/sh", "-c"]
             args:
               - |
@@ -110,14 +103,9 @@ spec:
             port: *port
     persistence:
       data:
-        # Created here (app-template names it after the release) and backed up by components/kopiur.
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-        # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
-        retain: true
+        # components/kopiur/pvc owns this claim (restore-on-create). Born chart-owned; the live
+        # claim keeps helm.sh/resource-policy: keep, so Helm did not delete it on the switch.
+        existingClaim: cliproxyapi
         globalMounts:
           - path: /data
       config:

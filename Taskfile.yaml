@@ -5,24 +5,17 @@ version: '3'
 set: [pipefail]
 shopt: [globstar]
 
-vars:
-  BOOTSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
-  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
-  SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
-  TALOS_DIR: '{{.ROOT_DIR}}/talos'
-  PRIVATE_DIR: '{{.ROOT_DIR}}/.private'
-
-# Same defaults as .mise.toml: read-only agent credentials unless the owner sets HOME_OPS_*.
+# Same defaults as .mise.toml: admin kubeconfig and talosconfig unless HOME_OPS_* says otherwise.
 env:
-  KUBECONFIG: '{{env "HOME_OPS_KUBECONFIG" | default (print (env "HOME") "/.kube/home-ops-agent")}}'
-  TALOSCONFIG: '{{env "HOME_OPS_TALOSCONFIG" | default (print (env "HOME") "/.talos/home-ops-agent")}}'
+  KUBECONFIG: '{{env "HOME_OPS_KUBECONFIG" | default (print (env "HOME") "/.kube/home-ops-admin")}}'
+  TALOSCONFIG: '{{env "HOME_OPS_TALOSCONFIG" | default (print (env "HOME") "/.talos/home-ops-admin")}}'
 
 includes:
-  1password: .taskfiles/1password
   flux: .taskfiles/flux
   rook: .taskfiles/rook
   network: .taskfiles/network
   actions-runner: .taskfiles/actions-runner
+  docs: .taskfiles/docs
 
 tasks:
 
@@ -41,27 +34,3 @@ tasks:
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
-
-  cleanup-failed-pods:
-    desc: Remove all failed/error pods (keeps completed pods)
-    cmd: kubectl delete pods --all-namespaces --field-selector=status.phase=Failed
-
-  cleanup-succeeded-pods:
-    desc: Remove old succeeded pods (keeps recent ones from last 24h)
-    cmd: CUTOFF=$(date -d '1 day ago' -u +"%Y-%m-%dT%H:%M:%SZ") && kubectl get pods --all-namespaces --field-selector=status.phase=Succeeded -o json | jq -r --arg cutoff "$CUTOFF" '.items[] | select(.metadata.creationTimestamp < $cutoff) | [.metadata.namespace, .metadata.name] | @tsv' | while IFS=$'\t' read -r ns name; do kubectl delete pod "$name" -n "$ns"; done
-
-  cleanup-error-pods:
-    desc: Remove all pods in Error state
-    cmd: kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded,status.phase!=Pending --no-headers -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" | while read -r ns name; do kubectl delete pod "$name" -n "$ns"; done
-
-  cleanup-replicasets:
-    desc: Remove old ReplicaSets with 0 desired replicas (excludes intentionally scaled ones)
-    cmd: CUTOFF=$(date -d '1 day ago' -u +"%Y-%m-%dT%H:%M:%SZ") && kubectl get rs --all-namespaces -o json | jq -r --arg cutoff "$CUTOFF" '.items[] | select((.spec.replicas // 0) == 0 and (.status.replicas // 0) == 0 and .metadata.creationTimestamp < $cutoff) | [.metadata.namespace, .metadata.name] | @tsv' | while IFS=$'\t' read -r ns name; do kubectl delete rs "$name" -n "$ns"; done
-
-  cleanup-all:
-    desc: Clean up all failed pods, error pods, and unused replicasets
-    cmds:
-      - task: cleanup-failed-pods
-      - task: cleanup-succeeded-pods
-      - task: cleanup-error-pods
-      - task: cleanup-replicasets

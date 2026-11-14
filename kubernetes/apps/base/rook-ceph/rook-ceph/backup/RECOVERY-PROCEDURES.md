@@ -1,8 +1,8 @@
 # Rook-Ceph Recovery Procedures
 
 These steps match the live backup in
-[`backup-system.yaml`](./backup-system.yaml) and the device-path runbook
-[`osd-device-path-recovery.md`](../../../../../../.agents/skills/rook-ceph/references/osd-device-path-recovery.md).
+[`cronjob.yaml`](./cronjob.yaml) and the device-path runbook
+[`ceph-osd-recovery.md`](../../../../../../.agents/skills/incident-runbooks/references/ceph-osd-recovery.md).
 Do not invent missing objects. There is no `backup-pod` Deployment, no
 `cleanup-all-nodes.yaml`, and no `initial-backup-job.yaml`.
 
@@ -81,17 +81,14 @@ kubectl get secret rook-ceph-mon -n rook-ceph -o jsonpath='{.data.fsid}' | base6
 `ceph-backup-pvc` lives on the same cluster, on a node's OpenEBS hostpath
 volume. Complete cluster loss, node rebuild, PVC delete, or a host wipe
 (`task rook:wipe-talos-N`, `task rook:reset-all-data`,
-`task rook:wipe-all-with-progress`) destroys that copy along with the OSD
+`task rook:wipe-all`) destroys that copy along with the OSD
 disks. After a host wipe there is nothing left to `kubectl apply`.
 
 Off-cluster copies of these YAML/FSID files were never implemented.
-`task rook:backup-rook-config` only dumps Ceph CRs to `/tmp` on the
-workstation; it does not save mon secrets or the FSID, and `/tmp` is not
-durable off-cluster storage.
 
 If the cluster and its nodes are gone, OSD data is unrecoverable and a
 new FSID is required. All-mon-store loss also cannot be restored from an
-old backup; see `.agents/skills/talos-nodes/references/hardware.md` (mon RocksDB store
+old backup; see section 6 (mon RocksDB store
 corruption). Copy the backup directory off-cluster **before** any wipe if
 you still need the original FSID.
 
@@ -105,7 +102,7 @@ OSD rolls stay serial. Deleting every OSD at once
 (`kubectl delete pods -n rook-ceph -l app=rook-ceph-osd`) is the blast
 radius that runbook forbids: on a degraded cluster Rook #17224 relocate
 fallback returns empty and pods stick `Init:0/5`. See
-[`osd-device-path-recovery.md`](../../../../../../.agents/skills/rook-ceph/references/osd-device-path-recovery.md).
+[`ceph-osd-recovery.md`](../../../../../../.agents/skills/incident-runbooks/references/ceph-osd-recovery.md).
 
 ```bash
 # 1. Confirm mons answer
@@ -191,7 +188,7 @@ kubectl patch cephcluster rook-ceph -n rook-ceph --type=merge -p '{"metadata":{"
 # 3. Wipe OSD disks and /var/lib/rook via the Taskfile, not a missing YAML.
 #    Per node:  task rook:wipe-talos-1  (and talos-2, talos-3)
 #    All nodes + host rook dir:
-task rook:wipe-all-with-progress
+task rook:wipe-all
 # Interactive prompts: the skip flag is global `task --yes rook:...`, not `--yes` after the task name.
 
 # 4. Resume HelmReleases; Flux recreates an empty ceph-backup-pvc
@@ -304,4 +301,4 @@ A `min_size=1` window on the block pool has been used twice to break an RBD-acti
 - [ ] A recent dated directory has been copied **off-cluster** if you
       care about FSID recovery after a wipe
 - [ ] `task rook:check-osd-device-paths` is green before any node reboot
-- [ ] This file still matches `backup-system.yaml`
+- [ ] This file still matches `cronjob.yaml`

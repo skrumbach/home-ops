@@ -1,5 +1,5 @@
-# SMB and NFS shares. The NFS exports on 10.10.10.0/24 serve the cluster
-# (Home-Ops, Volsync, document auto-import). Skill `truenas-nas`.
+# The cluster mounts only the `media` NFS share (/mnt/storage/Media): plex, sonarr, radarr, lidarr,
+# bazarr, tdarr, shelfmark, calibre-web-automated. Changing or deleting it takes those apps down.
 
 resource "truenas_smb_share" "netboot_mgt" {
   abe = false

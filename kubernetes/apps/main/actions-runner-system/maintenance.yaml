@@ -3,12 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app actions-runner-maintenance
-  namespace: &namespace actions-runner-system
+  name: actions-runner-maintenance
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace actions-runner-system
   interval: 1h
   dependsOn:
     - name: gha-runner-scale-set-controller
@@ -17,12 +14,10 @@ spec:
       namespace: *namespace
     - name: external-secrets
       namespace: security
-  path: ./kubernetes/apps/base/actions-runner-system/maintenance
+  path: ./kubernetes/apps/base/actions-runner-system/maintenance/app
   prune: true
   retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m

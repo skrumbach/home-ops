@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: generic-device-plugin
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: generic-device-plugin
   driftDetection:
     mode: enabled
 
@@ -17,7 +16,6 @@ spec:
     defaultPodOptions:
       priorityClassName: system-node-critical
       # Toleration is hygiene. PreferNoSchedule does not filter, and talos-3 is this DaemonSet's only legal node for the B70.
-      # See skill node-scheduling.
       tolerations:
         - key: home-operations.com/dedicated
           operator: Exists

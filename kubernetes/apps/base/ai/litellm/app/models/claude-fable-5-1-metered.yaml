@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # Household-metered route. The natural name is the Claude Code subscription pass-through.
 # No info.extra prices: the v1.103.1 cost map already prices this id.
-# See skill litellm-proxy (references/model-catalog.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

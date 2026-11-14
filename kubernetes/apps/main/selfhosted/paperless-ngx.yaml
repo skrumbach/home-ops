@@ -4,13 +4,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app paperless-ngx
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
+  targetNamespace: selfhosted
+  interval: 1h
   timeout: 5m
   path: "./kubernetes/apps/base/selfhosted/paperless-ngx/app"
   prune: true
@@ -18,7 +14,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   healthCheckExprs:
     - apiVersion: dragonflydb.io/v1alpha1
       kind: Dragonfly
@@ -36,53 +31,38 @@ spec:
     - name: dragonfly-operator
       namespace: database
   components:
-    # Proof: proof-ledger.md row 27, re-drilled 2026-11-01 from ceph, r2 and the populator path.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/dragonfly
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 10Gi
       KOPIUR_CACHE_CAPACITY: 10Gi
-      GATUS_GROUP: *namespace
       KOPIUR_SCHEDULE_R2: "H 14 * * *"
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # kopiur backup for the SECOND volume, `paperless-ngx-media` - the scanned originals and their archived PDFs, which are not reconstructible from the database.
 # The `paperless-ngx-consume` inbox is deliberately NOT backed up: paperless deletes files from it once they are ingested into media.
-# Skill `kopiur-backups`.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: paperless-ngx-media-kopiur
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: paperless-ngx
-  interval: 30m
-  timeout: 5m
+  targetNamespace: &namespace selfhosted
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
     - name: paperless-ngx
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: paperless-ngx-media
       KOPIUR_CLAIM: paperless-ngx-media
@@ -91,18 +71,14 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: paperless-ngx-db
-  namespace: selfhosted
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: paperless-ngx
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

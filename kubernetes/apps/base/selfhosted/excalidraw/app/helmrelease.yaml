@@ -8,14 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: excalidraw
   values:
     controllers:
       excalidraw:
@@ -42,7 +35,6 @@ spec:
         pod:
           # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute, and the talos-3 taint is PreferNoSchedule,
           # so talos-3 stays in the spread domains; the TaintToleration score keeps this workload off it.
-          # Skill `node-scheduling`, references/talos-3-ledger.md.
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
@@ -61,11 +53,12 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Excalidraw
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
-          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the Service in-cluster instead. Skill observability.
+          gethomepage.dev/icon: excalidraw.svg
+          gethomepage.dev/description: Whiteboard
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://excalidraw.selfhosted.svc.cluster.local/
             conditions:
@@ -73,7 +66,7 @@ spec:
             group: selfhosted
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

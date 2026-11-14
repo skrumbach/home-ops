@@ -1,11 +1,12 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/configmap-v1.json
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ntfy-config
 data:
   server.yml: |
-    base-url: https://ntfy.${SECRET_DOMAIN}
+    base-url: https://ntfy.sklab.dev
     upstream-base-url: https://ntfy.sh
     cache-file: /var/cache/ntfy/cache.db
     cache-duration: 12h

@@ -1,8 +1,8 @@
+---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/toolhive.stacklok.dev/embeddingserver_v1alpha1.json
 #
 # Tool-selection index for vmcp only. Keep BAAI/bge-small-en-v1.5: Qwen3-Embedding-0.6B
 # takes about 487s per session and the handshake budget is 30s. Do not point this at the B70.
-# See skill ai-stack references/toolhive.md.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: EmbeddingServer
 metadata:
@@ -14,7 +14,7 @@ spec:
     - name: HOSTNAME
       value: "::"
   # No --max-batch-tokens. bge-small's warmup buffer is about 12 MiB. Request 1 CPU so a
-  # saturated node still finishes inside 30s; the 4 CPU limit is the burst. See skill ai-stack references/toolhive.md.
+  # saturated node still finishes inside 30s; the 4 CPU limit is the burst.
   resources:
     requests:
       cpu: "1"

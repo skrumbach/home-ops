@@ -5,15 +5,13 @@ kind: HelmRelease
 metadata:
   name: kube-prometheus-stack
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 15m
   chartRef:
     kind: OCIRepository
     name: kube-prometheus-stack
-  install:
-    crds: Skip
-  upgrade:
-    crds: Skip
+  # values.crds.enabled false keeps this chart from shipping CRDs (prometheus-operator/crds
+  # owns them).
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -44,12 +42,13 @@ spec:
         PrometheusDuplicateTimestamps:
           # The counter is global and unlabelled, so the offending target can
           # only be named from Prometheus's own log - which is lost when the pod
-          # is replaced. Promtail ships it to Loki, so read it there first.
+          # is replaced. vlagent ships it to VictoriaLogs, so read it there first.
           attribution: >-
             The dropped samples are attributable ONLY from Prometheus's own log,
             not from any metric label. Capture it before the pod is replaced:
-            LogQL `{namespace="monitoring", pod=~"prometheus-.*"} |= "different
-            value but same timestamp"` names the scrape_pool, the target URL and
+            LogsQL `{kubernetes.pod_namespace="monitoring"}
+            kubernetes.pod_name:="prometheus-"* "different value but same
+            timestamp"` names the scrape_pool, the target URL and
             num_dropped per scrape. Last occurrence: rook-ceph-exporter on
             talos-2 (http://10.10.10.12:9926/metrics), 90 samples per 10s scrape
             = 540/min, from 2026-09-06 until it cleared at 2026-09-14T21:29Z.
@@ -143,8 +142,8 @@ spec:
           enabled: false
 
     prometheus-node-exporter:
-      # hostNetwork listener, pinned at the chart default: cilium hostpolicy-ceph.yaml
-      # world-denies 9100 and scripts/ci/hostpolicy-ceph-selector-test.py checks it.
+      # hostNetwork listener, pinned at the chart default: cilium ciliumclusterwidenetworkpolicy.yaml
+      # world-denies 9100; keep the two in sync.
       service:
         port: 9100
       prometheus:
@@ -222,6 +221,7 @@ spec:
         scrapeConfigSelectorNilUsesHelmValues: false
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         serviceMonitorSelectorNilUsesHelmValues: false
+        # Not backed up: metrics are kept only 14 days and are scraped again, so a lost claim loses only history.
         storageSpec:
           volumeClaimTemplate:
             metadata:
@@ -238,14 +238,17 @@ spec:
           enabled: true
           annotations:
             gethomepage.dev/enabled: "true"
-            gethomepage.dev/icon: prometheus
+            gethomepage.dev/icon: prometheus.svg
             gethomepage.dev/name: Prometheus
             gethomepage.dev/group: Observability
             gethomepage.dev/app: prometheus
-            gethomepage.dev/description: Monitoring Scrape Service
+            gethomepage.dev/description: Metrics
             gethomepage.dev/widget.type: prometheus
             gethomepage.dev/widget.url: http://kube-prometheus-stack-prometheus.monitoring:9090
-          hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+            gatus.home-operations.com/endpoint: |-
+              url: https://kube-prometheus-stack.sklab.dev/-/ready
+              conditions: ["[STATUS] == 200"]
+          hostnames: ["{{ .Release.Name }}.sklab.dev"]
           parentRefs:
             - name: envoy-internal
               namespace: network

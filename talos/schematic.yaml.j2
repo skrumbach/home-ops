@@ -15,7 +15,7 @@ customization:
     - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU & Intel iGPU
     - nvme_core.default_ps_max_latency_us=0 # Disable NVMe APST deep sleep to prevent I/O stalls
     - pcie_aspm=off # Disable PCIe Active State Power Management to prevent link state transitions
-    # pcie_aspm=off does not cover root-port runtime D3hot. pcie_port_pm=off does. Not retroactive. See skill talos-nodes.
+    # pcie_aspm=off does not cover root-port runtime D3hot. pcie_port_pm=off does. Not retroactive.
     - pcie_port_pm=off # Keep PCIe root ports out of runtime D3hot so a late-training card is never orphaned
     - pci=realloc # Reallocate PCIe resource windows for the Arc B70 Pro OCuLink switch
     - pci=assign-busses # BIOS leaves the B70's e2ff switch at [bus 00-00] with no spare bus numbers behind 00:01.0; kernel must renumber all buses (NIC renames are safe: bonds select members via LinkAliasConfig)
@@ -23,10 +23,10 @@ customization:
     - i915.force_probe=!a7a0 # Keep i915 off the iGPU so xe owns it (load-bearing: siderolabs/i915 ships i915.ko)
     - talos.auditd.disabled=1 # Less security, faster puter
   systemExtensions:
+    # Do not add siderolabs/thunderbolt: it broke the early-boot NIC path.
     officialExtensions:
       - siderolabs/xe # Intel iGPU + Arc discrete GPU
       # Supplies iGPU firmware blobs xe still loads. i915.ko stays off the iGPU via the force_probe arg above.
-      # See skill talos-nodes.
       - siderolabs/i915 # Intel iGPU firmware (i915/adlp_*) for the xe driver
       - siderolabs/intel-ucode # Intel iGPU
       - siderolabs/mei # Intel iGPU

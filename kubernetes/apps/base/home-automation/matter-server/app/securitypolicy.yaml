@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Gates the whole matter-server route with Pocket ID at Envoy (native OIDC): the WebSocket API on
+# this port has no authentication and commissions, removes and controls every Matter device. The
+# dashboard's own WebSocket goes to the same host and carries the session cookie. Home Assistant
+# reaches the server through the in-cluster Service, not this route.
+# A policy that fails to translate (e.g. the operator has not written
+# matter-server-oidc-credentials yet) makes the route answer 500, not pass through; a policy whose
+# targetRef matches no route leaves that route open.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: matter-server-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: matter-server
+  oidc:
+    provider:
+      issuer: https://id.sklab.dev
+      # Explicit endpoints skip discovery: without them the Envoy Gateway controller fetches
+      # the issuer's openid-configuration on every translation, and a failed fetch turns the
+      # route into a 500 until the next one.
+      authorizationEndpoint: https://id.sklab.dev/authorize
+      tokenEndpoint: https://id.sklab.dev/api/oidc/token
+      endSessionEndpoint: https://id.sklab.dev/api/oidc/end-session
+    # Both from the Secret pocketidoidcclient.yaml generates.
+    clientIDRef:
+      name: matter-server-oidc-credentials
+    clientSecret:
+      name: matter-server-oidc-credentials
+    redirectURL: https://matter.sklab.dev/oauth2/callback
+    logoutPath: /oauth2/logout

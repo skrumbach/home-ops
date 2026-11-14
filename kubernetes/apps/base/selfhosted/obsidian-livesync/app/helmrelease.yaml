@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app obsidian-livesync
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: obsidian-livesync
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -75,8 +74,6 @@ spec:
     persistence:
       data:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-obsidian-livesync}
         globalMounts:
           - path: /opt/couchdb/data
@@ -92,17 +89,17 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Obsidian LiveSync
           gethomepage.dev/icon: obsidian.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/description: Vault sync
           gatus.home-operations.com/endpoint: |-
-            url: https://sync.${SECRET_DOMAIN}/
+            url: https://sync.sklab.dev/
             conditions:
               - "[STATUS] == 200"
             group: selfhosted
         hostnames:
-          - "sync.${SECRET_DOMAIN}"
+          - "sync.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

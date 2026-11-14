@@ -8,18 +8,8 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: repo-wiki
   maxHistory: 2
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     defaultPodOptions:
       securityContext:
@@ -49,6 +39,32 @@ spec:
                   printf '%s\n' '# Home Ops Repo Wikis' '' 'Waiting for the first generator run.' > /app-data/repository/index.md
                 fi
                 exec mkdocs serve --dirty -f /config/mkdocs.yml -a 0.0.0.0:8000
+            # `/` is what the route's Gatus check expects 200 from. Thresholds follow searxng; the startup
+            # probe covers the full site build mkdocs runs before it binds, which grows with the wiki.
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 8000
+                  initialDelaySeconds: 0
+                  periodSeconds: 5
+                  timeoutSeconds: 3
+                  failureThreshold: 12
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -89,7 +105,7 @@ spec:
           app:
             image:
               repository: python
-              tag: 3.14@sha256:d18055009f327b22993de14458aa5a6bac032cdf459ea2a2e9bbdc3d3d49e4fb
+              tag: 3.15@sha256:df3f05ff4d74833f52146edd195c8f7913581b57796a820fb7e373457ace9bad
             command: ["python3", "/config/generate.py"]
             env:
               # In-cluster LiteLLM governance proxy (captain decisions B4/D4) -
@@ -154,12 +170,17 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: AI
           gethomepage.dev/name: Repo Wiki
-          gethomepage.dev/description: "AI-generated per-repo documentation"
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/description: Generated repo documentation
+          gethomepage.dev/icon: "mdi-book-open-page-variant-#22D8F0"
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the mkdocs Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
+            url: http://repo-wiki.ai.svc.cluster.local:8000/
             conditions: ["[STATUS] == 200"]
+            ui:
+              hide-url: true
         hostnames:
-          - "repo-wiki.${SECRET_DOMAIN}"
+          - "repo-wiki.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

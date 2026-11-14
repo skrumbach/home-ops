@@ -10,5 +10,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
+    # Before bumping to a release with cilium/cilium#47914 set l7Proxy: false in helmrelease.yaml: agents
+    # refuse to start with netkit + endpointRoutes + L7 proxy. l7Proxy is unset today (chart default).
     tag: 1.20.4
   url: oci://quay.io/cilium/charts/cilium

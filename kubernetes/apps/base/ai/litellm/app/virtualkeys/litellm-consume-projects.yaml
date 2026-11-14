@@ -4,7 +4,7 @@
 # the four subscription pass-throughs stay off this key. `jev` is the decision model (/v1/decisions).
 # $100/30d is this key's spend on every model below and the only cap on the Aviator
 # route: there is no provider-wide router budget, so subscription pass-throughs and other keys
-# are unaffected. See skill litellm-proxy (references/governance-keys.md).
+# are unaffected.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

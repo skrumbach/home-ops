@@ -8,15 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
+    name: shelfmark
   values:
     defaultPodOptions:
       securityContext:
@@ -30,11 +22,13 @@ spec:
       shelfmark:
         # Left off the Deployment: KEDA owns it (components/keda/nfs-scaler).
         replicas: null
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
               repository: ghcr.io/calibrain/shelfmark-lite
-              tag: v1.6.2@sha256:3bf5a4fd4b9ac4255578c361cd6cc820ba941f5edee34161d48b4081e026b15d
+              tag: v1.7.0@sha256:b8bbc8ae26282c9cc765162719d2090142edf6c93c01c1eb430e51b1fa746ef2
             env:
               # List form: app-template mangles bare PUID/PGID map keys (see the CWA release).
               - name: PUID
@@ -151,15 +145,16 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/icon: calibre-web.png
-          gethomepage.dev/name: *app
+          gethomepage.dev/icon: sh-shelfmark.svg
+          gethomepage.dev/name: Shelfmark
           gethomepage.dev/group: Downloads
+          gethomepage.dev/description: Book search and download
           gatus.home-operations.com/endpoint: |-
-            url: https://books.${SECRET_DOMAIN}/api/health
+            url: https://books.sklab.dev/api/health
             conditions:
               - "[STATUS] == 200"
             group: media
-        hostnames: ["books.${SECRET_DOMAIN}"]
+        hostnames: ["books.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -195,14 +190,14 @@ spec:
           - path: /data/downloads
       ingest:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media/ebooks/calibre/ingest
         globalMounts:
           - path: /cwa-book-ingest
       # Read-only view of the CWA library so Shelfmark can see which books already exist.
       library:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media/ebooks/calibre/library
         globalMounts:
           - path: /calibre-library

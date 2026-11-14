@@ -2,6 +2,10 @@
 
 GitOps repository for a 3-node Talos Linux Kubernetes cluster, continuously reconciled by Flux v2.
 
+![Talos](https://kromgo.sklab.dev/badges/talos_version) ![Kubernetes](https://kromgo.sklab.dev/badges/kubernetes_version) ![Flux](https://kromgo.sklab.dev/badges/flux_version) ![Nodes](https://kromgo.sklab.dev/badges/cluster_node_count) ![Pods](https://kromgo.sklab.dev/badges/cluster_pod_count) ![CPU](https://kromgo.sklab.dev/badges/cluster_cpu_usage) ![Memory](https://kromgo.sklab.dev/badges/cluster_memory_usage) ![Uptime](https://kromgo.sklab.dev/badges/cluster_uptime_days) ![Alerts](https://kromgo.sklab.dev/badges/cluster_alert_count)
+
+**Documentation: <https://skrumbach.github.io/home-ops/>** (generated from the manifests on every merge; the app catalog, backups, exposure and runbooks are all there).
+
 This is a live cluster, not an upstream template. There is no Makejinja render step, no `cluster.yaml` / `nodes.yaml`, and no `task init` / `task configure` / `task bootstrap:talos` workflow. Operator commands live in the files listed below.
 
 ## Stack
@@ -22,8 +26,8 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 | Day-to-day commands, app layout, secrets, backups, agent-facing conventions and anti-patterns | [`AGENTS.md`](AGENTS.md) (`CLAUDE.md` is a symlink to it) |
 | Talos templates, render/apply/upgrade | [`talos/AGENTS.md`](talos/AGENTS.md) |
 | First-time / disaster-recovery bootstrap | [`bootstrap/AGENTS.md`](bootstrap/AGENTS.md) |
-| Runbooks | skill references under [`.agents/skills/`](.agents/skills/); [`docs/README.md`](docs/README.md) for the exceptions |
-| Agent skills (one per subsystem) | [`.agents/skills/`](.agents/skills/) - indexed in `AGENTS.md` |
+| Incident runbooks (restore, power-down/up, Ceph OSD, EMQX) | [`.agents/skills/incident-runbooks/`](.agents/skills/incident-runbooks/) |
+| The documentation site: generator and theme | [`scripts/docs/`](scripts/docs/README.md), [`docs/`](docs/) |
 
 ## Layout
 
@@ -32,12 +36,15 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 ├── kubernetes/
 │   ├── apps/           # Flux apps at apps/base/<ns> + overlay apps/main/<ns>
 │   ├── clusters/main/  # Flux entry point (cluster-meta + cluster-apps)
-│   └── components/     # Reusable Kustomize components (alerts, common, dragonfly, kopiur (+ pvc))
+│   └── components/     # Reusable Kustomize components
 ├── talos/              # minijinja machine config, node overlays, factory schematic
 ├── bootstrap/          # just bootstrap stages (nodes, k8s, base, apps)
-├── .agents/skills/     # agent skills, one per subsystem (.claude/skills is a symlink)
-├── .taskfiles/         # task recipes (flux, rook, network, 1password, actions-runner)
-├── docs/               # tdarr harness files and a runbook pointer
+├── .agents/skills/     # incident-runbooks skill (.claude/skills is a symlink)
+├── .renovate/          # Renovate presets
+├── .taskfiles/         # task recipes (flux, rook, network, actions-runner, docs)
+├── docs/               # Hugo theme for the generated documentation site
+├── scripts/            # CI guards (scripts/ci), add-app scaffold, docs generator, agent credentials, VolSync expiry ledger
+├── terraform/          # OpenTofu stacks outside Flux (UniFi, TrueNAS)
 └── .mise.toml          # workstation tool versions
 ```
 
@@ -63,7 +70,7 @@ just talos render-config talos-1
 just talos apply-node talos-1 --dry-run
 just talos apply-node talos-1
 just talos upgrade-node talos-1
-just talos upgrade-k8s v1.36.5
+just talos upgrade-k8s <version>
 
 # Bootstrap is DR / first-time only. Never run against a healthy cluster.
 just bootstrap cluster
@@ -73,7 +80,7 @@ Do not pass the control-plane VIP `10.10.10.10` as a node target. Node addresses
 
 ## Adding an app
 
-Directory shapes and authoring traps: [`.agents/skills/flux-gitops/references/app-shapes.md`](.agents/skills/flux-gitops/references/app-shapes.md). Prefer the scaffold over hand-copying a sibling:
+Prefer the scaffold over hand-copying a sibling:
 
 ```bash
 scripts/add-app/generate-app.sh <namespace> <app> [--shape=app|family|crd-split|parameterized] [--secrets] [--dragonfly] [--dry-run]
@@ -83,7 +90,7 @@ Usage and limits: [`scripts/add-app/README.md`](scripts/add-app/README.md). Afte
 
 1. Fill every `TODO` in the generated base manifests and overlay `kubernetes/apps/main/{namespace}/{app}.yaml` (the scaffold also appends the namespace `kustomization.yaml` `resources:` entry).
 2. Secrets go in `externalsecret.yaml` against ClusterSecretStore `onepassword`. Never commit plaintext or SOPS files.
-3. Optional backups are **not** scaffolded. New never-VolSync apps take kopiur-only with `components/kopiur` alone plus a chart-owned PVC (example: `downloads/cleanuparr.yaml`); `components/kopiur/pvc` is the VolSync-retirement takeover shape only (example: `downloads/sonarr.yaml`). Always `dependsOn: kopiur-repository` in namespace `system`, plus measured `KOPIUR_*` keys. VolSync and `components/volsync` were removed on 2026-11-01 (issue #2202). Owner: `kubernetes/components/kopiur/Readme.md`.
+3. Optional backups are **not** scaffolded. A new app takes `components/kopiur` alone plus a chart-owned PVC with `retain: true` (the `components/kopiur/pvc` restore is fail-closed and a new claim has no snapshot), and moves to `components/kopiur/pvc` once it has snapshots (example: `downloads/sonarr.yaml`). Always `dependsOn: kopiur-repository` in namespace `system`, plus measured `KOPIUR_*` keys. VolSync and `components/volsync` were removed on 2026-11-01 (issue #2202). Owner: `kubernetes/components/kopiur/README.md`.
 4. Validate with `mise exec -- task flux:test:all`.
 
 Flux reconciles from Git. After a merge, `task reconcile` forces a sync.

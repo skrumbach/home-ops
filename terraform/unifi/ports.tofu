@@ -7,7 +7,7 @@
 # switch. Never change it without a console on the switch.
 #
 # The Talos bonds (Aggregation 5+6, 7+8, 9+10) are at the end of this file.
-# USW Flex has no overrides. Skill `unifi-network`.
+# USW Flex has no overrides.
 
 resource "unifi_device_port" "usw_pro_max_48_port_49" {
   aggregate_members      = [49, 50]
@@ -298,7 +298,7 @@ resource "unifi_device_port" "usw_pro_max_48_port_33" {
 # network NOT in excluded_networkconf_ids, which today leaves IoT [Devices]
 # (VLAN 3) and VPN_Network (VLAN 90). A new network is tagged here too unless
 # it is added to the list. Any change re-provisions the Aggregation switch and
-# drops this node's bond. Skill `unifi-network`.
+# drops this node's bond.
 resource "unifi_device_port" "usw_pro_aggregation_port_5" {
   aggregate_members        = [5, 6]
   autoneg                  = true
@@ -321,7 +321,7 @@ resource "unifi_device_port" "usw_pro_aggregation_port_5" {
 # network NOT in excluded_networkconf_ids, which today leaves IoT [Devices]
 # (VLAN 3) and VPN_Network (VLAN 90). A new network is tagged here too unless
 # it is added to the list. Any change re-provisions the Aggregation switch and
-# drops this node's bond. Skill `unifi-network`.
+# drops this node's bond.
 resource "unifi_device_port" "usw_pro_aggregation_port_7" {
   aggregate_members        = [7, 8]
   autoneg                  = true
@@ -344,7 +344,7 @@ resource "unifi_device_port" "usw_pro_aggregation_port_7" {
 # network NOT in excluded_networkconf_ids, which today leaves IoT [Devices]
 # (VLAN 3) and VPN_Network (VLAN 90). A new network is tagged here too unless
 # it is added to the list. Any change re-provisions the Aggregation switch and
-# drops this node's bond. Skill `unifi-network`.
+# drops this node's bond.
 resource "unifi_device_port" "usw_pro_aggregation_port_9" {
   aggregate_members        = [9, 10]
   autoneg                  = false

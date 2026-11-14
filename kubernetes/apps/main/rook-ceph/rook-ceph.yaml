@@ -3,18 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app rook-ceph
-  namespace: &namespace rook-ceph
+  name: rook-ceph
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: rook-ceph
   dependsOn:
     - name: onepassword-store
       namespace: security
-  interval: 30m
-  timeout: 15m
+  interval: 1h
   path: "./kubernetes/apps/base/rook-ceph/rook-ceph/operator"
   # prune: false only stops removal of objects dropped from Git. Deleting this
   # Kustomization still deletes its resources (cluster-apps sets
@@ -25,26 +20,20 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app rook-ceph-cluster
-  namespace: &namespace rook-ceph
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
+  targetNamespace: rook-ceph
+  interval: 1h
   timeout: 15m
   path: "./kubernetes/apps/base/rook-ceph/rook-ceph/cluster"
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   dependsOn:
     - name: onepassword-store
       namespace: security
@@ -61,8 +50,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  # Stays false: wait:true would ignore healthChecks and assess the inventory.
-  wait: false
+  # No wait: wait: true would ignore healthChecks and assess the inventory.
   # rook-ceph-cluster's chart only renders the toolbox Deployment directly -
   # mons/OSDs/mgr are created dynamically by the operator from the CephCluster
   # CR, not by this Helm template, so they can't be named here. The CephCluster

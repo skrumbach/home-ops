@@ -3,9 +3,9 @@
 #
 # PUBLIC: served on envoy-external without auth. kromgo 0.16 returns every label of the
 # result sample in ?format=json, so every query must aggregate away all labels except the
-# one a badge displays. scripts/ci/kromgo-public-config-test.py enforces the badge
-# allow-list, that every metric sits under a label-dropping aggregation, and that no
-# graphs (range data) or gallery are served. The route only forwards /badges/.
+# one a badge displays. Keep the badge allow-list short, every metric under a
+# label-dropping aggregation, and serve no graphs (range data) or gallery. The route
+# only forwards /badges/.
 # Flux substitutes this file: never write a dollar-brace variable here.
 
 gallery:
@@ -119,7 +119,7 @@ badges:
         / clamp_min((sum(increase(litellm_cache_hits_metric_total[7d])) or vector(0)) + (sum(increase(litellm_cache_misses_metric_total[7d])) or vector(0)), 1), 0.1)
     valueExpr: humanizeFloat(result) + "%"
 
-  # Arc Pro B70 on talos-3 (skill intel-gpu, references/telemetry.md). VRAM from
+  # Arc Pro B70 on talos-3. VRAM from
   # system/xe-gpu-exporter; temperature, fan and energy from the xe hwmon chip.
   - id: gpu_vram_used_gib
     title: VRAM used

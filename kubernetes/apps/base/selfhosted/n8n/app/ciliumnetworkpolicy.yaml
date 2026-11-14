@@ -8,7 +8,7 @@ spec:
   # n8n runs user code (Code node, NODE_FUNCTION_ALLOW_BUILTIN "*") and HTTP Request nodes, so it is
   # fenced both ways. A workflow that must reach a LAN host or an in-cluster Service needs its own
   # egress rule here. The JS task runner talks to the broker over loopback, which policy never sees.
-  # Kopiur movers mount the claim in their own pods and never connect to n8n. Skill `networking`.
+  # Kopiur movers mount the claim in their own pods and never connect to n8n.
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: n8n
@@ -41,7 +41,7 @@ spec:
               protocol: TCP
     # Database replies (DB_POSTGRESDB_HOST postgres-18-rw), all instances. No toPorts: a same-node
     # Service reply arrives with the ClusterIP as source after reverse NAT and is re-checked here.
-    # A workflow given an in-cluster egress rule needs a rule like this too. Skill `networking`.
+    # A workflow given an in-cluster egress rule needs a rule like this too.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

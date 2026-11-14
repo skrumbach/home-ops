@@ -8,14 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: kromgo
   values:
     controllers:
       kromgo:
@@ -31,7 +24,7 @@ spec:
             image:
               # kashalls/kromgo moved to home-operations/kromgo (tags without the v prefix).
               repository: ghcr.io/home-operations/kromgo
-              tag: 0.16.3@sha256:98775a53019250a517a09a0fb716404146d1aaa6fb1f67091c58345663e5b7b5
+              tag: 0.16.4@sha256:f55f7b5590a394e3ea47f5debf8c75e01898c3f915331aa28568b6fd8d426310
             env:
               KROMGO_PROMETHEUS_URL: http://prometheus-operated.monitoring.svc.cluster.local:9090
               KROMGO_SERVER_PORT: &port 8080
@@ -69,7 +62,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       # maxSkew 1 so one drain cannot take both replicas. Honor does not see the talos-3 PreferNoSchedule taint.
-      # The chart defaults labelSelector to this controller's pods. See skill node-scheduling.
+      # The chart defaults labelSelector to this controller's pods.
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -85,15 +78,16 @@ spec:
     # Public on purpose, no ExtAuth: the github.com/skrumbach profile workflow reads these
     # badges anonymously. Only /badges/ is routed (no gallery, graphs or health paths), kromgo
     # answers only the fixed queries in resources/config.yaml (query parameters never reach
-    # PromQL), and every query aggregates away identifying labels.
-    # scripts/ci/kromgo-public-config-test.py enforces both. Cloudflare sits in front.
+    # PromQL), and every query aggregates away identifying labels. Cloudflare sits in front.
+    # Access-Control-Allow-Origin: * lets a documentation site on another origin read the
+    # badges from the browser; that is safe because the data is fixed and anonymous.
     route:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            url: https://kromgo.${SECRET_DOMAIN}/badges/cluster_node_count?format=json
+            url: https://kromgo.sklab.dev/badges/cluster_node_count?format=json
             conditions: ["[STATUS] == 200", "[BODY].id == cluster_node_count"]
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-external
             namespace: network
@@ -103,6 +97,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /badges/
+            filters:
+              - type: ResponseHeaderModifier
+                responseHeaderModifier:
+                  set:
+                    - name: Access-Control-Allow-Origin
+                      value: "*"
             backendRefs:
               - identifier: app
                 port: *port

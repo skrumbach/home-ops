@@ -2,7 +2,7 @@
 # snooping), IGMP snooping, IPS/IDS and its suppressions, management (auto
 # upgrade, SSH), NTP, RADIUS ports, syslog and USG timeouts. One singleton per
 # site. A change re-provisions every device it touches; jumbo frames carry the
-# MTU 9000 Talos bonds. Skill `unifi-network`.
+# MTU 9000 Talos bonds.
 
 resource "unifi_setting" "site" {
   connectivity = {

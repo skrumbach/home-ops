@@ -4,14 +4,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cliproxyapi
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   components:
-    # kopiur ONLY: the app's own persistence block creates the claim.
     - ../../../../../components/kopiur
+    - ../../../../../components/kopiur/pvc
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -29,13 +26,8 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi

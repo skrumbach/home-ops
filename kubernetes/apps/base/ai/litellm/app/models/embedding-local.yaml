@@ -3,8 +3,7 @@
 # Local embedder on the shared B70 (ai/embedding-gpu, Qwen3-Embedding-0.6B, 1024 dims).
 # INVARIANT: no prices, no cloud fallback; params.model must name what the backend serves.
 # Load caps for the shared B70 (rpm, in-flight, timeout) only work together with routerSettings
-# optional_pre_call_checks and this alias's model_group_retry_policy. Skill b70-llm-serving
-# references/contention.md; CR catalog: skill litellm-proxy references/model-catalog.md.
+# optional_pre_call_checks and this alias's model_group_retry_policy.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

@@ -10,8 +10,6 @@ spec:
     kind: OCIRepository
     name: kopiur
   install:
-    remediation:
-      retries: -1
     # Helm's crds/ directory is INSTALL-ONLY: `helm upgrade` never updates a CRD
     # schema. Without CreateReplace on BOTH install and upgrade, a chart bump
     # that adds a CRD field leaves the old schema in place, the API server
@@ -19,9 +17,6 @@ spec:
     # shipped exactly that shape (three schema changes).
     crds: CreateReplace
   upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
     crds: CreateReplace
   values:
     # Load-bearing and pinned deliberately: a namespaced install swaps the
@@ -30,7 +25,6 @@ spec:
     installScope: cluster
 
     # CREDENTIAL PROJECTION. Captain decision 2026-08-30, key `credential-scope` (Option B), which closes the question Stage 1 deliberately deferred.
-    # Skill `kopiur-backups`.
     features:
       credentialProjection:
         enabled: true
@@ -43,6 +37,15 @@ spec:
     podDisruptionBudget:
       enabled: true
       minAvailable: 1
+    # Without a spread both replicas ran on talos-1 (2026-11-13), so the two replicas bought nothing.
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: kopiur
+            app.kubernetes.io/component: controller
 
     resources:
       requests:
@@ -75,6 +78,14 @@ spec:
       podDisruptionBudget:
         enabled: true
         minAvailable: 1
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: kopiur
+              app.kubernetes.io/component: webhook
       serviceMonitor:
         enabled: true
 
@@ -83,7 +94,6 @@ spec:
         enabled: true
       prometheusRule:
         # The chart alerts go silent if the operator stops emitting. The absent() rule is in ./prometheusrule.yaml.
-        # Skill `kopiur-backups`.
         enabled: true
       dashboards:
         enabled: true

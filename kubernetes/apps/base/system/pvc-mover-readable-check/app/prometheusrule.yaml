@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 # Fires on kube_job_status_failed.
-# Skill `pvc-integrity-checks`.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -13,7 +12,6 @@ spec:
       rules:
         - alert: PVCMoverCannotReadVolume
           # reason!="" matches every real terminal-failure series from kube-state-metrics v2.
-          # Skill `pvc-integrity-checks`.
           expr: |-
             kube_job_status_failed{namespace="system", job_name=~"^pvc-mover-readable-check-.+", reason!=""} > 0
               unless on (namespace, job_name)
@@ -33,6 +31,6 @@ spec:
               app.kubernetes.io/name=pvc-mover-readable-check --tail=300
               --since=12h | grep -E 'FINDING|INCONCLUSIVE|FAILURES'`. Design
               and the known coverage gaps:
-              kubernetes/apps/base/system/pvc-mover-readable-check/app/README.md.
+              kubernetes/apps/base/system/pvc-mover-readable-check/README.md.
           labels:
             severity: warning

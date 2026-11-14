@@ -1,0 +1,120 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: onepassword-connect
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: onepassword-connect
+  values:
+    controllers:
+      onepassword-connect:
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          api:
+            image:
+              repository: docker.io/1password/connect-api
+              tag: 1.8.4@sha256:0f74924c55c9156b8116f59f485223b2c2d30a5148d362562aa27838159bdffa
+            env:
+              XDG_DATA_HOME: &configDir /config
+              OP_HTTP_PORT: &apiPort 8080
+              OP_BUS_PORT: 11220
+              OP_BUS_PEERS: localhost:11221
+              OP_SESSION:
+                valueFrom:
+                  secretKeyRef:
+                    name: onepassword-secret
+                    key: 1password-credentials.json
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /heartbeat
+                    port: *apiPort
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *apiPort
+                  initialDelaySeconds: 15
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - "ALL"
+            resources: &resources
+              requests:
+                cpu: 10m
+                # One anchor serves both containers, so the request is sized for the larger (api). Limit unchanged.
+                # This pair is load-bearing for every ExternalSecret in the cluster, hence the conservative ratio.
+                memory: 192M
+              limits:
+                memory: 256M
+          sync:
+            image:
+              repository: docker.io/1password/connect-sync
+              tag: 1.8.4@sha256:ca34850f2a20ca302e688a9347cdb696f29ce3bfc011d2554eff338e315c9089
+            env:
+              XDG_DATA_HOME: *configDir
+              OP_HTTP_PORT: &syncPort 8081
+              OP_BUS_PORT: 11221
+              OP_BUS_PEERS: localhost:11220
+              OP_SESSION:
+                valueFrom:
+                  secretKeyRef:
+                    name: onepassword-secret
+                    key: 1password-credentials.json
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /heartbeat
+                    port: *syncPort
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *syncPort
+                  initialDelaySeconds: 15
+            securityContext: *securityContext
+            resources: *resources
+    defaultPodOptions:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: onepassword-connect
+        ports:
+          http:
+            port: *apiPort
+    persistence:
+      config:
+        type: emptyDir
+        globalMounts:
+          - path: *configDir

@@ -22,3 +22,18 @@ resources:
   - ./sabnzbd.yaml
   - ./shelfmark.yaml
   - ./sonarr.yaml
+
+# Pod Security: enforce baseline here (warn/audit stay restricted from components/common).
+# Every pod template in Git and every operator-made pod in this namespace passed baseline
+# on 2026-11-13. Patch target is not-used. Delete this patch to stop enforcing.
+patches:
+  - target:
+      kind: Namespace
+      name: not-used
+    patch: |-
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce
+        value: baseline
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce-version
+        value: latest

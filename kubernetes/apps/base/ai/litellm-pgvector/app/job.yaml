@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/job_v1.json
+# Creates the litellm_pgvector role and database, then applies resources/schema.sql (idempotent,
+# every run). The superuser creates the `vector` extension, then SET ROLEs to the app role.
+# A schema.sql edit renames the hashed ConfigMap, so Flux recreates this Job and re-applies it.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: litellm-pgvector-db-init
+  annotations:
+    # `enabled` is the only value Flux honours (recreates the immutable Job).
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        - name: init-db
+          image: ghcr.io/home-operations/postgres-init:18.7@sha256:6d4cfa4b8d343eb6fa0de8dd9ec416a2007f346bb631fc8e246e1f39eee6c4aa
+          envFrom:
+            - secretRef:
+                name: litellm-pgvector-db-init
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      containers:
+        # Its PG* variables are set here, never in the shared Secret (see externalsecret.yaml).
+        - name: init-schema
+          image: ghcr.io/home-operations/postgres-init:18.7@sha256:6d4cfa4b8d343eb6fa0de8dd9ec416a2007f346bb631fc8e246e1f39eee6c4aa
+          command: ["psql"]
+          args:
+            - --no-psqlrc
+            - --set=owner=$(INIT_POSTGRES_USER)
+            - --file=/sql/schema.sql
+          envFrom:
+            - secretRef:
+                name: litellm-pgvector-db-init
+          env:
+            - name: PGHOST
+              value: $(INIT_POSTGRES_HOST)
+            - name: PGDATABASE
+              value: $(INIT_POSTGRES_DBNAME)
+            - name: PGUSER
+              # postgres-init's own default superuser name.
+              value: postgres
+            - name: PGPASSWORD
+              value: $(INIT_POSTGRES_SUPER_PASS)
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - name: schema
+              mountPath: /sql
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: schema
+          configMap:
+            name: litellm-pgvector-schema

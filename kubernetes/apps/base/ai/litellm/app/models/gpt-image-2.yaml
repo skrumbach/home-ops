@@ -6,7 +6,6 @@
 # ignores output_cost_per_image (a flat per-image price logged $0 and left the key budget blind), so the
 # rates are OpenRouter's per-token prices ($5/M in, $30/M out, from its usage.cost breakdown; measured
 # 2026-10-31: $0.007 for a low-quality 1024x1024). Only the image-generation key allow-lists it.
-# See skill litellm-proxy (references/model-catalog.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

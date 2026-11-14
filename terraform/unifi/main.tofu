@@ -4,7 +4,7 @@
 # from 1Password through `vals` (secrets.vals.yaml) and the provider reads
 # them from the environment. UNIFI_API_KEY must stay unset: the provider
 # prefers it, and the 1Password field of that name is a cloud key that
-# returns 401 on the console. Skill `unifi-network`.
+# returns 401 on the console.
 
 terraform {
   required_version = "~> 1.12"

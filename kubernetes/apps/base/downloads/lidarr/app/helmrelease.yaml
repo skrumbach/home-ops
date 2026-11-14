@@ -5,12 +5,11 @@ kind: HelmRelease
 metadata:
   name: &app lidarr
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 10m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: lidarr
   values:
     controllers:
       lidarr:
@@ -130,7 +129,7 @@ spec:
 
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -140,21 +139,43 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/description: Music Downloads
+          gethomepage.dev/name: Lidarr
+          gethomepage.dev/description: Music
+          gethomepage.dev/icon: lidarr.svg
+          # Goes through the ungated `api` rule: Lidarr's own {"status": "OK"} body proves the app
+          # answers and that /ping still bypasses the Envoy OIDC gate (a gated path would end on the
+          # Pocket ID sign-in page).
           gatus.home-operations.com/endpoint: |-
-            url: https://lidarr.${SECRET_DOMAIN}/ping
+            url: https://lidarr.sklab.dev/ping
             conditions:
               - "[STATUS] == 200"
+              - "[BODY].status == OK"
             group: downloads
 
         hostnames:
-          - lidarr.${SECRET_DOMAIN}
+          - lidarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+              # Calendar feed (/feed/v1/calendar/lidarr.ics), API key in the query string.
+              - path:
+                  type: PathPrefix
+                  value: /feed
+              - path:
+                  type: Exact
+                  value: /ping
+            backendRefs:
+              - name: *app
+                port: *port
+          - name: app
+            backendRefs:
               - name: *app
                 port: *port

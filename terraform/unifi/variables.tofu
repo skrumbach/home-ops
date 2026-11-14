@@ -6,7 +6,7 @@ variable "unifi_url" {
 
 # WPA passphrases. The controller never returns them to the read-only role, so
 # they are owned by 1Password and only matter on create or after a deliberate
-# change; each wlan carries ignore_changes on passphrase. Skill `unifi-network`.
+# change; each wlan carries ignore_changes on passphrase.
 variable "wlan_passphrase_home" {
   type        = string
   description = "WPA passphrase of the U7-Home SSID"

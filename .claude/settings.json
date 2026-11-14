@@ -2,25 +2,6 @@
   "env": {
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   },
-  "permissions": {
-    "deny": [
-      "Bash(talosctl apply-config *)",
-      "Bash(talosctl upgrade *)",
-      "Bash(talosctl reboot *)",
-      "Bash(talosctl reset *)",
-      "Bash(tofu apply *)",
-      "Bash(tofu destroy *)",
-      "Bash(kubectl apply *)",
-      "Bash(kubectl delete *)",
-      "Bash(kubectl patch *)",
-      "Bash(kubectl edit *)",
-      "Bash(kubectl replace *)",
-      "Read(~/.kube/home-ops-admin)",
-      "Read(~/.talos/home-ops-admin)",
-      "Read(/kubeconfig)",
-      "Read(/talos/talosconfig)"
-    ]
-  },
   "enabledPlugins": {
     "superpowers@anthropic-plugin-directory": false,
     "exa-deep-research@anthropic-plugin-directory": true

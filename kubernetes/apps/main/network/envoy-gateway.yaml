@@ -4,13 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app envoy-gateway
-  namespace: &namespace network
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  dependsOn:
-    - name: certificates-import
+  targetNamespace: &namespace network
   # Controller first, then both Gateways Programmed (address assigned, listeners
   # pushed to the proxies). wait stays false so these entries are honoured.
   healthChecks:
@@ -35,13 +30,10 @@ spec:
   prune: true
   retryInterval: 2m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false

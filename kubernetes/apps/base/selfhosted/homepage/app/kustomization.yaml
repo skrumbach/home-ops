@@ -6,4 +6,11 @@ resources:
   - ./configmap.yaml
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
   - ./rbac.yaml
+configMapGenerator:
+  - name: homepage-theme
+    files:
+      - ./resources/custom.css
+generatorOptions:
+  disableNameSuffixHash: true

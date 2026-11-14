@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app shelfmark
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: downloads
+  interval: 1h
   path: ./kubernetes/apps/base/downloads/shelfmark/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: downloads-pvc
       namespace: downloads
@@ -29,8 +23,5 @@ spec:
   components:
     - ../../../../../components/keda/nfs-scaler
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app

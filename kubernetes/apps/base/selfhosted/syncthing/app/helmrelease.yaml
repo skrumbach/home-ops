@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app syncthing
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: syncthing
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -95,8 +94,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-syncthing}
         globalMounts:
           - path: /var/syncthing/config
@@ -109,13 +106,13 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Syncthing
           gethomepage.dev/icon: syncthing.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/description: File sync
           # securitypolicy.yaml gates this route, so the auto-discovered route check would measure
-          # the Authentik login page. Probe the GUI Service's unauthenticated health endpoint
-          # in-cluster instead. Skill observability.
+          # the Pocket ID sign-in page. Probe the GUI Service's unauthenticated health endpoint
+          # in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://syncthing-app.selfhosted.svc.cluster.local:8384/rest/noauth/health
             conditions:
@@ -124,7 +121,7 @@ spec:
             ui:
               hide-url: true
         hostnames:
-          - "syncthing.${SECRET_DOMAIN}"
+          - "syncthing.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

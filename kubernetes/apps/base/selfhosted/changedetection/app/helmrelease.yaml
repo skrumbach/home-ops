@@ -8,24 +8,14 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: changedetection
   maxHistory: 3
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     # Identity is declared pod-level like the rest of the fleet; `browser` (browserless/chrome) overrides
     # back to its image's `blessuser` uid 999 (see below). This does NOT earn kopiur's
     # `SecurityContextCompatible` condition: it needs the mover uid to match every container of every pod
     # mounting the claim, and the 999 sidecar suppresses it. The condition is positive-only (absence is not
-    # a failure); a whole-volume kopia read is the proof. See `components/kopiur/Readme.md`.
+    # a failure); a whole-volume kopia read is the proof. See `components/kopiur/README.md`.
     defaultPodOptions:
       securityContext:
         runAsUser: 1000
@@ -35,6 +25,8 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
     controllers:
       main:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           main:
             image:
@@ -54,10 +46,25 @@ spec:
               - {name: USE_X_SETTINGS, value: "1"}
               # Apprise notification URLs carry credentials and are logged at INFO.
               - {name: LOGGER_LEVEL, value: WARNING}
-              - {name: BASE_URL, value: "https://changedetection.${SECRET_DOMAIN}"}
+              - {name: BASE_URL, value: "https://changedetection.sklab.dev"}
               # The browser sidecar's DevTools socket is token-gated (TOKEN on `browser`); port 3000 is not in the Service.
               - name: PLAYWRIGHT_DRIVER_URL
                 value: "ws://localhost:3000/?stealth=1&--disable-web-security=true&--user-data-dir=~/browserless-cache-123&token=$(BROWSER_TOKEN)"
+            # `/` answers 200 without login on the Service port (the in-cluster Gatus check below proves it);
+            # the login gate is the route's securitypolicy.yaml. Thresholds follow paperless-ngx.
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 5000
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 6
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               # Writes Python bytecode and temp files outside /datastore.
@@ -121,10 +128,12 @@ spec:
       internal:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
-          gethomepage.dev/name: *app
-          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the Service in-cluster instead. Skill observability.
+          gethomepage.dev/group: Apps
+          gethomepage.dev/name: Changedetection
+          gethomepage.dev/icon: changedetection.svg
+          gethomepage.dev/description: Web page change alerts
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://changedetection.selfhosted.svc.cluster.local:5000/
             conditions:
@@ -132,7 +141,7 @@ spec:
             group: selfhosted
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -144,8 +153,7 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM. This token has no `:-default`, so a stale VOLSYNC_CLAIM would render an
-        # EMPTY existingClaim. Skill `kopiur-backups`, references/onboarding.md.
+        # No `:-default`: an undefined KOPIUR_CLAIM renders an EMPTY existingClaim.
         existingClaim: "${KOPIUR_CLAIM}"
         advancedMounts:
           main:

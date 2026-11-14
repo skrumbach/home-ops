@@ -7,10 +7,10 @@ metadata:
 spec:
   # llama-server takes no API key, so only LiteLLM may reach it; every consumer in git (Hermes,
   # OpenCode, repo-wiki, Linkwarden) uses chat-local via LiteLLM. Ingress only: the -hf download
-  # on first boot needs open egress. Selects the chat controller; vllm-embed (replicas 0) is not
-  # covered. port-forward (bench, AGENTS.md) enters the pod via the kubelet and is not affected.
+  # on first boot needs open egress. port-forward (bench, AGENTS.md) enters the pod via the
+  # kubelet and is not affected.
   # It connects to no in-cluster Service but CoreDNS, so it needs no other cilium/cilium#47913
-  # reply rule. A new outbound in-cluster peer needs one. Skill `networking`.
+  # reply rule. A new outbound in-cluster peer needs one.
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: vllm

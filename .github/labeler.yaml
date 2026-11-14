@@ -7,6 +7,8 @@ area/docs:
   - changed-files:
       - any-glob-to-any-file:
           - README.md
+          - AGENTS.md
+          - "**/*.md"
 area/github:
   - changed-files:
       - any-glob-to-any-file:
@@ -37,10 +39,8 @@ area/taskfile:
       - any-glob-to-any-file:
           - .taskfiles/**/*
           - Taskfile.yaml
-area/templates:
-  - changed-files:
-      - any-glob-to-any-file:
-          - templates/**/*
+          - .justfile
+          - "**/mod.just"
 area/terraform:
   - changed-files:
       - any-glob-to-any-file:

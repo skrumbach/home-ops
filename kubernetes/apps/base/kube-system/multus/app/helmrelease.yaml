@@ -10,7 +10,6 @@ spec:
     name: multus
   interval: 1h
   # Chart mergeOverwrite drops values tolerations. This JSON6902 add is the only in-repo path. Effect must stay PreferNoSchedule.
-  # See skill node-scheduling.
   postRenderers:
     - kustomize:
         patches:
@@ -33,7 +32,7 @@ spec:
       resources:
         requests:
           cpu: 10m
-          # Explicit request. A limit with no request reserves the whole limit. See skill node-scheduling.
+          # Explicit request. A limit with no request reserves the whole limit.
           memory: 64Mi
         limits:
           memory: 512Mi

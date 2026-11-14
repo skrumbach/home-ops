@@ -5,12 +5,14 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
   - ./servicemonitor.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
 configMapGenerator:
   - name: alertmanager
     files:
-      - config/alertmanager.yml
+      - resources/alertmanager.yml
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -8,14 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: hermes
   values:
     controllers:
       hermes:
@@ -73,16 +66,13 @@ spec:
           app:
             # Keep the -desktop suffix. The plain tag has no Chromium or Bot Desktop, and neither
             # can be installed at runtime. Docker versioning keeps the suffix on its own.
-            # See skill hermes-agent.
             image:
               repository: docker.io/nousresearch/hermes-agent
               tag: v2026.9.24-desktop@sha256:45379eb3eb2d11c38df9b0e529dc734775b42c40b57cfb1cae0448f0cb7bf647
             # Do not pass gateway run. gateway-default is the only gateway; a second one crash-loops.
-            # See skill hermes-agent references/restarts.md.
             args: ["sleep", "infinity"]
             env:
               # Never set OPENAI_BASE_URL. It overrides every provider. Routing is config.yaml.
-              # See skill hermes-agent references/llm-routing.md.
               HERMES_DASHBOARD: "1"
               HERMES_DASHBOARD_HOST: 0.0.0.0
               HERMES_DASHBOARD_PORT: "9119"
@@ -106,10 +96,11 @@ spec:
               HERMES_UID: "10000"
               HERMES_GID: "10000"
               # 900. Runway is 4x because the integrity check burns CPU and earns extensions.
-              # The 300 default loses that race and the pod loops. See skill hermes-agent references/restarts.md.
+              # The 300 default loses that race and the pod loops. If the loop outlasts this runway, the only exit is deleting
+              # /opt/data/state/gateway.lifecycle.json (left at phase=running by the unclean exit). UNVERIFIED-LIVE.
               HERMES_STARTUP_WATCHDOG_TIMEOUT_S: "900"
               # uid 10000 is not detected as Docker, so the sandbox does not auto-disable.
-              # There is no browser.launch_args key. See skill hermes-agent.
+              # There is no browser.launch_args key.
               AGENT_BROWSER_ARGS: "--no-sandbox,--disable-dev-shm-usage,--disable-gpu"
               # Global git config via env (no writable $HOME): the `store` helper reads the
               # single-repo PAT from the mounted `.git-credentials` file.
@@ -148,7 +139,6 @@ spec:
                   # Generous: first boot initialises config/skills under /opt/data.
                   failureThreshold: 30
             # 6Gi so state.db's page cache is not thrashed. The request stays 512Mi.
-            # See skill hermes-agent references/state-db.md and skill node-scheduling.
             resources:
               requests:
                 cpu: 100m
@@ -156,7 +146,6 @@ spec:
               limits:
                 memory: 6Gi
             # gateway_state.json records stopped on a graceful exit, and boot will not restart it.
-            # See skill hermes-agent references/restarts.md.
             lifecycle:
               postStart:
                 exec:
@@ -175,7 +164,7 @@ spec:
           # Browser VS Code over the agent's state PVC. Same pod as `app`, so it
           # shares the RWO /opt/data mount (no multi-attach, no node affinity).
           # Runs as uid 10000 to own /opt/data (hermes owns it as 10000). --auth none
-          # because Authentik SSO gates the route at Envoy (securitypolicy.yaml); the
+          # because Pocket ID (Envoy OIDC) gates the route at Envoy (securitypolicy.yaml); the
           # Service port is still open to in-cluster callers.
           codeserver:
             image:
@@ -230,13 +219,20 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            url: https://hermes.${SECRET_DOMAIN}/
+            url: https://hermes.sklab.dev/
             conditions:
               # Dashboard 302-redirects unauthenticated requests to its login.
               - "[STATUS] == any(200, 302, 401)"
             group: ai
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: Hermes
+          gethomepage.dev/icon: "mdi-robot-outline-#22D8F0"
+          gethomepage.dev/description: Agent workspace
+          # The route is named hermes-app, so homepage's default selector would match no pod.
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "{{ .Release.Name }}.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -249,7 +245,7 @@ spec:
       # Browser VS Code. code-server has no auth of its own; securitypolicy.yaml adds SSO.
       codeserver:
         hostnames:
-          - "hermes-code.${SECRET_DOMAIN}"
+          - "hermes-code.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -273,7 +269,6 @@ spec:
             codeserver:
               - path: /opt/data
       # Two-way XML share. App container only. smbd forces 10000:10000.
-      # See skill hermes-agent references/shared-storage.md.
       xml:
         existingClaim: shared-xml
         advancedMounts:
@@ -281,7 +276,6 @@ spec:
             app:
               - path: /opt/xml
       # Scratch drop folder, not a second copy of the XML corpus, and not backed up.
-      # See skill hermes-agent references/shared-storage.md.
       files:
         existingClaim: shared-files
         advancedMounts:
@@ -300,7 +294,7 @@ spec:
             readOnly: true
       # Keys of the hermes Secret as files, read by the `secrets.command` helper in
       # config.yaml (multiplexed MCP ${VAR} refs, the provider key_env and a skill's required
-      # env cannot see the container env). Skill hermes-agent references/mcp-gateway.md.
+      # env cannot see the container env).
       mcp-gateway:
         type: secret
         name: *app
@@ -329,7 +323,7 @@ spec:
                 subPath: DISCORD_WEBHOOK
                 readOnly: true
       # Terminal guard hook script (hooks: in config.yaml runs it). Read-only; a byte change rolls
-      # the pod via reloader like config.yaml. Skill hermes-agent.
+      # the pod via reloader like config.yaml.
       hooks:
         type: configMap
         name: hermes-hooks
@@ -414,9 +408,6 @@ spec:
               verbs: [get, list, watch]
             - apiGroups: [external-secrets.io]
               resources: [externalsecrets, secretstores, clustersecretstores]
-              verbs: [get, list, watch]
-            - apiGroups: [volsync.backube]
-              resources: [replicationsources, replicationdestinations]
               verbs: [get, list, watch]
             - apiGroups: [postgresql.cnpg.io]
               resources: [clusters, backups, scheduledbackups]

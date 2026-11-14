@@ -6,20 +6,20 @@ metadata:
   name: &app surrealdb
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/description: surrealdb
-    gethomepage.dev/group: database
-    gethomepage.dev/name: *app
+    gethomepage.dev/description: Multi-model database
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: SurrealDB
     gethomepage.dev/app: *app
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    gethomepage.dev/icon: surrealdb.svg
     # Check /health, not `/`: bare `/` redirects to a third-party surrealdb.com
-    # page that Gatus follows. Skill `databases`.
+    # page that Gatus follows.
     gatus.home-operations.com/endpoint: |-
-      url: https://surrealdb.${SECRET_DOMAIN}/health
+      url: https://surrealdb.sklab.dev/health
       conditions: ["[STATUS] == 200"]
 spec:
   hostnames:
-    - "surrealdb.${SECRET_DOMAIN}"
-    - "sdb.${SECRET_DOMAIN}"
+    - "surrealdb.sklab.dev"
+    - "sdb.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

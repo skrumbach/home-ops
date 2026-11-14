@@ -4,17 +4,12 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app matter-server
-  namespace: &namespace home-automation
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: home-automation
   components:
-    # Proof: proof-ledger.md row 16.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
-  interval: 10m
+  interval: 1h
   path: "./kubernetes/apps/base/home-automation/matter-server/app"
   prune: true
   dependsOn:
@@ -26,15 +21,12 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false # no flux ks dependents; the standing kopiur Restore is Ready=False by design
+  # wait stays off: no flux ks dependents; the standing kopiur Restore is Ready=False by design
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi
-      # 2Gi default clears this snapshot. Root mover needs privileged-movers. Skill `kopiur-backups`.
+      # 2Gi default clears this snapshot. Root mover needs privileged-movers.
       KOPIUR_PUID: "0"
       KOPIUR_PGID: "0"
       KOPIUR_SCHEDULE_R2: "H 10 * * *"

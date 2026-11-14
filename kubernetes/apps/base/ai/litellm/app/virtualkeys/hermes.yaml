@@ -6,7 +6,7 @@
 #   - go-*: the OpenCode Go flat-rate models, zero-priced (caller must send x-opencode-session).
 #   - the metered Claude/GPT routes Hermes offers as selectable models. maxBudget is a real cap
 #     for these; the local and Go models are $0 so only rpm/tpm bound them.
-# No spec.metadata. See skill litellm-proxy (references/governance-keys.md).
+# No spec.metadata.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

@@ -15,7 +15,7 @@ spec:
     - chat-local
     - embedding-local
   # Inert (zero-priced models) but kept: the guard if models is ever widened, and removing it
-  # would not clear the live cap (omitempty). references/governance-keys.md.
+  # would not clear the live cap (omitempty).
   maxBudget: "30.00"
   budgetDuration: 30d
   # The real bound: one repo is 9 back-to-back calls (1 plan + 8 pages).

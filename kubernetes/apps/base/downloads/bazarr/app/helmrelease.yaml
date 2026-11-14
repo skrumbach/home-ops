@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app bazarr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: bazarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -129,7 +128,7 @@ spec:
           - path: /data/downloads
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /data/nas-media
@@ -139,13 +138,17 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/bazarr.svg
-          gethomepage.dev/description: "Bazarr - Subtitle Management"
+          gethomepage.dev/name: Bazarr
+          gethomepage.dev/icon: bazarr.svg
+          gethomepage.dev/description: Subtitles
           gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gatus.home-operations.com/endpoint: |-
+            url: https://bazarr.sklab.dev/api/system/ping
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
-          - bazarr.${SECRET_DOMAIN}
+          - bazarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

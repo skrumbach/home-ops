@@ -19,6 +19,7 @@ spec:
       kind: Restore
       expr: |-
         !has(status.phase) || status.phase != "Restoring"
+    # HEALTH_OK only: degraded PGs show as HEALTH_WARN; widening lets the next node reboot below min_size.
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
       expr: |-

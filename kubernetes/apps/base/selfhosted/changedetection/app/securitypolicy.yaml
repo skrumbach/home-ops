@@ -1,10 +1,12 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Gates the whole changedetection route: the app has no password of its own and its page shows the
-# RSS token. No consumer of /rss or /api was found (Git, Envoy access logs), so nothing is exempt.
-# A future RSS reader or API client gets a named route rule plus sectionName, never the proxy
-# provider's skip_path_regex. The cross-namespace backendRef needs the selfhosted entry in
-# security/allow-authentik-access. Skill authentik-terraform.
+# Gates the whole changedetection route with Pocket ID at Envoy (native OIDC): the app has no
+# password of its own and its page shows the RSS token. No consumer of /rss or /api was found (Git,
+# Envoy access logs), so nothing is exempt. A future RSS reader or API client gets a named route
+# rule plus sectionName.
+# A policy that fails to translate (e.g. the operator has not written
+# changedetection-oidc-credentials yet) makes the route answer 500, not pass through; a policy whose
+# targetRef matches no route leaves that route open.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -14,24 +16,19 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: changedetection
-  extAuth:
-    headersToExtAuth:
-      - cookie
-      - authorization
-      - x-forwarded-for
-      - x-forwarded-host
-      - x-forwarded-proto
-      - x-forwarded-uri
-    http:
-      backendRefs:
-        - name: ak-outpost-authentik-embedded-outpost
-          namespace: security
-          port: 9000
-      path: /outpost.goauthentik.io/auth/envoy
-      headersToBackend:
-        - set-cookie
-        - authorization
-        - x-authentik-username
-        - x-authentik-email
-        - x-authentik-name
-        - x-authentik-uid
+  oidc:
+    provider:
+      issuer: https://id.sklab.dev
+      # Explicit endpoints skip discovery: without them the Envoy Gateway controller fetches
+      # the issuer's openid-configuration on every translation, and a failed fetch turns the
+      # route into a 500 until the next one.
+      authorizationEndpoint: https://id.sklab.dev/authorize
+      tokenEndpoint: https://id.sklab.dev/api/oidc/token
+      endSessionEndpoint: https://id.sklab.dev/api/oidc/end-session
+    # Both from the Secret pocketidoidcclient.yaml generates.
+    clientIDRef:
+      name: changedetection-oidc-credentials
+    clientSecret:
+      name: changedetection-oidc-credentials
+    redirectURL: https://changedetection.sklab.dev/oauth2/callback
+    logoutPath: /oauth2/logout

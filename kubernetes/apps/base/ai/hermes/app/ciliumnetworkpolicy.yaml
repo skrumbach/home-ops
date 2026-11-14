@@ -8,7 +8,7 @@ spec:
   # Hermes has a terminal, execute_code and a browser, cluster-wide read RBAC and pods/exec in ai,
   # so this fences what a hijacked session can reach: the LAN and node IPs are cut out of egress.
   # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
-  # A new tool target (LAN host, in-cluster Service) needs its own egress rule. Skill `hermes-agent`.
+  # A new tool target (LAN host, in-cluster Service) needs its own egress rule.
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: hermes
@@ -41,7 +41,7 @@ spec:
     # a same-node Service reply arrives with the ClusterIP or LB IP as source after reverse NAT and
     # is re-checked here. LiteLLM :4000, SearXNG :8080, the MCP gateway through the envoy-internal
     # LoadBalancer IP (this rule also subsumes the envoy-internal port rule above), and the
-    # kubernetes Service for kubectl. Skill `networking` references/dns-ownership.md.
+    # kubernetes Service for kubectl.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

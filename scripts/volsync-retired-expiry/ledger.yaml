@@ -1,6 +1,5 @@
 ---
 # Not a Kubernetes manifest and not reconciled by Flux. Expiry is NOT IN FORCE until an operator applies it.
-# Skill `kopiur-backups`.
 measured_at: "2026-09-12"
 
 buckets:
@@ -12,7 +11,7 @@ buckets:
     endpoint: https://604128bd389364580b3208006c949072.r2.cloudflarestorage.com
     bucket: volsync
   minio:
-    endpoint: https://nas.${SECRET_DOMAIN}:9000
+    endpoint: https://nas.sklab.dev:9000
     bucket: volsync
 
 # LIVE repositories. These still have ReplicationSources writing to them. Empty since
@@ -23,12 +22,10 @@ buckets:
 protected: []
 
 # Retired repositories, split by whether anything else still backs the data up.
-# Skill `kopiur-backups`.
 tiers:
 
   redundant:
     # Retired from VolSync during the kopiur Stage 5 migration.
-    # Skill `kopiur-backups`.
     expires: "2026-11-16"
     # Owner decision 2026-11-08, brought forward from 2027-03-31 to cut R2 storage
     # (~35.7 GiB of this tier is on r2). Every claim has had kopiur ceph+r2 backups
@@ -100,7 +97,6 @@ tiers:
     # the ONLY remaining copy of that data anywhere.
     expires: "2027-09-30"
     # ~12.5 months out, double the redundant tier. This repository is the only remaining copy.
-    # Skill `kopiur-backups`.
     reason: no other copy exists anywhere - app and volume are both gone
     prefixes:
       # ceph: 259673311 B / 297 obj, r2: 240224703 B / 154 obj, minio: 232857904 B / 208 obj; last write 2026-08-31

@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # Decision key: calls POST /v1/decisions or /v1/systemone against the `jev` model. No pass-through
-# route, no out-of-Git grant. Skill litellm-proxy (references/model-catalog.md).
+# route, no out-of-Git grant.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -21,7 +21,7 @@ spec:
   tpmLimit: 1000000
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
-# Mirrors the key to 1Password litellm-consumer-jev-decisions, where the decision skill reads it.
+# Mirrors the key to 1Password litellm-consumer-jev-decisions.
 apiVersion: external-secrets.io/v1alpha1
 kind: PushSecret
 metadata:

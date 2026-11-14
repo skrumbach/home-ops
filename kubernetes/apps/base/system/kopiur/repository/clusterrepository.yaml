@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kopiur.home-operations.com/clusterrepository_v1alpha1.json
 # Two destinations: `ceph` (local) and `r2` (offsite).
-# Skill `kopiur-backups`.
 apiVersion: kopiur.home-operations.com/v1alpha1
 kind: ClusterRepository
 metadata:
@@ -37,15 +36,12 @@ spec:
     enabled: true
   mode: ReadWrite
   # Owner consent for projecting repository Secrets into a mover namespace for one run.
-  # Skill `kopiur-backups`.
   credentialProjection:
     allowed: true
   # Mass-deletion breaker. At threshold 10, external Snapshot deletes are held until a human acks.
-  # Skill `kopiur-backups`.
   deletionProtection:
     threshold: 10
   # ceph minDuration is 4h. Do not restore kopia's 24h default, and do not round this to 6h.
-  # Skill `kopiur-backups`.
   parameters:
     epoch:
       minDuration: 4h
@@ -63,7 +59,6 @@ spec:
   backend:
     s3:
       # A NEW, EMPTY bucket, not a VolSync restic path.
-      # Skill `kopiur-backups`.
       bucket: kopiur
       # <accountid>.r2.cloudflarestorage.com, substituted so the account id
       # stays out of this public repo - see app/externalsecret.yaml.
@@ -79,16 +74,14 @@ spec:
       namespace: system
       key: KOPIA_PASSWORD
   # Connect-only. create.enabled stays false so r2 never bootstraps over the off-site copy.
-  # Skill `kopiur-backups`.
   create:
     enabled: false
   mode: ReadWrite
-  # See the `ceph` repository above for the full rationale. Same owner-side
-  # consent, same three-leg gate, same captain decision (`credential-scope`).
+  # Credential projection has three legs: HelmRelease feature, this ClusterRepository `allowed`, enabled on each policy/Restore.
+  # A missed leg leaves the CRs green and the mover failing at run time.
   credentialProjection:
     allowed: true
   deletionProtection:
     threshold: 10
   # No epoch override. r2's daily cadence accumulates slower; re-derive the band before raising it.
-  # Skill `kopiur-backups`.
   onNamespaceDelete: Orphan

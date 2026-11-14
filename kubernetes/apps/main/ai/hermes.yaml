@@ -4,13 +4,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app hermes
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   components:
-    # Proof: proof-ledger.md row 1.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   healthChecks:
@@ -34,16 +30,13 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/base/ai/hermes/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       CONFIG_TIMEZONE: America/New_York
       # Claim name matches the app. Capacity is create-time only; growing the live claim is kubectl patch.
-      # Do not set sessions.vacuum_after_prune. Skill `hermes-agent`. Skill `kopiur-backups`.
+      # Do not set sessions.vacuum_after_prune.
       KOPIUR_CAPACITY: 40Gi
-      # Files are 10000:10000. Component default 1000 fails closed. Skill `kopiur-backups`.
+      # Files are 10000:10000. Component default 1000 fails closed.
       KOPIUR_PUID: "10000"
       KOPIUR_PGID: "10000"
       KOPIUR_CACHE_CAPACITY: 48Gi
@@ -54,6 +47,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
-  wait: false

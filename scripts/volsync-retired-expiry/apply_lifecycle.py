@@ -37,12 +37,11 @@ credential Secrets are pruned when the last claim leaves VolSync, so nothing rea
   AWS_SECRET_ACCESS_KEY), the bucket owner. The OBC is `prune: disabled`, so it
   outlives the operator.
 - minio and r2: `--credentials env` only, AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
-  exported from the 1Password item `volsync-template` (see the apply plan for the
-  exact `op read` invocation). R2's in-cluster token has object read/write but not
-  the `Workers R2 Storage Write` permission group that lifecycle management needs,
-  so a dry run with it stops at the lifecycle read, by design.
-
-See .agents/skills/kopiur-backups/references/retired-expiry-apply-plan.md.
+  exported from the 1Password item `volsync-template` (for the `op read` invocation
+  see .agents/skills/incident-runbooks/references/restore.md section C). R2's
+  in-cluster token has object read/write but not the `Workers R2 Storage Write`
+  permission group that lifecycle management needs, so a dry run with it stops at
+  the lifecycle read, by design.
 """
 
 from __future__ import annotations
@@ -62,14 +61,14 @@ import render_lifecycle  # noqa: E402
 # `credentials` is the default source.
 #
 # `ceph` is deliberately NOT the in-cluster service URL: that resolves only inside
-# the cluster. The external S3 route is used instead, and --endpoint must resolve
-# its ${SECRET_DOMAIN}. An endpoint that is None falls back to ledger.yaml `buckets`.
+# the cluster. The external S3 route is used instead. An endpoint that is None
+# falls back to ledger.yaml `buckets`.
 DESTINATIONS: dict[str, dict[str, Any]] = {
     "ceph": {
         "secret": ("system", "volsync"),
         "credentials": "secret",
         "region": "us-east-1",
-        "endpoint_override": "https://s3.${SECRET_DOMAIN}",
+        "endpoint_override": "https://s3.sklab.dev",
         "note": "credential is the OBC bucket owner, so lifecycle management is authorised",
     },
     "r2": {
@@ -160,10 +159,6 @@ def main(argv: list[str] | None = None) -> int:
         or dest["endpoint_override"]
         or render_lifecycle.load_ledger()["buckets"][args.destination]["endpoint"]
     )
-    if "${SECRET_DOMAIN}" in endpoint:
-        print(f"\nendpoint {endpoint!r} still contains ${{SECRET_DOMAIN}}; pass --endpoint "
-              "with the resolved host.", file=sys.stderr)
-        return 2
     print(f"endpoint    : {endpoint}")
 
     if source == "env":

@@ -20,7 +20,7 @@ spec:
 
         # Pages non-external groups except connectivity, Radarr Import Queue,
         # and Hermes Gateway (own alerts, or WAN rather than an app). for: 10m.
-        # Do not drop the exclusions. Skill observability.
+        # Do not drop the exclusions.
         - alert: GatusServiceDown
           expr: |
             gatus_results_endpoint_success{group!~"external|connectivity", name!~"Radarr Import Queue|Hermes Gateway"} == 0
@@ -44,7 +44,6 @@ spec:
 
         # Hermes gateway, not the dashboard. for: 10m covers a Recreate
         # restart. A restart counter stays flat while the gateway is wedged.
-        # Skill observability.
         - alert: HermesGatewayDown
           expr: |
             gatus_results_endpoint_success{name="Hermes Gateway"} == 0

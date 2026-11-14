@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: &app coder
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: Coder
+    gethomepage.dev/icon: coder-light.svg
+    gethomepage.dev/description: Dev workspaces
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=coder
+    gatus.home-operations.com/endpoint: |-
+      url: https://coder.sklab.dev/healthz
+      conditions:
+        - "[STATUS] == 200"
+      group: coder
+spec:
+  hostnames:
+    - "coder.sklab.dev"
+  # LAN only since 2026-11-13; off-site use goes through the VPN. One gateway per
+  # hostname: UniFi stores one CNAME target, so a name on both gateways never settles.
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: coder
+          namespace: coder
+          port: 80

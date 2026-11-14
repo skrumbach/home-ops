@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app ntfy
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: ntfy
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -71,8 +70,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-ntfy}
         globalMounts:
           - path: /var/cache/ntfy
@@ -92,12 +89,18 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: ntfy
           gethomepage.dev/icon: ntfy.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/description: Push notifications
+          gatus.home-operations.com/endpoint: |-
+            url: https://ntfy.sklab.dev/v1/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].healthy == true"
+            group: selfhosted
         hostnames:
-          - "ntfy.${SECRET_DOMAIN}"
+          - "ntfy.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

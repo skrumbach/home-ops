@@ -1,5 +1,5 @@
 # Adoption of the live TrueNAS objects (dataset path or numeric id). Inert once in
-# state; kept so a lost state reattaches. Skill `truenas-nas`.
+# state; kept so a lost state reattaches.
 
 import {
   to = truenas_dataset.pool_ssd_mgt_sklab_dev

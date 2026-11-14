@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app bazarr
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: downloads
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/bazarr/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: downloads-pvc
       namespace: downloads
@@ -29,14 +23,10 @@ spec:
     - name: keda
       namespace: monitoring
   components:
-    # Proof: proof-ledger.md row 6.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/keda/nfs-scaler
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: bazarr-config

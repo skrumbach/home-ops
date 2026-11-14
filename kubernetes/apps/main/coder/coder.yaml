@@ -4,11 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app coder
-  namespace: &namespace coder
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: coder-db
       namespace: coder
@@ -16,12 +12,9 @@ spec:
       namespace: security
     - name: rook-ceph
       namespace: rook-ceph
-  interval: 30m
-  path: ./kubernetes/apps/base/coder/app
+  interval: 1h
+  path: ./kubernetes/apps/base/coder/coder/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
   prune: true
@@ -29,24 +22,20 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: coder
   timeout: 5m
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: coder-db
-  namespace: coder
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: coder
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

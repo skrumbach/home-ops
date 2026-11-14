@@ -25,7 +25,7 @@ spec:
             summary: Grafana Viewer service account reconciler has been failing for over an hour.
           # Not `or vector(0)`: vector(0) has no labels, so it survives the union and the
           # alert never clears. absent() only returns a series when the metric is truly
-          # absent. Skill observability.
+          # absent.
           expr: |-
             absent(kube_cronjob_status_last_successful_time{namespace="monitoring", cronjob="grafana-sa-provisioner"})
             or

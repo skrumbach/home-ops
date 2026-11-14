@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # Household-METERED Anthropic route (auto-router REASONING tier, fallback target), priced by the cost map.
 # The natural name belongs to the subscription pass-through; tiers and fallbacks must name this CR.
-# See skill litellm-proxy (references/model-catalog.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

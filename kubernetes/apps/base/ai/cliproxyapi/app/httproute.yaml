@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Internal only. No Authentik policy: API clients send bearer keys and the management UI
+# Internal only. No sign-in SecurityPolicy: API clients send bearer keys and the management UI
 # (/management.html) has its own secret-key.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -10,17 +10,17 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: AI
     gethomepage.dev/name: CLIProxyAPI
-    gethomepage.dev/description: "Subscription OAuth to OpenAI-compatible API proxy"
+    gethomepage.dev/description: Subscription OAuth API proxy
     gethomepage.dev/pod-selector: app.kubernetes.io/name=cliproxyapi
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    gethomepage.dev/icon: "mdi-api-#22D8F0"
     gatus.home-operations.com/endpoint: |-
-      url: https://cliproxyapi.${SECRET_DOMAIN}/healthz
+      url: https://cliproxyapi.sklab.dev/healthz
       conditions:
         - "[STATUS] == 200"
       group: ai
 spec:
   hostnames:
-    - "cliproxyapi.${SECRET_DOMAIN}"
+    - "cliproxyapi.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

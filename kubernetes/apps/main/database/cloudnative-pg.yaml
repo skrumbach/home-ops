@@ -3,52 +3,40 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app cloudnative-pg
-  namespace: &namespace database
+  name: cloudnative-pg
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-store
       namespace: security
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/operator
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+  targetNamespace: database
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app barman-cloud
-  namespace: &namespace database
+  name: barman-cloud
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: cloudnative-pg
       namespace: database
     - name: cert-manager
       namespace: cert-manager
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/barman-cloud
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: database
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -56,11 +44,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app postgres-cluster-18
-  namespace: &namespace database
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: cloudnative-pg
       namespace: database
@@ -82,7 +66,7 @@ spec:
       kind: Cluster
       current: status.readyInstances >= 1 && status.conditions.filter(e, e.type == 'ContinuousArchiving').all(e, e.status == 'True')
       failed: status.readyInstances < 1
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/cluster-18
   prune: true
   sourceRef:
@@ -90,34 +74,25 @@ spec:
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-  targetNamespace: *namespace
+    substitute:
+      APP: *app
+  targetNamespace: database
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app cloudnative-pg-dashboard
-  namespace: &namespace database
+  name: cloudnative-pg-dashboard
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/dashboard
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-  targetNamespace: *namespace
+  targetNamespace: database
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -125,15 +100,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app pgadmin
-  namespace: &namespace database
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace database
   components:
-    # Proof: proof-ledger.md row 4.
     - ../../../../../components/kopiur/pvc
-  interval: 30m
+  interval: 1h
   dependsOn:
     - name: cloudnative-pg
       namespace: database
@@ -143,8 +114,7 @@ spec:
       namespace: system
     - name: external-secrets
       namespace: security
-  # Workload health signal only. wait:false is required for Flux to honour healthChecks at all (wait:true assesses the whole inventory instead).
-  # Skill `databases`.
+  # Workload health signal only. wait stays unset (false): Flux honours healthChecks only then (wait:true assesses the whole inventory instead).
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -152,41 +122,30 @@ spec:
       namespace: *namespace
   path: ./kubernetes/apps/base/database/cloudnative-pg/pgadmin
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
-      # Cache stays at the 2Gi default, which clears this snapshot. Skill `kopiur-backups`.
+      # Cache stays at the 2Gi default, which clears this snapshot.
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: pgadmin-kopiur
-  namespace: &namespace database
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: pgadmin
-  interval: 30m
-  timeout: 5m
+  targetNamespace: database
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     # kopiur-repository, not kopiur: it applies the `ceph` and `r2`
     # ClusterRepository objects these policies reference, and it already
@@ -196,9 +155,6 @@ spec:
     - name: kopiur-repository
       namespace: system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: pgadmin
       KOPIUR_PUID: "5050"
@@ -207,16 +163,11 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Second, OFF-SITE copy of the postgres-18 barman archive (LAN MinIO -> R2).
-# Skill `databases`.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app postgres-offsite-mirror
-  namespace: &namespace database
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     # Supplies `cloudnative-pg-secret`, whose aws-access-key-id /
     # aws-secret-access-key are the mirror's SOURCE (LAN MinIO) credentials.
@@ -227,7 +178,7 @@ spec:
       namespace: security
     - name: onepassword-store
       namespace: security
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/database/cloudnative-pg/offsite-mirror
   prune: true
   retryInterval: 2m
@@ -235,15 +186,12 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
+  targetNamespace: database
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-  # No healthChecks and wait:false, matching the fleet's other CronJob-only
+    substitute:
+      APP: *app
+  # No healthChecks and no wait, matching the fleet's other CronJob-only
   # overlays (kubernetes/apps/main/system/pvc-writable-check.yaml): a CronJob
   # has no meaningful Ready condition, and the job's real health signal is a
   # successful run, which is offsite-mirror/prometheusrule.yaml's alert rather
   # than a Flux gate.
-  wait: false

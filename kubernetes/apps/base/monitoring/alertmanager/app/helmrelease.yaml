@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: alertmanager
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: alertmanager
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -93,20 +92,20 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/description: Alerting system that works with Prometheus
+          gethomepage.dev/description: Alert routing
           gethomepage.dev/group: Observability
-          gethomepage.dev/icon: alertmanager
+          gethomepage.dev/icon: alertmanager.svg
           gethomepage.dev/name: Alertmanager
           gethomepage.dev/weight: "10"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=alertmanager
-          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe readiness on the in-cluster Service instead. Skill observability.
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe readiness on the in-cluster Service instead.
           gatus.home-operations.com/endpoint: |-
             url: http://alertmanager.monitoring.svc.cluster.local:9093/-/ready
             conditions: ["[STATUS] == 200"]
             ui:
               hide-url: true
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

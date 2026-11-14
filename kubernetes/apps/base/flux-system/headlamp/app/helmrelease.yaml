@@ -6,18 +6,10 @@ metadata:
   name: &app headlamp
   namespace: flux-system
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: headlamp
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   # Patch deployment to use Recreate strategy for RWO volume compatibility.
   # RollingUpdate creates new pods before terminating old ones, which fails
   # when the PVC can only attach to one node at a time.
@@ -54,6 +46,7 @@ spec:
     env:
       - name: HEADLAMP_CONFIG_BACKEND_PROXY_TIMEOUT
         value: "30s"
+    # The headlamp claim is the plugin directory that the headlamp-plugins init container re-copies on every start: disposable, not backed up.
     persistentVolumeClaim:
       enabled: true
       accessModes: ["ReadWriteOnce"]

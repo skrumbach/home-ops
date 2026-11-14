@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # The zero-priced, TERMINAL local alias real traffic runs on (one of four aliases of the B70 backend).
 # INVARIANT: no prices and no cloud fallback - it must never reach a paid API.
-# See skill litellm-proxy (references/model-catalog.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

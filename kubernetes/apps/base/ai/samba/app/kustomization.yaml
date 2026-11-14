@@ -6,6 +6,7 @@ namespace: ai
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
 configMapGenerator:
   # smb.conf, mounted verbatim at /etc/samba/smb.conf. The name is kept stable
   # (no suffix hash) so reloader's controller annotation drives the restart;

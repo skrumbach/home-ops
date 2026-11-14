@@ -2,7 +2,7 @@
 # iXsystems provider over the versioned JSON-RPC API.
 #
 # TRUENAS_API_KEY comes from 1Password through `vals` (secrets.vals.yaml) and
-# the provider reads it from the environment. Skill `truenas-nas`.
+# the provider reads it from the environment.
 
 terraform {
   required_version = "~> 1.12"

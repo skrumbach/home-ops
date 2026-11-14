@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app sonarr
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: downloads
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/sonarr/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: sonarr-db
       namespace: downloads
@@ -31,14 +25,10 @@ spec:
     - name: keda
       namespace: monitoring
   components:
-    # Proof: proof-ledger.md row 13.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
     - ../../../../../components/keda/nfs-scaler
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: sonarr-config
@@ -49,18 +39,14 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: sonarr-db
-  namespace: downloads
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: sonarr
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

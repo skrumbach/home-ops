@@ -1,25 +1,11 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: OCIRepository
-metadata:
-  name: litellm-operator
-spec:
-  interval: 15m
-  layerSelector:
-    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
-    operation: copy
-  ref:
-    tag: 0.0.26
-  url: oci://ghcr.io/home-operations/charts/litellm-operator
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: litellm-operator
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: litellm-operator
@@ -37,8 +23,8 @@ spec:
     # LLMKube is not installed here; a chart-default flip must not mint undeclared LiteLLMModels.
     llmkube:
       autoRegister: false
-    # Operator pod hardening comes from the chart. The proxy pod it renders has none (CRD gap):
-    # skill litellm-proxy (references/platform.md). Its webhook is failurePolicy Fail for every LiteLLM kind.
+    # Operator pod hardening comes from the chart. The proxy pod it renders has none (CRD gap).
+    # Its webhook is failurePolicy Fail for every LiteLLM kind.
     resources:
       requests:
         cpu: 25m

@@ -2,12 +2,8 @@
 
 mogenius `renovate-operator` with one hourly `RenovateJob` (`home-ops`). The
 GitHub Actions workflow is rollback only (manual dispatch). UI at
-`renovate.${SECRET_DOMAIN}`, internal route, Authentik OIDC
-(`terraform/authentik/renovate-operator.tofu`, 1Password `Homelab/renovate-operator-oidc`).
-
-Skill `renovate`
-([operations.md](../../../../.agents/skills/renovate/references/operations.md),
-[versioning-traps.md](../../../../.agents/skills/renovate/references/versioning-traps.md)).
+`renovate.sklab.dev`, internal route, Pocket ID OIDC (`renovate-operator/app/pocketidoidcclient.yaml`; the client
+secret is generated in the cluster by `renovate-operator/app/externalsecret.yaml`, not kept in 1Password).
 
 ## Rollback
 
@@ -15,6 +11,6 @@ Skill `renovate`
 2. Dispatch `.github/workflows/renovate.yaml` (or add a `schedule` to it).
 
 GitHub App fields: 1Password `Homelab/renovate` (`BOT_APP_ID`,
-`BOT_APP_PRIVATE_KEY`); the installation ID is in `jobs/externalsecret.yaml`.
+`BOT_APP_PRIVATE_KEY`); the installation ID is in `renovate-operator/jobs/externalsecret.yaml`.
 Alerts use the operator's own metrics (`RenovateRunFailed`, `RenovateRunMissing`,
-`RenovateDiscoveryEmpty`, `RenovateOperatorAbsent`).
+`RenovateDiscoveryEmpty`, `RenovateJobSuspended`, `RenovateOperatorAbsent`).

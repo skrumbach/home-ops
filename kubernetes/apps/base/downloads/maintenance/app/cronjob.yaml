@@ -1,8 +1,8 @@
 ---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
 # Daily janitor for the shared-downloads CephFS volume. SABnzbd retry-loops
 # unpacks as the disk fills and never garbage-collects the failed attempts, and
 # orphaned _UNPACK_*/_FAILED_* dirs fill the PVC until complete_free auto-pauses SAB.
-# Full writeup: .agents/skills/media-stack/references/sabnzbd-disk-space.md
 #
 # Scope is DELIBERATELY narrow — depth-2 under usenet/complete only
 # (i.e. complete/<category>/<dir>):
@@ -11,7 +11,7 @@
 #   2. empty leftover dirs older than 7 days
 # It NEVER touches non-empty regular dirs (all downloads flow through the
 # *arrs whose completed-download handling cleans them — side-channel
-# downloads are stopped as policy, see runbook), NEVER the complete/ root
+# downloads are stopped as policy), NEVER the complete/ root
 # level, and NEVER usenet/incomplete (live SABnzbd assembly area).
 apiVersion: batch/v1
 kind: CronJob

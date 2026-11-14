@@ -6,8 +6,8 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
-  - ./prometheusrules.yaml
+  - ./prometheusrule.yaml
   - ../backup
   - ./volumesnapshotclass-patch.yaml
-  - ./cephfs-rwx-subvolumegroup.yaml
-  - ./cephfs-rwx-storageclass.yaml
+  - ./cephfilesystemsubvolumegroup.yaml
+  - ./storageclass.yaml

@@ -3,7 +3,7 @@
 #
 # Packet drops. The chart twins use rate([1m]) and cannot fire; do not
 # edit them. Errors are already covered. The ratio needs >= 10 packets/s
-# or an idle interface is +Inf. No for. Skill observability.
+# or an idle interface is +Inf. No for.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

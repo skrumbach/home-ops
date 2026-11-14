@@ -1,0 +1,19 @@
+{{ define "main" }}
+<article class="doc">
+  <div class="doc-body">
+    {{ partial "pagehead.html" . }}
+    <div class="prose">{{ .Content }}</div>
+    {{- /* Reference and Operations list their pages as cards; Apps pages carry their own tables. */ -}}
+    {{ if and (not .Sections) (ne .Params.kind "namespace") }}
+    <div class="cards">
+      {{ range .RegularPages.ByWeight }}
+      <a class="card" href="{{ .RelPermalink }}">
+        <span class="card-title">{{ .Title }}</span>
+        {{ with .Description }}<span class="card-desc">{{ . }}</span>{{ end }}
+      </a>
+      {{ end }}
+    </div>
+    {{ end }}
+  </div>
+</article>
+{{ end }}

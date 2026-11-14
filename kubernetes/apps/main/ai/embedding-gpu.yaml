@@ -4,11 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app embedding-gpu
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   # Deployment, not HelmRelease: an HR healthCheck stays Ready through a crashloop.
   # wait stays false so this list is actually consulted.
   healthChecks:
@@ -18,18 +15,10 @@ spec:
       namespace: *namespace
   interval: 1h
   path: ./kubernetes/apps/base/ai/embedding-gpu/app
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-    substitute:
-      APP: *app
   prune: true
   retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 15m
-  wait: false

@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app n8n
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: n8n
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -23,12 +22,12 @@ spec:
           app:
             image:
               repository: ghcr.io/n8n-io/n8n
-              tag: 3.1.0@sha256:6e9f220e9cf0d2f17d3c2371c8d8a6fe6720f99b82a9672afb96bf068cfd04a5
+              tag: 3.2.2@sha256:c5d94cb443ff3d7b3abd65927fd8c9af1281f026ebfed9b208cf8d0f6b199a94
             env:
               GENERIC_TIMEZONE: America/New_York
               N8N_PORT: &port 80
-              N8N_HOST: &hostName "n8n.${SECRET_DOMAIN}"
-              WEBHOOK_URL: "https://n8n-webhook.${SECRET_DOMAIN}/"
+              N8N_HOST: &hostName "n8n.sklab.dev"
+              WEBHOOK_URL: "https://n8n-webhook.sklab.dev/"
               N8N_PROXY_HOPS: 1
               N8N_LOG_LEVEL: info
               N8N_LOG_OUTPUT: console
@@ -39,7 +38,6 @@ spec:
               N8N_HIRING_BANNER_ENABLED: false
               N8N_RUNNERS_ENABLED: true
 
-              DB_SQLITE_VACUUM_ON_STARTUP: true
               EXECUTIONS_DATA_PRUNE: true
               # EXECUTIONS_DATA_MAX_AGE is in HOURS: 168 = 7 days.
               EXECUTIONS_DATA_MAX_AGE: 168
@@ -71,7 +69,7 @@ spec:
             probes:
               # /healthz cannot fail, so liveness stays there. Readiness and
               # Gatus use /healthz/readiness. A DB-aware liveness probe would
-              # restart the pod on every CNPG switchover. Skill observability.
+              # restart the pod on every CNPG switchover.
               liveness:
                 enabled: true
                 custom: true
@@ -99,7 +97,7 @@ spec:
 
     defaultPodOptions:
       # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)
-      # keeps this app off it via the TaintToleration score. Skill `node-scheduling`, references/talos-3-ledger.md.
+      # keeps this app off it via the TaintToleration score.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -117,27 +115,26 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-n8n}
 
     route:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Automation
-          gethomepage.dev/name: N8N
+          gethomepage.dev/group: Apps
+          gethomepage.dev/name: n8n
           gethomepage.dev/icon: n8n.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/description: Workflow automation
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
           # /healthz/readiness, NOT /healthz: /healthz is an unconditional 200 upstream and stayed green
           # through a database outage. See the probes block above.
           gatus.home-operations.com/endpoint: |-
-            url: https://n8n.${SECRET_DOMAIN}/healthz/readiness
+            url: https://n8n.sklab.dev/healthz/readiness
             conditions:
               - "[STATUS] == 200"
             group: selfhosted
         hostnames:
-          - "n8n.${SECRET_DOMAIN}"
+          - "n8n.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -150,19 +147,19 @@ spec:
       webhooks:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: APIs
-          gethomepage.dev/description: N8N Webhook API
-          gethomepage.dev/name: N8N Webhook
-          gethomepage.dev/icon: n8n.svg
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          gethomepage.dev/group: Apps
+          gethomepage.dev/description: Inbound webhook endpoint
+          gethomepage.dev/name: n8n Webhook
+          gethomepage.dev/icon: "mdi-webhook-#22D8F0"
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
           gatus.home-operations.com/endpoint: |-
-            url: https://n8n-webhook.${SECRET_DOMAIN}/webhook/any
+            url: https://n8n-webhook.sklab.dev/webhook/any
             conditions:
               - "[STATUS] == 404"
               - "[BODY].code == 404"
             group: selfhosted
         hostnames:
-          - "n8n-webhook.${SECRET_DOMAIN}"
+          - "n8n-webhook.sklab.dev"
         parentRefs:
           - name: envoy-external
             namespace: network

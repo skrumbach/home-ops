@@ -32,7 +32,6 @@ spec:
               in over 8 days, so Ceph blocks are not being discarded. On
               2026-09-28 Job fstrim-29842800 failed unnoticed for 2 days (fixed
               by PR 1892). Check `kubectl -n system logs -l
-              app.kubernetes.io/name=fstrim --tail=100`. Runbook: skill
-              `system-namespaces` (fstrim tripwire 6).
+              app.kubernetes.io/name=fstrim --tail=100`.
           labels:
             severity: warning

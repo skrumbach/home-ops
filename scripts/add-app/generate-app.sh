@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold a new app's manifests to match this repo's app-structure convention.
-# See .agents/skills/flux-gitops/references/app-shapes.md for the three shapes this generates and the traps
-# it encodes by construction. Run from the repo root.
+# Run from the repo root.
 set -euo pipefail
 
 usage() {
@@ -19,6 +18,7 @@ Options:
   --key=<name>            parameterized shape only: the grouping directory under app/
   --instance=<name>       parameterized shape only: the instance directory under app/<key>/
   --secrets               also write an externalsecret.yaml stub and depend on onepassword-store
+                          (not supported with --shape=parameterized)
   --dragonfly             add the components/dragonfly include with a correctly computed
                           relative path (namespace-scoped cache; see components/dragonfly)
   --dry-run               print what would be written/changed, write nothing
@@ -34,7 +34,7 @@ Examples:
   # add a second family member ("playwright") to an existing app ("rsshub")
   scripts/add-app/generate-app.sh selfhosted rsshub --shape=family --piece=playwright
 
-  # parameterized instance (rare - see .agents/skills/flux-gitops/references/app-shapes.md "Parameterized instance")
+  # parameterized instance (rare: nested app/<key>/<instance>/)
   scripts/add-app/generate-app.sh actions-runner-system gha-runner-scale-set \
     --shape=parameterized --key=skrumbach --instance=home-ops
 EOF
@@ -88,7 +88,7 @@ MAIN_NS_DIR="kubernetes/apps/main/$NAMESPACE"
 if [[ ! -d "$BASE_NS_DIR" ]]; then
   echo "error: namespace '$NAMESPACE' has no kubernetes/apps/base/$NAMESPACE - this scaffold" >&2
   echo "  only adds apps to existing namespaces. A new top-level namespace needs a manual" >&2
-  echo "  entry on kubernetes/apps/main/kustomization.yaml first (see AGENTS.md NOTES)." >&2
+  echo "  entry on kubernetes/apps/main/kustomization.yaml first." >&2
   exit 1
 fi
 if [[ ! -d "$MAIN_NS_DIR" ]]; then
@@ -124,8 +124,7 @@ append_file() {
 }
 
 # Relative-path depth from a base kustomize directory up to kubernetes/: a
-# components: include's ../ count depends on how deep the base path is
-# (trap in .agents/skills/flux-gitops/references/app-shapes.md).
+# components: include's ../ count depends on how deep the base path is: copy a sibling at the same depth.
 components_relpath() {
   local dir="$1" name="$2"
   # dir is repo-relative, e.g. kubernetes/apps/base/ai/my-app/app
@@ -151,7 +150,8 @@ overlay_ks_schema='# yaml-language-server: $schema=https://kubernetes-schemas.pa
 # shellcheck disable=SC2016
 ocirepository_schema='# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json'
 
-# Renders base/<piece>/helmrelease.yaml - app-template chartRef, TODOs pointing
+# Renders base/<piece>/helmrelease.yaml - chartRef to its own app-template
+# OCIRepository (render_app_ocirepository, same name), TODOs pointing
 # at exactly the two most consequential silent failures: an unrecognized
 # pod-options key (Helm drops it with no warning - use defaultPodOptions,
 # spelled exactly as shown) and image/port placeholders to fill in.
@@ -168,14 +168,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: $app
   values:
     controllers:
       $app:
@@ -216,9 +209,8 @@ spec:
                 memory: 256Mi
     # Pod-level security lives here, spelled exactly "defaultPodOptions" and
     # a sibling of controllers:/service: - not nested inside controllers:.
-    # A wrong key or wrong nesting here is silently dropped by Helm (no
-    # warning from flate, no error from Flux; see .agents/skills/flux-gitops/references/app-shapes.md "A
-    # pod-options key the chart doesn't recognize is silently discarded").
+    # A wrong key or wrong nesting here is silently dropped by Helm (no warning from flate,
+    # no error from Flux): check the chart's values.yaml.
     # Fill in the real uid/gid this image runs as.
     defaultPodOptions:
       securityContext:
@@ -235,7 +227,7 @@ spec:
     route:
       app:
         hostnames:
-          - "{{ .Release.Name }}.\${SECRET_DOMAIN}"
+          - "{{ .Release.Name }}.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -243,9 +235,39 @@ spec:
 EOF
 }
 
+# Renders base/<piece>/ocirepository.yaml - the app-template chart source, named
+# after the HelmRelease. The tag is read from network/echo, which Renovate keeps
+# current; url and layerSelector stay in step with it by hand.
+render_app_ocirepository() {
+  local name="$1"
+  local tag
+  tag="$(awk '$1 == "tag:" { print $2 }' "$REPO_ROOT/kubernetes/apps/base/network/echo/app/ocirepository.yaml")"
+  if [[ -z "$tag" ]]; then
+    echo "generate-app: could not read the app-template tag from network/echo" >&2
+    exit 1
+  fi
+  cat <<EOF
+---
+$ocirepository_schema
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: $name
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: $tag
+  url: oci://ghcr.io/bjw-s-labs/helm/app-template
+EOF
+}
+
 render_base_kustomization() {
   local secrets="$1"
-  local resources="  - ./helmrelease.yaml"
+  local resources="  - ./helmrelease.yaml
+  - ./ocirepository.yaml"
   if [[ "$secrets" -eq 1 ]]; then
     resources="  - ./externalsecret.yaml
 $resources"
@@ -305,7 +327,7 @@ kind: OCIRepository
 metadata:
   name: $app-crds
 spec:
-  interval: 1h
+  interval: 15m
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
@@ -331,13 +353,8 @@ spec:
     name: $app-crds
   install:
     crds: CreateReplace
-    remediation:
-      retries: -1
   upgrade:
     crds: CreateReplace
-    cleanupOnFail: true
-    remediation:
-      retries: 3
 EOF
 }
 
@@ -345,7 +362,7 @@ EOF
 # management here - callers decide whether this is the whole file or one
 # document among several separated by ---).
 render_overlay_doc() {
-  local ks_name="$1" namespace="$2" base_path="$3" secrets="$4" dragonfly="$5" wait_false="$6" depends_on_crds="$7" workload_name="$8"
+  local ks_name="$1" namespace="$2" base_path="$3" secrets="$4" dragonfly="$5" depends_on_crds="$6" workload_name="$7"
   # workload_name is the rendered Deployment/HelmRelease name. For the default
   # app shape it matches ks_name; for a family sibling piece it is the piece
   # name (live precedent: KS rsshub-playwright, Deployment playwright).
@@ -369,9 +386,6 @@ $(printf '%s\n' "${depends[@]}")
     - $(components_relpath "$base_path" dragonfly)
 "
   fi
-  local wait_line=""
-  [[ "$wait_false" -eq 1 ]] && wait_line="  wait: false
-"
   local healthcheck_name_line
   if [[ "$workload_name" == "$ks_name" ]]; then
     healthcheck_name_line="      name: *app"
@@ -385,34 +399,25 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app $ks_name
-  namespace: &namespace $namespace
 spec:
-$components_block  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  targetNamespace: *namespace
-  interval: 1h
+  targetNamespace: &namespace $namespace
+$components_block  interval: 1h
   retryInterval: 2m
   timeout: 5m
   path: ./$base_path
   prune: true
-  # healthChecks target the rendered workload, not the HelmRelease - a
-  # HelmRelease-kind check stays Ready through a live crashloop (see
-  # .agents/skills/flux-gitops/references/app-shapes.md). wait: false so Flux uses this list instead of
-  # assessing the whole inventory.
+  # healthChecks target the rendered workload, not the HelmRelease: a HelmRelease check stays
+  # Ready through a crashloop. wait stays unset (false) so Flux uses this list instead of assessing the whole inventory.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
 $healthcheck_name_line
       namespace: *namespace
-$wait_line$depends_on_block  sourceRef:
+$depends_on_block  sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
 EOF
@@ -426,13 +431,11 @@ add_namespace_resource_entry() {
     return
   fi
   if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "--- would append '  - $entry' to the resources: list in $ns_kustomization ---"
+    echo "--- would insert '  - $entry' into the resources: list in $ns_kustomization ---"
     return
   fi
-  # Appended at the end of the existing resources: block, not inserted
-  # alphabetically - this repo's namespaces don't agree on an order (ai/
-  # and downloads/ sort alphabetically, selfhosted/ is roughly
-  # chronological), so append is the only assumption that holds everywhere.
+  # Inserted in sorted position (name with the extension stripped), the order
+  # scripts/ci/naming-test.py enforces for every overlay resources: list.
   python3 - "$ns_kustomization" "$entry" <<'PYEOF'
 import sys
 path, entry = sys.argv[1], sys.argv[2]
@@ -445,11 +448,17 @@ except StopIteration:
 end = start + 1
 while end < len(lines) and (lines[end].startswith("  - ") or lines[end].startswith("  #")):
     end += 1
-lines.insert(end, f"  - {entry}\n")
+key = lambda e: e.removeprefix("./").removesuffix(".yaml")
+pos = end
+for i in range(start + 1, end):
+    if lines[i].startswith("  - ") and key(lines[i][4:].strip()) > key(entry):
+        pos = i
+        break
+lines.insert(pos, f"  - {entry}\n")
 with open(path, "w") as f:
     f.writelines(lines)
 PYEOF
-  echo "appended '  - $entry' to the resources: list in $ns_kustomization"
+  echo "inserted '  - $entry' into the resources: list in $ns_kustomization"
 }
 
 write_or_append_overlay() {
@@ -466,9 +475,10 @@ case "$SHAPE" in
     base_dir="$BASE_NS_DIR/$APP/app"
     write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization "$WITH_SECRETS")"
     write_file "$base_dir/helmrelease.yaml" "$(render_helmrelease "$APP")"
+    write_file "$base_dir/ocirepository.yaml" "$(render_app_ocirepository "$APP")"
     [[ "$WITH_SECRETS" -eq 1 ]] && write_file "$base_dir/externalsecret.yaml" "$(render_externalsecret "$APP")"
     overlay_path="$MAIN_NS_DIR/$APP.yaml"
-    doc="$(render_overlay_doc "$APP" "$NAMESPACE" "$base_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 1 0 "$APP")"
+    doc="$(render_overlay_doc "$APP" "$NAMESPACE" "$base_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 0 "$APP")"
     write_file "$overlay_path" "$doc"
     add_namespace_resource_entry
     ;;
@@ -478,23 +488,24 @@ case "$SHAPE" in
       echo "error: --shape=family requires --piece=<name>" >&2
       exit 1
     fi
-    # Live family pieces name the HelmRelease/controller after the piece
-    # (playwright), and the overlay Kustomization after app-piece
-    # (rsshub-playwright). Naming both after the parent app collides with the
-    # main piece and leaves healthChecks looking for the wrong Deployment.
+    # The overlay Kustomization and the HelmRelease/controller are both named
+    # app-piece (rsshub-playwright): a bare piece name (operator) can collide with
+    # another app's in the same namespace. Older pieces (rsshub's playwright) keep
+    # the bare name; they are not renamed.
     if [[ "$PIECE" == "app" ]]; then
       ks_name="$APP"
       hr_name="$APP"
     else
       ks_name="$APP-$PIECE"
-      hr_name="$PIECE"
+      hr_name="$APP-$PIECE"
     fi
     base_dir="$BASE_NS_DIR/$APP/$PIECE"
     write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization "$WITH_SECRETS")"
     write_file "$base_dir/helmrelease.yaml" "$(render_helmrelease "$hr_name")"
+    write_file "$base_dir/ocirepository.yaml" "$(render_app_ocirepository "$hr_name")"
     [[ "$WITH_SECRETS" -eq 1 ]] && write_file "$base_dir/externalsecret.yaml" "$(render_externalsecret "$hr_name")"
     overlay_path="$MAIN_NS_DIR/$APP.yaml"
-    doc="$(render_overlay_doc "$ks_name" "$NAMESPACE" "$base_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 1 0 "$hr_name")"
+    doc="$(render_overlay_doc "$ks_name" "$NAMESPACE" "$base_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 0 "$hr_name")"
     write_or_append_overlay "$overlay_path" "$doc"
     add_namespace_resource_entry
     echo "reminder: family members that depend on each other need an explicit" \
@@ -506,26 +517,23 @@ case "$SHAPE" in
     crds_dir="$BASE_NS_DIR/$APP/crds"
     write_file "$app_dir/kustomization.yaml" "$(render_base_kustomization "$WITH_SECRETS")"
     write_file "$app_dir/helmrelease.yaml" "$(render_helmrelease "$APP")"
+    write_file "$app_dir/ocirepository.yaml" "$(render_app_ocirepository "$APP")"
     [[ "$WITH_SECRETS" -eq 1 ]] && write_file "$app_dir/externalsecret.yaml" "$(render_externalsecret "$APP")"
     write_file "$crds_dir/kustomization.yaml" "$(render_crds_kustomization)"
     write_file "$crds_dir/ocirepository.yaml" "$(render_crds_ocirepository "$APP")"
     write_file "$crds_dir/helmrelease.yaml" "$(render_crds_helmrelease "$APP")"
 
     overlay_path="$MAIN_NS_DIR/$APP.yaml"
-    app_doc="$(render_overlay_doc "$APP" "$NAMESPACE" "$app_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 1 1 "$APP")"
+    app_doc="$(render_overlay_doc "$APP" "$NAMESPACE" "$app_dir" "$WITH_SECRETS" "$WITH_DRAGONFLY" 1 "$APP")"
     crds_doc="$(cat <<EOF
 ---
 $overlay_ks_schema
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app $APP-crds
-  namespace: &namespace $NAMESPACE
+  name: $APP-crds
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  targetNamespace: *namespace
+  targetNamespace: $NAMESPACE
   interval: 1h
   retryInterval: 1m
   timeout: 3m
@@ -548,19 +556,24 @@ EOF
       echo "error: --shape=parameterized requires --key=<name> and --instance=<name>" >&2
       exit 1
     fi
+    if [[ "$WITH_SECRETS" -eq 1 ]]; then
+      echo "error: --secrets is not supported with --shape=parameterized (no ExternalSecret is written);" >&2
+      echo "  add the externalsecret.yaml and its dependsOn by hand" >&2
+      exit 1
+    fi
     base_dir="$BASE_NS_DIR/$APP/app/$KEY/$INSTANCE"
+    write_file "$base_dir/kustomization.yaml" "$(render_base_kustomization 0)"
     write_file "$base_dir/helmrelease.yaml" "$(render_helmrelease "$INSTANCE")"
+    write_file "$base_dir/ocirepository.yaml" "$(render_app_ocirepository "$INSTANCE")"
     cat >&2 <<EOF
 
 This shape has exactly one live precedent in this repo
 (actions-runner-system/gha-runner-scale-set) and its parent app/kustomization.yaml
 resources list is hand-maintained, not machine-generated here - merging a new
 resources: entry into an existing, possibly hand-edited kustomization.yaml
-safely is not something this script attempts. Add manually:
-  $base_dir/kustomization.yaml (resources: [./helmrelease.yaml])
+safely is not something this script attempts. The instance kustomization.yaml is written; add manually:
   a resources: entry for it in $BASE_NS_DIR/$APP/app/kustomization.yaml
-See .agents/skills/flux-gitops/references/app-shapes.md "Parameterized instance" before using this shape -
-in almost every case shape=app or shape=family is the better fit.
+A parameterized instance is rare: in almost every case shape=app or shape=family is the better fit.
 EOF
     ;;
 
@@ -570,6 +583,38 @@ EOF
     ;;
 esac
 
+# The README skeleton of scripts/docs/README.md ("App READMEs"); one per app, so a second piece keeps the first.
+render_readme() {
+  cat <<EOF
+<p align="center"><img src="header.svg" width="100%" alt="$APP"></p>
+
+> TODO: one sentence, at most 120 characters, that says what $APP does for this cluster.
+
+**Live facts:** <https://skrumbach.github.io/home-ops/apps/$NAMESPACE/$APP/> (workloads, routes, storage, backups, secrets and alerts, generated on every merge)
+
+## What it does
+
+- TODO
+
+## How it works
+
+1. TODO
+
+## Settings that matter
+
+| Setting | Value | Why |
+|---|---|---|
+| TODO | | |
+
+## Operate it
+
+\`\`\`bash
+flux -n $NAMESPACE get ks $APP
+\`\`\`
+EOF
+}
+[[ -e "$BASE_NS_DIR/$APP/README.md" ]] || write_file "$BASE_NS_DIR/$APP/README.md" "$(render_readme)"
+
 cat <<EOF
 
 Next steps:
@@ -578,7 +623,9 @@ Next steps:
   - decide whether this app needs a backup component (components/kopiur;
     VolSync is removed) - that requires measuring the live file
     ownership after first deploy, so it is deliberately not auto-generated;
-    see kubernetes/components/kopiur/Readme.md, and the "one component include
-    covers one volume" trap in .agents/skills/flux-gitops/references/app-shapes.md
+    see kubernetes/components/kopiur/README.md (one components/kopiur include
+    covers one volume; a second PVC is a second Kustomization)
+  - write $BASE_NS_DIR/$APP/README.md (the standard is in scripts/docs/README.md),
+    then draw its header: mise exec -- task docs:pictures
   - validate: mise exec -- task flux:test:all
 EOF

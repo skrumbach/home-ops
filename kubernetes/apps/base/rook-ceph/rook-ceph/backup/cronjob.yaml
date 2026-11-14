@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rook-ceph-backup
+  namespace: rook-ceph
+spec:
+  schedule: "0 3 * * *" # Daily at 03:00 UTC (no timeZone set); the kopiur schedules run on America/New_York time
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: rook-ceph-backup
+          containers:
+            - name: backup
+              # renovate: datasource=docker depName=alpine/k8s
+              image: alpine/k8s:1.37.2@sha256:7a82aeefea3d554a43a8676b137f2b88bae6c1fe11c13862b191b3a086cc28c0
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+
+                  BACKUP_DATE=$(date +%Y%m%d-%H%M%S)
+                  BACKUP_DIR="/backup/$${BACKUP_DATE}"
+                  mkdir -p "$${BACKUP_DIR}"
+
+                  echo "Starting Ceph backup at $${BACKUP_DATE}"
+
+                  # No `|| echo` on these five: a read that fails must fail the Job (KubeJobFailed), not
+                  # leave a "completed" marker next to an empty file. All five objects exist and the
+                  # ServiceAccount may read them (checked 2026-11-13).
+                  kubectl get secret rook-ceph-mon -n rook-ceph -o yaml > "$${BACKUP_DIR}/rook-ceph-mon.yaml"
+                  kubectl get secret rook-ceph-admin-keyring -n rook-ceph -o yaml > "$${BACKUP_DIR}/rook-ceph-admin-keyring.yaml"
+
+                  kubectl get cephcluster -n rook-ceph -o yaml > "$${BACKUP_DIR}/cephcluster.yaml"
+
+                  kubectl get configmap rook-ceph-mon-endpoints -n rook-ceph -o yaml > "$${BACKUP_DIR}/mon-endpoints.yaml"
+
+                  kubectl get secret rook-ceph-mon -n rook-ceph -o jsonpath='{.data.fsid}' | base64 -d > "$${BACKUP_DIR}/cluster-fsid.txt"
+                  test -s "$${BACKUP_DIR}/cluster-fsid.txt"
+
+                  cat > "$${BACKUP_DIR}/backup-manifest.yaml" <<EOF
+                  apiVersion: v1
+                  kind: ConfigMap
+                  metadata:
+                    name: backup-$${BACKUP_DATE}
+                    namespace: rook-ceph
+                    labels:
+                      backup-type: ceph-metadata
+                      backup-date: "$${BACKUP_DATE}"
+                  data:
+                    backup-date: "$${BACKUP_DATE}"
+                    cluster-fsid: "$(cat $${BACKUP_DIR}/cluster-fsid.txt 2>/dev/null || echo 'unknown')"
+                    backup-status: "completed"
+                  EOF
+
+                  kubectl apply -f "$${BACKUP_DIR}/backup-manifest.yaml"
+
+                  find /backup -maxdepth 1 -type d -name "20*" -mtime +7 -exec rm -rf {} \; || echo "Cleanup failed"
+
+                  kubectl get configmaps -n rook-ceph -l backup-type=ceph-metadata --sort-by=.metadata.creationTimestamp -o name | head -n -7 | xargs -r kubectl delete || echo "Manifest cleanup failed"
+
+                  echo "Backup completed successfully at $${BACKUP_DATE}"
+
+                  echo "Available backups:"
+                  ls -la /backup/
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: ceph-backup-pvc
+          restartPolicy: OnFailure

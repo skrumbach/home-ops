@@ -4,18 +4,6 @@
     // Annotated dependencies (the renovate comment above a version line) are parsed by the base preset
     // (home-operations/renovate-presets "Process annotated dependencies"); a local copy extracts every dep twice.
     {
-      customType: "regex",
-      description: "Process MCP server npm packages",
-      managerFilePatterns: [
-        "/(^|/).vscode/mcp\\.json$/",
-      ],
-      matchStrings: [
-        // Match: "mcp-server-kubernetes@2.8.0"
-        '"(?<depName>mcp-server-[^"@]+)@(?<currentValue>[^"]+)"',
-      ],
-      datasourceTemplate: "npm",
-    },
-    {
       // A bare oci:// artifact URL is matched directly here instead of the # renovate: annotation form.
       description: "Flux distribution artifact in the flux-instance HelmRelease",
       customType: "regex",
@@ -24,6 +12,18 @@
         "artifact:\\s*oci://(?<depName>[^:\\s]+):(?<currentValue>[^\\s]+)",
       ],
       datasourceTemplate: "docker",
+    },
+    {
+      // The plugin pin is "<id> <version>" in a YAML list, so the annotation form (needs ": " or "=") does not match it.
+      description: "Grafana VictoriaLogs datasource plugin pin in the grafana HelmRelease",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)monitoring/grafana/app/helmrelease\\.yaml$/"],
+      matchStrings: [
+        "-\\s+victoriametrics-logs-datasource\\s+(?<currentValue>\\d[^\\s]*)",
+      ],
+      depNameTemplate: "VictoriaMetrics/victorialogs-datasource",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
     },
   ],
 }

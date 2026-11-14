@@ -4,14 +4,10 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app wizarr
-  namespace: &namespace media
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
-    # kopiur ONLY: the app's own persistence block creates the claim.
     - ../../../../../components/kopiur
+    - ../../../../../components/kopiur/pvc
   dependsOn:
     - name: onepassword-store
       namespace: security
@@ -19,12 +15,9 @@ spec:
       namespace: rook-ceph
     - name: kopiur-repository
       namespace: system
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/media/wizarr/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi
@@ -36,6 +29,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: media

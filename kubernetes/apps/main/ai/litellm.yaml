@@ -4,14 +4,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app litellm
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   components:
     - ../../../../../components/dragonfly
-  # The operator-rendered Deployment, never the LiteLLMProxy CR (skill flux-gitops).
+  # The operator-rendered Deployment, never the LiteLLMProxy CR.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -45,12 +42,9 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   timeout: 5m
   postBuild:
     substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
       # CHAT_MODEL_ID: the loaded model's name, defined once in chat-model.yaml.
       - name: chat-model
         kind: ConfigMap
@@ -60,18 +54,14 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: litellm-db
-  namespace: ai
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: litellm
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

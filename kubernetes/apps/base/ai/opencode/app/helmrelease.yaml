@@ -8,22 +8,11 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: opencode
   maxHistory: 2
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     defaultPodOptions:
       # No talos-3 toleration. PreferNoSchedule keeps it off that node. A hostname deny-list fails open.
-      # See skill node-scheduling.
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
@@ -41,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/joryirving/opencode
-              tag: 2.2.6@sha256:e4200ea4eb64ebf6e5f940ccc3bb244d5cb61a15ac09b47a9ba521cb3c513e2a
+              tag: 2.3.0@sha256:2db8d1a83eaf101ee56ec7a31b22d259faf5f6169797450dccd163738ceb2b89
             command: ["/etc/opencode/entrypoint.sh"]
             env:
               HOME: &homepath /home/opencode

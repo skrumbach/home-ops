@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Builds the documentation site from the manifests and publishes it to GitHub Pages.
+# Runs on GitHub-hosted runners so the runbooks stay reachable while the cluster is down.
+name: Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - kubernetes/**
+      - docs/**
+      - scripts/docs/**
+      - .renovate/**
+      - .renovaterc.json5
+      - "**/*.md"
+      - .mise.toml
+      - .github/workflows/docs.yaml
+  # Build only, no deploy: a change that breaks the generator or the theme fails before merge.
+  pull_request:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - scripts/docs/**
+      - .github/workflows/docs.yaml
+  workflow_dispatch:
+
+# Never cancel a deploy that is already running; a newer push queues behind it.
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.event.number || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Tool versions come from .mise.toml, so the site is built with the flate and hugo used locally.
+      - name: Setup Tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          install_args: python uv ubi:home-operations/flate aqua:gohugoio/hugo
+          cache: false
+
+      - name: Configure Pages
+        if: ${{ github.event_name != 'pull_request' }}
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # PyYAML is declared in the script header; uv resolves it.
+      - name: Generate content
+        run: uv run --script scripts/docs/build.py
+
+      - name: Build site
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: hugo --source docs --baseURL "${BASE_URL:-https://example.org}/" --minify --gc
+
+      - name: Upload site
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: docs/.build/public
+
+  deploy:
+    if: ${{ github.event_name != 'pull_request' }}
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

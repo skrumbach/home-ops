@@ -1,3 +1,5 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/toolhive.stacklok.dev/virtualmcpserver_v1alpha1.json
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: VirtualMCPServer
 metadata:
@@ -18,7 +20,7 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
-  # Shared MCPTelemetryConfig (mcp-telemetry.yaml): serves /metrics on the main port 4483.
+  # Shared MCPTelemetryConfig (mcptelemetryconfig.yaml): serves /metrics on the main port 4483.
   telemetryConfigRef:
     name: prometheus
   podTemplateSpec:

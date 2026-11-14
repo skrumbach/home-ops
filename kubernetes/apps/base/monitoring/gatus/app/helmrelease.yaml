@@ -8,14 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+    name: gatus
   values:
     controllers:
       gatus:
@@ -36,7 +29,7 @@ spec:
               requests:
                 cpu: 10m
                 # Equal to the limit on purpose: a limit with no request reserves the whole limit
-                # silently (scripts/ci/memory-request-declared-test.py). restartPolicy Always makes
+                # silently. restartPolicy Always makes
                 # this a native sidecar, so its request ADDS to the pod total.
                 memory: 64Mi
               limits:
@@ -90,7 +83,7 @@ spec:
       # init container (--auto-httproute/--enable-service) watches the K8s API and needs the token.
       automountServiceAccountToken: true
       # fsGroup 65532: the nonroot sidecar must write the shared config PVC
-      # or HTTPRoute auto-discovery stops silently. Skill observability.
+      # or HTTPRoute auto-discovery stops silently.
       securityContext:
         fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch
@@ -111,14 +104,19 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Observability
           gethomepage.dev/name: Gatus
-          gethomepage.dev/icon: gatus
-          gethomepage.dev/description: Status Page
+          gethomepage.dev/icon: gatus.svg
+          gethomepage.dev/description: Status page
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.monitoring
-          external-dns.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gatus.home-operations.com/endpoint: |-
+            url: https://status.sklab.dev/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].status == UP"
+            group: monitoring
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-          - status.${SECRET_DOMAIN}
+          - "{{ .Release.Name }}.sklab.dev"
+          - status.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
