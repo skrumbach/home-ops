@@ -3,37 +3,18 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app certificates-import
+  # Holds the Certificate both Gateways serve and the PushSecret that copies it to 1Password
+  # (one way, cluster to 1Password); renaming this Kustomization would delete and reissue the Certificate.
+  name: &app certificates-export
 spec:
   dependsOn:
     - name: onepassword-store
       namespace: security
-  interval: 1h
-  path: ./kubernetes/apps/base/network/certificates/import
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  postBuild:
-    substitute:
-      APP: *app
-  targetNamespace: network
-  wait: true
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &app certificates-export
-spec:
-  dependsOn:
-    - name: certificates-import
-    # Owns the Certificate CRD and the issuer the exported certificates use.
+    # Owns the Certificate CRD and the issuer the certificate uses.
     - name: cert-manager
       namespace: cert-manager
   interval: 1h
-  path: ./kubernetes/apps/base/network/certificates/export
+  path: ./kubernetes/apps/base/network/certificates/app
   prune: true
   sourceRef:
     kind: GitRepository
