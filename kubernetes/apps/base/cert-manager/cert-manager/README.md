@@ -10,7 +10,7 @@
 
 - **Issues** one certificate, `sklab-dev-production`, covering the apex `sklab.dev` and `*.sklab.dev`.
   The `Certificate` lives with its consumers in `network`
-  ([`certificate.yaml`](../../network/certificates/export/certificate.yaml)); this app provides the issuer that signs it.
+  ([`certificate.yaml`](../../network/certificates/app/certificate.yaml)); this app provides the issuer that signs it.
 - **Proves domain ownership** with the ACME DNS-01 challenge: it writes a `_acme-challenge` TXT record through the
   Cloudflare API, Let's Encrypt reads it, and the record is removed.
 - **Renews** automatically about 30 days before the 90-day certificate expires, and rewrites the Secret
@@ -67,9 +67,8 @@ In more detail:
    resolvers over DNS-over-HTTPS (`dns01RecursiveNameservers`), not the cluster's resolver chain, which is split
    horizon here (`network/unifi-dns`) and can answer for the zone without the public TXT record.
 4. Let's Encrypt validates, signs, and cert-manager writes `sklab-dev-production-tls`. The Gateways pick it up live.
-5. `certificates-export` pushes the issued pair to 1Password item `sklab-dev-tls`, so a rebuilt cluster can start
-   from a valid certificate instead of spending an issuance. The restore side does not reach the Gateways today, see
-   [Known gaps](#known-gaps).
+5. `certificates-export` pushes the issued pair to 1Password item `sklab-dev-tls`, a copy kept outside the cluster.
+   Nothing restores it automatically: a rebuilt cluster issues a fresh certificate, one issuance.
 
 ## Settings that matter
 
@@ -113,14 +112,6 @@ From [`app/prometheusrule.yaml`](app/prometheusrule.yaml), routed by the `alerts
 | `CertManagerCertNotReady` | a Certificate is not Ready for 5 min | `kubectl describe certificate` shows the failing condition. |
 | `CertManagerAbsent` | the controller left Prometheus discovery | Flux or the Deployment. |
 | `CertManagerCainjector{HighRestarts,HighMemory,OOMKilled}` | cainjector restarting, above 80% of its limit, or OOM-killed | Raise its memory limit; it scales with the number of CRDs and webhooks. |
-
-## Known gaps
-
-- **The restore path writes the wrong Secret name.** `certificates-import`
-  ([`externalsecret.yaml`](../../network/certificates/import/externalsecret.yaml)) restores 1Password item
-  `sklab-dev-tls` into Secret `sklab-dev-tls`, annotated as Certificate `sklab-dev`. The live Certificate is
-  `sklab-dev-production` and writes `sklab-dev-production-tls`, which the Gateways read. On a rebuild, cert-manager
-  therefore issues a fresh certificate instead of adopting the restored one. That works, but it spends an issuance.
 
 Upstream: [cert-manager docs](https://cert-manager.io/docs/) •
 [DNS-01 Cloudflare](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/) •

@@ -1,8 +1,8 @@
 <!-- header: icon=badge-check -->
-<!-- concept: From an issued certificate to a copy in the vault | file-key Certificate | upload Export | vault Vault | download Import | rotate-ccw Rebuild -->
+<!-- concept: From an issued certificate to a copy in the vault | file-key Certificate | shield-check Serve | upload Export | vault Vault -->
 <p align="center"><img src="header.svg" width="100%" alt="certificates"></p>
 
-> Declares the wildcard certificate for `sklab.dev` and keeps a copy of it in 1Password for a rebuilt cluster.
+> Declares the wildcard certificate for `sklab.dev` and pushes a copy of it to 1Password.
 
 **Live facts:** <https://skrumbach.github.io/home-ops/apps/network/certificates/> (workloads, routes, storage, backups, secrets and alerts, generated on every merge)
 
@@ -11,26 +11,22 @@
 - **Declares the certificate.** Certificate `sklab-dev-production` asks ClusterIssuer `letsencrypt-production` for the
   apex `sklab.dev` and `*.sklab.dev`, and writes Secret `sklab-dev-production-tls`. The issuer and the renewals
   belong to [`cert-manager/cert-manager`](../../cert-manager/cert-manager/README.md).
-- **Exports it.** PushSecret `sklab-dev-tls` copies `tls.crt` and `tls.key` of that Secret to 1Password item
-  `sklab-dev-tls` through ClusterSecretStore `onepassword`.
-- **Imports it.** ExternalSecret `sklab-dev-tls` reads the item back into Secret `sklab-dev-tls` (type
-  `kubernetes.io/tls`), once, so a rebuilt cluster can start from a valid certificate. See [Known gaps](#known-gaps):
-  the restored Secret is not the one the Gateways read.
 - **Feeds both Gateways.** `envoy-internal` and `envoy-external` serve `sklab-dev-production-tls` on port 443
   ([`network/envoy-gateway`](../envoy-gateway/README.md)).
+- **Exports it.** PushSecret `sklab-dev-tls` copies `tls.crt` and `tls.key` of that Secret to 1Password item
+  `sklab-dev-tls` through ClusterSecretStore `onepassword`. One way only: nothing in Git reads the item back.
 
 ## Why it is built this way
 
 | Choice | Why |
 |---|---|
-| **Two Flux Kustomizations, `certificates-import` and `certificates-export`** | `certificates-export` depends on `certificates-import` and on `cert-manager`, which owns the Certificate CRD and the issuer (comment in the overlay). The manifest records no reason for the order of the two. |
 | **The Certificate lives here, not in `cert-manager`** | It sits with its consumers, in `network`, next to the Gateways that serve it. |
-| **`creationPolicy: Orphan`, `refreshPolicy: CreatedOnce`** | The import creates its Secret once, and the Secret outlives the ExternalSecret. The manifest records no reason. |
-| **Push the pair to 1Password** | A rebuilt cluster can start from a valid certificate instead of spending a Let's Encrypt issuance. The same reason is in the cert-manager README. |
+| **Kustomization name `certificates-export`** | Kept from when a separate `certificates-import` restored the item. Renaming it would delete and reissue the Certificate (comment in the overlay). |
+| **A push, no restore** | The restore wrote Secret `sklab-dev-tls`, which no Gateway read, and was retired. A rebuilt cluster issues a fresh certificate, one Let's Encrypt issuance. The item stays as an off-cluster copy. |
 
 ## How it works
 
-<p align="center"><img src="concept.svg" width="100%" alt="How certificates works: 1 Certificate, 2 Export, 3 Vault, 4 Import, 5 Rebuild."></p>
+<p align="center"><img src="concept.svg" width="100%" alt="How certificates works: 1 Certificate, 2 Serve, 3 Export, 4 Vault."></p>
 
 <details>
 <summary><b>Resource graph</b>: every object involved, by name</summary>
@@ -42,7 +38,6 @@ flowchart LR
   cert -->|writes| sec["Secret<br/>sklab-dev-production-tls"]
   sec --> gw["Gateways<br/>envoy-internal + envoy-external"]
   sec -->|PushSecret<br/>sklab-dev-tls| op[("1Password<br/>item sklab-dev-tls")]
-  op -->|"ExternalSecret<br/>sklab-dev-tls (once)"| old["Secret<br/>sklab-dev-tls"]
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class cert accent
@@ -51,50 +46,32 @@ flowchart LR
 
 </details>
 
-1. **Order.** Flux applies `certificates-import` first, after `onepassword-store` (`wait: true`). Then
-   `certificates-export`, after `certificates-import` and `cert-manager`. `envoy-gateway` also waits for
-   `certificates-import`.
-2. **Issue.** cert-manager signs the Certificate and writes `sklab-dev-production-tls`.
+1. **Order.** Flux applies `certificates-export` after `onepassword-store` and `cert-manager`, which owns the
+   Certificate CRD and the issuer.
+2. **Issue.** cert-manager signs the Certificate and writes `sklab-dev-production-tls`. The Gateways pick it up live.
 3. **Export.** The PushSecret runs the pair through a template (`b64enc`) and pushes `tls.crt` and `tls.key` to
    item `sklab-dev-tls`.
-4. **Import.** The ExternalSecret extracts the same item with `decodingStrategy: Base64` into a TLS Secret. It carries
-   the `cert-manager.io/*` annotations and the label `controller.cert-manager.io/fao: "true"`, so cert-manager treats
-   it as one of its own.
 
 ## Settings that matter
 
-All in [`export/`](export/) and [`import/`](import/).
+All in [`app/`](app/).
 
 | Setting | Value | Why |
 |---|---|---|
 | Certificate `dnsNames` | `sklab.dev`, `*.sklab.dev` | One wildcard for every route on both Gateways. |
 | Certificate `issuerRef` | ClusterIssuer `letsencrypt-production` | The only ClusterIssuer in the cluster (see the cert-manager README). |
-| ExternalSecret `refreshPolicy` | `CreatedOnce` | The restore runs once. |
-| ExternalSecret `creationPolicy` | `Orphan` | The Secret stays if the ExternalSecret is deleted. The manifest records no reason. |
-| ExternalSecret `decodingStrategy` | `Base64` | Matches the `b64enc` in the PushSecret template. |
-| `cert-manager.io/certificate-name` annotation | `sklab-dev` | See [Known gaps](#known-gaps). |
+| PushSecret template | `b64enc` on both keys | The item holds base64 text, so a restore must decode it (`decodingStrategy: Base64`). |
+| PushSecret store | ClusterSecretStore `onepassword` | See the `security/external-secrets` README on push stores. |
 
 ## Operate it
 
 ```bash
-flux -n network get ks certificates-import certificates-export
+flux -n network get ks certificates-export
 kubectl -n network get certificate sklab-dev-production
 kubectl -n network get pushsecret sklab-dev-tls
-kubectl -n network get externalsecret sklab-dev-tls
 kubectl -n network get secret sklab-dev-production-tls -o jsonpath='{.data.tls\.crt}' \
   | base64 -d | openssl x509 -noout -subject -enddate
 ```
-
-`SecretSynced` on an ExternalSecret does not mean the Secret is non-empty.
-
-## Known gaps
-
-- **The restore writes a Secret nobody reads.** The ExternalSecret in
-  [`import/externalsecret.yaml`](import/externalsecret.yaml) restores into Secret `sklab-dev-tls`, annotated as
-  Certificate `sklab-dev`. The live Certificate is `sklab-dev-production` ([`export/certificate.yaml`](export/certificate.yaml))
-  and both Gateways read `sklab-dev-production-tls` ([`../envoy-gateway/app/gateway.yaml`](../envoy-gateway/app/gateway.yaml)).
-  On a rebuild cert-manager therefore issues a fresh certificate and does not adopt the restored one, and
-  `envoy-gateway` (`kubernetes/apps/main/network/envoy-gateway.yaml`) waits for an import the Gateways do not use.
 
 Upstream: [External Secrets PushSecret](https://external-secrets.io/latest/guides/pushsecret/) •
 [cert-manager Certificate](https://cert-manager.io/docs/usage/certificate/)

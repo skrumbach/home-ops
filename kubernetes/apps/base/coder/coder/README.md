@@ -12,7 +12,7 @@ The sign-in model and the break-glass steps for an issuer change are in the name
 ## What it does
 
 - **Runs workspaces** from the `coder` Deployment (Helm chart `coder`), with the access URL `https://coder.sklab.dev`
-  and the wildcard `*.coder.sklab.dev`.
+  and no wildcard access URL, so workspace apps are served on path URLs.
 - **Signs people in with Pocket ID** (PocketIDOIDCClient `coder`). Password login is off, and only the group `admins` gets in.
 - **Serves the UI** at `coder.sklab.dev` on `envoy-internal` only, since 2026-11-13. Off-site use goes through the VPN.
 - **Stores its data** in database `coder` on the shared `postgres-18` Cluster, created by Kustomization `coder-db`.
@@ -99,7 +99,7 @@ kubectl -n coder top pod
 
 | Alert | Fires when | First look |
 |---|---|---|
-| `CoderdCPUUsage` | never today: it divides CPU use by the CPU limit, which the HelmRelease does not set | [`runbooks/coderd.md`](app/runbooks/coderd.md); `kubectl -n coder top pod` against the 71m request. |
+| `CoderdCPUUsage` | coderd uses more CPU than its 71m request for 10m (warning) | [`runbooks/coderd.md`](app/runbooks/coderd.md); `kubectl -n coder top pod` against the 71m request. |
 | `CoderdMemoryUsage` | working set above 80% (warning) or 90% (critical) of the memory limit for 10m | [`runbooks/coderd.md`](app/runbooks/coderd.md); `kubectl -n coder top pod`. |
 | `CoderdRestarts` | a coderd pod restarts more than 1, 2 or 3 times in 10m (three severities) | The runbook, then `kubectl -n coder logs deploy/coder --previous`. |
 | `CoderdReplicas` | no coderd pod is up for 5m | The runbook; `flux -n coder get hr coder`. |
@@ -111,14 +111,6 @@ kubectl -n coder top pod
 - Do not create a local password user, and do not `UPDATE users.rbac_roles` in Postgres to grant admin
   (namespace document).
 - Do not add a CPU limit as a first response to `CoderdCPUUsage` ([`runbooks/coderd.md`](app/runbooks/coderd.md)).
-
-## Known gaps
-
-- **`CODER_OIDC_ROLE_FIELD` has no effect.** [`app/helmrelease.yaml`](app/helmrelease.yaml) sets it to `groups`; its own comment says it is not a Coder option.
-- **`CoderdCPUUsage` cannot fire.** [`app/rules/coderd.yaml`](app/rules/coderd.yaml) divides by
-  `kube_pod_container_resource_limits{resource="cpu"}`, and the HelmRelease sets no CPU limit, so the series is
-  empty. The runbook says so too.
-- **The wildcard host has no route.** `CODER_WILDCARD_ACCESS_URL` is `*.coder.sklab.dev`, but the only HTTPRoute ([`app/httproute.yaml`](app/httproute.yaml)) lists `coder.sklab.dev`.
 
 Upstream: [Coder docs](https://coder.com/docs) •
 [Pocket ID](https://pocket-id.org/docs)

@@ -105,11 +105,13 @@ Defined in `monitoring/kube-prometheus-stack` ([`silent-failure-gaps.yaml`](../.
 
 ## Known gaps
 
-- **Most PushSecrets still write through the read store.** 26 `PushSecret`s name store `onepassword`, among them the
-  LiteLLM virtual keys, `flux-system/headlamp`, `monitoring/grafana-sa-provisioner`, `network/certificates`,
-  `system/kopiur` and `system/volsync`. The comment in
+- **Most PushSecrets still write through the read store.** 26 `PushSecret`s name store `onepassword`: the 19 LiteLLM
+  virtual keys and `litellm-pgvector-seed` in `ai/litellm`, `flux-system/headlamp`, `monitoring/grafana-sa-provisioner`,
+  `network/certificates`, `system/kopiur`, `system/volsync` and `media/plex`. The comment in
   [`stores/clustersecretstore-automation.yaml`](stores/clustersecretstore-automation.yaml) says a push through that
-  store resolves by vault priority and could land in `Homelab`. Only three use `onepassword-automation`.
+  store resolves by vault priority and could land in `Homelab`. Only three use `onepassword-automation`. `media/plex`
+  stays on `onepassword` on purpose (its item lives in `Homelab`, comment in its PushSecret). Moving another one is not
+  a one-line change: a new item lands in `Automation` while any copy already in `Homelab` stays first in the read order.
 
 Upstream: [External Secrets docs](https://external-secrets.io/latest/) •
 [1Password provider](https://external-secrets.io/latest/provider/1password-automation/)

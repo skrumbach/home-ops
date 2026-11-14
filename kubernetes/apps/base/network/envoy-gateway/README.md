@@ -70,8 +70,8 @@ flowchart LR
 
 </details>
 
-1. **Flux.** Kustomization `envoy-gateway` ([overlay](../../../main/network/envoy-gateway.yaml)) waits for
-   `certificates-import`, then applies `app/`. Its health checks are the controller Deployment, then both Gateways
+1. **Flux.** Kustomization `envoy-gateway` ([overlay](../../../main/network/envoy-gateway.yaml)) has no `dependsOn`
+   and applies `app/`. Its health checks are the controller Deployment, then both Gateways
    `Programmed` (a custom `healthCheckExprs`). `wait` stays false, so the listed checks are the ones honoured.
 2. **Controller and proxies.** The chart runs one controller, `envoy-gateway`. For each Gateway it creates an Envoy
    Deployment in `network` (2 replicas, from `EnvoyProxy` `envoy`) and a LoadBalancer Service. The infrastructure
@@ -139,12 +139,6 @@ From [`app/prometheusrule.yaml`](app/prometheusrule.yaml).
 - **One Gateway per hostname.** Never attach a hostname to both Gateways.
 - **A Gateway name is referenced elsewhere.** Network policies select `gateway.envoyproxy.io/owning-gateway-name`,
   and `cloudflare-tunnel` and `cloudflare-dns` name `envoy-external`.
-
-## Known gaps
-
-- **`envoy-gateway` waits for a Secret the Gateways do not read.** `dependsOn: certificates-import`
-  (`kubernetes/apps/main/network/envoy-gateway.yaml`) gates on the restore of Secret `sklab-dev-tls`, but both Gateways
-  read `sklab-dev-production-tls`. See the known gap in [`network/certificates`](../certificates/README.md).
 
 Upstream: [Envoy Gateway docs](https://gateway.envoyproxy.io/docs/) •
 [Gateway API](https://gateway-api.sigs.k8s.io/)
