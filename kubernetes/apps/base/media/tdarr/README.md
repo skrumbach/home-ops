@@ -56,7 +56,7 @@ flowchart LR
 
 </details>
 
-1. Flux applies Kustomization `tdarr` after `intel-device-plugin-gpu`, `rook-ceph-cluster` and `kopiur-repository`.
+1. Flux applies Kustomization `tdarr` after `generic-device-plugin`, `rook-ceph-cluster` and `kopiur-repository`.
    The `kopiur/pvc` component owns PVC `tdarr-config` (claim name set by `KOPIUR_CLAIM`). PVC `tdarr-temp`
    is a plain manifest and is not backed up.
 2. The server starts with `serverIP` `0.0.0.0`, `serverPort` `8266`, `webUIPort` `8265`.
@@ -127,10 +127,7 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 ## Known gaps
 
 - **The world rule on 8266 is still open.** [`app/ciliumnetworkpolicy.yaml`](app/ciliumnetworkpolicy.yaml) marks the
-  `world` entry on port 8266 "HOLD: replace with `fromCIDR: [<node-ip>/32]` before merging". It is merged and still
+  `world` entry on port 8266 HOLD ("replace this `world` entry with `fromCIDR: [<node-ip>/32]` before merging"). It is merged and still
   admits any LAN source. With `auth: "false"`, that is an open API.
-- **The overlay depends on the wrong device plugin.** [`kubernetes/apps/main/media/tdarr.yaml`](../../../main/media/tdarr.yaml)
-  waits for `intel-device-plugin-gpu`, but neither container requests `gpu.intel.com/xe`. The worker requests
-  `devic.es/b70-vaapi`, served by Kustomization `generic-device-plugin`.
 
 Upstream: [Tdarr docs](https://docs.tdarr.io/)

@@ -120,11 +120,5 @@ the offending target.
 | `Watchdog` | the heartbeat rule, firing by design | Not a fault. Alertmanager routes it to Healthchecks.io every 5 minutes; silence there means this chain is broken. |
 | Rules in `app/alerts/` | see the site | Each rule's annotation carries its own recovery steps. |
 
-## Known gaps
-
-- **Two empty directories are included.** `app/prometheusrules/kustomization.yaml` and
-  `app/scrapeconfigs/kustomization.yaml` both set `resources: []`, and `app/kustomization.yaml` includes them.
-  They render nothing.
-
 Upstream: [kube-prometheus-stack chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) •
 [Prometheus docs](https://prometheus.io/docs/)

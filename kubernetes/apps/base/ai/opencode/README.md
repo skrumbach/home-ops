@@ -108,12 +108,5 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 - Keep `forwardAccessToken` off in `opencode-auth`.
 - Do not name the Service `opencode`.
 
-## Known gaps
-
-- **A stale claim about Hermes' token.** [`app/externalsecret.yaml`](app/externalsecret.yaml) lines 3 to 8 call
-  `HOMELAB_GH_TOKEN` the credential Hermes' commit-watcher uses. [`../hermes/app/externalsecret.yaml`](../hermes/app/externalsecret.yaml)
-  now renders Hermes' `HOMELAB_GH_TOKEN` from the read-only field `HOMELAB_GH_READ_TOKEN`, and leaves the write
-  field to OpenCode alone.
-
 Upstream: [OpenCode docs](https://opencode.ai/docs/) •
 [Envoy Gateway OIDC](https://gateway.envoyproxy.io/docs/tasks/security/oidc/)

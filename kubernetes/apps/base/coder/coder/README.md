@@ -115,7 +115,6 @@ kubectl -n coder top pod
 ## Known gaps
 
 - **`CODER_OIDC_ROLE_FIELD` has no effect.** [`app/helmrelease.yaml`](app/helmrelease.yaml) sets it to `groups`; its own comment says it is not a Coder option.
-- **A runbook cites a comment that is not there.** [`app/runbooks/coderd.md`](app/runbooks/coderd.md) points at "the 2026-06-30 outage comment on the HelmRelease"; `app/helmrelease.yaml` has none.
 - **`CoderdCPUUsage` cannot fire.** [`app/rules/coderd.yaml`](app/rules/coderd.yaml) divides by
   `kube_pod_container_resource_limits{resource="cpu"}`, and the HelmRelease sets no CPU limit, so the series is
   empty. The runbook says so too.

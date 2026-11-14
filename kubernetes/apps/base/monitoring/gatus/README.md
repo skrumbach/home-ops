@@ -114,12 +114,4 @@ kubectl -n monitoring exec deploy/gatus -c app -- ls /config         # exec: fil
   duplicate.
 - **Never size `storage-gatus` down.** A claim cannot shrink in place.
 
-## Known gaps
-
-- **A stale reason on the Home Assistant check.** [`app/resources/config.yaml`](app/resources/config.yaml) lines
-  87-89 say a status-only probe of the route "stays green through ext_authz". The Home Assistant route has no
-  SecurityPolicy: `home-automation/home-assistant/app/securitypolicy.yaml` targets only
-  `home-assistant-code-server`. The route annotation already adds a check on `/manifest.json`, so the two
-  overlap.
-
 Upstream: [Gatus](https://github.com/TwiN/gatus) • [gatus-sidecar](https://github.com/home-operations/gatus-sidecar)

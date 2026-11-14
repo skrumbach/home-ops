@@ -115,10 +115,5 @@ Active alerts and silences are in the UI at `https://alertmanager.sklab.dev`. Th
   leaves that route open (comment in `app/securitypolicy.yaml`).
 - **Deleting `PocketIDOIDCClient` `alertmanager` deletes the client in Pocket ID.**
 
-## Known gaps
-
-- **Comments cite a skill that does not exist.** `app/resources/alertmanager.yml` says "Skill observability" in
-  four places. `.agents/skills/` holds only `incident-runbooks`.
-
 Upstream: [Alertmanager docs](https://prometheus.io/docs/alerting/latest/alertmanager/) •
 [Pushover API](https://pushover.net/api)
