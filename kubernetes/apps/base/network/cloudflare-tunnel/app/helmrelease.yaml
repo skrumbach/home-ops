@@ -94,14 +94,28 @@ spec:
     configMaps:
       config:
         data:
+          # One rule per public hostname, no wildcard: a stray public DNS record gets 404 here.
+          # Must match ALLOWED in scripts/ci/external-routes-test.py (the test fails otherwise).
           config.yaml: |-
             ingress:
-              - hostname: "*.sklab.dev"
-                originRequest:
+              - hostname: "echo.sklab.dev"
+                originRequest: &origin
                   http2Origin: true
                   originServerName: "external.sklab.dev"
                   tcpKeepAlive: 7200s
                 service: &svc https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+              - hostname: "flux-webhook.sklab.dev"
+                originRequest: *origin
+                service: *svc
+              - hostname: "id.sklab.dev"
+                originRequest: *origin
+                service: *svc
+              - hostname: "kromgo.sklab.dev"
+                originRequest: *origin
+                service: *svc
+              - hostname: "n8n-webhook.sklab.dev"
+                originRequest: *origin
+                service: *svc
               - service: http_status:404
     persistence:
       config-file:

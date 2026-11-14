@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Every route on the public gateway (`envoy-external`) is on the allow-list below, host and path.
+"""Every route on the public gateway (`envoy-external`) is on the allow-list below, host and path,
+and the Cloudflare tunnel forwards exactly the allow-listed hosts.
 
 Prevents: an internal admin UI or a credential-spending app exposed to the internet; exposure is a reviewed diff here.
 """
@@ -72,6 +73,13 @@ for path in sorted((ROOT / "kubernetes").rglob("*.yaml")):
                     failures.append(f"{where}: {host} paths {extra} are not on the public allow-list (ALLOWED)")
 if not found:
     failures.append(f"kubernetes/: found no routes on {GATEWAY}; the walker is broken")
+# The tunnel names each public host (no wildcard), so its list must equal ALLOWED.
+TUNNEL = "kubernetes/apps/base/network/cloudflare-tunnel/app/helmrelease.yaml"
+config = yaml.safe_load((ROOT / TUNNEL).read_text())["spec"]["values"]["configMaps"]["config"]["data"]["config.yaml"]
+tunnel = {rule["hostname"] for rule in yaml.safe_load(config)["ingress"] if "hostname" in rule}
+if tunnel != set(ALLOWED):
+    failures.append(f"{TUNNEL}: tunnel hostnames must equal ALLOWED; missing {sorted(set(ALLOWED) - tunnel)}, "
+                    f"not allowed {sorted(tunnel - set(ALLOWED))}")
 for failure in failures:
     print(f"FAIL {failure}")
 sys.exit(1 if failures else 0)
