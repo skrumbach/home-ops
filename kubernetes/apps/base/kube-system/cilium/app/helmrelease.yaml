@@ -155,7 +155,6 @@ spec:
       acceleration: best-effort
       algorithm: maglev
       mode: dsr
-    localRedirectPolicy: true
     operator:
       # Its panels are AWS ENI/IPAM metrics a bare-metal cluster never emits.
       dashboards:

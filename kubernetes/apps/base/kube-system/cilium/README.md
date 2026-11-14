@@ -149,9 +149,4 @@ change to `bgp.conf`.
   months and keeps the Secrets out of the release, so no `driftDetection`
   ignore is needed.
 
-## Known gaps
-
-- **`localRedirectPolicy: true` has no user.** No `CiliumLocalRedirectPolicy` exists in Git, and no comment
-  says what the flag is for.
-
 Upstream: [Cilium docs](https://docs.cilium.io/en/stable/)
