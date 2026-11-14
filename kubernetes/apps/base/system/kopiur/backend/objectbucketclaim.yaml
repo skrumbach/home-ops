@@ -12,3 +12,10 @@ metadata:
 spec:
   bucketName: kopiur
   storageClassName: ceph-bucket
+  # additionalConfig is the only OBC field Rook updates in place; nothing else here may change on a live claim.
+  additionalConfig:
+    # 500G headroom (peak ~37 GB). Do not copy volsync's 20G quota; that quota was already exceeded.
+    # A quota on the user Rook generates for this claim, which Rook limits to this one bucket, so it caps the bucket.
+    # Not bucketMaxSize: the operator allows only maxObjects and maxSize by default (obcAllowAdditionalConfigFields).
+    # Never bucketOwner: it re-links the bucket to another user and hands the claim that user's keys.
+    maxSize: 500G

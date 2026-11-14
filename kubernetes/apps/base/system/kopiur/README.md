@@ -12,8 +12,8 @@
   `SnapshotPolicy`, `SnapshotSchedule` and `Restore` objects into mover jobs.
 - **Defines two destinations** as `ClusterRepository` objects usable from every namespace: `ceph` (the in-cluster
   RGW bucket `kopiur`) and `r2` (an offsite Cloudflare R2 bucket, also named `kopiur`).
-- **Provisions the local backend**: `ObjectBucketClaim` `kopiur` on `ceph-bucket`, and `CephObjectStoreUser` `kopiur`
-  with a 500G quota.
+- **Provisions the local backend**: `ObjectBucketClaim` `kopiur` on `ceph-bucket`, capped at 500G by its
+  `additionalConfig.maxSize`.
 - **Feeds the repositories their credentials** from 1Password through ExternalSecrets `kopiur-ceph` and `kopiur-r2`.
 - **Watches itself** with `KopiurComponentAbsent` and its siblings, because the chart's own alerts go silent when
   the operator disappears.
@@ -67,10 +67,11 @@ flowchart LR
 </details>
 
 1. Flux applies Kustomization `kopiur` after `onepassword-store` (security) and `snapshot-controller` (kube-system).
-   It installs the HelmRelease, the OBC, the CephObjectStoreUser, the PushSecret, `kopiur-substitutions` and the
+   It installs the HelmRelease, the OBC, the PushSecret, `kopiur-substitutions` and the
    `kopiur-absent` PrometheusRule.
-2. Rook turns the OBC into Secret `kopiur` with the S3 keys. The PushSecret records them in 1Password item
-   `kopiur-ceph-bucket`, which is a record only: nothing reads it back.
+2. Rook turns the OBC into the bucket, a generated RGW user that owns it, and Secret `kopiur` with that user's S3
+   keys. The PushSecret records them in 1Password item `kopiur-ceph-bucket`, which is a record only: nothing reads
+   it back.
 3. Kustomization `kopiur-repository` then applies the two ExternalSecrets and the two `ClusterRepository` objects. The
    `ceph` repository bootstraps an absent repository and only connects to an existing one (`create.enabled: true`;
    Rook creates the bucket through the OBC). The `r2` repository only
@@ -97,7 +98,7 @@ flowchart LR
 | `onNamespaceDelete` | `Orphan` on both | Deleting a consuming namespace leaves its snapshots in the repository. |
 | `ceph` `parameters.epoch.minDuration` | `4h` | The manifest says not to restore kopia's 24h default and not to round to 6h. |
 | `r2` epoch | untuned | Its daily cadence accumulates slower. Re-derive the band before raising it. |
-| `CephObjectStoreUser` quotas | `500G`, 1,000,000 objects, 10 buckets | Headroom. The manifest warns not to copy VolSync's 20G quota, which was already exceeded. |
+| OBC `additionalConfig.maxSize` | `500G` | Headroom over a ~37 GB peak; VolSync's 20G quota was already exceeded. It is a quota on the user Rook generates for the claim, which Rook limits to one bucket, so it caps the bucket. `bucketMaxSize` is off in the operator's default allow-list. |
 | OBC annotation | `kustomize.toolkit.fluxcd.io/prune: disabled` | `ceph-bucket` has reclaimPolicy Delete: deleting the claim deletes the Ceph copy of every backup. This stops Flux only, not `kubectl delete obc` or a namespace delete. |
 | PushSecret `deletionPolicy` | `None` | Removing the PushSecret must not delete the 1Password record. |
 
@@ -146,14 +147,9 @@ The chart ships its own group `kopiur.rules`. These come from [`app/prometheusru
   tuning. `ceph` `minDuration` is `4h`. `r2` is untuned.
 - 1Password item `kopiur-ceph-bucket` is a record nothing reads. The OBC
   Secret is what the controller uses.
+- Only `additionalConfig` may change on the live OBC. Never set `bucketOwner`:
+  it re-links the bucket and swaps the keys every backup uses.
 
 Restores: `.agents/skills/incident-runbooks/references/restore.md`.
-
-## Known gaps
-
-- **The `CephObjectStoreUser` quota does not bound the bucket.** Nothing references `CephObjectStoreUser` `kopiur`
-  ([`backend/cephobjectstoreuser.yaml`](backend/cephobjectstoreuser.yaml)) or its Secret. `ClusterRepository` `ceph`
-  authenticates with the OBC's Secret `kopiur`, and the OBC sets no `bucketOwner`, so the bucket belongs to the user
-  Rook creates for the claim and the 500G quota applies to an idle user.
 
 Upstream: [kopia docs](https://kopia.io/docs/)
