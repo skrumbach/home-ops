@@ -12,8 +12,7 @@ certificate trouble is in [`TROUBLESHOOTING.md`](../TROUBLESHOOTING.md).
 ## What it does
 
 - **Provides the runner label** `gha-runner-scale-set-skrumbach-home-ops`, which workflows name in `runs-on`:
-  `.github/workflows/image-pull.yaml` (job `pull`) and `.github/workflows/terraform-diff.yaml` (jobs `filter`, `plan`,
-  `success`). Other workflows run GitHub-hosted.
+  `.github/workflows/image-pull.yaml` (job `pull`). Other workflows run GitHub-hosted.
 - **Scales** between `minRunners: 1` and `maxRunners: 15`. Each runner is a pod that takes one job.
 - **Authenticates to GitHub** with a GitHub App. ExternalSecret `skrumbach-runner-secret` builds `github_app_id`,
   `github_app_installation_id` and `github_app_private_key` from 1Password items `github` and `github-acr-all-repositories`.

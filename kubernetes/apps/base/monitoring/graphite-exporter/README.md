@@ -19,7 +19,7 @@
 No sample has reached it yet: `graphite_last_processed_timestamp_seconds` stays 0 because the NAS has never sent a
 sample. The three TrueNAS dashboards that queried these series (`cpu_temperature`, `disk_await`, `zfs_*` and the rest
 of the graphite-mapped names) are retired. Nothing in Git configures the NAS side (no match for Graphite or port 2003
-under `terraform/`).
+in the private home-infra repo).
 
 ## How it works
 

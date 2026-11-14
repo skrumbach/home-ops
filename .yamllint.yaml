@@ -10,6 +10,7 @@ rules:
   document-start: disable
 
 ignore: |
+  terraform/
   *.j2
   *.gotmpl
   **/templates/**

@@ -113,7 +113,7 @@ Chart values are in [`app/helmrelease.yaml`](app/helmrelease.yaml), BGP and the 
 | `hubble.tls.auto.method` | `cronJob` | See [Invariants](#invariants). |
 | `l7Proxy` | unset | A release with cilium/cilium#47914 refuses to start with netkit, `endpointRoutes` and the L7 proxy. Set it `false` before that bump ([`app/ocirepository.yaml`](app/ocirepository.yaml)). |
 | Pool `allowFirstLastIPs` | `"No"` | The network and broadcast addresses of `10.50.0.0/24` are never handed out. |
-| `CiliumBGPPeerConfig` `gracefulRestart.restartTimeSeconds` | `15` | Routes survive an agent restart for 15 s. `terraform/unifi/bgp.tofu` names the same value. |
+| `CiliumBGPPeerConfig` `gracefulRestart.restartTimeSeconds` | `15` | Routes survive an agent restart for 15 s. `unifi/bgp.tofu` in the private home-infra repo names the same value. |
 
 ## Operate it
 
@@ -142,7 +142,7 @@ change to `bgp.conf`.
 ## Invariants
 
 - **BGP peer.** UniFi is not reconciled from here. The UDM's FRR config is
-  `terraform/unifi/bgp.conf` (OpenTofu); change it together with `app/networking.yaml`.
+  `unifi/bgp.conf` in the private home-infra repo (OpenTofu); change it together with `app/networking.yaml`.
 - **Hubble TLS.** Certs use
   `hubble.tls.auto.method: cronJob`: the chart's `helm` method reuses its leaf
   certs on every upgrade and never renews them, while certgen renews every four

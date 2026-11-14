@@ -41,7 +41,3 @@ area/taskfile:
           - Taskfile.yaml
           - .justfile
           - "**/mod.just"
-area/terraform:
-  - changed-files:
-      - any-glob-to-any-file:
-          - terraform/**/*
