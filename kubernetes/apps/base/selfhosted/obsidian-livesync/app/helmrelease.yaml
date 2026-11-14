@@ -93,7 +93,6 @@ spec:
           gethomepage.dev/name: Obsidian LiveSync
           gethomepage.dev/icon: obsidian.svg
           gethomepage.dev/description: Vault sync
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             url: https://sync.sklab.dev/
             conditions:

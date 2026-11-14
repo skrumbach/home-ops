@@ -127,7 +127,6 @@ spec:
           gethomepage.dev/icon: n8n.svg
           gethomepage.dev/description: Workflow automation
           gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
-          external-dns.kubernetes.io/target: "internal.sklab.dev"
           # /healthz/readiness, NOT /healthz: /healthz is an unconditional 200 upstream and stayed green
           # through a database outage. See the probes block above.
           gatus.home-operations.com/endpoint: |-
@@ -154,7 +153,6 @@ spec:
           gethomepage.dev/name: n8n Webhook
           gethomepage.dev/icon: "mdi-webhook-#22D8F0"
           gethomepage.dev/pod-selector: app.kubernetes.io/name=n8n
-          external-dns.kubernetes.io/target: "external.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             url: https://n8n-webhook.sklab.dev/webhook/any
             conditions:

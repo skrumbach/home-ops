@@ -14,7 +14,6 @@ metadata:
     gethomepage.dev/description: "LLM gateway, keys and budgets"
     gethomepage.dev/icon: sh-litellm.svg
     gethomepage.dev/pod-selector: app.kubernetes.io/name=litellm
-    external-dns.kubernetes.io/target: "internal.sklab.dev"
     # /health/readiness also covers the Postgres dependency.
     gatus.home-operations.com/endpoint: |-
       group: ${GATUS_GROUP}

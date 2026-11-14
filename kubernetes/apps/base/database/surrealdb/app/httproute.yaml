@@ -11,7 +11,6 @@ metadata:
     gethomepage.dev/name: SurrealDB
     gethomepage.dev/app: *app
     gethomepage.dev/icon: surrealdb.svg
-    external-dns.kubernetes.io/target: "internal.sklab.dev"
     # Check /health, not `/`: bare `/` redirects to a third-party surrealdb.com
     # page that Gatus follows.
     gatus.home-operations.com/endpoint: |-
