@@ -91,16 +91,8 @@ spec:
                   app.kubernetes.io/name: surrealdb
               topologyKey: kubernetes.io/hostname
 
-    # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute; talos-3 is
-    # PreferNoSchedule, so the score penalty keeps this off talos-3.
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: ScheduleAnyway
-        nodeTaintsPolicy: Honor
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: surrealdb
+    # No topologySpreadConstraints: the chart does not render that key. talos-3's
+    # PreferNoSchedule taint already scores it last for this untolerating pod.
 
     # route: does not work on this chart. Leave it unset. A real HTTPRoute
     # is its own manifest.
@@ -118,10 +110,8 @@ spec:
       initialDelaySeconds: 10
       periodSeconds: 5
 
-    serviceMonitor:
-      enabled: true
-
-    # storageClassName omitted on purpose: chart 0.4.0 renders it twice.
+    # storageClassName omitted: the claim takes the default class, ceph-block (chart 0.4.0 rendered
+    # the key twice; 0.5.0 does not). Setting it now would only restate the bound value.
     persistence:
       enabled: true
       accessModes:
