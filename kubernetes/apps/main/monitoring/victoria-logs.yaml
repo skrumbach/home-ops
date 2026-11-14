@@ -6,6 +6,9 @@ kind: Kustomization
 metadata:
   name: victoria-logs
 spec:
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: monitoring
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/victoria-logs/app
   prune: true
