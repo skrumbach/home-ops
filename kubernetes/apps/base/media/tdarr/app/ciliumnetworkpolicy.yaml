@@ -5,8 +5,7 @@ kind: CiliumNetworkPolicy
 metadata:
   name: tdarr
 spec:
-  # The server runs auth "false" because the external Windows node cannot take a key from Git
-  # (helmrelease.yaml), so :8265 (UI and API) and :8266 (node protocol, which also serves the API)
+  # The server runs auth "false" (helmrelease.yaml), so :8265 (UI and API) and :8266 (node protocol, which also serves the API)
   # are open to anything that can reach them. This fence is the only gate. Ingress only: plugin
   # downloads and the NFS mount stay as they are. The tdarr-node pod listens on nothing and is
   # not selected. The server connects to no in-cluster Service but CoreDNS, so
@@ -47,15 +46,6 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: monitoring
             app.kubernetes.io/name: gatus
-      toPorts:
-        - ports:
-            - port: "8266"
-              protocol: TCP
-    # External Windows GPU node through tdarr-node-lb (10.50.0.54:8266). DSR keeps its LAN source
-    # address. HOLD: the node's /32 is not in Git; replace this `world` entry with
-    # `fromCIDR: [<node-ip>/32]` before merging, or LAN-wide :8266 access stays open.
-    - fromEntities:
-        - world
       toPorts:
         - ports:
             - port: "8266"
