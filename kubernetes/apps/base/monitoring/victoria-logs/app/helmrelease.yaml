@@ -16,6 +16,11 @@ spec:
     global:
       image:
         registry: quay.io
+    # The server never calls the Kubernetes API. The chart renders automountServiceAccountToken only
+    # when a service account is named, so name the one the pod already uses.
+    serviceAccount:
+      name: default
+      automountToken: false
     server:
       # Service and StatefulSet `victoria-logs`, claim `server-volume-victoria-logs-0`. Not the 2025
       # release `victorialogs`: its orphan claim server-volume-victorialogs-victoria-logs-single-server-0
