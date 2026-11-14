@@ -57,7 +57,7 @@ flowchart LR
    (`UNIFI_API_URL` as `UNIFI_HOST`, `UNIFI_API_KEY`). Reloader restarts the pod when it changes.
 3. **Watch.** `triggerLoopOnEvent: true` starts a sync when a route or Service changes.
 4. **Write.** external-dns hands the desired records to the webhook sidecar, which creates them on the UniFi
-   gateway. Hand-made static records live in `terraform/unifi/dns.tofu` and are not touched here.
+   gateway. Hand-made static records live in the private home-infra repo (`unifi/dns.tofu`) and are not touched here.
 
 ## Settings that matter
 
@@ -93,7 +93,7 @@ kubectl get svc -A -o yaml | grep -B8 'external-dns.kubernetes.io/hostname'
 ## Invariants
 
 - **external-dns owns every app record.** Hand-made local records are the only ones in
-  `terraform/unifi/dns.tofu` (the NAS), and an app record is never declared there. The owner is `main` and the TXT
+  `unifi/dns.tofu` in the private home-infra repo (the NAS), and an app record is never declared there. The owner is `main` and the TXT
   prefix `k8s.main.`; keep both in step with that file's header.
 
 Upstream: [external-dns-unifi-webhook](https://github.com/home-operations/external-dns-unifi-webhook)

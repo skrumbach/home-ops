@@ -37,7 +37,6 @@ jobs:
       versions: ${{ steps.versions.outputs.changed_files }}
       bootstrap: ${{ steps.bootstrap.outputs.changed_files }}
       renovate: ${{ steps.renovate.outputs.changed_files }}
-      terraform: ${{ steps.terraform.outputs.changed_files }}
     steps:
       - name: Kubernetes Changes
         id: kubernetes
@@ -76,16 +75,6 @@ jobs:
             .renovaterc.json5
             .renovate/**
             .github/workflows/ci.yaml
-
-      - name: Terraform Changes
-        id: terraform
-        uses: bjw-s-labs/action-changed-files@147be9638332cf68fd60714a610509d7a9360d60 # v0.7.0
-        with:
-          patterns: |-
-            terraform/**
-            .github/workflows/ci.yaml
-            .mise.toml
-            scripts/ci/tofu-validate.sh
 
   flate-test:
     if: ${{ needs.changes.outputs.kubernetes != '[]' }}
@@ -253,28 +242,6 @@ jobs:
       - name: Validate Renovate Config
         run: npx --yes --package renovate renovate-config-validator .renovaterc.json5 .renovate/*.json5
 
-  terraform:
-    if: ${{ needs.changes.outputs.terraform != '[]' }}
-    needs: changes
-    name: Terraform
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Setup Tools
-        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
-        with:
-          install_args: opentofu
-          cache: false
-
-      # Credential-less fmt + validate. Live read-only plans are terraform-diff.yaml.
-      - name: Format and Validate OpenTofu Stacks
-        run: ./scripts/ci/tofu-validate.sh
-
   # Whole tree, no path filter. Tool versions come from .mise.toml, so install_args names
   # the tools only.
   lint:
@@ -360,7 +327,6 @@ jobs:
       - versions
       - bootstrap
       - renovate-config
-      - terraform
       - lint
       - tests
     name: CI Success

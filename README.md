@@ -44,7 +44,7 @@ This is a live cluster, not an upstream template. There is no Makejinja render s
 ├── .taskfiles/         # task recipes (flux, rook, network, actions-runner, docs)
 ├── docs/               # Hugo theme for the generated documentation site
 ├── scripts/            # CI guards (scripts/ci), add-app scaffold, docs generator, agent credentials, VolSync expiry ledger
-├── terraform/          # OpenTofu stacks outside Flux (UniFi, TrueNAS)
+├── terraform/          # gitignored clone of the private home-infra repo (OpenTofu: UniFi, TrueNAS)
 └── .mise.toml          # workstation tool versions
 ```
 

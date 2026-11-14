@@ -26,7 +26,7 @@ GRANDFATHERED = {  # path or subtree: reason (exempt from every check)
     "kubernetes/apps/base/flux-system/meta": "cluster-meta entry point",
     "kubernetes/apps/base/system/volsync": "retired tree, frozen until the restic repos expire",
 }
-NAMED_ROOTS = ("kubernetes", "scripts", ".taskfiles", "terraform", "bootstrap")
+NAMED_ROOTS = ("kubernetes", "scripts", ".taskfiles", "bootstrap")
 KIND = re.compile(r"^kind:\s*(\w+)\s*$", re.M)
 SEGMENT = re.compile(r"^\.?[a-z0-9][a-z0-9.-]*$")
 BASE, MAIN = "kubernetes/apps/base/", "kubernetes/apps/main/"

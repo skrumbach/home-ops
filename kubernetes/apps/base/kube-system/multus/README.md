@@ -92,7 +92,7 @@ kubectl -n home-automation get pod -l app.kubernetes.io/name=home-assistant -o j
   (`networks/vpn.yaml`).
 - **`home-assistant` takes the wrong prefix length.** Its annotation asks for `10.40.0.100/16`
   (`home-automation/home-assistant/app/helmrelease.yaml`). The IoT network is `10.40.0.1/22` in
-  `terraform/unifi/networks.tofu`, and the other three consumers take `/22`.
+  `unifi/networks.tofu` in the private home-infra repo, and the other three consumers take `/22`.
 
 Upstream: [Multus CNI](https://github.com/k8snetworkplumbingwg/multus-cni) •
 [bjw-s multus chart](https://github.com/bjw-s-labs/helm-charts)

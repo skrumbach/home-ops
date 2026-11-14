@@ -10,7 +10,7 @@ Reads:
 - the overlay files `kubernetes/apps/main/<ns>/<app>.yaml`: one file is one app, and its Flux
   Kustomizations give the paths, `dependsOn`, components and substitutions;
 - `.renovaterc.json5` and `.renovate/*.json5`;
-- a fixed list of hand-written Markdown (`OPS_ORDER`, `OPS_REST`, the runbooks, `terraform/`), plus every
+- a fixed list of hand-written Markdown (`OPS_ORDER`, `OPS_REST`, the runbooks), plus every
   `README.md`/runbook under `kubernetes/apps/base/<ns>/<app>/` (shown on that app's page) and
   `kubernetes/apps/base/<ns>/README.md` (shown on the namespace page).
 
