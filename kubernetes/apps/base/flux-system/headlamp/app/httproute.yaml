@@ -11,6 +11,14 @@ metadata:
     gethomepage.dev/icon: headlamp.svg
     gethomepage.dev/name: Headlamp
     gethomepage.dev/app: *app
+    # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+    # sign-in page it redirects to. Probe the Service in-cluster instead (the chart's own
+    # readiness probe path is /).
+    gatus.home-operations.com/endpoint: |-
+      url: http://headlamp.flux-system.svc.cluster.local/
+      conditions: ["[STATUS] == 200"]
+      ui:
+        hide-url: true
 spec:
   hostnames:
     - "headlamp.sklab.dev"

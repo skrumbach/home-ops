@@ -244,6 +244,9 @@ spec:
             gethomepage.dev/description: Metrics
             gethomepage.dev/widget.type: prometheus
             gethomepage.dev/widget.url: http://kube-prometheus-stack-prometheus.monitoring:9090
+            gatus.home-operations.com/endpoint: |-
+              url: https://kube-prometheus-stack.sklab.dev/-/ready
+              conditions: ["[STATUS] == 200"]
           hostnames: ["{{ .Release.Name }}.sklab.dev"]
           parentRefs:
             - name: envoy-internal
