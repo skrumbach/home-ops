@@ -566,14 +566,30 @@ def comment_blocks(lines: list[str]) -> list[tuple[int, int, str]]:
     return blocks
 
 
+def key_blocks(lines: list[str], key: str) -> tuple[set[int], set[int]]:
+    """Line numbers of each `key:` line (a regex alternation), and of the lines nested under it."""
+    heads, inside, indent = set(), set(), None
+    for i, line in enumerate(lines):
+        if re.match(rf"^\s*(?:{key}):\s*$", line):
+            indent = len(line) - len(line.lstrip())
+            heads.add(i)
+        elif indent is not None and line.strip() and not line.strip().startswith("#") and len(line) - len(line.lstrip()) <= indent:
+            indent = None
+        elif indent is not None:
+            inside.add(i)
+    return heads, inside
+
+
 def no_backup_reason(claim: dict, app: dict | None) -> str:
     """The sentence of a manifest comment that says this claim is deliberately not backed up, if one exists.
 
     Looked for in the app's overlay file and base manifests: a comment that names the claim, the comments
     of the PVC document that defines it, or a comment in the `persistence:` block of the HelmRelease that
-    renders it. A comment saying "not backed up" beats one that only says "scratch".
+    renders it. A claim template (StatefulSet, Prometheus, a chart's storage values) takes the comment
+    directly above or inside its `volumeClaimTemplates:`, `volumeClaimTemplate:`, `persistentVolume:` or
+    `storageSpec:` block. A comment saying "not backed up" beats one that only says "scratch".
     """
-    if not app or claim["template"]:
+    if not app:
         return ""
     files = [ROOT / app["file"]]
     for k in app["ks"]:
@@ -588,25 +604,23 @@ def no_backup_reason(claim: dict, app: dict | None) -> str:
         lines = path.read_text().splitlines()
         persistence = set()
         if from_helm and path.name.startswith("helmrelease"):
-            indent = None
-            for i, line in enumerate(lines):
-                if re.match(r"^\s*persistence:\s*$", line):
-                    indent = len(line) - len(line.lstrip())
-                elif indent is not None and line.strip() and not line.strip().startswith("#") and len(line) - len(line.lstrip()) <= indent:
-                    indent = None
-                elif indent is not None:
-                    persistence.add(i)
+            persistence = key_blocks(lines, "persistence")[1]
         doc_start = 0
         docs = []  # (first line, last line) of each YAML document
         for i, line in enumerate(lines + ["---"]):
             if line.startswith("---"):
                 docs.append((doc_start, i - 1))
                 doc_start = i + 1
+        storage = key_blocks(lines, "volumeClaimTemplates?|persistentVolume|storageSpec") if claim["template"] else None
         for first, last, text in comment_blocks(lines):
             doc = next(((a, b) for a, b in docs if a <= first <= b), (0, -1))
             doc_text = "\n".join(lines[doc[0]:doc[1] + 1])
-            if (token.search(text) or first in persistence or
-                    (re.search(r"kind:\s*PersistentVolumeClaim", doc_text) and defines.search(doc_text))):
+            if storage:
+                found = first in storage[1] or last + 1 in storage[0]
+            else:
+                found = bool(token.search(text) or first in persistence or
+                             (re.search(r"kind:\s*PersistentVolumeClaim", doc_text) and defines.search(doc_text)))
+            if found:
                 # The whole comment when it is short, else the sentence that says so.
                 candidates += [(s, text if len(text) <= 200 else s) for s in re.split(r"(?<=[.!?])\s+", text) if NO_BACKUP.search(s)]
     strong = [shown for sentence, shown in candidates if NO_BACKUP_STRONG.search(sentence)]

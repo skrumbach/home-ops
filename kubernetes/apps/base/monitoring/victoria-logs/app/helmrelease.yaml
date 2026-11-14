@@ -25,6 +25,7 @@ spec:
       # drops the oldest days first if 14 days ever outgrow the claim, instead of filling it.
       retentionPeriod: 14d
       retentionDiskSpaceUsage: 45GiB
+      # Not backed up: logs are kept only 14 days, so a lost claim loses at most those days.
       persistentVolume:
         enabled: true
         storageClassName: ceph-block
