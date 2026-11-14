@@ -4,6 +4,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: storage-gatus
+  # Holds only the sqlite check history; the endpoints come from Git, so a loss costs history: not backed up.
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:

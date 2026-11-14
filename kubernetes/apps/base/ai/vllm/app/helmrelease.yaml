@@ -179,6 +179,7 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: ceph-block
+        # Model cache (LLAMA_CACHE): `-hf` re-downloads the GGUF at start, so this claim is re-downloadable and not backed up.
         # Each cached model is about 17 GiB with its mmproj; 75Gi holds four. A claim never
         # shrinks: lowering this fails the Helm upgrade.
         size: 75Gi
