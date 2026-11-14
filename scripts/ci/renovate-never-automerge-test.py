@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Talos, Kubernetes, Cilium, Rook, Ceph, kopiur and trust-path bumps never automerge, for any update type.
 
-Prevents: an unattended node upgrade, CNI or storage bump, or an unreviewed identity, secret, edge, TLS, Renovate or runner-controller bump. Replays local presets; the remote base is not covered.
+Prevents: an unattended node upgrade, CNI or storage bump, or an unreviewed identity, secret, edge, TLS, Renovate, runner-controller or Flux bump. Replays local presets; the remote base is not covered.
 """
 
 import fnmatch
@@ -32,6 +32,9 @@ LIVE = {  # package -> the manifest Renovate tracks it in (all docker datasource
     "ghcr.io/renovatebot/renovate": "kubernetes/apps/base/renovate/renovate-operator/jobs/renovatejob.yaml",
     "ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller":
         "kubernetes/apps/base/actions-runner-system/gha-runner-scale-set-controller/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/charts/flux-operator": "kubernetes/apps/base/flux-system/flux-operator/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/charts/flux-instance": "kubernetes/apps/base/flux-system/flux-instance/app/ocirepository.yaml",
+    "ghcr.io/controlplaneio-fluxcd/flux-operator-manifests": "kubernetes/apps/base/flux-system/flux-instance/app/helmrelease.yaml",
 }
 STR = r"""\"(?:\\.|[^"\\])*\"|'(?:\\.|[^'\\])*'"""  # JSON5 strings, both quote styles
 
