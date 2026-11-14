@@ -507,16 +507,10 @@ spec:
             jsonData:
               implementation: prometheus
 
-        # Tempo (retired 2026-10-25) and Loki (replaced by VictoriaLogs) stay here only so Grafana
-        # drops the stale datasources.
         deleteDatasources:
           - name: Alertmanager
             orgId: 1
           - name: Prometheus
-            orgId: 1
-          - name: Loki
-            orgId: 1
-          - name: Tempo
             orgId: 1
 
     env:
@@ -574,6 +568,18 @@ spec:
         preinstall_auto_update: false
     imageRenderer:
       enabled: true
+      # Pinned to the digest the chart's floating `latest` was running on 2026-11-13. Idles at
+      # about 6Mi; Chromium spikes while it renders a panel.
+      image:
+        registry: docker.io
+        repository: grafana/grafana-image-renderer
+        tag: v5.9.1@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
+        pullPolicy: IfNotPresent
+      resources:
+        limits:
+          memory: 512Mi
+        requests:
+          memory: 64Mi
 
     persistence:
       enabled: false
