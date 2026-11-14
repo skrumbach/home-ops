@@ -50,20 +50,6 @@ spec:
         runAsGroup: 0
         fsGroup: 0
         fsGroupChangePolicy: OnRootMismatch
-    route:
-      app:
-        annotations:
-          gatus.home-operations.com/enabled: "false"
-        hostnames:
-          - "{{ .Release.Name }}.sklab.dev"
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: &port 3000
     persistence:
       # browserless keeps no durable state (DATA_DIR held only `lost+found`; metrics go to the /tmp
       # emptyDir below), so there is no PVC and nothing to back up.
@@ -90,4 +76,6 @@ spec:
         controller: *app
         ports:
           http:
-            port: *port
+            # No route on purpose: browserless has no token and runs as root with SYS_ADMIN, so a LAN
+            # route let any device drive a browser inside the pod network. RSSHub uses this Service.
+            port: 3000
