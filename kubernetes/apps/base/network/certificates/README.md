@@ -14,7 +14,8 @@
 - **Feeds both Gateways.** `envoy-internal` and `envoy-external` serve `sklab-dev-production-tls` on port 443
   ([`network/envoy-gateway`](../envoy-gateway/README.md)).
 - **Exports it.** PushSecret `sklab-dev-tls` copies `tls.crt` and `tls.key` of that Secret to 1Password item
-  `sklab-dev-tls` through ClusterSecretStore `onepassword`. One way only: nothing in Git reads the item back.
+  `sklab-dev-tls` (vault `Automation`) through ClusterSecretStore `onepassword-automation`. One way only: nothing
+  in Git reads the item back.
 
 ## Why it is built this way
 
@@ -61,7 +62,7 @@ All in [`app/`](app/).
 | Certificate `dnsNames` | `sklab.dev`, `*.sklab.dev` | One wildcard for every route on both Gateways. |
 | Certificate `issuerRef` | ClusterIssuer `letsencrypt-production` | The only ClusterIssuer in the cluster (see the cert-manager README). |
 | PushSecret template | `b64enc` on both keys | The item holds base64 text, so a restore must decode it (`decodingStrategy: Base64`). |
-| PushSecret store | ClusterSecretStore `onepassword` | See the `security/external-secrets` README on push stores. |
+| PushSecret store | ClusterSecretStore `onepassword-automation` | See the `security/external-secrets` README on push stores. |
 
 ## Operate it
 

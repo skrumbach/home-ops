@@ -31,7 +31,7 @@ metadata:
 spec:
   refreshInterval: 5m
   secretStoreRefs:
-    - name: onepassword
+    - name: onepassword-automation
       kind: ClusterSecretStore
   selector:
     secret:

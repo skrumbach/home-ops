@@ -59,7 +59,8 @@ flowchart LR
 1. Flux applies `app/`. The HelmRelease depends on `onepassword-connect` and installs the controller, the webhook and the cert controller.
 2. Flux then applies `stores/`. Both stores point at `http://onepassword-connect.security.svc.cluster.local:8080` and read the token from key `token` in Secret `onepassword-secret`.
 3. An `ExternalSecret` names store `onepassword`, an item and fields. ESO asks Connect, which returns the item from the first vault that has it, and ESO writes the target Secret.
-4. A `PushSecret` that names `onepassword-automation` writes an item into `Automation`. Three do: `ai/toolhive`, `media/seerr` and `media/wizarr`. The others still name `onepassword`, see [Known gaps](#known-gaps).
+4. A `PushSecret` that names `onepassword-automation` writes an item into `Automation`. Readers keep store
+   `onepassword`, which falls through to `Automation` when `Homelab` has no item of that title.
 5. The generated-secret pattern holds no 1Password item. The `Password` generator and `refreshPolicy: CreatedOnce` produce the value once; `monitoring/grafana` is one example.
 
 The Connect token Secret `onepassword-secret` is the only pre-ESO secret. Bootstrap applies it from `ref+op://Home-Lab/1password/...` (see [`bootstrap/README.md`](../../../../../bootstrap/README.md)).
@@ -102,16 +103,10 @@ Defined in `monitoring/kube-prometheus-stack` ([`silent-failure-gaps.yaml`](../.
 
 - **Read vault is `Homelab`.** Connect cannot see `Home-Lab`. The two names differ on purpose.
 - **Stores stay cluster-scoped** while the Connect token Secret lives in `security`.
-
-## Known gaps
-
-- **Most PushSecrets still write through the read store.** 26 `PushSecret`s name store `onepassword`: the 19 LiteLLM
-  virtual keys and `litellm-pgvector-seed` in `ai/litellm`, `flux-system/headlamp`, `monitoring/grafana-sa-provisioner`,
-  `network/certificates`, `system/kopiur`, `system/volsync` and `media/plex`. The comment in
-  [`stores/clustersecretstore-automation.yaml`](stores/clustersecretstore-automation.yaml) says a push through that
-  store resolves by vault priority and could land in `Homelab`. Only three use `onepassword-automation`. `media/plex`
-  stays on `onepassword` on purpose (its item lives in `Homelab`, comment in its PushSecret). Moving another one is not
-  a one-line change: a new item lands in `Automation` while any copy already in `Homelab` stays first in the read order.
+- **Machine-made pushes use `onepassword-automation`.** Their items live in `Automation`, not the hand-kept `Homelab`.
+  Two exceptions name `onepassword` because they upsert one field of a hand-kept `Homelab` item: `media/plex` (item
+  `plex`) and `system/volsync` (item `volsync-template`); each PushSecret says why. Moving a push to `Automation`
+  means moving its item first (`op item move`): a copy left in `Homelab` stays first in the read order.
 
 Upstream: [External Secrets docs](https://external-secrets.io/latest/) •
 [1Password provider](https://external-secrets.io/latest/provider/1password-automation/)
