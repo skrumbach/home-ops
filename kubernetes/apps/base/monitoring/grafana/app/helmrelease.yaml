@@ -573,7 +573,7 @@ spec:
       image:
         registry: docker.io
         repository: grafana/grafana-image-renderer
-        tag: v5.9.1@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
+        tag: v5.12.10@sha256:a7970b826f6e477461e02bf5463d92634e9ad27d525e4e50296978a2e592d2d7
         pullPolicy: IfNotPresent
       resources:
         limits:
