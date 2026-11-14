@@ -72,8 +72,8 @@ Values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | `KOPIUR_SCHEDULE_R2` (overlay) | `H 7 * * *` | The namespace's r2 hour in the kopiur schedule table. |
 | `surrealdb.extraArgs` | `--allow-all`, `--allow-funcs` | The manifest records no reason. |
 | `resources` | request `100m` CPU, `512Mi`; limit `2Gi` memory, no CPU limit | The comment says to re-measure at `[14d:30s]` before trimming CPU, because coarser sampling under-reads the peak. |
-| `topologySpreadConstraints` | `ScheduleAnyway`, `nodeTaintsPolicy: Honor` | `Honor` only filters `NoSchedule`/`NoExecute`. talos-3 is `PreferNoSchedule`, so the score penalty keeps the pod off it. |
-| `persistence.storageClassName` | omitted | The comment says the chart renders it twice. |
+| `serviceMonitor` | not set | SurrealDB serves no `/metrics` on port 8000 and the chart has no ServiceMonitor template. The alerts read kube-state-metrics and cAdvisor series. |
+| `persistence.storageClassName` | omitted | The claim takes the default class, `ceph-block`. An older chart release rendered the key twice. |
 
 ## Operate it
 
@@ -102,12 +102,6 @@ kubectl -n database get snapshotpolicy,snapshotschedule,snapshot
 - Snapshots are crash-consistent, which is enough while the server holds no data. Add a `beforeSnapshot` export hook
   in [`backup/kustomization.yaml`](backup/kustomization.yaml) before storing anything that matters.
 - The `route:` chart key does not work on this chart. A real HTTPRoute is its own manifest.
-
-## Known gaps
-
-- **A ServiceMonitor for a port with no metrics.** `serviceMonitor.enabled: true` in
-  [`app/helmrelease.yaml`](app/helmrelease.yaml), while a comment in [`app/prometheusrule.yaml`](app/prometheusrule.yaml)
-  says SurrealDB serves no `/metrics` on its only port, 8000.
 
 Upstream: [SurrealDB docs](https://surrealdb.com/docs) •
 [SurrealDB Helm chart](https://github.com/surrealdb/helm-charts)

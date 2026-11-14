@@ -74,7 +74,7 @@ spec:
         # existed. Now a plain core-for-core ratio.
         #
         # The denominator is the REQUEST, not the limit, because this container
-        # declares no CPU limit at all - only requests.cpu: 500m - so
+        # declares no CPU limit at all - only requests.cpu: 100m - so
         # kube_pod_container_resource_limits{resource="cpu"} is empty for it and
         # a limit-based rule would be just as unfireable as the one it replaces.
         # If a CPU limit is ever added, switch this to resource_limits.
