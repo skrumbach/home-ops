@@ -1,20 +1,10 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/issuer_v1.json
-# Create a selfsigned Issuer, in order to create a root CA certificate for
-# signing webhook serving certificates
+# Self-signed Issuer for the chart's webhook serving Certificate (k8tz-tls); the
+# MutatingWebhookConfiguration takes its caBundle from that same Certificate.
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: k8tz-webhook-selfsign
 spec:
   selfSigned: {}
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/issuer_v1.json
-# Create an Issuer that uses the above generated CA certificate to issue certs
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: k8tz-webhook-ca
-spec:
-  ca:
-    secretName: k8tz-webhook-ca
