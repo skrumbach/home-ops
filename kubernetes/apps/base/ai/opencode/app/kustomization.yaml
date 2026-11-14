@@ -8,6 +8,8 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./ocirepository.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
 configMapGenerator:
   # entrypoint.sh's own `${GITHUB_TOKEN}`/`${HOME}` shell expansions are not

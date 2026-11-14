@@ -25,23 +25,22 @@ repos:
         name: Fix EOF
       - id: mixed-line-ending
         name: Check mixed line endings
-      # - id: check-case-conflict
-      #   name: Check case conflicts
       - id: check-executables-have-shebangs
         name: Check executable shebangs
       - id: check-shebang-scripts-are-executable
         name: Check files with shebangs being executable
       - id: trailing-whitespace
         name: Fix trailing whitespace
+      # docs/layouts/*.json are Hugo templates that emit JSON, not JSON files.
       - id: pretty-format-json
         name: Format JSON
         args: [--autofix, --no-sort-keys]
+        exclude: ^docs/layouts/
       - id: check-json
         name: Check JSON
+        exclude: ^docs/layouts/
       - id: check-toml
         name: Check TOML
-      - id: check-xml
-        name: Check XML
       - id: check-yaml
         name: Check YAML
         args: [--allow-multiple-documents, --unsafe]
@@ -72,7 +71,7 @@ repos:
         language: system
         files: ^\.github/(workflows|zizmor\.yml)
         pass_filenames: false
-      # Public repo. Scans only the staged diff; findings are redacted. Skill `secrets-1password`.
+      # Public repo. Scans only the staged diff; findings are redacted.
       - id: gitleaks
         name: Scan staged changes for secrets
         entry: mise exec -- gitleaks git --pre-commit --staged --redact --no-banner --verbose

@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app paperless-ngx
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: paperless-ngx
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -25,7 +24,7 @@ spec:
               repository: ghcr.io/paperless-ngx/paperless-ngx
               tag: 3.4.2@sha256:d704e84f88300eb6ab001ab15720a2330ff99169cf9f94d6b8fcc44b63a84c84
             env:
-              PAPERLESS_URL: "https://docs.${SECRET_DOMAIN}"
+              PAPERLESS_URL: "https://docs.sklab.dev"
               PAPERLESS_PORT: &port 8000
               PAPERLESS_TIME_ZONE: America/New_York
               PAPERLESS_REDIS: "redis://paperless-ngx-dragonfly.selfhosted.svc.cluster.local:6379"
@@ -60,8 +59,8 @@ spec:
               PAPERLESS_AI_LLM_BACKEND: openai-like
               PAPERLESS_AI_LLM_ENDPOINT: "http://litellm.ai.svc.cluster.local:4000/v1"
               PAPERLESS_AI_LLM_MODEL: chat-local
-              # Suggestions in English so they match the English taxonomy in scripts/paperless-seed, also for
-              # German documents.
+              # Suggestions in English so they match the English tag and type names, also for German
+              # documents.
               PAPERLESS_AI_LLM_OUTPUT_LANGUAGE: English
               # The local chat model can think before answering; the 120s default is too short for it.
               PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
@@ -70,13 +69,30 @@ spec:
               # embedding-local is a 512-token llama-server context; over-length input fails the whole document's
               # embedding ("Context size has been exceeded"). Paperless counts chunk tokens with a different
               # tokenizer than Qwen and llama-index prepends document metadata, so 384 still overflowed ~1 in 20
-              # documents (2026-11-08); 256 leaves the margin. Skill b70-llm-serving.
+              # documents (2026-11-08); 256 leaves the margin.
               PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE: "256"
               PAPERLESS_WEBSERVER_WORKERS: "2"
-              # Authentik SSO; the provider JSON with the client secret is in paperless-ngx-secret. SSO users
-              # are signed up on first login with no permissions; grant them in Paperless. The password
-              # form stays as break-glass until the admin account is linked (Profile > Connect).
+              # Pocket ID SSO (django-allauth openid_connect), the only provider. SSO users are signed up
+              # on first login with no permissions; grant them in Paperless. The password form stays as
+              # break-glass until the admin account is linked (Profile > Connect).
               PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              # The client secret, generated in the cluster (externalsecret-oidc.yaml);
+              # pocketidoidcclient.yaml pushes the same value to Pocket ID.
+              PAPERLESS_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: paperless-ngx-oidc-client
+                    key: client-secret
+              # The kubelet fills $(PAPERLESS_OIDC_CLIENT_SECRET) in, which only works for a variable
+              # listed before this one (dependsOn orders them). provider_id "pocket-id" is part of the
+              # client's callback URL: change both together.
+              PAPERLESS_SOCIALACCOUNT_PROVIDERS:
+                value: >-
+                  {"openid_connect": {"OAUTH_PKCE_ENABLED": true, "APPS": [{"provider_id": "pocket-id",
+                  "name": "Pocket ID", "client_id": "paperless",
+                  "secret": "$(PAPERLESS_OIDC_CLIENT_SECRET)", "settings": {"server_url":
+                  "https://id.sklab.dev/.well-known/openid-configuration"}}]}}
+                dependsOn: PAPERLESS_OIDC_CLIENT_SECRET
               PAPERLESS_SOCIAL_AUTO_SIGNUP: "true"
               PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
               # Office documents (.docx/.xlsx/.doc/.odt/.rtf) and e-mail (.eml) go through the tika and
@@ -199,43 +215,53 @@ spec:
       data:
         enabled: true
         existingClaim: ${KOPIUR_CLAIM:-paperless-ngx}
-        globalMounts:
-          - path: /usr/src/paperless/data
+        # Only `app` mounts the volumes: paperless reaches tika and gotenberg over
+        # HTTP, and tika (uid 35002) cannot write them, which fails pvc-writable-check.
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/data
       media:
         enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 50Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /usr/src/paperless/media
+        retain: true
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/media
       consume:
         enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 10Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /usr/src/paperless/consume
+        advancedMounts:
+          paperless-ngx:
+            app:
+              - path: /usr/src/paperless/consume
 
     route:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Paperless-ngx
-          gethomepage.dev/icon: paperless-ngx.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/icon: sh-paperless-ngx-light.svg
+          gethomepage.dev/description: Document archive
           # Goes through the ungated `api` rule: Paperless' own DRF 401 proves Django answers and
-          # that /api still bypasses Authentik (a gated path would end on a 200 login page).
+          # that /api still bypasses the Envoy OIDC gate (a gated path would end on the 200 Pocket ID
+          # sign-in page).
           gatus.home-operations.com/endpoint: |-
-            url: https://docs.${SECRET_DOMAIN}/api/ui_settings/
+            url: https://docs.sklab.dev/api/ui_settings/
             conditions:
               - "[STATUS] == 401"
               - "[BODY].detail == pat(*credentials*)"
             group: selfhosted
         hostnames:
-          - "docs.${SECRET_DOMAIN}"
+          - "docs.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

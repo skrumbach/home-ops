@@ -51,7 +51,6 @@ endpoints:
 
   # Gateway :8642, not the dashboard :9119. The dashboard SPA returns 200
   # for unknown paths, so this matches the gateway's own /health JSON.
-  # Skill observability.
   - name: Hermes Gateway
     group: ai
     url: http://hermes.ai.svc.cluster.local:8642/health
@@ -64,7 +63,6 @@ endpoints:
 
   # initialize, not /health: /health stays 200 while the handshake hangs.
   # 25s timeout, 5m interval. A fast embed failure can still return 200.
-  # Skill observability.
   - name: ToolHive MCP Session
     group: ai
     url: ${MCP_GATEWAY_URL}
@@ -84,9 +82,9 @@ endpoints:
       - "[STATUS] == 200"
       - "[BODY].result.serverInfo.name == mcp-gateway-internal"
 
-  # In-cluster Service, matching a Home Assistant manifest.json body field.
-  # Status-only on the HTTPRoute stays green through ext_authz, and
-  # code-server also serves /manifest.json. Skill observability.
+  # In-cluster Service, matching a Home Assistant manifest.json body field,
+  # because code-server also serves /manifest.json. The home-assistant route
+  # annotation adds a status-only check of the same path through the gateway.
   - name: Home Assistant
     group: home-automation
     url: http://home-assistant.home-automation.svc.cluster.local:8123/manifest.json
@@ -99,7 +97,7 @@ endpoints:
 
   # In-cluster health bodies, not the ext_authz route. The (in-cluster)
   # suffix avoids colliding with auto-discovered external/echo and
-  # external/kromgo, which panics Gatus at startup. Skill observability.
+  # external/kromgo, which panics Gatus at startup.
   - name: Echo (in-cluster)
     group: external
     url: http://echo.network.svc.cluster.local/healthz
@@ -136,8 +134,8 @@ endpoints:
       - "[CONNECTED] == true"
 
   # Database TCP connects. These were ConfigMaps with gatus.io/enabled, which the
-  # sidecar never loads (it watches Services, Gateways and HTTPRoutes only). Skill
-  # observability. group database is not external/connectivity, so GatusServiceDown covers it.
+  # sidecar never loads (it watches Services, Gateways and HTTPRoutes only).
+  # group database is not external/connectivity, so GatusServiceDown covers it.
   - name: postgres-18
     group: database
     url: tcp://postgres-18-rw.database.svc.cluster.local:5432

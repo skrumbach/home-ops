@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app sabnzbd
-  namespace: &namespace downloads
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: downloads
+  interval: 1h
   path: "./kubernetes/apps/base/downloads/sabnzbd/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: downloads-pvc
       namespace: downloads
@@ -27,19 +21,14 @@ spec:
     - name: kopiur-repository
       namespace: system
   components:
-    # Proof: proof-ledger.md row 12.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: sabnzbd-config
       KOPIUR_CAPACITY: 5Gi
-      # 2Gi component default clears this snapshot. A raise does not update the standing Restore. Skill
-      # `kopiur-backups`.
+      # 2Gi component default clears this snapshot. A raise does not update the standing Restore.
       KOPIUR_CACHE_CAPACITY: 10Gi
       KOPIUR_PUID: "2000"
       KOPIUR_PGID: "2000"

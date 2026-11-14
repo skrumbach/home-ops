@@ -9,16 +9,16 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/description: Rendered Flux PR diffs
-    gethomepage.dev/group: observe
-    gethomepage.dev/name: konflate
+    gethomepage.dev/group: Platform
+    gethomepage.dev/name: Konflate
     gethomepage.dev/app: *app
     gethomepage.dev/pod-selector: app.kubernetes.io/name=konflate
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    gethomepage.dev/icon: konflate.svg
     gatus.home-operations.com/endpoint: |-
       conditions: ["[STATUS] == 200"]
 spec:
   hostnames:
-    - "konflate.${SECRET_DOMAIN}"
+    - "konflate.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

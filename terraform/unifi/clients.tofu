@@ -2,7 +2,7 @@
 # Client groups are not a resource in this provider: `groups` names them and
 # they live in the UI. The MS01 entries are the Talos nodes and their vPro
 # ports: keep them stable. Destroying a unifi_client makes the controller
-# forget the client (skip_forget_on_destroy = false). Skill `unifi-network`.
+# forget the client (skip_forget_on_destroy = false).
 
 resource "unifi_client" "ms01_01_vpro" {
   allow_existing         = true

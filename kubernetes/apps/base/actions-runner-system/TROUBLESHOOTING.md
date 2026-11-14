@@ -1,9 +1,5 @@
 # GitHub Actions runners
 
-Operational playbook (queued jobs, ghost jobs, broker timeouts, expired
-Talos client cert, no Docker on the home-ops scale set): skill `github-ci`
-([arc-runners.md](../../../../.agents/skills/github-ci/references/arc-runners.md)).
-
 Image and chart pins live in the HelmReleases. Taskfile recipes cover
 `skrumbach/home-ops` only. `task actions-runner:diagnose` is the status
 entry.

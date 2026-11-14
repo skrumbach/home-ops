@@ -75,7 +75,7 @@ spec:
           labels:
             severity: critical
 
-        # The ACME 429 counter is not emitted. A blocked renewal leaves renewal_timestamp in the past while the cert stays Ready. 6h overdue plus for: 1h covers retry backoff. Skill `observability`.
+        # The ACME 429 counter is not emitted. A blocked renewal leaves renewal_timestamp in the past while the cert stays Ready. 6h overdue plus for: 1h covers retry backoff.
         - alert: CertManagerRenewalOverdue
           expr: |-
             (time() - certmanager_certificate_renewal_timestamp_seconds) > 6 * 3600

@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketiduser_v1alpha1.json
+# Deleting this CR keeps the user and its passkeys in Pocket ID (no delete-from-pocket-id
+# annotation). The first reconcile writes a one-hour login link to status.oneTimeLoginURL.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDUser
+metadata:
+  name: owner
+spec:
+  username:
+    valueFrom:
+      name: pocket-id-secret
+      key: OWNER_USERNAME
+  email:
+    valueFrom:
+      name: pocket-id-secret
+      key: OWNER_EMAIL
+  admin: true

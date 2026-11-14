@@ -24,6 +24,8 @@ machine:
       allowedRoles:
         - os:admin
         - os:operator
+      # Adding or removing a namespace here is an apply-node on all 3 nodes, not a Flux change.
+      # Do it before moving tuppr or the runner, or they lose the Talos API.
       allowedKubernetesNamespaces:
         - actions-runner-system
         - system-upgrade
@@ -74,7 +76,7 @@ machine:
     extraConfig:
       serializeImagePulls: false
       maxPods: 250
-      # imagefs GC 60/45. The 85/80 default let unused layers fill /var. See skill talos-nodes.
+      # imagefs GC 60/45. The 85/80 default let unused layers fill /var.
       imageGCHighThresholdPercent: 60
       imageGCLowThresholdPercent: 45
       featureGates:
@@ -117,7 +119,7 @@ machine:
     vm.vfs_cache_pressure: "50"
   sysfs:
     # MGLRU stays off. machine.sysfs applies immediately; kube-system/mglru-disable reasserts the same key.
-    # Do not delete either until a reboot proves the other holds. See skill talos-nodes.
+    # Do not delete either until a reboot proves the other holds.
     kernel/mm/lru_gen/enabled: "0"
   udev:
     rules:
@@ -234,13 +236,11 @@ cluster:
   {% endif %}
 ---
 # Codified PSI trigger. OOMController never selects Guaranteed cgroups. A live patch does not survive the next render.
-# See skill talos-nodes.
 apiVersion: v1alpha1
 kind: OOMConfig
 triggerExpression: memory_full_avg10 > 50.0 && d_memory_full_avg10 > 0.0 && time_since_trigger > duration("30s")
 ---
 # domains must stay an empty list. Omitting it keeps the DHCP search domain and musl stops resolving.
-# See skill talos-nodes.
 apiVersion: v1alpha1
 kind: ResolverConfig
 nameservers:

@@ -1,5 +1,5 @@
 ---
-# Canonical commit convention (CLAUDE.md Position B, matching live history).
+# Canonical commit convention, matching live history.
 # Types are a closed enum. Scopes are not: Renovate uses container, helm,
 # github-action, mise, talos, flux, deps, and github-release, and human
 # commits also use app or namespace names (toolhive, hermes, ai, ...).

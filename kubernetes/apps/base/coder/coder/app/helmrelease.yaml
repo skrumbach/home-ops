@@ -1,0 +1,119 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app coder
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: *app
+  values:
+    coder:
+      # Deployment metadata (the chart's coder.annotations; a top-level podAnnotations is never
+      # rendered). Restarts Coder when Secret coder or coder-oidc-credentials changes.
+      annotations:
+        reloader.stakater.com/auto: "true"
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2112"
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 71m
+          # Request tracks peak working set with tight headroom: coderd grows with concurrent workspace builds.
+          memory: 640Mi
+      envFrom:
+        - secretRef:
+            name: *app
+      env:
+        - name: CODER_ACCESS_URL
+          value: "https://coder.sklab.dev"
+        - name: CODER_BLOCK_DIRECT
+          value: "true"
+        - name: CODER_DISABLE_PASSWORD_AUTH
+          value: "true"
+        - name: CODER_DERP_SERVER_STUN_ADDRESSES
+          value: "disable"
+        - name: CODER_EMAIL_FROM
+          value: "Coder <admin@sklab.dev>"
+        - name: CODER_EMAIL_TLS_STARTTLS
+          value: "true"
+        - name: CODER_LOGGING_HUMAN
+          value: "/dev/stderr"
+        # Exact, case-sensitive match on the `groups` claim; checked on every OIDC login.
+        - name: CODER_OIDC_ALLOWED_GROUPS
+          value: "admins"
+        # pocketidoidcclient.yaml; the operator writes this Secret.
+        - name: CODER_OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: coder-oidc-credentials
+              key: client-id
+        - name: CODER_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: coder-oidc-credentials
+              key: client-secret
+        # Group and role sync need a Premium license (entitlements: not_entitled), so the group
+        # and role mappings below do nothing today; only CODER_OIDC_ALLOWED_GROUPS is enforced.
+        - name: CODER_OIDC_GROUP_AUTO_CREATE
+          value: "true"
+        - name: CODER_OIDC_GROUP_FIELD
+          value: "groups"
+        - name: CODER_OIDC_GROUP_MAPPING
+          value: |
+            {"admins": "CoderAdmins"}
+        - name: CODER_OIDC_ICON_URL
+          value: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/refs/heads/main/svg/pocket-id.svg"
+        # On start, Coder resets the linked_id of every OIDC user linked to another issuer
+        # (CODER_OIDC_REPAIR_LINKS, default true); the next login re-links by email.
+        - name: CODER_OIDC_ISSUER_URL
+          value: "https://id.sklab.dev"
+        # Pocket ID sends email_verified=false for a user the operator created through the admin
+        # API (EMAILS_VERIFIED only covers self-signups, and the operator never sets the flag), and
+        # Coder then refuses the login with "Email not verified" (2026-11-13). Signups are disabled
+        # in Pocket ID and its only users are created from Git, so the claim adds nothing here.
+        - name: CODER_OIDC_IGNORE_EMAIL_VERIFIED
+          value: "true"
+        # Pocket ID releases the `groups` claim only with the groups scope.
+        - name: CODER_OIDC_SCOPES
+          value: "openid,profile,email,groups,offline_access"
+        - name: CODER_OIDC_SIGN_IN_TEXT
+          value: "Sign in with Pocket ID"
+        - name: CODER_OIDC_AUTH_URL_PARAMS
+          value: ""
+        - name: CODER_OIDC_USER_ROLE_MAPPING
+          value: |
+            {"admins": ["owner"]}
+        - name: CODER_PROMETHEUS_ENABLE
+          value: "true"
+        - name: CODER_PROMETHEUS_COLLECT_AGENT_STATS
+          value: "true"
+        - name: CODER_TELEMETRY_ENABLE
+          value: "false"
+        - name: CODER_UPDATE_CHECK
+          value: "false"
+
+      service:
+        enabled: true
+        ports:
+          http:
+            port: 8080
+        type: ClusterIP
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Service
+              name: *app
+            patch: |
+              - op: add
+                path: /spec/ports/-
+                value:
+                  name: prom-http
+                  port: 2112
+                  protocol: TCP
+                  targetPort: 2112

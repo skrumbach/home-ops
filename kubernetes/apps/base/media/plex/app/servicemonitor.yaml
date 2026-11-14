@@ -13,12 +13,9 @@ spec:
       scrapeTimeout: 10s
   selector:
     matchLabels:
-      # Flux's commonMetadata.labels (kubernetes/apps/main/media/plex.yaml)
-      # overwrites this Service's app.kubernetes.io/name to "plex" at reconcile
-      # time - it never carries "plex-exporter" live. The `port: metrics`
-      # endpoint below is what actually disambiguates it from the main `plex`
-      # Service, which shares this label but has no port named "metrics".
-      app.kubernetes.io/name: plex
+      # Matches only the plex-exporter Service (service.yaml). The chart's main
+      # `plex` Service carries app.kubernetes.io/name: plex, so it is not selected.
+      app.kubernetes.io/name: plex-exporter
   namespaceSelector:
     matchNames:
       - media

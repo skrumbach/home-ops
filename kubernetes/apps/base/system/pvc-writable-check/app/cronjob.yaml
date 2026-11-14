@@ -1,6 +1,6 @@
 ---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/batch/cronjob_v1.json
 # An app can be Ready, probed, and backed up while unable to write its volume.
-# Skill `pvc-integrity-checks`.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -48,7 +48,7 @@ spec:
           containers:
             - name: check
               # renovate: datasource=docker depName=alpine/k8s
-              image: alpine/k8s:1.37.2@sha256:dcb7185e112a453aa72f426754849a97357727ef8f40168fb208c8cf59952042
+              image: alpine/k8s:1.37.2@sha256:7a82aeefea3d554a43a8676b137f2b88bae6c1fe11c13862b191b3a086cc28c0
               imagePullPolicy: IfNotPresent
               securityContext:
                 allowPrivilegeEscalation: false
@@ -269,6 +269,5 @@ spec:
                   memory: 64Mi
                 limits:
                   # 1000m. A tight CFS quota throttled every run while the node was idle.
-                  # Skill `pvc-integrity-checks`.
                   cpu: 1000m
                   memory: 256Mi

@@ -78,7 +78,6 @@ spec:
         # in_recovery == 0. A primary at 0 is the *TimestampAbsent rules.
         # The Barman Cloud plugin renames the in-tree cnpg_collector_* backup
         # metrics to barman_cloud_cloudnative_pg_io_*; either one counts.
-        # Skill databases.
         - alert: PostgresBackupStale
           annotations:
             description: Primary {{ $labels.pod }} last completed a base backup more than 36h ago. ScheduledBackup postgres-18 is daily; standbys report this timestamp as 0 and are excluded.

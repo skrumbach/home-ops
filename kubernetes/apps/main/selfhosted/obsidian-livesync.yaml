@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app obsidian-livesync
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: selfhosted
+  interval: 1h
   path: "./kubernetes/apps/base/selfhosted/obsidian-livesync/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: onepassword-store
       namespace: security
@@ -28,13 +22,10 @@ spec:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
-      # Identity is measured from the files. Do not fall back to 1000. Skill `kopiur-backups`.
+      # Identity is measured from the files. Do not fall back to 1000.
       KOPIUR_PUID: "5984"
       KOPIUR_PGID: "5984"
       KOPIUR_SCHEDULE_R2: "H 14 * * *"

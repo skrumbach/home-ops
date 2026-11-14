@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # Zero-priced local alias WITH the claude-sonnet-5-metered fallback: holding it IS the cloud
-# entitlement (config fallbacks bypass allow-lists). See skill litellm-proxy (references/fallbacks.md).
+# entitlement (config fallbacks bypass allow-lists).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

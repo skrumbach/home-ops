@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/issuer_v1.json
+# Self-signed Issuer for the chart's webhook serving Certificate (k8tz-tls); the
+# MutatingWebhookConfiguration takes its caBundle from that same Certificate.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: k8tz-webhook-selfsign
+spec:
+  selfSigned: {}

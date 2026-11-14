@@ -4,13 +4,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app surrealdb
-  namespace: &namespace database
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
+  targetNamespace: database
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/base/database/surrealdb/app
   prune: true
@@ -29,45 +25,34 @@ spec:
       kind: Deployment
       current: status.availableReplicas == status.replicas
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Own Kustomization: the parent uses wait:true, and the standing Restore stays Ready=False until a rebuild.
-# Skill `kopiur-backups`.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: surrealdb-kopiur
-  namespace: &namespace database
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: surrealdb
-  interval: 30m
-  timeout: 5m
+  targetNamespace: &namespace database
+  interval: 1h
   path: ./kubernetes/apps/base/database/surrealdb/backup
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
     - name: surrealdb
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: surrealdb
       KOPIUR_PUID: "65532"
       KOPIUR_PGID: "65532"
-      # Namespace r2 hour (kubernetes/components/kopiur/Readme.md schedule
+      # Namespace r2 hour (kubernetes/components/kopiur/README.md schedule
       # table).
       KOPIUR_SCHEDULE_R2: "H 7 * * *"

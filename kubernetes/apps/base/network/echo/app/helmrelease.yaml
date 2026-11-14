@@ -44,7 +44,7 @@ spec:
               requests:
                 cpu: 10m
                 # Declared equal to the limit on purpose: peak usage sits near the 64Mi limit so there is nothing to
-                # reclaim, and a limit with no request silently reserves the whole limit (scripts/ci/memory-request-declared-test.py).
+                # reclaim, and a limit with no request silently reserves the whole limit.
                 memory: 64Mi
               limits:
                 memory: 64Mi
@@ -69,14 +69,14 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/parent: Applications
-          gethomepage.dev/group: Network
-          gethomepage.dev/name: "Echo Server"
-          gethomepage.dev/icon: si-codemirror
-          gethomepage.dev/description: "HTTP/HTTPS Echo Server"
-          gethomepage.dev/href: "https://echo.${SECRET_DOMAIN}"
+          gethomepage.dev/group: Platform
+          gethomepage.dev/name: Echo
+          gethomepage.dev/icon: "mdi-swap-horizontal-#22D8F0"
+          gethomepage.dev/description: HTTP echo test endpoint
+          gethomepage.dev/href: "https://echo.sklab.dev"
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-external
             namespace: network

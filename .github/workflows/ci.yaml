@@ -2,8 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # The one required PR check: `CI Success`. Every job runs on GitHub-hosted runners, so the
 # gate reports while the cluster and its ARC runners are down. Image Pull and Terraform Diff
-# need the cluster and stay advisory in their own files. Non-gate tests run in tests.yaml.
-# Pin: scripts/ci/workflow-contract-test.py. Skill `github-ci`.
+# need the cluster and stay advisory in their own files.
 name: CI
 
 on:
@@ -23,7 +22,7 @@ env:
   # Pinned exactly: the action's SHA-ref lookup falls back to "latest" when the tags API
   # call fails. Keep in step with the action pin on the `uses:` lines and image-pull.yaml.
   # renovate: datasource=github-releases depName=home-operations/flate
-  FLATE_VERSION: 0.6.5
+  FLATE_VERSION: 0.7.3
 
 jobs:
   changes:
@@ -35,7 +34,6 @@ jobs:
     timeout-minutes: 5
     outputs:
       kubernetes: ${{ steps.kubernetes.outputs.changed_files }}
-      talos: ${{ steps.talos.outputs.changed_files }}
       versions: ${{ steps.versions.outputs.changed_files }}
       bootstrap: ${{ steps.bootstrap.outputs.changed_files }}
       renovate: ${{ steps.renovate.outputs.changed_files }}
@@ -48,16 +46,6 @@ jobs:
           patterns: |-
             kubernetes/**/*
             .github/workflows/ci.yaml
-
-      - name: Talos Changes
-        id: talos
-        uses: bjw-s-labs/action-changed-files@147be9638332cf68fd60714a610509d7a9360d60 # v0.7.0
-        with:
-          patterns: |-
-            talos/**
-            .github/workflows/ci.yaml
-            .mise.toml
-            scripts/ci/talos-validate.sh
 
       - name: Version Pin Changes
         id: versions
@@ -113,7 +101,7 @@ jobs:
 
       # Empty base: otherwise the action exports FLATE_BASE and `flate test all` goes changed-only.
       - name: Setup flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
         with:
           version: ${{ env.FLATE_VERSION }}
           base: ""
@@ -155,7 +143,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
         with:
           version: ${{ env.FLATE_VERSION }}
           base: ""
@@ -196,28 +184,6 @@ jobs:
             {{{content}}}
             ```
 
-  talos:
-    if: ${{ needs.changes.outputs.talos != '[]' }}
-    needs: changes
-    name: Talos
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # Same minijinja-cli and talosctl versions as `just talos render-config` (.mise.toml).
-      - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
-        with:
-          install_args: aqua:mitsuhiko/minijinja aqua:siderolabs/talos aqua:mikefarah/yq
-          cache: false
-
-      - name: Render and Validate Talos Configs
-        run: ./scripts/ci/talos-validate.sh
-
   versions:
     if: ${{ needs.changes.outputs.versions != '[]' }}
     needs: changes
@@ -231,7 +197,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: aqua:mikefarah/yq
           cache: false
@@ -252,7 +218,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform
           cache: false
@@ -300,7 +266,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: opentofu
           cache: false
@@ -310,7 +276,7 @@ jobs:
         run: ./scripts/ci/tofu-validate.sh
 
   # Whole tree, no path filter. Tool versions come from .mise.toml, so install_args names
-  # the tools only. Full history gives functional-comments-guard its merge base.
+  # the tools only.
   lint:
     needs: changes
     name: Lint
@@ -320,11 +286,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python uv aqua:rhysd/actionlint pipx:zizmor aqua:koalaman/shellcheck pipx:yamllint
           cache: false
@@ -342,23 +307,10 @@ jobs:
       - name: shellcheck
         run: git ls-files -z '*.sh' | xargs -0 shellcheck
 
-      - name: Docs guards
-        env:
-          DIFF_GUARD_BASE: origin/${{ github.event.repository.default_branch }}
-        run: |
-          fail=0
-          for f in scripts/ci/docs-budget-test.py scripts/ci/doc-links-test.py scripts/ci/functional-comments-guard-test.py; do
-            echo "::group::${f}"
-            python3 "${f}" || fail=1
-            echo "::endgroup::"
-          done
-          exit "${fail}"
-
-  # Only scripts/ci files marked `# ci: gate` (at most 15, each naming the data loss or
-  # outage it prevents; scripts/ci/ci-test-gate-test.py). Every other test is tests.yaml.
-  gate-tests:
+  # Every scripts/ci/*-test.py blocks the PR. Each needs only python3 and PyYAML.
+  tests:
     needs: changes
-    name: Gate Tests
+    name: Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -367,28 +319,26 @@ jobs:
         with:
           persist-credentials: false
 
-      # Only what gate files call. Versions from .mise.toml; no @version here.
       - name: Setup Tools
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          install_args: python uv kubectl aqua:kubernetes-sigs/kustomize aqua:prometheus/prometheus aqua:jqlang/jq
+          install_args: python uv
           cache: false
 
-      # boto3 is for volsync-retired-expiry-test.py.
       - name: Install Python Test Dependencies
-        run: uv pip install --system pyyaml boto3
+        run: uv pip install --system pyyaml
 
-      # mapfile + count check: a process substitution's exit status is ignored, so an
-      # empty or failed grep would otherwise run zero tests and pass.
-      - name: Run gate tests
+      # nullglob + count check: an empty glob must fail, not run zero tests and pass.
+      - name: Run tests
         run: |
-          mapfile -t gates < <(grep -lx '# ci: gate' scripts/ci/*-test.py)
-          if (( ${#gates[@]} == 0 )); then
-            echo "FAILED: no '# ci: gate' files found"
+          shopt -s nullglob
+          tests=(scripts/ci/*-test.py)
+          if (( ${#tests[@]} == 0 )); then
+            echo "FAILED: no scripts/ci/*-test.py files found"
             exit 1
           fi
           fail=0
-          for f in "${gates[@]}"; do
+          for f in "${tests[@]}"; do
             echo "::group::${f}"
             if ! python3 "${f}" </dev/null; then
               echo "FAILED: ${f}"
@@ -402,17 +352,17 @@ jobs:
     # always(), not !cancelled(): GitHub counts a skipped required check as passing, so a
     # cancelled run must post red here, never skip. Skipped jobs (no matching changes) pass.
     if: ${{ always() }}
+    # List every other job here: CI Success is the only required check.
     needs:
       - changes
       - flate-test
       - flate-diff
-      - talos
       - versions
       - bootstrap
       - renovate-config
       - terraform
       - lint
-      - gate-tests
+      - tests
     name: CI Success
     runs-on: ubuntu-latest
     timeout-minutes: 5

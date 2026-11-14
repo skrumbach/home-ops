@@ -5,21 +5,11 @@ kind: HelmRelease
 metadata:
   name: &app rsshub
 spec:
-  interval: 30m
+  interval: 1h
   maxHistory: 3
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
-  uninstall:
-    keepHistory: false
+    name: rsshub
   values:
     controllers:
       rsshub:
@@ -43,9 +33,6 @@ spec:
               SENTRY: false
               PIXIV_IMG_PROXY: "https://i.yuki.sh"
               HOTLINK_TEMPLATE: "https://rsstt-img-relay-cqf.pages.dev/$${href_ue}"
-            envFrom:
-              - secretRef:
-                  name: rsshub-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -73,7 +60,11 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            url: https://rsshub.sklab.dev/healthz
+            conditions: ["[STATUS] == 200"]
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
         parentRefs:
           - name: envoy-internal
             namespace: network

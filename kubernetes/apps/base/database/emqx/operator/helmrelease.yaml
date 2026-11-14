@@ -19,13 +19,6 @@ spec:
         name: emqx-charts
         namespace: flux-system
       interval: 5m
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     fullnameOverride: emqx
     replicaCount: 1

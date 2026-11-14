@@ -9,13 +9,13 @@ components:
   - ../../../components/alerts
 
 resources:
-  - ./rsshub.yaml
   - ./changedetection.yaml
-  - ./homepage.yaml
-  - ./n8n.yaml
   - ./excalidraw.yaml
+  - ./homepage.yaml
   - ./linkwarden.yaml
+  - ./n8n.yaml
   - ./ntfy.yaml
   - ./obsidian-livesync.yaml
   - ./paperless-ngx.yaml
+  - ./rsshub.yaml
   - ./syncthing.yaml

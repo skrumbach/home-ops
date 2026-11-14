@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
 # Alertmanager is standalone (app-template), so the chart creates no ServiceMonitor for it;
-# without this every alertmanager_* series is absent. Skill observability.
+# without this every alertmanager_* series is absent.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

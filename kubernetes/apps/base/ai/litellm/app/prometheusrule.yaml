@@ -38,7 +38,6 @@ spec:
           for: 5m
           labels:
             severity: warning
-        # Fallback/router alerts: skill litellm-proxy (references/fallbacks.md, references/auto-router.md).
         # The two fallback counters are SPARSE (no series until the first fallback): absence is the
         # healthy state, not a wrong name - do not "repair" these alerts. Names need the _total suffix.
         - alert: LiteLLMFallbackChainExhausted
@@ -196,7 +195,6 @@ spec:
               cloud tier over the last hour. The router exists to keep cheap work
               local, so a sustained majority landing on Anthropic means either the
               traffic really did get harder, or the classifier/rubric has drifted.
-              Tuning guidance: skill litellm-proxy, .agents/skills/litellm-proxy/references/auto-router.md (Tuning).
             summary: LiteLLM auto-router is sending most traffic to the cloud tier.
           expr: |-
             sum(rate(litellm_deployment_success_responses_total{requested_model="auto", litellm_model_name=~"claude-.*"}[1h]))

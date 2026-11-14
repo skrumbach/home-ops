@@ -1,0 +1,3 @@
+# A homelab's inventory has no business in a search index.
+User-agent: *
+Disallow: /

@@ -5,11 +5,12 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
 
 configMapGenerator:
   - name: recyclarr
     files:
-      - config/recyclarr.yml
+      - resources/recyclarr.yml
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -7,35 +8,26 @@ spec:
   interval: 1h
   # The chat pod downloads its GGUF on first start (about 16 GiB, over 5 minutes) and the startup
   # probe allows 30. The default 5m Helm timeout rolled the Q3_K_M swap back mid-download, so
-  # this matches the probe. See skill b70-llm-serving references/flags.md.
+  # this matches the probe.
   timeout: 30m
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: vllm
   maxHistory: 2
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-  uninstall:
-    keepHistory: false
   values:
     # Placement is the devic.es/b70 request, not hostname affinity. KV at ctx
     # 262144 is 2720 MiB at q8_0 (10 of 40 layers are full attention), about twice that at f16.
-    # See skill b70-llm-serving references/flags.md.
     controllers:
       # Chat stays llama.cpp SYCL. This GPTQ cannot finish vLLM warmup on one B70
       # (intel/llm-scaler#382). The controller name stays vllm so the Service does not move.
       vllm:
+        annotations:
+          reloader.stakater.com/auto: "true"
         strategy: Recreate
         pod:
           terminationGracePeriodSeconds: 60
           # Outranks the CI runners (1000000) so the 8-CPU request below is always schedulable on
-          # talos-3 and a runner burst cannot preempt chat. See skill b70-llm-serving references/contention.md.
+          # talos-3 and a runner burst cannot preempt chat.
           priorityClassName: chat-gpu-high
           # The llama.cpp server-intel image has no USER (runs as root) and the /models PVC and the
           # GPU nodes are root-owned, so runAsNonRoot is not set. No fsGroup: it would re-own /models.
@@ -44,7 +36,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           # talos-3 PreferNoSchedule: this pod can only land there, so it tolerates the penalty.
-          # See skill node-scheduling.
           tolerations:
             - key: home-operations.com/dedicated
               operator: Exists
@@ -54,17 +45,18 @@ spec:
             image:
               repository: ghcr.io/ggml-org/llama.cpp
               # Re-measure the next tag with -ub 4096 before bumping. The two compound.
-              # See skill b70-llm-serving references/flags.md.
               tag: server-intel-b10820@sha256:35037559d99a90963d479b6e6e79764b138c76dc657341292aac6ad41d627c9f
             args:
               - -hf
               # Q3_K_M of the official distill, not the IQ3_XXS APEX build: same quality on the
               # graded suite and +28% decode (81 vs 63 t/s), because K-quants dequantize faster
               # than IQ-quants on SYCL. Q4_K_M decodes 99 t/s but leaves 1.5 GiB of VRAM at 262K.
-              # Not abliterated. mmproj auto-loads. Results: scripts/bench/results/q6-*, quality-*.
+              # Not abliterated. mmproj auto-loads.
+              # Tried 2026-11-13: llmfan46's heretic build of plain Qwen3.6-35B-A3B at Q3_K_M (still
+              # cached). Same decode speed and tool-call score, but 5x the completion tokens on the
+              # same 50 tasks (82k vs 16k, thinking), so each answer took about 2.7x as long.
               # The alias is the loaded model's real name, from ConfigMap chat-model
               # (apps/main/ai/chat-model.yaml). Change both together on a swap.
-              # See skill b70-llm-serving references/flags.md.
               - empero-ai/Qwen3.8-35B-A3B-Distill-GGUF:Q3_K_M
               - --alias
               - ${CHAT_MODEL_ID}
@@ -74,7 +66,6 @@ spec:
               - "8000"
               - --ctx-size
               # Model max. Do not pin --parallel or --kv-unified: an explicit pin collapses decode.
-              # vllm-embed stays at replicas 0. See skill b70-llm-serving references/flags.md.
               - "262144"
               - -ngl
               - "99"
@@ -84,25 +75,21 @@ spec:
               - "on"
               # f16, not q8_0: decode is +12-16% at 16K+ context and VRAM stays ~9 GiB free.
               # The oneDNN pin below stays. The servicemonitor kv label must match.
-              # See skill b70-llm-serving references/flags.md.
               - --cache-type-k
               - f16
               - --cache-type-v
               - f16
               - --cache-reuse
               # No-op while mmproj is loaded. Dropping mmproj removes vision.
-              # See skill b70-llm-serving references/flags.md.
               - "256"
               - --cache-ram
               # Absence restores the silent 8192 MiB default. A memory limit cannot stop that leak
               # (kernel SIGKILL at page fault). 4096, not 0. Pairs with GLIBC_TUNABLES. --no-mmap is not this fix.
-              # See skill b70-llm-serving references/memory.md. Gate: scripts/ci/vllm-prompt-cache-test.py.
               - "4096"
               - --no-mmap
               # -ub 4096 with -b 8192: prefill +14% at 16K and +11% at 64K, decode unchanged, and
-              # 4 concurrent 16K requests finished 6% sooner with per-request decode 10.4 vs 6.7 t/s
-              # (scripts/bench/results/day-ub4096-*.json). The earlier rejection did not reproduce.
-              # See skill b70-llm-serving references/flags.md.
+              # 4 concurrent 16K requests finished 6% sooner with per-request decode 10.4 vs 6.7 t/s.
+              # The earlier rejection did not reproduce.
               - -b
               - "8192"
               - -ub
@@ -110,12 +97,11 @@ spec:
               # Drafts from n-grams already in the context, so there is no draft model and no VRAM cost.
               # Neutral on novel text (64.4 vs 64.3 t/s), faster only when the output copies the prompt.
               # draft-mtp was slower at short context and worse under concurrency. Do not swap it in
-              # without re-running day-mtp3-*.json. See skill b70-llm-serving references/flags.md.
+              # without re-measuring it.
               - --spec-type
               - ngram-mod
               # Unset, llama.cpp spawns one thread per hardware thread (20 on talos-3) and the
               # spin-waiting extras thrash when tdarr holds cores. Matches the cpu request below.
-              # See skill b70-llm-serving references/contention.md.
               - -t
               - "8"
             env:
@@ -125,13 +111,12 @@ spec:
               UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS: "1"
               SYCL_PI_LEVEL_ZERO_USE_IMMEDIATE_COMMANDLISTS: "1"
               # Second half of --cache-ram. Pins mmap_threshold so glibc returns large chunks.
-              # Do not ship one without the other. See skill b70-llm-serving references/memory.md.
+              # Do not ship one without the other.
               GLIBC_TUNABLES: glibc.malloc.mmap_threshold=131072
               # Numeric only. "false" or "off" parse as the default and leave the leak on.
-              # Lift only when this tag bounds fattn-onednn.cpp. Gate: scripts/ci/vllm-prompt-cache-test.py.
-              # See skill b70-llm-serving references/memory.md.
+              # Lift only when this tag bounds fattn-onednn.cpp.
               GGML_SYCL_FA_ONEDNN: "0"
-            envFrom: &envFrom
+            envFrom:
               - secretRef:
                   name: vllm-secret
             # readOnlyRootFilesystem stays off: llama.cpp, the SYCL/Level Zero runtime and glibc
@@ -144,16 +129,14 @@ spec:
             resources:
               requests:
                 # Equal to -t. The request is the CFS weight against tdarr on the same node.
-                # See skill b70-llm-serving references/contention.md.
                 cpu: "8"
                 # 12Gi = ~1232 MiB baseline + 2.7x the 4096 MiB cache. Below the working set this
                 # pod is evicted first. Do not raise it to silence VLLMMemoryRetainedAboveBound.
-                # See skill b70-llm-serving references/memory.md.
                 memory: 12Gi
                 devic.es/b70: 1
               limits:
                 # A limit cannot stop the host leak. Leave it above the request so a prefill
-                # spike is not an OOMKill. See skill b70-llm-serving references/memory.md.
+                # spike is not an OOMKill.
                 memory: 48Gi
                 devic.es/b70: 1
             probes:
@@ -180,87 +163,27 @@ spec:
                   failureThreshold: 3
               liveness: *probe
 
-      vllm-embed:
-        # replicas 0. No live consumer, and it shares the one B70 with chat.
-        # --gpu-memory-utilization belongs only on this controller. See skill b70-llm-serving.
-        replicas: 0
-        strategy: Recreate
-        containers:
-          app:
-            image:
-              repository: docker.io/intel/llm-scaler-vllm
-              tag: 0.14.0-b8.3.1@sha256:4304f64f2a9a38994cf1e824d8fa0c61769c87c8b7ecfd2965d9a01b46c8bc8a
-            command:
-              - vllm
-              - serve
-              - Qwen/Qwen3-VL-Embedding-2B
-              # --task was removed in vLLM 0.14; needs both runner + convert here
-              # (convert alone leaves pooler_config unset -> AssertionError)
-              - --runner=pooling
-              - --convert=embed
-              - --served-model-name=qwen3-vl-embedding-2b
-              - --host=0.0.0.0
-              - --port=8000
-              - --dtype=float16
-              # 0.15 (4.8GB) only covers the fp16 weights; no room for cache blocks
-              - --gpu-memory-utilization=0.20
-              - --max-model-len=8192
-            env:
-              HF_HOME: /models
-              VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
-              VLLM_WORKER_MULTIPROC_METHOD: spawn
-              ZES_ENABLE_SYSMAN: "1"
-            envFrom: *envFrom
-            resources:
-              requests:
-                cpu: "1"
-                memory: 4Gi
-                devic.es/b70: 1
-              limits:
-                memory: 16Gi
-                devic.es/b70: 1
-            probes:
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: 8000
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-                  failureThreshold: 20
-              readiness: *probe
-              liveness: *probe
-
+    # suffix pins the names vllm-app and vllm-models. With one service and one claim the
+    # chart would name both `vllm`, and Helm would delete the model cache.
     service:
       app:
+        suffix: app
         controller: vllm
-        ports:
-          http:
-            port: 8000
-      embed:
-        controller: vllm-embed
         ports:
           http:
             port: 8000
 
     persistence:
       models:
+        suffix: models
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: ceph-block
-        size: 50Gi
+        # Model cache (LLAMA_CACHE): `-hf` re-downloads the GGUF at start, so this claim is re-downloadable and not backed up.
+        # Each cached model is about 17 GiB with its mmproj; 75Gi holds four. A claim never
+        # shrinks: lowering this fails the Helm upgrade.
+        size: 75Gi
         advancedMounts:
           vllm:
-            app:
-              - path: /models
-      embed-models:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        storageClass: ceph-block
-        size: 20Gi
-        advancedMounts:
-          vllm-embed:
             app:
               - path: /models

@@ -6,12 +6,13 @@ _.python.venv = { path = "{{config_root}}/.venv", create = true, uv_create_args 
 # Optional env file holding the 1Password service-account token for vals/op
 # (e.g. OP_SERVICE_ACCOUNT_TOKEN). Gitignored; see .secrets.env.example.
 _.file = ["{{config_root}}/.secrets.env"]
-# Agent sessions default to read-only credentials, one copy shared by every worktree
-# (scripts/agent-credentials.sh, goal §3).
-# Owner writes: export HOME_OPS_KUBECONFIG=~/.kube/home-ops-admin HOME_OPS_TALOSCONFIG=~/.talos/home-ops-admin.
+# kubectl and talosctl default to the admin credentials (owner decision 2026-11-11). The files
+# live outside the repo, one copy shared by every worktree.
+# Read-only instead: export HOME_OPS_KUBECONFIG=~/.kube/home-ops-agent
+# HOME_OPS_TALOSCONFIG=~/.talos/home-ops-agent (scripts/agent-credentials.sh).
 # A plain KUBECONFIG=... prefix does not work here: mise [env] overrides it.
-KUBECONFIG = "{{ get_env(name='HOME_OPS_KUBECONFIG', default=get_env(name='HOME') ~ '/.kube/home-ops-agent') }}"
-TALOSCONFIG = "{{ get_env(name='HOME_OPS_TALOSCONFIG', default=get_env(name='HOME') ~ '/.talos/home-ops-agent') }}"
+KUBECONFIG = "{{ get_env(name='HOME_OPS_KUBECONFIG', default=get_env(name='HOME') ~ '/.kube/home-ops-admin') }}"
+TALOSCONFIG = "{{ get_env(name='HOME_OPS_TALOSCONFIG', default=get_env(name='HOME') ~ '/.talos/home-ops-admin') }}"
 # minijinja-cli config used by the `just` render path (talos/*.j2 templates)
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 # `mod` imports in the root .justfile require unstable features on older `just`
@@ -19,10 +20,10 @@ JUST_UNSTABLE = "1"
 MISE_LIST_ALL_VERSIONS = "false"
 
 [tools]
-"python" = "3.14.7"
+"python" = "3.15.2"
 "pipx:pre-commit" = "4.7.0"
 # Not in the mise or aqua registries, so installed via the ubi backend from GitHub releases.
-"ubi:home-operations/flate" = "0.7.0"
+"ubi:home-operations/flate" = "0.7.3"
 "just" = "latest"
 "aqua:mitsuhiko/minijinja" = "latest"
 "vals" = "latest"
@@ -30,19 +31,19 @@ MISE_LIST_ALL_VERSIONS = "false"
 "aqua:cilium/cilium-cli" = "0.20.2"
 "aqua:cli/cli" = "2.103.3"
 "aqua:cloudflare/cloudflared" = "2026.10.7"
-"aqua:cue-lang/cue" = "0.17.1"
 "aqua:fluxcd/flux2" = "2.10.0"
 "aqua:go-task/task" = "3.54.0"
 "aqua:helm/helm" = "4.3.1"
 "aqua:helmfile/helmfile" = "1.8.3"
+# Builds the documentation site (docs/, `task docs:build`).
+"aqua:gohugoio/hugo" = "0.169.0"
 "aqua:jqlang/jq" = "1.7.1"
 "aqua:kubernetes-sigs/kustomize" = "5.6.0"
 "kubectl" = "1.37.2"
-"aqua:mikefarah/yq" = "4.54.2"
+"aqua:mikefarah/yq" = "4.54.3"
 "opentofu" = "1.13.9"
 "aqua:siderolabs/talos" = "1.14.5"
 "aqua:yannh/kubeconform" = "0.8.0"
-"aqua:nektos/act" = "0.2.97"
 # Standard linters: pre-commit hooks and the ci.yaml `lint` job. CI installs them via
 # unversioned mise-action install_args so these pins stay the single source of truth.
 "aqua:rhysd/actionlint" = "1.7.12"
@@ -51,24 +52,7 @@ MISE_LIST_ALL_VERSIONS = "false"
 "aqua:gitleaks/gitleaks" = "8.30.1"
 "pipx:yamllint" = "1.38.0"
 "aqua:google/yamlfmt" = "0.21.0"
-# promtool for scripts/ci/grafana-sa-provisioner-test.py PromQL rule evaluation.
-# CI installs this via unversioned mise-action install_args so this pin is the
-# single source of truth (scripts/ci/workflow-contract-test.py).
-"aqua:prometheus/prometheus" = "3.16.0"
 uv = "0.13.7"
 1password-cli = "2.42.0"
 krew = "0.5.0"
 k9s = "0.51.0"
-
-[tasks.install-hooks]
-description = "Install pre-commit hooks"
-run = "pre-commit install --install-hooks && pre-commit install --hook-type commit-msg"
-depends = ["install"]
-
-[tasks.install]
-description = "Install all tools and setup hooks"
-run = "echo 'Tools installed via mise'"
-
-[tasks.activate]
-description = "Install all tools and setup hooks"
-run = "eval \"$(mise activate zsh)\" "

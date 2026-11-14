@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # The auto-router's classifier: zero-priced (billed to the caller), terminal, own metrics series.
 # INVARIANT: enable_thinking false (else empty content, 100% silent fail-open) and num_retries 0.
-# See skill litellm-proxy (references/auto-router.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

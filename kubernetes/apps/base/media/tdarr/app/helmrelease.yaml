@@ -5,14 +5,13 @@ kind: HelmRelease
 metadata:
   name: &app tdarr
 spec:
-  interval: 30m
+  interval: 1h
   # The node Deployment's startup probe allows up to 5 min for the server heartbeat; the
   # default 5m Helm timeout rolled the 3.x upgrade back mid-start.
   timeout: 15m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: tdarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -34,7 +33,7 @@ spec:
           app:
             image:
               repository: ghcr.io/haveagitgat/tdarr
-              tag: 3.07.00@sha256:ce61af20247825024b790d879ad305411c7e07092e88b4cdf5c686e8dafcf8c0
+              tag: 3.08.00@sha256:84743e5ae433a5b49cb463b2dff2679eb02f0cac24fb88c830f49bf8aa9f1c04
             env:
               - name: TZ
                 value: America/New_York
@@ -108,7 +107,7 @@ spec:
         pod:
           # talos-3 carries a PreferNoSchedule home-operations.com/dedicated taint. This pod
           # is pinned there by devic.es/b70-vaapi, so the toleration stops the score
-          # penalty from disadvantaging the only node it can run on. Skill node-scheduling.
+          # penalty from disadvantaging the only node it can run on.
           tolerations:
             - key: home-operations.com/dedicated
               operator: Exists
@@ -117,7 +116,7 @@ spec:
           app:
             image:
               repository: ghcr.io/haveagitgat/tdarr_node
-              tag: 3.07.00@sha256:2850292d8a6ff07a722e228139301bac386ced6f9445325c44bc835bdfc74340
+              tag: 3.08.00@sha256:25153299cc9c2fcd99202cc36171c2e42ba7ef11823959c018e5c5bf2733581f
             env:
               - name: TZ
                 value: America/New_York
@@ -151,7 +150,7 @@ spec:
               # Keep at least one CPU transcode worker. A GPU-only node turns any
               # VA-API regression into a silent, total transcoding outage: every job
               # the GPU worker picks up fails with transcodeError and nothing else
-              # can take it. Cost is speed, not correctness. See .agents/skills/intel-gpu/references/vaapi-check.md.
+              # can take it. Cost is speed, not correctness.
               - name: transcodecpuWorkers
                 value: "1"
               # Must stay 0. Tdarr builds the GPU health-check command with
@@ -160,6 +159,11 @@ spec:
               # The CPU health-check worker does the same job.
               - name: healthcheckgpuWorkers
                 value: "0"
+              # On 2026-11-12 the thorough check (ffmpeg -f null) of one 4K 10-bit
+              # AV1 file ("Fall 2 Deadpoint") passed 7 GB RSS in 30s and grew until
+              # the 12Gi limit killed the container, with every running transcode,
+              # about every 6 minutes. That file's check was skipped in Tdarr. If a
+              # 4K AV1 check does it again, the cause is general: set this to "0".
               - name: healthcheckcpuWorkers
                 value: "1"
             securityContext:
@@ -232,7 +236,6 @@ spec:
                 # At 12 it still cut chat decode 64 -> 40 t/s and prefill 1815 -> 1290 t/s
                 # (llama.cpp launches SYCL work from CPU threads). At 6, with chat on -ub 4096,
                 # prefill was 1853 t/s against 2079 with tdarr stopped; at 4 it was 1951 (+5%).
-                # See skill b70-llm-serving references/contention.md.
                 cpu: 4
                 memory: 12Gi
 
@@ -266,7 +269,7 @@ spec:
           - path: /temp
       media:
         type: nfs
-        server: nas.${SECRET_DOMAIN}
+        server: nas.sklab.dev
         path: /mnt/storage/Media
         globalMounts:
           - path: /media
@@ -276,12 +279,18 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/tdarr.svg
-          gethomepage.dev/description: "Tdarr is a distributed transcoding system for automating media library optimization."
+          gethomepage.dev/name: Tdarr
+          gethomepage.dev/icon: tdarr.svg
+          gethomepage.dev/description: Library transcoding to AV1
           gethomepage.dev/pod-selector: app.kubernetes.io/name=tdarr
+          gatus.home-operations.com/endpoint: |-
+            url: https://tdarr.sklab.dev/api/v2/status
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].status == good"
+            group: media
         hostnames:
-          - tdarr.${SECRET_DOMAIN}
+          - tdarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

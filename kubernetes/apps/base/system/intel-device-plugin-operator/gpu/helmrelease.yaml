@@ -13,22 +13,14 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: intel
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     name: xe
     # Chart default nodeSelector (intel.feature.node.kubernetes.io/gpu=true) is a hand-set Talos nodeLabel, not NFD (talos/machineconfig.yaml.j2).
     nodeFeatureRule: false
     sharedDevNum: 99
     # This pool is the iGPU only (allowIDs 0xa7a0). B70 consumers use devic.es/b70 and devic.es/b70-vaapi.
-    # See skill intel-gpu.
     allowIDs: "0xa7a0"
-    # Toleration is hygiene under PreferNoSchedule. See skill node-scheduling.
+    # Toleration is hygiene under PreferNoSchedule.
     tolerations:
       - key: home-operations.com/dedicated
         operator: Exists

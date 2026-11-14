@@ -4,21 +4,15 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app esphome
-  namespace: &namespace home-automation
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: home-automation
+  interval: 1h
   path: "./kubernetes/apps/base/home-automation/esphome/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: multus-networks
       namespace: kube-system
@@ -27,13 +21,9 @@ spec:
     - name: kopiur-repository
       namespace: system
   components:
-    # Proof: proof-ledger.md row 14.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CLAIM: esphome-config

@@ -1,0 +1,9 @@
+{{- /* Generated pages link site-root-relative (/apps/media/plex/); prefix the base path so the
+       site also works under a project path such as /home-ops/. */ -}}
+{{- $dest := .Destination -}}
+{{- $external := or (strings.HasPrefix $dest "http://") (strings.HasPrefix $dest "https://") -}}
+{{- if and (strings.HasPrefix $dest "/") (not (strings.HasPrefix $dest "//")) -}}
+  {{- $dest = relURL (strings.TrimPrefix "/" $dest) -}}
+{{- end -}}
+<a href="{{ $dest }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} rel="noopener"{{ end }}>{{ .Text }}</a>
+{{- /**/ -}}

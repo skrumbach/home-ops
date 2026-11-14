@@ -5,22 +5,15 @@ kind: HelmRelease
 metadata:
   name: &app pgadmin
 spec:
-  interval: 30m
+  interval: 1h
   timeout: 20m
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: pgadmin
   install:
     timeout: 20m
-    remediation:
-      retries: 3
   upgrade:
     timeout: 20m
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   values:
     controllers:
       pgadmin:
@@ -66,6 +59,13 @@ spec:
                   secretKeyRef:
                     name: pgadmin-secret
                     key: PGADMIN_DEFAULT_PASSWORD
+              # Read by config_local.py (externalsecret.yaml). Not a PGADMIN_CONFIG_* name: the
+              # entrypoint would write that into config_distro.py.
+              PGADMIN_OAUTH_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: pgadmin-oidc-client
+                    key: client-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -93,7 +93,7 @@ spec:
         fsGroup: 5050
         fsGroupChangePolicy: OnRootMismatch
       # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute; talos-3 is
-      # PreferNoSchedule, so the score penalty keeps this off talos-3. Skill `node-scheduling`.
+      # PreferNoSchedule, so the score penalty keeps this off talos-3.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname

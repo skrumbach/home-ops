@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app seerr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: seerr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -33,7 +32,7 @@ spec:
           app:
             image:
               repository: docker.io/seerr/seerr
-              tag: v3.5.1@sha256:d8fab675b55ad293ded98fd71efcfd46054cbad9746534ae1cc4794a88c0b3be
+              tag: v3.5.2@sha256:aadee014b40e28cf9aa4928bc9d1183a6eb08f8c44d543cddc9efdcb16549be2
             env:
               TZ: America/New_York
               LOG_LEVEL: info
@@ -103,15 +102,20 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/jellyseerr.svg
-          gethomepage.dev/description: "Seerr is a unified request manager for Jellyfin, Plex, and Emby."
+          gethomepage.dev/name: Seerr
+          gethomepage.dev/icon: seerr.svg
+          gethomepage.dev/description: Request movies and shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=seerr
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          gatus.home-operations.com/endpoint: |-
+            url: https://seerr.sklab.dev/api/v1/status
+            conditions:
+              - "[STATUS] == 200"
+            group: media
         hostnames:
-          - seerr.${SECRET_DOMAIN}
+          - seerr.sklab.dev
         parentRefs:
-          - name: envoy-external
+          # Internal only since 2026-11-12 (owner decision): reachable on the LAN, not through the Cloudflare tunnel.
+          - name: envoy-internal
             namespace: network
             sectionName: https
         rules:

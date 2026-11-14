@@ -5,11 +5,12 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
 
 configMapGenerator:
   - name: queue-watchdog
     files:
-      - watchdog.py
+      - resources/watchdog.py
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -1,0 +1,14 @@
+{{ define "main" }}
+<article class="doc{{ if gt (len .Fragments.Headings) 0 }} has-toc{{ end }}">
+  <div class="doc-body">
+    {{ partial "pagehead.html" . }}
+    <div class="prose">{{ .Content }}</div>
+  </div>
+  {{ if and (gt .WordCount 250) (ne .TableOfContents "<nav id=\"TableOfContents\"></nav>") }}
+  <aside class="toc" aria-label="On this page">
+    <p class="toc-title">On this page</p>
+    {{ .TableOfContents }}
+  </aside>
+  {{ end }}
+</article>
+{{ end }}

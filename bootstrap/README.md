@@ -4,8 +4,6 @@ Cluster genesis and disaster recovery. `bootstrap/mod.just` (root `.justfile` mo
 
 Never run `just bootstrap cluster` or `just bootstrap apps` against a healthy cluster. Those stages `kubectl apply` and `helmfile sync`. Offline checks are `helmfile template`, `kustomize build`, and `vals` resolution.
 
-Agent procedures for Talos itself are skill `talos-nodes`.
-
 ## Layout
 
 ```
@@ -34,7 +32,7 @@ helmfile -f bootstrap/helmfile/apps.yaml template --dry-run
 kustomize build bootstrap/kustomize/apps | vals eval -f -    # needs op signin
 ```
 
-`default.yaml` reads `spec.url` and `spec.ref.tag` from the Flux OCIRepository. Do not pin `chart:` / `version:` here. Do not re-add a grafana-operator release or `GrafanaDashboard` CRs (skill `observability`, `references/grafana.md`).
+`default.yaml` reads `spec.url` and `spec.ref.tag` from the Flux OCIRepository. Do not pin `chart:` / `version:` here. Do not re-add a grafana-operator release or `GrafanaDashboard` CRs.
 
 ## Secrets
 
@@ -42,6 +40,6 @@ The only pre-ESO secret is `onepassword-secret` in `security` (`1password-creden
 
 ## After Flux
 
-A rebuild after Ceph data loss restores no volume by itself. Land the DR-mode commit before bootstrapping and follow `.agents/skills/kopiur-backups/references/full-cluster-restore-r2.md`.
+A rebuild after Ceph data loss restores no volume by itself. Land the DR-mode commit before bootstrapping and follow `.agents/skills/incident-runbooks/references/restore.md` section A.
 
 `mod.just` runs `talosctl config info` at load, so `just -l bootstrap` needs a `TALOSCONFIG`. The `base` stage depends on `ready`.

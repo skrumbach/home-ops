@@ -5,5 +5,9 @@ kind: Kustomization
 resources:
   - ./ciliumnetworkpolicy.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
   - ./externalsecret.yaml
+  - ./externalsecret-oidc.yaml
+  - ./pocketidoidcclient.yaml
+  - ./pocketidoidcclient-gateway.yaml
   - ./securitypolicy.yaml

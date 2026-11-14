@@ -3,7 +3,6 @@
 # One bucket for every stack outside Flux that wants off-cluster state; this
 # stack owns the `unifi/` key. Credentials and the account endpoint come from
 # 1Password through vals (AWS_*), so the account ID stays out of Git.
-# Skill `unifi-network`.
 terraform {
   backend "s3" {
     bucket = "home-ops-tfstate"

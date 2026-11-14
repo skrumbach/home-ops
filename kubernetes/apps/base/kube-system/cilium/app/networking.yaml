@@ -52,6 +52,8 @@ spec:
   nodeSelector:
     matchLabels:
       kubernetes.io/os: linux
+  # UDM side: terraform/unifi/bgp.conf (OpenTofu). Change peer/ASN/node IPs on both sides together:
+  # no static route covers 10.50.0.0/24, so a dropped session unroutes every LB IP.
   bgpInstances:
     - name: cilium
       localASN: 64514
@@ -62,12 +64,15 @@ spec:
           peerConfigRef:
             name: l3-bgp-peer-config
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/service.json
 apiVersion: v1
 kind: Service
 metadata:
   name: kube-api
   annotations:
-    external-dns.kubernetes.io/hostname: k8s.{SECRET_DOMAIN}
+    # Only unifi-dns reads Service annotations, so this is an internal-only record. The name must
+    # be one the API server certificate covers (certSANs in talos/machineconfig.yaml.j2).
+    external-dns.kubernetes.io/hostname: talos.sklab.dev
     lbipam.cilium.io/ips: 10.50.0.121
 spec:
   type: LoadBalancer

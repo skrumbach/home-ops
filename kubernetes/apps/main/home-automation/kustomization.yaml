@@ -15,7 +15,6 @@ resources:
   - ./zigbee2mqtt.yaml
 
 # Patch target is not-used. The annotation admits a root mover for the whole namespace; it does not change any other claim's uid.
-# Skill `kopiur-backups`.
 patches:
   - target:
       kind: Namespace

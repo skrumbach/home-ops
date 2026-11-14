@@ -3,13 +3,9 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app xe-gpu-exporter
-  namespace: &namespace system
+  name: xe-gpu-exporter
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: system
   dependsOn:
     - name: kube-prometheus-stack
       namespace: monitoring
@@ -18,7 +14,5 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  interval: 30m
-  timeout: 5m
+  interval: 1h
   prune: true
-  wait: false

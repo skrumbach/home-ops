@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The only log store (replaced Loki and promtail). No kopiur claim: logs are not backed up.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: victoria-logs
+spec:
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: monitoring
+  interval: 1h
+  path: ./kubernetes/apps/base/monitoring/victoria-logs/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: monitoring
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: victoria-logs-collector
+spec:
+  # Orders, does not gate: victoria-logs has no wait or healthChecks, so this can start before the
+  # server is ready. Harmless: vlagent buffers to disk (maxDiskUsagePerURL) until it is.
+  dependsOn:
+    - name: victoria-logs
+  interval: 1h
+  path: ./kubernetes/apps/base/monitoring/victoria-logs/collector
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: monitoring

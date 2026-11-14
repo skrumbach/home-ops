@@ -12,7 +12,9 @@ components:
 # (2026-08-22), agentmemory (2026-08-31), comfyui and comfyui-mcp (2026-09-15),
 # agentgateway app, dashboards and CRDs (2026-10-25; stateless).
 # Flux prunes their workloads and PVCs; comfyui's five PVCs are deleted with
-# their RBD images. Retained data and revival: skill ai-stack, references/retirement.md.
+# their RBD images.
+# Retained backups outlive these apps: kopiur Snapshot CRs in ai (agentmemory, comfyui-user) own their kopia snapshots; deleting a CR deletes the backup.
+# Retired VolSync restic repos (scripts/volsync-retired-expiry/ledger.yaml) hold agentmemory's older copy; revival restores into a new PVC before the app writes.
 
 resources:
   - ./chat-model.yaml
@@ -20,8 +22,8 @@ resources:
   - ./embedding-gpu.yaml
   - ./gpu-node-dashboard.yaml
   - ./hermes.yaml
-  - ./litellm-operator.yaml
   - ./litellm.yaml
+  - ./litellm-operator.yaml
   - ./litellm-pgvector.yaml
   - ./opencode.yaml
   - ./pvc.yaml
@@ -30,3 +32,18 @@ resources:
   - ./searxng.yaml
   - ./toolhive.yaml
   - ./vllm.yaml
+
+# Pod Security: enforce baseline here (warn/audit stay restricted from components/common).
+# Every pod template in Git and every operator-made pod in this namespace passed baseline
+# on 2026-11-13. Patch target is not-used. Delete this patch to stop enforcing.
+patches:
+  - target:
+      kind: Namespace
+      name: not-used
+    patch: |-
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce
+        value: baseline
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce-version
+        value: latest

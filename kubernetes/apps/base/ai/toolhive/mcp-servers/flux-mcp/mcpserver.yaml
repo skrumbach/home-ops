@@ -10,6 +10,7 @@ spec:
   proxyMode: streamable-http
   proxyPort: 8080
   mcpPort: 8000
+  # spec.resources lands on the toolhive proxy Deployment; the mcp container's own are in podTemplateSpec below.
   resources:
     requests:
       cpu: 100m
@@ -27,6 +28,13 @@ spec:
             - --transport=http
             - --port=8000
             - --read-only
+          # Idles at 1m CPU / 25Mi; the limit leaves room for large tool responses.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
           env:
             # In-cluster mode: no KUBECONFIG; uses the pod service account.
             - name: RUNTIME_NAMESPACE

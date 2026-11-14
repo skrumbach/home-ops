@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app prowlarr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: prowlarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -100,17 +99,44 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/prowlarr.svg
-          gethomepage.dev/description: "Prowlarr is a Usenet and BitTorrent indexer manager/proxy built on the popular Radarr/Sonarr/NzbGet/Lidarr stack."
+          gethomepage.dev/name: Prowlarr
+          gethomepage.dev/icon: prowlarr.svg
+          gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
+          # Goes through the ungated `api` rule: Prowlarr's own {"status": "OK"} body proves the app
+          # answers and that /ping still bypasses the Envoy OIDC gate (a gated path would end on the
+          # Pocket ID sign-in page).
+          gatus.home-operations.com/endpoint: |-
+            url: https://prowlarr.sklab.dev/ping
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY].status == OK"
+            group: downloads
         hostnames:
-          - prowlarr.${SECRET_DOMAIN}
+          - prowlarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+              # Per-indexer Newznab/Torznab feed and grab URLs (/<id>/api, /<id>/download) that the
+              # *arr apps call with the API key when Prowlarr syncs them this hostname.
+              - path:
+                  type: RegularExpression
+                  value: /[0-9]+/(api|download)/?
+              - path:
+                  type: Exact
+                  value: /ping
+            backendRefs:
+              - name: *app
+                port: *port
+          - name: app
+            backendRefs:
               - name: *app
                 port: *port

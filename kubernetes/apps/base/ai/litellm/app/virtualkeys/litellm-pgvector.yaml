@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # The vector store's embedding key. INVARIANT: exactly the one model the store's vectors come from
-# (so no embedding-local); another model's vectors rank silently wrong. references/vector-store.md.
+# (so no embedding-local); another model's vectors rank silently wrong.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

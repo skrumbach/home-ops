@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# pgAdmin's OAUTH2_CONFIG entry (externalsecret.yaml). Deleting this CR deletes the client in
+# Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: pgadmin
+spec:
+  name: pgAdmin
+  # Must match OAUTH2_CLIENT_ID of the pocket-id entry. Immutable once created.
+  clientID: pgadmin
+  # The cluster-generated value (externalsecret-oidc.yaml), which config_local.py reads from the
+  # pod's environment: the operator pushes it to Pocket ID and never generates or rotates one.
+  # Same-namespace Secret.
+  clientSecretRef:
+    name: pgadmin-oidc-client
+    key: client-secret
+  # A new value (see the ExternalSecret) leaves the old one valid this long, so sign-in keeps
+  # working while the pod restarts with the new one.
+  clientSecretOverlap: 1h
+  # url_for('oauth2.authorize', _external=True) on whichever host the browser used (httproute.yaml).
+  callbackUrls:
+    - https://pgadmin.sklab.dev/oauth2/authorize
+    - https://pg.sklab.dev/oauth2/authorize
+  # No OAUTH2_LOGOUT_URL: pgAdmin's logout ends only its own session.
+  # pgAdmin sends an S256 challenge (OAUTH2_CHALLENGE_METHOD + OAUTH2_RESPONSE_TYPE).
+  pkceEnabled: true
+  launchUrl: https://pgadmin.sklab.dev
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # pgAdmin reads the secret from pgadmin-oidc-client; no copy is needed.
+  secret:
+    enabled: false

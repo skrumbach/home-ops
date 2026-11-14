@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app wizarr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: wizarr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -33,8 +32,8 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
 
         initContainers:
-          # Writes the admin, Plex server, Seerr link and Hermes API key rows that Wizarr's setup wizard would. Skill
-          # media-stack references/friends.md. Runs on the exact app image so it always matches the DB schema.
+          # Writes the admin, Plex server, Seerr link and Hermes API key rows that Wizarr's setup wizard would.
+          # Runs on the exact app image so it always matches the DB schema.
           seed:
             image: &image
               repository: ghcr.io/wizarrrr/wizarr
@@ -121,15 +120,10 @@ spec:
 
     persistence:
       config:
-        # Created here (app-template names it after the release) and backed up by
-        # components/kopiur. Invites, servers and libraries live in this SQLite database.
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-        # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
-        retain: true
+        # components/kopiur/pvc owns this claim (restore-on-create). Invites, servers and libraries
+        # live in this SQLite database. Born chart-owned; the live claim keeps
+        # helm.sh/resource-policy: keep, so Helm did not delete it on the switch.
+        existingClaim: wizarr
         advancedMounts:
           wizarr:
             app:
@@ -156,60 +150,29 @@ spec:
                 readOnly: true
 
     route:
-      # Admin UI: LAN/VPN only.
+      # The only route since the public invite host (join.sklab.dev) went 2026-11-13: LAN only.
+      # forceRename keeps the name the route had while there were two.
       admin:
+        forceRename: wizarr-admin
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: wizarr.png
-          gethomepage.dev/description: "Wizarr sends invite links that give friends a Plex library share."
+          gethomepage.dev/name: Wizarr
+          gethomepage.dev/icon: wizarr.svg
+          gethomepage.dev/description: Plex invitations
           gethomepage.dev/pod-selector: app.kubernetes.io/name=wizarr
           gatus.home-operations.com/endpoint: |-
-            url: https://wizarr.${SECRET_DOMAIN}/health
+            url: https://wizarr.sklab.dev/health
             conditions:
               - "[STATUS] == 200"
             group: media
         hostnames:
-          - wizarr.${SECRET_DOMAIN}
+          - wizarr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
             sectionName: https
         rules:
           - backendRefs:
-              - name: wizarr
-                port: *port
-      # Invite flow only, reachable from the internet. Everything else (admin login,
-      # settings, plex scan, API) is not routed on this host.
-      join:
-        annotations:
-          external-dns.kubernetes.io/target: "external.${SECRET_DOMAIN}"
-          # "/" is not routed on this host, so the default probe of the bare hostname always 404s.
-          # /favicon.ico is an Exact route straight to the app.
-          gatus.home-operations.com/endpoint: |-
-            url: https://join.${SECRET_DOMAIN}/favicon.ico
-            conditions:
-              - "[STATUS] == 200"
-            group: media
-        hostnames:
-          - join.${SECRET_DOMAIN}
-        parentRefs:
-          - name: envoy-external
-            namespace: network
-            sectionName: https
-        rules:
-          - matches:
-              - path: {type: PathPrefix, value: /j}
-              - path: {type: PathPrefix, value: /join}
-              - path: {type: PathPrefix, value: /invitation}
-              - path: {type: PathPrefix, value: /wizard}
-              - path: {type: PathPrefix, value: /static}
-              - path: {type: PathPrefix, value: /image-proxy}
-              - path: {type: PathPrefix, value: /cinema-posters}
-              - path: {type: PathPrefix, value: /reset}
-              - path: {type: Exact, value: /favicon.ico}
-              - path: {type: Exact, value: /plex/callback}
-            backendRefs:
               - name: wizarr
                 port: *port

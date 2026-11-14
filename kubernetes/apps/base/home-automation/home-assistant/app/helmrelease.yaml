@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app home-assistant
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: home-assistant
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -23,18 +22,16 @@ spec:
           annotations:
             # Static IP only, no MAC pin: a pinned MAC on bond0.3 makes the kernel reject the
             # new pod's net1 while the dying pod's veth holds it. IoT devices key on IP.
-            # Skill home-automation.
             k8s.v1.cni.cncf.io/networks: |
               [{
                 "name":"multus-iot",
                 "namespace": "kube-system",
-                "ips": ["10.40.0.100/16"]
+                "ips": ["10.40.0.100/22"]
               }]
         initContainers:
           # Installs the hass-oidc-auth custom component into /config. The zip is verified against
           # OIDC_SHA256 (GitHub release asset digest); bump both together. A failed download or
           # checksum keeps the installed copy so HA still boots, and fails the pod on a fresh PVC.
-          # Skill home-automation.
           install-oidc:
             image:
               repository: docker.io/library/busybox
@@ -80,8 +77,8 @@ spec:
               - secretRef:
                   name: home-assistant
             # /manifest.json is served without authentication, so the probe measures HA's own
-            # HTTP server, not the ext_authz chain in front of the public route. Pod readiness
-            # then drives the upstream KubePodNotReady rule. Skill home-automation.
+            # HTTP server and nothing in front of the route. Pod readiness
+            # then drives the upstream KubePodNotReady rule.
             probes:
               liveness: &probes
                 enabled: true
@@ -114,11 +111,11 @@ spec:
               requests:
                 cpu: 10m
                 # Explicit memory request: without one Kubernetes reserves the full 2Gi limit on
-                # the node. 768Mi is ~2x the 30-day peak working set of 393Mi. Skill node-scheduling.
+                # the node. 768Mi is ~2x the 30-day peak working set of 393Mi.
                 memory: 768Mi
               limits:
                 memory: 2Gi
-          # --auth none: Authentik SSO gates the route at Envoy (securitypolicy.yaml).
+          # --auth none: Pocket ID gates the route at Envoy (securitypolicy.yaml).
           code-server:
             image:
               repository: ghcr.io/coder/code-server
@@ -142,7 +139,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       # nodeTaintsPolicy: Honor only filters NoSchedule/NoExecute taints. The talos-3
       # dedicated taint is PreferNoSchedule, so talos-3 stays in the spread domains and
-      # the TaintToleration score penalty keeps this workload off it. Skill node-scheduling.
+      # the TaintToleration score penalty keeps this workload off it.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname
@@ -170,13 +167,21 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: home-assistant
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant.svg
+          gethomepage.dev/description: Smart home hub
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
+          gatus.home-operations.com/endpoint: |-
+            url: https://hass.sklab.dev/manifest.json
+            conditions:
+              - "[STATUS] == 200"
+            group: home-automation
         hostnames:
-          - "hass.${SECRET_DOMAIN}"
+          - "hass.sklab.dev"
+        # LAN only since 2026-11-13: the companion app needs the VPN off-site.
         parentRefs:
-          - name: envoy-external
+          - name: envoy-internal
             namespace: network
             sectionName: https
         rules:
@@ -186,11 +191,13 @@ spec:
       code-server:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: home-assistant-code
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: HA Code Server
           gethomepage.dev/icon: vscode.svg
+          gethomepage.dev/description: Edit the Home Assistant config
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
         hostnames:
-          - "hass-code.${SECRET_DOMAIN}"
+          - "hass-code.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -203,8 +210,6 @@ spec:
     persistence:
       config:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key, and the
-        # `:-home-assistant` default would hide a token naming a variable nothing defines.
         existingClaim: ${KOPIUR_CLAIM:-home-assistant}
         globalMounts:
           - path: /config

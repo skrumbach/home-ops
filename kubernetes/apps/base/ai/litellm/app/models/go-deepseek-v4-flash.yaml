@@ -3,7 +3,7 @@
 # OpenCode Go flat-rate subscription (OpenAI-compatible, /zen/go). Registration only: held by the
 # hermes key. Distinct from `deepseek-v4-flash`, which is the metered OpenRouter route.
 # INVARIANT: explicit $0 on every price field. The invoice is flat, so any non-zero cost-map hit
-# would be phantom spend. See skill litellm-proxy (references/model-catalog.md).
+# would be phantom spend.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

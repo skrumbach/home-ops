@@ -25,7 +25,7 @@ spec:
       ports:
         - port: 9999
           protocol: TCP
-    # DNS replies from CoreDNS. No `ports:` on purpose: a reply arrives on an ephemeral port, never 53. Skill `networking` references/dns-ownership.md.
+    # DNS replies from CoreDNS. No `ports:` on purpose: a reply arrives on an ephemeral port, never 53.
     - from:
         - namespaceSelector:
             matchLabels:

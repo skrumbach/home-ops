@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Every SecurityPolicy HTTPRoute target exists, and every `sectionName` names a rule of it.
 
-Prevents: an Authentik ExtAuth gate that silently attaches to nothing. paperless-ngx and
+Prevents: a sign-in gate (Envoy OIDC) that silently attaches to nothing. paperless-ngx and
 linkwarden gate one named route rule (`app`) and leave `api` open. If a rule is renamed
 or loses its `name`, the policy targets no rule and the UI it was meant to gate is
 served without sign-in. A whole-route policy (esphome, syncthing, zigbee2mqtt) fails the
@@ -11,7 +11,7 @@ valid, and a Gatus check on the in-cluster Service stays green.
 Routes are read from raw HTTPRoute manifests and from app-template HelmRelease
 `values.route.<key>` in the same app directory (`nameOverride`, else the release name
 when the release has one route, else `<release>-<key>`; matched against the live
-cluster). Skill `networking`.
+cluster).
 """
 
 from __future__ import annotations

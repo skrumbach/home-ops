@@ -3,7 +3,6 @@
 # One bucket for every stack outside Flux that wants off-cluster state; this
 # stack owns the `truenas/` key. Credentials and the account endpoint come from
 # 1Password through vals (AWS_*), so the account ID stays out of Git.
-# Skill `truenas-nas`.
 terraform {
   backend "s3" {
     bucket = "home-ops-tfstate"

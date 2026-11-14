@@ -18,6 +18,8 @@ spec:
       labels:
         app: emqx-exporter
     spec:
+      # The exporter only calls the EMQX API; it has no Kubernetes client.
+      automountServiceAccountToken: false
       containers:
         - name: exporter
           # renovate: datasource=docker depName=emqx/emqx-exporter

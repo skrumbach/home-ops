@@ -1,0 +1,79 @@
+# Coderd Runbooks
+
+These files are generated into ConfigMap `coder-runbooks` (label `runbook_docs: "true"`),
+which no workload mounts.
+There is no `runbooks.sklab.dev` HTTPRoute. Alert `runbook_url` values
+point at this Git path.
+
+## CoderdCPUUsage
+
+The CPU usage of the Coder pod has stayed above its CPU **request** for 10
+minutes. The HelmRelease sets `requests.cpu: 71m` and no CPU limit
+(`app/helmrelease.yaml`), so the pod is not throttled: it runs on spare node CPU
+it did not reserve, and it loses that CPU first when the node is busy.
+
+Check usage against the request (`kubectl -n coder top pod`) and what Coder was
+doing (workspace builds, many connected agents). If the higher usage is normal,
+raise `requests.cpu` on the HelmRelease. Do not add a CPU limit as a first
+response: a limit throttles coderd instead of only signalling the low request.
+
+## CoderdMemoryUsage
+
+The memory usage of one or more Coder pods has been close to the limit defined
+for the deployment. When the memory usage exceeds the limit, the pod(s) will be
+restarted by Kubernetes. This will interrupt all connections to workspaces being
+handled by the affected pod(s).
+
+The memory limit is `1Gi`. To resolve, increase that limit on the Coder
+HelmRelease if usage is genuinely at the cap. If usage increases monotonically,
+that is likely a memory leak.
+
+## CoderdRestarts
+
+One or more Coder pods have been restarting multiple times in the last 10
+minutes. This may be due to a number of issues, including:
+
+- Failure to connect to the configured database: Coder requires a reachable
+  PostgreSQL database to function. If it fails to connect, you will see an error
+  similar to the following:
+
+  ```console
+  [warn]  ping postgres: retrying  error="dial tcp postgres-18-rw.database.svc.cluster.local:5432: connect: connection refused"  try=3
+  ```
+
+  The live DSN host is `postgres-18-rw.database.svc.cluster.local:5432`
+  (`app/externalsecret.yaml`), not a ClusterIP.
+
+- Out-Of-Memory (OOM) kills due to memory usage (see [above](#coderdmemoryusage)),
+- An unexpected bug causing the application to exit with an error.
+
+If Coder is not restarting due to excessive memory usage, check the logs:
+
+1. Check the logs of the deployment for any errors,
+
+```console
+kubectl -n coder logs deployment/coder --previous
+```
+
+2. Check any Kubernetes events related to the deployment,
+
+```console
+kubectl -n coder events --watch
+```
+
+## CoderdReplicas
+
+One or more Coderd replicas are down. This may cause availability problems and elevated
+response times for user and agent API calls.
+
+This cluster runs a single coderd replica (`replicas` defaults to 1; there is no
+separate provisioner Deployment). Review `deployment/coder` in namespace `coder`
+for `CrashLoopBackOff`, or re-adjust alarm levels if the replica count changes.
+
+## CoderdWorkspaceBuildFailures
+
+A few workspace build errors have been recently observed.
+
+Review Prometheus metrics to identify failed jobs. Check the workspace build logs
+to determine if there is a relationship with a new template version or a buggy
+Terraform plugin.

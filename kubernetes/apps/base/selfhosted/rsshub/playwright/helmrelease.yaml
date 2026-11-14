@@ -8,15 +8,7 @@ spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
+    name: playwright
   values:
     controllers:
       playwright:
@@ -26,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/browserless/chromium
-              tag: v2.62.0@sha256:0f28bbde20e890463e8d0f253dc2b66860de8ad3aef6cc17bcdbfe8a02ffccf0
+              tag: v2.63.1@sha256:a79e03601b98ca7dc69bb518e7ffec9bbc7e368cde9b28d793a0c81e3193c0bb
             env:
               TZ: ${CONFIG_TIMEZONE}
               DATA_DIR: /config/
@@ -50,7 +42,7 @@ spec:
                 add:
                   - SYS_ADMIN
     # `selfhostedPodOptions` is not an app-template key, so Helm silently discarded this block and the
-    # pod ran with an EMPTY securityContext (legal YAML, flate passes, HelmRelease green). Skill `app-workloads`.
+    # pod ran with an EMPTY securityContext (legal YAML, flate passes, HelmRelease green).
     defaultPodOptions:
       securityContext:
         runAsNonRoot: false
@@ -58,20 +50,6 @@ spec:
         runAsGroup: 0
         fsGroup: 0
         fsGroupChangePolicy: OnRootMismatch
-    route:
-      app:
-        annotations:
-          gatus.home-operations.com/enabled: "false"
-        hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: &port 3000
     persistence:
       # browserless keeps no durable state (DATA_DIR held only `lost+found`; metrics go to the /tmp
       # emptyDir below), so there is no PVC and nothing to back up.
@@ -98,4 +76,6 @@ spec:
         controller: *app
         ports:
           http:
-            port: *port
+            # No route on purpose: browserless has no token and runs as root with SYS_ADMIN, so a LAN
+            # route let any device drive a browser inside the pod network. RSSHub uses this Service.
+            port: 3000

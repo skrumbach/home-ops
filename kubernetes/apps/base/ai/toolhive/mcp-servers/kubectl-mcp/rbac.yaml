@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/serviceaccount.json
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -6,7 +7,6 @@ metadata:
 ---
 # aggregationRule discards hand-written rules. Grants live on kubectl-mcp-readonly-base,
 # labeled rbac.home-operations.com/aggregate-to-kubectl-mcp-readonly. Core Secrets are omitted.
-# See skill ai-stack references/toolhive.md.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -112,7 +112,6 @@ rules:
       - gateway.networking.k8s.io
       - gateway.networking.x-k8s.io
       - generators.external-secrets.io
-      - grafana.integreatly.org
       - groupsnapshot.storage.k8s.io
       - helm.toolkit.fluxcd.io
       - image.toolkit.fluxcd.io
@@ -139,8 +138,6 @@ rules:
       - talos.dev
       - toolhive.stacklok.dev
       - tuppr.home-operations.com
-      - upgrade.cattle.io
-      - volsync.backube
     resources:
       - "*"
     verbs:

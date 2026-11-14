@@ -3,7 +3,6 @@
 # Claude Code subscription PASS-THROUGH: the caller's own OAuth token pays, never ANTHROPIC_API_KEY.
 # INVARIANT: placeholder apiKey + $0 on all seven price fields below are load-bearing (money safety).
 # Owns the natural name; the household-metered route is claude-opus-5-metered.
-# See skill litellm-proxy (references/claude-code-subscription.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

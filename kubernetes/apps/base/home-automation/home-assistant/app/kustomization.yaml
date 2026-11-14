@@ -5,6 +5,9 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
+  - ./pocketidoidcclient-app.yaml
+  - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
 configMapGenerator:
   - name: home-assistant-oidc

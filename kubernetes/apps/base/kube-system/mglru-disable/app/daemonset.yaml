@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/apps/daemonset_v1.json
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -18,7 +19,6 @@ spec:
         app.kubernetes.io/name: mglru-disable
     spec:
       # Reasserts kernel/mm/lru_gen/enabled=0. machine.sysfs sets the same key. Do not delete this until a reboot proves sysfs alone holds.
-      # See skill talos-nodes.
       priorityClassName: system-node-critical
       automountServiceAccountToken: false
       hostPID: false

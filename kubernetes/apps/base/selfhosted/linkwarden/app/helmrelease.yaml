@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app linkwarden
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: linkwarden
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -26,7 +25,7 @@ spec:
               tag: v2.17.0@sha256:7c11fde57d1a0c819b6de0079966eba3a33584d718464af7dacde22bd470ae46
             env:
               NEXT_SHARP_PATH: /data/node_modules/sharp
-              NEXTAUTH_URL: "https://links.${SECRET_DOMAIN}"
+              NEXTAUTH_URL: "https://links.sklab.dev"
               NEXT_PUBLIC_DISABLE_REGISTRATION: "true"
               NEXT_PUBLIC_CREDENTIALS_ENABLED: "true"
               # Full-page Monolith archive: raise output buffer above the 100MB
@@ -84,7 +83,7 @@ spec:
 
     defaultPodOptions:
       # `affinity` NotIn talos-3 is not needed: the talos-3 PreferNoSchedule taint (no toleration here)
-      # keeps this app off it via the TaintToleration score. Skill `node-scheduling`, references/talos-3-ledger.md.
+      # keeps this app off it via the TaintToleration score.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -102,8 +101,6 @@ spec:
     persistence:
       data:
         enabled: true
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key any more.
-        # Skill `kopiur-backups`, references/onboarding.md (dangling VolSync aliases).
         existingClaim: ${KOPIUR_CLAIM:-linkwarden}
         globalMounts:
           - path: /data/data
@@ -116,21 +113,21 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Selfhosted
+          gethomepage.dev/group: Apps
           gethomepage.dev/name: Linkwarden
-          gethomepage.dev/icon: linkwarden.svg
-          external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/icon: sh-linkwarden.svg
+          gethomepage.dev/description: Bookmarks and page archives
           # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a
-          # Linkwarden body field the Authentik login page cannot match, and proves /api still
-          # bypasses Authentik.
+          # Linkwarden body field the Pocket ID sign-in page cannot match, and proves /api still
+          # bypasses the Envoy OIDC gate.
           gatus.home-operations.com/endpoint: |-
-            url: https://links.${SECRET_DOMAIN}/api/v1/logins
+            url: https://links.sklab.dev/api/v1/logins
             conditions:
               - "[STATUS] == 200"
               - "has([BODY].credentialsEnabled) == true"
             group: selfhosted
         hostnames:
-          - "links.${SECRET_DOMAIN}"
+          - "links.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

@@ -8,7 +8,6 @@
         "docker"
       ],
       matchPackageNames: [
-        "/gha-runner-scale-set-controller/",
         "/gha-runner-scale-set/"
       ],
       group: {
@@ -84,6 +83,21 @@
       },
     },
     {
+      // Three deps, one tool: .mise.toml (mise, depName ubi:home-operations/flate), FLATE_VERSION (annotated regex) and the
+      // flate/action uses: lines (github-actions); all report packageName home-operations/flate. Split, CI ran an older flate than
+      // developers. A group automerges only when every member does, so the FLATE_VERSION pin sets the policy: patches automerge,
+      // 0.x minors and majors wait for review. The age applies the mise and action pins' 3 days to FLATE_VERSION too.
+      description: "flate Group - local tool and CI pins move together",
+      groupName: "flate",
+      matchPackageNames: [
+        "home-operations/flate"
+      ],
+      minimumReleaseAge: "3 days",
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "Flux Operator Group",
       groupName: "Flux Operator",
       matchDatasources: [
@@ -113,6 +127,7 @@
       },
     },
     {
+      // One PR for kubelet and the control plane: scripts/ci/version-consistency.sh fails any PR that bumps only some of them.
       description: "Kubernetes Group",
       groupName: "Kubernetes",
       matchDatasources: [
@@ -136,8 +151,7 @@
         "docker"
       ],
       matchPackageNames: [
-        "/rook-ceph/",
-        "/rook-ceph-cluster/"
+        "/rook-ceph/"
       ],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
@@ -165,7 +179,6 @@
         "docker"
       ],
       "matchPackageNames": [
-        "/siderolabs/talosctl/",
         "/siderolabs/installer/",
         "/skrumbach/talosctl-busybox/"
       ],

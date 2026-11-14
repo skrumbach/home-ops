@@ -4,13 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app seerr
-  namespace: &namespace media
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
-    # Proof: proof-ledger.md row 20.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   dependsOn:
@@ -22,12 +17,9 @@ spec:
       namespace: rook-ceph
     - name: kopiur-repository
       namespace: system
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/base/media/seerr/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 2Gi
@@ -39,24 +31,18 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
-  wait: false
+  targetNamespace: media
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 # Role and database on the shared postgres-18 Cluster (retain: removing this never
-# drops data). Skill `databases`.
+# drops data).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: seerr-db
-  namespace: media
 spec:
   targetNamespace: database
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: seerr
-  interval: 30m
+  interval: 1h
   timeout: 5m
   path: ./kubernetes/components/cnpg-database
   prune: true

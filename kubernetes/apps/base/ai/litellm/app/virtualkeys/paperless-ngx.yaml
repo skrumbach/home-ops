@@ -3,7 +3,7 @@
 # selfhosted/paperless-ngx's key (AI suggestions, document chat and RAG embeddings on the local models).
 # chat-local and embedding-local only, so spend is $0 by construction and maxBudget is an inert guard
 # (same reasoning as linkwarden); rpm/tpm are the real bound on the shared B70. The model-level rpm on
-# embedding-local still caps every key together. See skill litellm-proxy (references/governance-keys.md).
+# embedding-local still caps every key together.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:

@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app sabnzbd
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: sabnzbd
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -76,7 +75,7 @@ spec:
                 sabnzbd.downloads.svc,
                 sabnzbd.downloads.svc.cluster,
                 sabnzbd.downloads.svc.cluster.local,
-                sabnzbd.${SECRET_DOMAIN}
+                sabnzbd.sklab.dev
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -137,7 +136,7 @@ spec:
     defaultPodOptions:
       # No dedicated-taint toleration. PreferNoSchedule keeps this off
       # talos-3 by score, not a hard filter. An explicit toleration is
-      # required to place it there. Skill node-scheduling.
+      # required to place it there.
       topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: kubernetes.io/hostname
@@ -174,7 +173,7 @@ spec:
       # download_dir scratch on ceph-block, not CephFS: thousands of tiny
       # SABnzbd_article_* files storm the MDS metadata journal. Mounts over the
       # usenet/incomplete subpath; `complete` stays on shared-downloads for *arr
-      # hardlinks. Path matches download_dir in sabnzbd.ini. Skill media-stack.
+      # hardlinks. Path matches download_dir in sabnzbd.ini.
       incomplete:
         existingClaim: sabnzbd-incomplete
         advancedMounts:
@@ -196,12 +195,17 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/sabnzbd.svg
-          gethomepage.dev/description: "SABnzbd is an open source binary newsreader written in Python. It simplifies the process of downloading from Usenet."
+          gethomepage.dev/name: SABnzbd
+          gethomepage.dev/icon: sabnzbd.svg
+          gethomepage.dev/description: Usenet downloader
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sabnzbd
+          gatus.home-operations.com/endpoint: |-
+            url: https://sabnzbd.sklab.dev/api?mode=version
+            conditions:
+              - "[STATUS] == 200"
+            group: downloads
         hostnames:
-          - sabnzbd.${SECRET_DOMAIN}
+          - sabnzbd.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

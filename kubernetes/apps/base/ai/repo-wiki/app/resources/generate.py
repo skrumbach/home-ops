@@ -2,7 +2,7 @@
 # Multi-pass repo wiki: stage 1 plans pages, stage 2 writes each from its
 # relevant files. Local-model friendly, background, no truncated whole-repo dump.
 # Adapted from joryirving/home-ops kubernetes/apps/base/llm/repo-wiki/config.yaml
-# (commit 3d3b700) - see this app's README.md for what changed.
+# (commit 3d3b700).
 import io, json, os, pathlib, re, shutil, subprocess, tarfile, urllib.error, urllib.request, fnmatch
 
 LITELLM  = os.environ["OPENAI_BASE_URL"].rstrip("/")

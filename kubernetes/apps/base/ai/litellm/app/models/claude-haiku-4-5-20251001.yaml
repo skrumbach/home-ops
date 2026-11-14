@@ -3,7 +3,6 @@
 # Claude Code subscription PASS-THROUGH: the caller's own OAuth token pays, never ANTHROPIC_API_KEY.
 # INVARIANT: placeholder apiKey + $0 on all seven price fields below are load-bearing (money safety).
 # Dated id on purpose: Anthropic's catalog has no bare claude-haiku-4-5, and it is Claude Code's wire id.
-# See skill litellm-proxy (references/claude-code-subscription.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

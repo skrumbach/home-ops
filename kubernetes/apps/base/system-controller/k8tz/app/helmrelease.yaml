@@ -13,7 +13,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: k8tz
-  interval: 30m
+  interval: 1h
   values:
     namespace: system-controller
 
@@ -23,7 +23,6 @@ spec:
     cronJobTimeZone: true
 
     # Init requests equal limits, so an injected init does not demote a Guaranteed pod. imageVolume stays off: it cannot mount /etc/localtime.
-    # See skill system-namespaces.
     initContainerResources:
       requests:
         cpu: 100m
@@ -33,7 +32,6 @@ spec:
         memory: 128Mi
 
     # Webhook request equals limit. Raising only the limit demotes the pod to Burstable. Chart resources do not cover cert-watcher.
-    # See skill system-namespaces.
     resources:
       requests:
         cpu: 250m
@@ -60,7 +58,6 @@ spec:
               topologyKey: kubernetes.io/hostname
 
     # DoNotSchedule spread plus the PDB. Honor does not see the current PreferNoSchedule taint.
-    # See skill node-scheduling.
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -85,7 +82,6 @@ spec:
               metadata:
                 name: not-used
           # Chart resources skip cert-watcher. Keep this patch request equal to limit or the pod stays Burstable.
-          # See skill system-namespaces.
           - target:
               version: v1
               kind: Deployment

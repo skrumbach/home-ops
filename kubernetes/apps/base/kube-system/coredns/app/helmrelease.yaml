@@ -81,7 +81,6 @@ spec:
                 - key: node-role.kubernetes.io/control-plane
                   operator: Exists
     # maxSkew 1 so one drain cannot take both replicas. Honor does not exclude talos-3 while the taint is PreferNoSchedule.
-    # See skill node-scheduling.
     topologySpreadConstraints:
       - labelSelector:
           matchLabels:

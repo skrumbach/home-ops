@@ -4,19 +4,13 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app vllm
-  namespace: &namespace ai
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+  targetNamespace: &namespace ai
   dependsOn:
     - name: rook-ceph
       namespace: rook-ceph
     - name: onepassword-store
       namespace: security
-  # Only the main "vllm" controller - "vllm-embed" is deliberately pinned to
-  # replicas: 0 (mutually exclusive with vllm on the single GPU), so it must
-  # not be health-checked.
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
@@ -29,16 +23,10 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   # Covers the 30 min startup probe budget (helmrelease.yaml startup failureThreshold 60 x 30s).
   timeout: 30m
   postBuild:
     substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
       # CHAT_MODEL_ID: the loaded model's name, defined once in chat-model.yaml.
       - name: chat-model
         kind: ConfigMap
-    substitute:
-      APP: *app
-      GATUS_GROUP: ai

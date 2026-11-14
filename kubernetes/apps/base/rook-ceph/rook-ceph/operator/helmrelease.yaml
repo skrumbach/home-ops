@@ -8,15 +8,8 @@ metadata:
     # Survives a Kustomization delete; prune: false on the Kustomization does not (deletionPolicy WaitForTermination).
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
-  interval: 30m
+  interval: 1h
   releaseName: rook-ceph
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   chartRef:
     kind: OCIRepository
     name: rook-ceph
@@ -25,11 +18,11 @@ spec:
       enabled: true
     csi:
       # CSI controller placement is not settable from this repo. The Driver CR belongs to the internal ceph-csi-drivers release.
-      # Kernel mount options live on the CephCluster. See skill rook-ceph.
+      # Kernel mount options live on the CephCluster.
       enableCephfsDriver: true
       enableCephfsSnapshotter: true
       enableLiveness: true
-      # Stays off. No pod carries app=csi-metrics, and the Driver CRD has no metrics field. See skill rook-ceph.
+      # Stays off. No pod carries app=csi-metrics, and the Driver CRD has no metrics field.
       serviceMonitor:
         enabled: false
     enableDiscoveryDaemon: true
@@ -38,7 +31,6 @@ spec:
     monitoring:
       enabled: true
     # Explicit 1Gi. limits: {} does not clear the chart default 512Mi, which OOMKilled the operator.
-    # See skill rook-ceph.
     resources:
       requests:
         memory: 128Mi
@@ -46,7 +38,6 @@ spec:
       limits:
         memory: 1Gi
     # Discover DaemonSet toleration. PreferNoSchedule makes it hygiene for a future hard taint.
-    # See skill node-scheduling.
     discover:
       tolerations:
         - key: home-operations.com/dedicated

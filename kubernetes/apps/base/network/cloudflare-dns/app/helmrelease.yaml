@@ -38,7 +38,7 @@ spec:
       - gateway-httproute
     txtPrefix: k8s.
     txtOwnerId: default
-    domainFilters: ["${SECRET_DOMAIN}"]
+    domainFilters: ["sklab.dev"]
     serviceMonitor:
       enabled: true
     resources:

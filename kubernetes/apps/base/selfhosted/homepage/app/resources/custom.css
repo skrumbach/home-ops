@@ -1,0 +1,253 @@
+/* Theme taken from the GitHub profile card (skrumbach/skrumbach, scripts/render/lib/svg.mjs):
+   same palette, same four type families, 6px panels with a violet hairline. */
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&family=Saira:wght@800&display=swap");
+
+:root {
+  --ho-bg: #060818;
+  --ho-bg2: #090c22;
+  --ho-line: rgba(140, 120, 255, 0.28);
+  --ho-line-soft: rgba(140, 120, 255, 0.16);
+  --ho-white: #ffffff;
+  --ho-text: #cdd2e6;
+  --ho-muted: #a9afcb;
+  --ho-dim: #7c83a5;
+  --ho-cyan: #22d8f0;
+  --ho-blue: #2f9bff;
+  --ho-indigo: #6c5cff;
+  --ho-magenta: #d946e6;
+  --ho-violet: #a57bff;
+  --ho-green: #2ee08a;
+  --ho-amber: #ffb547;
+  --ho-red: #ff4d6d;
+  --ho-body: "Barlow", system-ui, sans-serif;
+  --ho-label: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --ho-mono: "JetBrains Mono", ui-monospace, monospace;
+  --ho-disp: "Saira", "Barlow", system-ui, sans-serif;
+}
+
+/* ---- canvas ---- */
+html,
+body {
+  background: var(--ho-bg) !important;
+}
+body {
+  font-family: var(--ho-body) !important;
+  color: var(--ho-text);
+}
+#background {
+  display: none;
+}
+#page_wrapper {
+  background:
+    radial-gradient(70% 55% at 88% 0%, rgba(139, 85, 245, 0.3), transparent 70%),
+    radial-gradient(45% 45% at 0% 30%, rgba(34, 216, 240, 0.09), transparent 70%),
+    linear-gradient(180deg, var(--ho-bg), var(--ho-bg2));
+}
+#inner_wrapper {
+  counter-reset: ho-group;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 120, 255, 0.4) transparent;
+}
+
+/* ---- hero: eyebrow, wordmark, then the widget row ---- */
+#information-widgets {
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid var(--ho-line);
+  padding: 20px 4px 18px !important;
+}
+#information-widgets::before {
+  content: "HOMELAB \2022  TALOS LINUX \2022  FLUX GITOPS";
+  flex-basis: 100%;
+  font-family: var(--ho-label);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--ho-cyan);
+}
+#widgets-wrap::before {
+  content: "HOME-OPS";
+  flex-basis: 100%;
+  margin: 2px 0 14px;
+  font-family: var(--ho-disp);
+  font-weight: 800;
+  font-size: clamp(40px, 6vw, 68px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: transparent;
+  background: linear-gradient(90deg, var(--ho-white) 0 3.02em, var(--ho-cyan) 3.02em, var(--ho-blue) 4.4em, #3a6bff 5.4em);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+#information-widgets .widget-container,
+#information-widgets [class*="information-widget"] {
+  font-family: var(--ho-mono);
+  color: var(--ho-text);
+}
+#information-widgets svg {
+  color: var(--ho-violet);
+}
+/* usage bars: track and neon fill */
+#information-widgets .rounded-full.h-1 {
+  background: var(--ho-line-soft) !important;
+}
+#information-widgets .rounded-full.h-1 > div {
+  background: linear-gradient(90deg, var(--ho-cyan), var(--ho-indigo), var(--ho-magenta)) !important;
+}
+.information-widget-search input {
+  background: rgba(11, 15, 38, 0.85) !important;
+  border: 1px solid var(--ho-line) !important;
+  border-radius: 6px !important;
+  color: var(--ho-white) !important;
+  font-family: var(--ho-mono);
+}
+.information-widget-search input::placeholder {
+  color: var(--ho-dim) !important;
+}
+.information-widget-search input:focus {
+  border-color: rgba(34, 216, 240, 0.55) !important;
+  box-shadow: 0 0 0 1px rgba(34, 216, 240, 0.25) !important;
+}
+.information-widget-datetime span {
+  font-family: var(--ho-label);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ho-white) !important;
+}
+
+/* ---- section headers: "01 / MEDIA" ---- */
+.services-group {
+  counter-increment: ho-group;
+  margin-top: 14px;
+}
+.services-group > button,
+.bookmark-group > button {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ho-line-soft);
+}
+.service-group-name,
+.bookmark-group-name {
+  align-items: baseline;
+  font-family: var(--ho-disp) !important;
+  font-weight: 800 !important;
+  font-size: 19px !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ho-white) !important;
+}
+.service-group-name::before {
+  content: counter(ho-group, decimal-leading-zero) " /";
+  margin-right: 12px;
+  font-family: var(--ho-mono);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--ho-magenta);
+}
+.services-group > button svg,
+.bookmark-group > button svg {
+  color: var(--ho-dim);
+}
+
+/* ---- tiles ---- */
+.service-card,
+.bookmark > a {
+  background: linear-gradient(100deg, rgba(40, 20, 90, 0.34), rgba(14, 14, 48, 0.5) 60%, rgba(9, 12, 34, 0.5)) !important;
+  border: 1px solid var(--ho-line-soft);
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.service-card:hover,
+.bookmark > a:hover {
+  border-color: rgba(34, 216, 240, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(34, 216, 240, 0.18),
+    0 0 26px -8px rgba(34, 216, 240, 0.45) !important;
+}
+.service-card {
+  padding: 6px 8px !important;
+}
+.service-name {
+  font-family: var(--ho-body);
+  font-weight: 600;
+  font-size: 15px !important;
+  color: var(--ho-white);
+}
+.service-description {
+  margin-top: 1px;
+  font-weight: 400 !important;
+  font-size: 12.5px !important;
+  color: var(--ho-muted) !important;
+}
+/* a missing icon keeps the text column aligned */
+.service-title > .service-title-text:first-child {
+  padding-left: 48px;
+}
+
+/* status: a dot at the right edge instead of a text badge */
+.service-tags {
+  top: 50% !important;
+  transform: translateY(-50%);
+  margin-right: 12px !important;
+  align-items: center;
+}
+.service-tags .k8s-status,
+.service-tags .docker-status {
+  padding: 0 !important;
+  background: none !important;
+  overflow: visible !important;
+}
+.service-tags .k8s-status > div,
+.service-tags .docker-status > div {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  font-size: 0 !important;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  color: var(--ho-red) !important;
+}
+.service-tags .k8s-status[title="running"] > div,
+.service-tags .docker-status[title="running"] > div {
+  color: var(--ho-green) !important;
+}
+.service-tags .k8s-status[title="not found"] > div,
+.service-tags .k8s-status[title="partial"] > div {
+  color: var(--ho-amber) !important;
+}
+/* widget blocks inside a tile (Grafana, Gatus, Prometheus, UniFi, TrueNAS) */
+.service-card .service-block {
+  background: rgba(3, 5, 15, 0.55) !important;
+  border-radius: 4px !important;
+  font-family: var(--ho-mono);
+}
+
+/* ---- bookmarks ---- */
+#bookmarks {
+  margin-top: 6px;
+}
+.bookmark-icon {
+  background: none !important;
+  font-family: var(--ho-mono);
+  color: var(--ho-cyan) !important;
+}
+.bookmark-name {
+  font-family: var(--ho-body);
+  font-weight: 600;
+  font-size: 14px !important;
+  color: var(--ho-white);
+}
+.bookmark-description {
+  font-family: var(--ho-mono);
+  color: var(--ho-dim) !important;
+}
+
+#footer {
+  color: var(--ho-dim);
+}

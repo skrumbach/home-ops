@@ -4,32 +4,22 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app syncthing
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: selfhosted
+  interval: 1h
   path: "./kubernetes/apps/base/selfhosted/syncthing/app"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
   components:
-    # Proof: proof-ledger.md row 29.
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: *app
       KOPIUR_CAPACITY: 1Gi
@@ -42,30 +32,21 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: syncthing-data-kopiur
-  namespace: &namespace selfhosted
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: syncthing
-  interval: 30m
-  timeout: 5m
+  targetNamespace: &namespace selfhosted
+  interval: 1h
   path: "./kubernetes/components/kopiur/backup"
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: kopiur-repository
       namespace: system
     - name: syncthing
       namespace: *namespace
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
     substitute:
       APP: syncthing-data
       KOPIUR_CLAIM: syncthing-data

@@ -5,10 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app matter-server
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: matter-server
   values:
     controllers:
       matter-server:
@@ -39,8 +39,29 @@ spec:
             env:
               MATTER_SERVER__INSTANCE_NAME: matter-server
               MATTER_SERVER__PORT: &wsPort 5580
-              MATTER_SERVER__APPLICATION_URL: &host matter.${SECRET_DOMAIN}
+              MATTER_SERVER__APPLICATION_URL: &host matter.sklab.dev
               MATTER_SERVER__LOG_LEVEL: info
+            # TCP, not HTTP: 5580 is the WebSocket API and has no plain-HTTP path that proves health.
+            # Thresholds follow home-assistant; the startup budget (300s) covers loading the fabric.
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *wsPort
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *wsPort
+                  periodSeconds: 10
+                  failureThreshold: 30
             # 30d max working set 109Mi (2026-11-07)
             resources:
               requests:
@@ -58,9 +79,10 @@ spec:
       matter-server:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home Automation"
-          gethomepage.dev/name: matter-server
-          gethomepage.dev/icon: matter.svg
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: Matter Server
+          gethomepage.dev/icon: matter-light.svg
+          gethomepage.dev/description: Matter device controller
           gatus.home-operations.com/enabled: "false"
         hostnames:
           - *host
@@ -75,6 +97,4 @@ spec:
 
     persistence:
       data:
-        # KOPIUR_CLAIM, not VOLSYNC_CLAIM: the overlay defines no VOLSYNC_* key, and the
-        # `:-matter-server` default would hide a token naming a variable nothing defines.
         existingClaim: ${KOPIUR_CLAIM:-matter-server}

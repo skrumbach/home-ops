@@ -5,12 +5,13 @@ kind: Kustomization
 namespace: ai
 resources:
   - ./externalsecret.yaml
-  - ./dbinit.yaml
+  - ./job.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
 configMapGenerator:
   # Hash suffix kept ON purpose: a schema.sql edit renames the ConfigMap, which
   # changes the db-init Job's spec, so Flux recreates the Job and the new SQL is
-  # applied (see dbinit.yaml).
+  # applied (see job.yaml).
   - name: litellm-pgvector-schema
     files:
       - schema.sql=./resources/schema.sql

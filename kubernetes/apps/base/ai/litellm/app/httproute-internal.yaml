@@ -2,7 +2,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
 # INTERNAL-ONLY route (captain decision B4): never an envoy-external parentRef.
 # Hand-written instead of the operator's spec.route, which cannot carry annotations.
-# See skill litellm-proxy (references/platform.md).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -12,17 +11,17 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: AI
     gethomepage.dev/name: LiteLLM
-    gethomepage.dev/description: "LLM governance proxy - virtual keys, budgets, fallback chains"
-    gethomepage.dev/icon: litellm.png
-    external-dns.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    gethomepage.dev/description: "LLM gateway, keys and budgets"
+    gethomepage.dev/icon: sh-litellm.svg
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=litellm
     # /health/readiness also covers the Postgres dependency.
     gatus.home-operations.com/endpoint: |-
       group: ${GATUS_GROUP}
       conditions: ["[STATUS] == 200", "[BODY].status == healthy"]
-      url: "https://litellm.${SECRET_DOMAIN}/health/readiness"
+      url: "https://litellm.sklab.dev/health/readiness"
 spec:
   hostnames:
-    - "litellm.${SECRET_DOMAIN}"
+    - "litellm.sklab.dev"
   parentRefs:
     - name: envoy-internal
       namespace: network

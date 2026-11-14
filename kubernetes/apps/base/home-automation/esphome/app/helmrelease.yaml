@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: esphome
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: esphome
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -37,7 +36,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/esphome
-              tag: 2026.10.2@sha256:d1c2ae70ce2310dc9e9ee8fd194aaf0eef45f23e1223021e3630707785873c6c
+              tag: 2026.10.2@sha256:af1e3b9a8087f25583959be9eec87ef154ec398b407106e50bde05be73f453c7
             probes:
               liveness:
                 enabled: false
@@ -132,15 +131,20 @@ spec:
     route:
       app:
         annotations:
-          # securitypolicy.yaml gates this route, so a route check would measure the Authentik
-          # login page. Probe the dashboard Service in-cluster instead. Skill observability.
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the dashboard Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
             url: http://esphome.home-automation.svc.cluster.local:6052/
             conditions: ["[STATUS] == 200"]
             ui:
               hide-url: true
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home Automation
+          gethomepage.dev/name: ESPHome
+          gethomepage.dev/icon: esphome.svg
+          gethomepage.dev/description: Device firmware
         hostnames:
-          - "esphome.${SECRET_DOMAIN}"
+          - "esphome.sklab.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network

@@ -5,11 +5,10 @@ kind: HelmRelease
 metadata:
   name: &app cleanuparr
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+    name: cleanuparr
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -40,8 +39,7 @@ spec:
               tag: 2.11.0@sha256:1898c3219e7e7ecaf9fcb8474691b6d67d56d0798b01b85690975bae14df11b5
             env:
               # Only the port is set here. Instances, the SABnzbd client and the queue rules
-              # live in Cleanuparr's own database (UI/REST API), backed up by kopiur, see
-              # .agents/skills/media-stack/references/stuck-downloads.md.
+              # live in Cleanuparr's own database (UI/REST API), backed up by kopiur.
               PORT: &port 11011
             probes:
               liveness:
@@ -86,15 +84,9 @@ spec:
 
     persistence:
       config:
-        # Created here (app-template names it after the release: cleanuparr) and backed up
-        # by components/kopiur.
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-        # helm.sh/resource-policy: keep, so a HelmRelease uninstall or rename does not
-        # delete the only live copy of this born-kopiur claim. Skill `kopiur-backups`.
-        retain: true
+        # components/kopiur/pvc owns this claim (restore-on-create). Born chart-owned; the live
+        # claim keeps helm.sh/resource-policy: keep, so Helm did not delete it on the switch.
+        existingClaim: cleanuparr
         advancedMounts:
           cleanuparr:
             app:
@@ -112,12 +104,18 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: *app
-          gethomepage.dev/icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/refs/heads/main/assets/cleanuparr.svg
-          gethomepage.dev/description: "Removes stalled and failed downloads from the arr queues so they are searched again."
+          gethomepage.dev/name: Cleanuparr
+          gethomepage.dev/icon: cleanuparr.png
+          gethomepage.dev/description: Clears stalled downloads
           gethomepage.dev/pod-selector: app.kubernetes.io/name=cleanuparr
+          gatus.home-operations.com/endpoint: |-
+            url: https://cleanuparr.sklab.dev/health
+            conditions:
+              - "[STATUS] == 200"
+              - "[BODY] == healthy"
+            group: downloads
         hostnames:
-          - cleanuparr.${SECRET_DOMAIN}
+          - cleanuparr.sklab.dev
         parentRefs:
           - name: envoy-internal
             namespace: network

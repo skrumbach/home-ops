@@ -6,6 +6,9 @@ namespace: ai
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./ocirepository.yaml
+  - ./pocketidoidcclient.yaml
+  - ./securitypolicy.yaml
 configMapGenerator:
   - name: repo-wiki-config
     files:

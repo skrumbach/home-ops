@@ -5,7 +5,7 @@
 # No static route covers the LoadBalancer pool 10.50.0.0/24: Cilium announces
 # each LB IP as a BGP /32. A pool-wide route to a node loops for every IP no
 # node announces (UDM -> node -> UDM), which the removed `space-engineers`
-# route did. Skill `unifi-network`.
+# route did.
 
 resource "unifi_traffic_route" "nordvpn_public" {
   description         = "NordVpn-Public"

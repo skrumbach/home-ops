@@ -4,25 +4,18 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app grafana
-  namespace: &namespace monitoring
 spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  interval: 30m
-  timeout: 5m
+  targetNamespace: monitoring
+  interval: 1h
   path: "./kubernetes/apps/base/monitoring/grafana/app"
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+    substitute:
+      APP: *app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   dependsOn:
     - name: onepassword-store
       namespace: security

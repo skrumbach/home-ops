@@ -29,7 +29,7 @@ spec:
           labels:
             severity: critical
 
-        # flux_resource_info is the only live suspended signal. Key the object on exported_namespace; namespace is always flux-system. Skill `flux-gitops`.
+        # flux_resource_info is the only live suspended signal. Key the object on exported_namespace; namespace is always flux-system.
         - alert: FluxResourceSuspendedTooLong
           expr: |
             flux_resource_info{suspended="True", kind=~"Kustomization|HelmRelease|GitRepository|OCIRepository|HelmRepository|HelmChart|Bucket"}
@@ -50,7 +50,7 @@ spec:
           labels:
             severity: warning
 
-        # Aggregated over the identity labels so a flapping ready/reason label does not reset the 30m timer. A first install that fails and then retries as an upgrade has no rollback target, so the HelmRelease stays Stalled with Ready=False and emits no further events. Skill `flux-gitops`.
+        # Aggregated over the identity labels so a flapping ready/reason label does not reset the 30m timer. A first install that fails and then retries as an upgrade has no rollback target, so the HelmRelease stays Stalled with Ready=False and emits no further events.
         - alert: FluxResourceNotReadyTooLong
           expr: |
             max by (kind, exported_namespace, name) (
@@ -60,13 +60,12 @@ spec:
           annotations:
             summary: >-
               Flux {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} has been not Ready for over 30m
-            # Kept short: Pushover cuts at 1024 runes and every object lands in one notification group. Background lives in the runbook.
+            # Kept short: Pushover cuts at 1024 runes and every object lands in one notification group.
             description: >-
               {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }}:
               flux get all -n {{ $labels.exported_namespace }}. A Stalled
               HelmRelease needs flux reconcile hr {{ $labels.name }} -n
               {{ $labels.exported_namespace }} --reset once fixed; a source on
               an auth or 404 error blocks every upgrade it serves.
-            runbook_url: https://github.com/skrumbach/home-ops/blob/main/.agents/skills/flux-gitops/SKILL.md
           labels:
             severity: warning

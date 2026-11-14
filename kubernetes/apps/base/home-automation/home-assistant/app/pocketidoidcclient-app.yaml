@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Home Assistant's own sign-in (hass-oidc-auth, resources/auth_oidc.yaml). The code-server route has
+# its own client (pocketidoidcclient.yaml). Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: home-assistant
+spec:
+  name: Home Assistant
+  # Must match client_id in resources/auth_oidc.yaml. Immutable once created.
+  clientID: home-assistant
+  # hass-oidc-auth sends no client_secret when none is configured, so the client is public.
+  isPublic: true
+  launchUrl: https://hass.sklab.dev
+  # Path fixed by hass-oidc-auth: <HA URL>/auth/oidc/callback. hass.sklab.dev is the only HA route.
+  callbackUrls: ["https://hass.sklab.dev/auth/oidc/callback"]
+  # hass-oidc-auth always sends an S256 challenge (features.disable_rfc7636 is not set).
+  pkceEnabled: true
+  # auth_oidc.yaml rejects anyone outside admins too; this stops them at Pocket ID.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  # A public client has no secret and auth_oidc.yaml carries the client ID; no copy is needed.
+  secret:
+    enabled: false
