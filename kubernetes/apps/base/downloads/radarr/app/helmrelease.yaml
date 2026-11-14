@@ -142,6 +142,10 @@ spec:
               - path:
                   type: PathPrefix
                   value: /api
+              # Calendar feed (/feed/v3/calendar/radarr.ics), API key in the query string.
+              - path:
+                  type: PathPrefix
+                  value: /feed
               - path:
                   type: Exact
                   value: /ping

@@ -2,8 +2,9 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 # Only rule `app` (the browser UI, /initialize.json that carries the API key, and the SignalR
 # websocket) is gated, with Pocket ID at Envoy (native OIDC). Sonarr runs AUTH__METHOD External, so
-# this policy is its only sign-in. Rule `api` (/api, /ping) stays open: Sonarr checks the API key
-# itself on /api (401 without it), and mobile apps and scripts cannot follow an SSO redirect.
+# this policy is its only sign-in. Rule `api` (/api, /feed, /ping) stays open: Sonarr checks the
+# API key itself on /api and /feed (401 without it), and mobile apps, scripts and calendar
+# subscriptions cannot follow an SSO redirect.
 # /oauth2/callback and /oauth2/logout fall in rule `app` (PathPrefix /), so the sign-in round trip
 # works on a rule-level policy.
 # A policy that fails to translate (e.g. the operator has not written sonarr-oidc-credentials yet)
