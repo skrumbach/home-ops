@@ -1,12 +1,6 @@
 ---
 devices:
-  - name: tun
-    groups:
-      - count: 1000
-        paths:
-          - path: /dev/net/tun
   # B70 as devic.es/b70, renamed to card0/renderD128 for Level Zero. That rename kills VA-API. Do not edit these paths.
-  # See skill intel-gpu.
   - name: b70
     groups:
       - count: 99
@@ -16,7 +10,7 @@ devices:
           - path: /dev/dri/by-path/pci-0000:03:00.0-render
             mountPath: /dev/dri/renderD128
   # b70-vaapi keeps the kernel names (card1/renderD129). libdrm reopens DEVNAME, so the renamed b70 group cannot serve VA-API.
-  # Device IDs are sha1(count + host paths): editing the b70 paths changes all 99 IDs. See skill intel-gpu.
+  # Device IDs are sha1(count + host paths): editing the b70 paths changes all 99 IDs.
   - name: b70-vaapi
     groups:
       - count: 99
