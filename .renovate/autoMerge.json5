@@ -144,6 +144,33 @@
       automerge: false,
     },
     {
+      // MUST stay after the blanket rules. Trust path: sign-in, secret delivery, the public edge, TLS, and the two things that write to or run code from this repo.
+      // Every update type, digests too: a re-pushed tag of these must not merge unattended. Exact names, so app-template and aqua:cloudflare/cloudflared (mise) are not matched.
+      // timestamp-optional as in the minor rule: GHCR and quay give no release timestamp, so the age holds only where the registry gives one; review is the gate.
+      description: "Never auto merge identity, secret, edge, TLS, Renovate, runner-controller or Flux components - review every update and let it age 3 days",
+      matchPackageNames: [
+        "ghcr.io/pocket-id/pocket-id",
+        "ghcr.io/aclerici38/charts/pocket-id-operator",
+        "ghcr.io/external-secrets/charts/external-secrets",
+        "docker.io/1password/connect-api",
+        "docker.io/1password/connect-sync",
+        "mirror.gcr.io/envoyproxy/gateway-helm",
+        "/(^|/)envoyproxy/envoy$/",
+        "docker.io/cloudflare/cloudflared",
+        "quay.io/jetstack/charts/cert-manager",
+        "ghcr.io/mogenius/helm-charts/renovate-operator",
+        "ghcr.io/renovatebot/renovate",
+        "ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller",
+        // Flux: both charts and the distribution artifact (customManagers.json5); the controller images ship inside them.
+        "ghcr.io/controlplaneio-fluxcd/charts/flux-operator",
+        "ghcr.io/controlplaneio-fluxcd/charts/flux-instance",
+        "ghcr.io/controlplaneio-fluxcd/flux-operator-manifests",
+      ],
+      automerge: false,
+      minimumReleaseAge: "3 days",
+      minimumReleaseAgeBehaviour: "timestamp-optional",
+    },
+    {
       // MUST stay after the blanket minor rule. GHCR has no releaseTimestamp, so timestamp-optional is what opens the PR. automerge stays false. Do not widen this.
       description: "LiteLLM proxy: GHCR has no release timestamp, so open minor PRs but never automerge them",
       matchPackageNames: ["ghcr.io/berriai/litellm-non_root"],
