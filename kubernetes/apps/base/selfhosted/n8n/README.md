@@ -109,10 +109,5 @@ the `postgres-18` one.
 - Egress never opens private, CGNAT or link-local ranges for all workflows. Add a narrow rule per workflow instead.
 - The Kustomization that owns the kopiur claim never sets `wait: true`.
 
-## Known gaps
-
-- **`DB_SQLITE_VACUUM_ON_STARTUP: true` does nothing here.** [`app/helmrelease.yaml`](app/helmrelease.yaml) sets a
-  SQLite setting, while [`app/externalsecret.yaml`](app/externalsecret.yaml) sets `DB_TYPE: postgresdb`.
-
 Upstream: [n8n docs](https://docs.n8n.io/) •
 [Environment variables](https://docs.n8n.io/hosting/configuration/environment-variables/)

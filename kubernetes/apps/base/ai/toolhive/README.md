@@ -160,10 +160,4 @@ curl -s https://mcp.sklab.dev/health                    # from the LAN: {"status
 - ClusterRole `kubectl-mcp-readonly` is an aggregation role. Hand-written rules on it are discarded; grants go on
   `kubectl-mcp-readonly-base`.
 
-## Known gaps
-
-- **Stale prerequisite comment.** `mcp-servers/kustomization.yaml` (last comment lines) says `seerr-mcp` needs the
-  `seerr` item to carry `SEERR_API_KEY`. `mcp-servers/seerr-mcp/externalsecret.yaml` reads item `seerr-api` from vault
-  Automation, which the media `seerr` PushSecret writes, and says nothing is added by hand.
-
 Upstream: [ToolHive docs](https://docs.stacklok.com/toolhive/)

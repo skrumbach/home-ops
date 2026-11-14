@@ -59,9 +59,4 @@ kubectl -n network get pods -o wide | grep flaresolverr
 kubectl -n network top pod | grep flaresolverr                  # watch memory against the 1536Mi limit
 ```
 
-## Known gaps
-
-- **`reloader.stakater.com/auto: "true"` has nothing to reload.** `app/helmrelease.yaml` mounts no ConfigMap or Secret,
-  so the annotation never triggers a restart.
-
 Upstream: [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr)

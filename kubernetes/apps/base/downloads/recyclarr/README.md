@@ -84,10 +84,4 @@ kubectl -n downloads get snapshotpolicy,restore,pvc | grep recyclarr
 |---|---|---|
 | `KubeJobFailed` | a sync Job failed in the last 12 h | Read the Job's log. An API key mismatch or an unreachable arr is the usual cause. |
 
-## Known gaps
-
-- **A comment points at a file that does not exist.** [`app/resources/recyclarr.yml`](app/resources/recyclarr.yml)
-  says the profile-to-movie mapping is in `media-stack/references/recyclarr.md`. No such path exists in the repository;
-  `.agents/skills/` holds only `incident-runbooks`.
-
 Upstream: [Recyclarr docs](https://recyclarr.dev/) • [TRaSH guides](https://trash-guides.info/)

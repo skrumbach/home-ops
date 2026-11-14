@@ -41,8 +41,6 @@ flowchart LR
   i1["Issuer<br/>k8tz-webhook-selfsign"] -->|"webhook.certManager.issuerRef"| wc["Certificate<br/>k8tz-tls"]
   wc --> d{{"Deployment<br/>k8tz"}}
   wc -.->|inject-ca-from| mwc["MutatingWebhookConfiguration<br/>k8tz"]
-  i1 -->|signs| ca["Certificate<br/>k8tz-webhook-ca"]
-  ca --> i2["Issuer<br/>k8tz-webhook-ca<br/>signs nothing"]
   pdb["PodDisruptionBudget<br/>k8tz"] -.-> d
   api(["kube-apiserver<br/>admission"]) -->|"pod and CronJob CREATE"| mwc
   mwc --> d
@@ -58,8 +56,7 @@ flowchart LR
 2. The HelmRelease from `HelmRepository` `k8tz` is installed into `system-controller`. Its `webhook.certManager`
    points at `Issuer` `k8tz-webhook-selfsign`, and the postRenderer removes the chart's Namespace.
 3. cert-manager issues the chart's `Certificate` `k8tz-tls` from `k8tz-webhook-selfsign` and injects its CA into
-   MutatingWebhookConfiguration `k8tz`. The CA `Certificate` and `Issuer` `k8tz-webhook-ca` are applied but sign
-   nothing (see [Known gaps](#known-gaps)).
+   MutatingWebhookConfiguration `k8tz`.
 4. The kube-apiserver calls the webhook on every pod and CronJob `CREATE` in scope, and the webhook applies the
    timezone.
 
@@ -89,11 +86,5 @@ kubectl get mutatingwebhookconfiguration | grep -i k8tz
 
 - Keep requests equal to limits on the webhook, the init container and the cert-watcher patch, or the pod
   loses its Guaranteed class.
-
-## Known gaps
-
-- **The CA chain is unused.** [`app/issuer.yaml`](app/issuer.yaml) says `Issuer` `k8tz-webhook-ca` issues the
-  webhook certificates, but [`app/helmrelease.yaml`](app/helmrelease.yaml) points `webhook.certManager.issuerRef` at
-  `k8tz-webhook-selfsign`. The 5-year CA `Certificate` `k8tz-webhook-ca` and its `Issuer` sign nothing.
 
 Upstream: [k8tz/k8tz](https://github.com/k8tz/k8tz)

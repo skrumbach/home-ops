@@ -99,10 +99,4 @@ kubectl -n flux-system top pod -l app.kubernetes.io/name=konflate     # against 
 The chart is single-replica with a Recreate strategy and a RWO cache PVC.
 Do not raise `replicaCount`.
 
-## Known gaps
-
-- **The route's `external-dns.kubernetes.io/target` annotation decides nothing.** `app/httproute.yaml` sets
-  `internal.sklab.dev`, but the parent Gateway's target decides the DNS record, not a route annotation
-  (`AGENTS.md`). The invariant "publishes only the internal DNS record" holds through the `envoy-internal` parent.
-
 Upstream: [konflate](https://github.com/home-operations/konflate)

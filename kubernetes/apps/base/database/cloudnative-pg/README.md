@@ -174,9 +174,4 @@ the archive to R2 hourly; see `offsite-mirror/README.md`.
   [`offsite-mirror/cronjob.yaml`](offsite-mirror/cronjob.yaml) with it.**
 - **Keep `retain` on `Database` and `DatabaseRole`.** Dropping a database or role is a manual step.
 
-## Known gaps
-
-- **The pgAdmin server is named for the wrong cluster.** `pgadmin/resources/servers.json` names the one server
-  "Postgres 17 Cluster", but its host is `postgres-18-rw` and postgres-17 was retired.
-
 Upstream: [CloudNativePG docs](https://cloudnative-pg.io/documentation/current/), [Barman Cloud plugin](https://cloudnative-pg.io/plugin-barman-cloud/)
