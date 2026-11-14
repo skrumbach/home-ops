@@ -95,11 +95,5 @@ The Job carries `kustomize.toolkit.fluxcd.io/force: enabled`, so Flux recreates 
 - **Never name the server's key `PG_VECTOR_API_KEY` in LiteLLM** (see `ai/litellm`).
 - **Non-sensitive content only:** the store is open to every virtual key.
 
-## Known gaps
-
-- **`schema.sql` points at files that do not exist.** Its header names `../dbinit.yaml` (the Job is
-  [`app/job.yaml`](app/job.yaml)) and `scripts/ci/litellm-pgvector-test.py` (no such file under `scripts/ci/`), and a
-  skill `litellm-proxy` (the only skill is `incident-runbooks`).
-
 Upstream: [BerriAI/litellm-pgvector](https://github.com/BerriAI/litellm-pgvector) •
 [pgvector](https://github.com/pgvector/pgvector)
