@@ -1,4 +1,4 @@
--- Schema for BerriAI/litellm-pgvector, applied by ../dbinit.yaml on every run.
+-- Schema for BerriAI/litellm-pgvector, applied by ../job.yaml on every run.
 -- Idempotent: every statement is IF NOT EXISTS / ON CONFLICT DO NOTHING.
 --
 -- Why this file exists at all: the server image never creates its own tables
@@ -8,11 +8,13 @@
 -- with the right width is sufficient - the generated Prisma models are unused.
 --
 -- WIDTH 2000, deliberately: pgvector's HNSW index caps `vector` at 2000 dims and
--- the embedding model's native 4096 cannot be indexed. Why 2000 (and not
--- halfvec): skill `litellm-proxy`, references/vector-store.md.
+-- the embedding model's native 4096 cannot be indexed. The model is
+-- Matryoshka-trained, so the API returns the renormalised 2000-dim prefix.
+-- Not halfvec (cap 4000): every `::vector` cast in upstream's SQL would need
+-- patching, for no gain below 2000 dims.
 --
 -- The width MUST match EMBEDDING__DIMENSIONS in ../helmrelease.yaml and stay
--- <= 2000 while the HNSW index exists (scripts/ci/litellm-pgvector-test.py).
+-- <= 2000 while the HNSW index exists.
 -- Changing the embedding model or the width means re-embedding every row:
 -- ALTER the column only after truncating `embeddings`, because vectors from
 -- two models (or two widths) are not comparable.
