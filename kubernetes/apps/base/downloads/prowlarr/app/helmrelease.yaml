@@ -103,10 +103,14 @@ spec:
           gethomepage.dev/icon: prowlarr.svg
           gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
+          # Goes through the ungated `api` rule: Prowlarr's own {"status": "OK"} body proves the app
+          # answers and that /ping still bypasses the Envoy OIDC gate (a gated path would end on the
+          # Pocket ID sign-in page).
           gatus.home-operations.com/endpoint: |-
             url: https://prowlarr.sklab.dev/ping
             conditions:
               - "[STATUS] == 200"
+              - "[BODY].status == OK"
             group: downloads
         hostnames:
           - prowlarr.sklab.dev
@@ -114,7 +118,25 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+              # Per-indexer Newznab/Torznab feed and grab URLs (/<id>/api, /<id>/download) that the
+              # *arr apps call with the API key when Prowlarr syncs them this hostname.
+              - path:
+                  type: RegularExpression
+                  value: /[0-9]+/(api|download)/?
+              - path:
+                  type: Exact
+                  value: /ping
+            backendRefs:
+              - name: *app
+                port: *port
+          - name: app
+            backendRefs:
               - name: *app
                 port: *port
