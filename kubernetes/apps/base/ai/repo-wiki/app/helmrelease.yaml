@@ -172,8 +172,13 @@ spec:
           gethomepage.dev/name: Repo Wiki
           gethomepage.dev/description: Generated repo documentation
           gethomepage.dev/icon: "mdi-book-open-page-variant-#22D8F0"
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the mkdocs Service in-cluster instead.
           gatus.home-operations.com/endpoint: |-
+            url: http://repo-wiki.ai.svc.cluster.local:8000/
             conditions: ["[STATUS] == 200"]
+            ui:
+              hide-url: true
         hostnames:
           - "repo-wiki.sklab.dev"
         parentRefs:
