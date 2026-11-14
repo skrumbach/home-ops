@@ -7,21 +7,15 @@ point at this Git path.
 
 ## CoderdCPUUsage
 
-The CPU usage of one or more Coder pods has been close to the **limit** defined
-for the deployment. This can cause slowness, workspaces becoming unavailable,
-and liveness-probe restarts.
+The CPU usage of the Coder pod has stayed above its CPU **request** for 10
+minutes. The HelmRelease sets `requests.cpu: 71m` and no CPU limit
+(`app/helmrelease.yaml`), so the pod is not throttled: it runs on spare node CPU
+it did not reserve, and it loses that CPU first when the node is busy.
 
-This cluster's Coder HelmRelease does **not** set a CPU limit. Resources are
-`requests.cpu: 71m` and `limits.memory: 1Gi` only (`app/helmrelease.yaml`).
-The alert divides usage by `kube_pod_container_resource_limits{resource="cpu"}`,
-which is empty here, so this alert will not fire. Do not add a CPU limit as a
-first response: the HelmRelease sizes coderd by memory (its request tracks peak
-working set), and a CPU limit would only add throttling.
-
-If CPU is actually high, check request vs usage (`kubectl -n coder top pod`)
-and node pressure. Compare against
-[Coder's Reference Architectures](https://coder.com/docs/v2/latest/admin/architectures)
-only after confirming real saturation.
+Check usage against the request (`kubectl -n coder top pod`) and what Coder was
+doing (workspace builds, many connected agents). If the higher usage is normal,
+raise `requests.cpu` on the HelmRelease. Do not add a CPU limit as a first
+response: a limit throttles coderd instead of only signalling the low request.
 
 ## CoderdMemoryUsage
 
