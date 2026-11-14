@@ -129,10 +129,13 @@ spec:
           gethomepage.dev/icon: sonarr.svg
           gethomepage.dev/description: TV shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sonarr
+          # Goes through the ungated `api` rule: a gated path would end on the 200 Pocket ID sign-in
+          # page, which the body condition cannot match.
           gatus.home-operations.com/endpoint: |-
             url: https://sonarr.sklab.dev/ping
             conditions:
               - "[STATUS] == 200"
+              - "[BODY].status == OK"
             group: downloads
         hostnames:
           - sonarr.sklab.dev
@@ -140,7 +143,20 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+              - path:
+                  type: Exact
+                  value: /ping
+            backendRefs:
+              - name: *app
+                port: *port
+          - name: app
+            backendRefs:
               - name: *app
                 port: *port
