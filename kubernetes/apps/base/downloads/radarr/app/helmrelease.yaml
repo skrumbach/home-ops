@@ -125,10 +125,13 @@ spec:
           gethomepage.dev/icon: radarr.svg
           gethomepage.dev/description: Movies
           gethomepage.dev/pod-selector: app.kubernetes.io/name=radarr
+          # Goes through the ungated `api` rule: a gated path would end on the 200 Pocket ID sign-in
+          # page, which the body condition cannot match.
           gatus.home-operations.com/endpoint: |-
             url: https://radarr.sklab.dev/ping
             conditions:
               - "[STATUS] == 200"
+              - "[BODY].status == OK"
             group: downloads
         hostnames:
           - radarr.sklab.dev
@@ -136,7 +139,24 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - backendRefs:
+          - name: api
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+              # Calendar feed (/feed/v3/calendar/radarr.ics), API key in the query string.
+              - path:
+                  type: PathPrefix
+                  value: /feed
+              - path:
+                  type: Exact
+                  value: /ping
+            backendRefs:
+              - name: *app
+                port: *port
+          - name: app
+            backendRefs:
               - name: *app
                 port: *port
