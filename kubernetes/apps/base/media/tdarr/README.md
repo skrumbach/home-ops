@@ -11,7 +11,6 @@
 - **Queues work** on the `tdarr` server: web UI at `tdarr.sklab.dev` on `envoy-internal` (port 8265) and the node
   protocol on port 8266. The server runs no transcodes itself (`internalNode: "false"`).
 - **Transcodes on the B70** in the `tdarr-node` worker: two GPU workers (AV1 via QSV) and one CPU worker.
-- **Takes outside workers** through Service `tdarr-node-lb` at `10.50.0.54:8266`, for the Windows GPU node.
 - **Reads and writes the library** on the NFS export `nas.sklab.dev:/mnt/storage/Media`, mounted at `/media`.
 - **Keeps its database** in PVC `tdarr-config` (`/app/server`), backed up by kopiur to `ceph` and `r2`.
 
@@ -22,8 +21,7 @@
 | **One worker, not a DaemonSet** | The server runs no internal node, so one worker is enough. A DaemonSet would strand Pending pods on any node without the B70. |
 | **`devic.es/b70-vaapi`, not `devic.es/b70`** | Same card, mounted under its kernel names (`card1`, `renderD129`). VA-API needs them; the renamed `b70` group cannot provide them. |
 | **A CPU transcode worker beside the GPU ones** | A GPU-only node turns any VA-API regression into a silent, total outage: every job fails with `transcodeError` and nothing else can take it. The cost is speed, not correctness. |
-| **`auth: "false"` on the server** | Tdarr 3.x defaults to auth and 401s every node without an API key. The external Windows node cannot take a key from Git, so the 2.x open behaviour stays. The network policy is the only gate. |
-| **A raw Service for `tdarr-node-lb`** | A second `service:` in the chart would rename the primary Service to `tdarr-app`, which breaks the HTTPRoute and the nodes' `tdarr.media.svc.cluster.local` lookup. |
+| **`auth: "false"` on the server** | Tdarr 3.x defaults to auth and 401s every node without an API key. The only node is the in-cluster worker and the server is internal-only, so the 2.x open behaviour stays. The network policy is the only gate. |
 | **Worker CPU capped at 4** | Unbounded, the CPU worker held about 15 of talos-3's 20 cores and starved the control plane. See the CPU row below. |
 
 ## How it works
@@ -44,14 +42,12 @@ flowchart LR
   node -->|"heartbeat :8266"| srv
   gp["Device plugin<br/>devic.es/b70-vaapi"] -->|renderD129| node
   gw["Gateway<br/>envoy-internal"] -->|"tdarr.sklab.dev :8265"| srv
-  lb["Service<br/>tdarr-node-lb 10.50.0.54"] -->|":8266"| srv
-  win(["Windows GPU node"]) --> lb
   cnp["CiliumNetworkPolicy<br/>tdarr"] -.->|fences ingress| srv
   cfg --> sp["SnapshotPolicy<br/>tdarr-ceph + tdarr-r2"]
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class node accent
-  class nas,win ext
+  class nas ext
 ```
 
 </details>
@@ -122,12 +118,7 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 - `healthcheckgpuWorkers` stays `"0"` on Intel.
 - Ingress to the server stays fenced by the network policy. A new outbound in-cluster peer needs a reply rule
   (cilium/cilium#47913).
-- Do not add a second `service:` entry to the HelmRelease (see `tdarr-node-lb`).
-
-## Known gaps
-
-- **The world rule on 8266 is still open.** [`app/ciliumnetworkpolicy.yaml`](app/ciliumnetworkpolicy.yaml) marks the
-  `world` entry on port 8266 HOLD ("replace this `world` entry with `fromCIDR: [<node-ip>/32]` before merging"). It is merged and still
-  admits any LAN source. With `auth: "false"`, that is an open API.
+- Do not add a second `service:` entry to the HelmRelease: the chart would rename the primary Service to `tdarr-app`,
+  which breaks the HTTPRoute and the worker's `tdarr.media.svc.cluster.local` lookup. Add a raw Service manifest instead.
 
 Upstream: [Tdarr docs](https://docs.tdarr.io/)
