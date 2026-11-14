@@ -2,21 +2,21 @@
 <!-- concept: From a host device node to a schedulable resource | hard-drive Device node | cpu Plugin | tags Resource | calendar-check Schedule | box Pod -->
 <p align="center"><img src="header.svg" width="100%" alt="generic-device-plugin"></p>
 
-> Advertises `/dev/net/tun` and two views of the Arc Pro B70 to the scheduler as `devic.es/*` resources.
+> Advertises two views of the Arc Pro B70 in talos-3 to the scheduler as `devic.es/*` resources.
 
 **Live facts:** <https://skrumbach.github.io/home-ops/apps/system/generic-device-plugin/> (workloads, routes, storage, backups, secrets and alerts, generated on every merge)
 
 ## What it does
 
-- **Registers** three kubelet device-plugin resources from [`app/resources/config.yaml`](app/resources/config.yaml):
-  `devic.es/tun`, `devic.es/b70` and `devic.es/b70-vaapi`.
+- **Registers** two kubelet device-plugin resources from [`app/resources/config.yaml`](app/resources/config.yaml):
+  `devic.es/b70` and `devic.es/b70-vaapi`.
 - **Places pods.** A pod that requests `devic.es/b70` or `devic.es/b70-vaapi` can only land on the node that
   advertises it, talos-3. No hostname affinity is needed.
 - **Shares one card.** `b70` and `b70-vaapi` each offer 99 identical tokens, so many pods can hold the same GPU.
 - **Mounts device nodes** into the pod, with a chosen name inside the container.
 
 Consumers (`git grep devic.es/`): `ai/vllm` and `ai/embedding-gpu` request `devic.es/b70`; `media/tdarr`
-(`tdarr-node`) requests `devic.es/b70-vaapi`. No manifest requests `devic.es/tun`.
+(`tdarr-node`) requests `devic.es/b70-vaapi`.
 
 ## Why it is built this way
 
@@ -67,7 +67,7 @@ flowchart LR
 |---|---|---|
 | `b70` paths | `card` to `/dev/dri/card0`, `render` to `/dev/dri/renderD128` | Level Zero expects these names. |
 | `b70-vaapi` paths | `card` to `/dev/dri/card1`, `render` to `/dev/dri/renderD129` | Kernel names, which VA-API needs. |
-| `count` | `99` per b70 group, `1000` for `tun` | Share tokens. The manifest records no reason for the numbers. |
+| `count` | `99` per b70 group | Share tokens. The manifest records no reason for the number. |
 | ConfigMap name hash | enabled ([`app/kustomization.yaml`](app/kustomization.yaml)) | See the table above. |
 | `tolerations` | `home-operations.com/dedicated` `PreferNoSchedule` | Hygiene. `PreferNoSchedule` does not filter, and talos-3 is the only node that can serve the B70. |
 | `resources` | 10m CPU; 32Mi request, 64Mi limit | Every limit has a request. |
@@ -91,11 +91,5 @@ fully off, switch the dock PSU on first, then power the host (the alert's text i
 - Never rename a DRM device node with `generic-device-plugin`'s `mountPath`, and never ship a GPU change without
   the VA-API check. VA-API consumers use `devic.es/b70-vaapi`.
 - Do not edit the `b70` paths. Device IDs are `sha1(count + host paths)`, so editing them changes all 99 IDs.
-
-## Known gaps
-
-- **Missing skill.** [`app/resources/config.yaml`](app/resources/config.yaml) says "See skill intel-gpu" twice, and
-  `.agents/skills/` holds only `incident-runbooks`.
-- **Unused resource.** `devic.es/tun` is advertised, and no manifest in `kubernetes/` requests it.
 
 Upstream: [squat/generic-device-plugin](https://github.com/squat/generic-device-plugin)
