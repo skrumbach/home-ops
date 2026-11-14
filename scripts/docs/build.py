@@ -707,7 +707,7 @@ def rewrite_markdown(text: str, source: str, ctx: dict, demote: int = 0) -> str:
             rel = os.path.relpath(real, real_root).replace(os.sep, "/")
         suffix = f"#{anchor}" if sep else ""
         if image:
-            if (ROOT / rel).is_file():  # served by the site itself, from <out>/../static/files/
+            if (ROOT / rel).is_file():  # served by the site itself, from <static>/files/
                 ctx["images"].add(rel)
                 return f"/files/{rel}"
             return f"https://raw.githubusercontent.com/{slug}/{branch}/{rel}"
@@ -759,7 +759,7 @@ def rewrite_markdown(text: str, source: str, ctx: dict, demote: int = 0) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip() + "\n"
 
 
-HEADER_IMG = re.compile(r"(?:<p[^>]*>\s*)?<img\s[^>]*src=\"(?:\./)?header\.svg\"[^>]*>(?:\s*</p>)?", re.I)
+HEADER_IMG = re.compile(r"(?:<p[^>]*>\s*)?<img\s[^>]*src=[\"'](?:\./)?header\.svg[\"'][^>]*>(?:\s*</p>)?", re.I)
 
 
 def readme_parts(text: str) -> tuple[str, str] | None:
@@ -771,9 +771,10 @@ def readme_parts(text: str) -> tuple[str, str] | None:
     if not HEADER_IMG.search(text):
         return None
     lines = HEADER_IMG.sub("", text, count=1).splitlines()
-    quote = next((i for i, line in enumerate(lines) if line.startswith(">")), None)
+    # The tagline is the quote that opens the README: the first line that is not blank or a comment.
+    quote = next((i for i, line in enumerate(lines) if line.strip() and not re.fullmatch(r"\s*<!--.*-->\s*", line)), None)
     tagline = ""
-    if quote is not None and not any(line.startswith("#") for line in lines[:quote]):
+    if quote is not None and lines[quote].startswith(">") and not lines[quote].lstrip("> ").startswith("[!"):
         end = quote
         while end < len(lines) and lines[end].startswith(">"):
             end += 1
@@ -782,7 +783,7 @@ def readme_parts(text: str) -> tuple[str, str] | None:
             tagline = ""
         del lines[quote:end]
     lines = [line for line in lines if not line.startswith("**Live facts:**")]
-    return tagline, "\n".join(lines)
+    return tagline, split_title("\n".join(lines))[1]  # the page has its own title
 
 
 def split_title(text: str) -> tuple[str, str]:
@@ -1466,6 +1467,7 @@ def build_pages(model: dict, apps: dict, ctx: dict) -> tuple[dict[str, str], lis
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", default="docs/.build/content", help="output directory, recreated on every run")
+    parser.add_argument("--static", default="docs/.build/static", help="directory for copied pictures, recreated on every run")
     parser.add_argument("--rendered", help="a pre-rendered flate JSON or YAML file instead of running flate")
     parser.add_argument("--repo", help="OWNER/NAME for GitHub links (default: $GITHUB_REPOSITORY, then origin)")
     parser.add_argument("--branch", default="main", help="branch GitHub links point at")
@@ -1488,7 +1490,7 @@ def main() -> int:
     collect_facts(model, apps, ctx)
     pages, warnings = build_pages(model, apps, ctx)
 
-    static_dir = out_dir.parent / "static"  # hugo.yaml: staticDir
+    static_dir = Path(args.static) if Path(args.static).is_absolute() else ROOT / args.static  # hugo.yaml: staticDir
     for stale in (out_dir, static_dir):
         if stale.exists():
             shutil.rmtree(stale)

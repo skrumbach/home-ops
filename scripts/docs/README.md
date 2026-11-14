@@ -16,7 +16,7 @@ Reads:
 
 Writes `docs/.build/content/` (deleted and recreated every run, gitignored): `apps/`, `reference/`,
 `operations/` and the home page, Markdown with front matter only. Images the Markdown shows are copied to
-`docs/.build/static/files/<repo path>`, so the site serves them itself. The same commit always gives the
+`docs/.build/static/files/<repo path>` (`--static DIR`, also recreated every run), so the site serves them itself. The same commit always gives the
 same bytes: everything is sorted and the only date is the commit date.
 
 The site is public. The script publishes names only: no Secret data, no ExternalSecret templates,
@@ -30,7 +30,7 @@ uv run --script scripts/docs/build.py --rendered FILE      # reuse a render (JSO
 task docs:serve                                            # build, then hugo server
 ```
 
-Flags: `--out DIR`, `--repo OWNER/NAME` (default `$GITHUB_REPOSITORY`, then `origin`), `--branch main`.
+Flags: `--out DIR`, `--static DIR`, `--repo OWNER/NAME` (default `$GITHUB_REPOSITORY`, then `origin`), `--branch main`.
 
 Add a hand-written page: put the Markdown next to what it describes. Under
 `kubernetes/apps/base/<ns>/<app>/` it lands on that app's page with no change here; anywhere else,
@@ -41,7 +41,7 @@ are rewritten to site pages or GitHub.
 
 Every app has one `README.md` in `kubernetes/apps/base/<ns>/<app>/`, in the shape below. It holds what a
 manifest cannot say: what the app is for here, why it is set up this way, how it works, how to operate
-it. Tables of workloads, routes, storage, backups, secrets and alert names are not written by hand; the
+it. Lists of workloads, routes, storage, backups, secrets and alert rules are not written by hand; the
 site generates them on every merge. The worked examples are `cert-manager/cert-manager`,
 `home-automation/home-assistant` and `kube-system/cilium`.
 
@@ -123,7 +123,8 @@ Rules:
   while writing goes into `Known gaps`; it is not fixed in the README change.
 - **Settings that matter** lists values that differ from the chart default or encode a decision. It is not
   a values dump. When no manifest gives the reason for a value, say so instead of inventing one.
-- **When an alert fires** covers the alerts about this app, wherever their rule is defined.
+- **When an alert fires** covers the alerts about this app, wherever their rule is defined. It says where
+  to look first; the site lists the rules themselves.
 - **Operate it** holds commands that only read. Mark the ones that need `exec`.
 - **Length follows the app:** about 50 lines for a single-container app, up to about 180 for a platform
   component.

@@ -31,6 +31,6 @@ spec:
               app.kubernetes.io/name=pvc-mover-readable-check --tail=300
               --since=12h | grep -E 'FINDING|INCONCLUSIVE|FAILURES'`. Design
               and the known coverage gaps:
-              kubernetes/apps/base/system/pvc-mover-readable-check/app/README.md.
+              kubernetes/apps/base/system/pvc-mover-readable-check/README.md.
           labels:
             severity: warning
