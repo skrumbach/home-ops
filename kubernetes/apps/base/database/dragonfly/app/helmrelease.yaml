@@ -11,13 +11,6 @@ spec:
   interval: 1h
   maxHistory: 3
   values:
-    kube-rbac-proxy:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 128Mi
-        limits:
-          memory: 128Mi
     manager:
       image:
         repository: ghcr.io/dragonflydb/operator
