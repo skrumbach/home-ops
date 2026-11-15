@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/radarr
-              tag: 7.0.2.10888@sha256:69ea515df6e2a3ea1490cfa127ffaaf9597a9db84fffa2fa150a6fae98fe04cb
+              tag: 7.0.3.10912@sha256:25b5c149bee74ac7f404d6015e0146d09b35ea91d639834624642e23df22f8c0
             env:
               # .NET caps the GC heap at 75% of the 4Gi limit by default (3GiB), which left
               # too little room for native memory: OOM-killed 2026-11-11 at ~3.4Gi working
