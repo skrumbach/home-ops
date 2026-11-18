@@ -128,6 +128,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Sonarr
+          gethomepage.dev/href: "https://sonarr.sklab.dev"
           gethomepage.dev/icon: sonarr.svg
           gethomepage.dev/description: TV shows
           gethomepage.dev/pod-selector: app.kubernetes.io/name=sonarr

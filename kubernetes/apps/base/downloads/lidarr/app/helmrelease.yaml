@@ -140,6 +140,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Lidarr
+          gethomepage.dev/href: "https://lidarr.sklab.dev"
           gethomepage.dev/description: Music
           gethomepage.dev/icon: lidarr.svg
           # Goes through the ungated `api` rule: Lidarr's own {"status": "OK"} body proves the app

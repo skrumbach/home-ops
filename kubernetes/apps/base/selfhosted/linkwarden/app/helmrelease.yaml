@@ -115,6 +115,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Apps
           gethomepage.dev/name: Linkwarden
+          gethomepage.dev/href: "https://links.sklab.dev"
           gethomepage.dev/icon: sh-linkwarden.svg
           gethomepage.dev/description: Bookmarks and page archives
           # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a

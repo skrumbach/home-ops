@@ -122,6 +122,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Radarr
+          gethomepage.dev/href: "https://radarr.sklab.dev"
           gethomepage.dev/icon: radarr.svg
           gethomepage.dev/description: Movies
           gethomepage.dev/pod-selector: app.kubernetes.io/name=radarr
