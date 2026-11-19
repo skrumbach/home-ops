@@ -10,7 +10,7 @@ metadata:
 spec:
   # Operator 0.16.x supports Pocket ID >=v2.14.0 <v3.0.0 and crash-loops outside that range:
   # a v3 bump waits for an operator release that supports it.
-  image: ghcr.io/pocket-id/pocket-id:v2.19.2-distroless@sha256:a21166a4eb513d2ffcbf815398480998d996a9e719cfba029395517658626f9e
+  image: ghcr.io/pocket-id/pocket-id:v2.19.3-distroless@sha256:6a0045a89b80fa6624c091786e7be132a4dde880ca64727a6b019c056b091982
   appUrl: https://id.sklab.dev
   encryptionKey:
     valueFrom:
