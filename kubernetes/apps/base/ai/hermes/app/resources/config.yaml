@@ -152,7 +152,7 @@ web:
 # (/opt/data/.env plus `secrets:` sources), never from the container env (else a 401, or a
 # cron job blocked at preflight with "missing env"). The `command` source below hydrates them
 # from the hermes Secret, mounted as files at /secrets/mcp (helmrelease.yaml); the SUMMARY_LLM_*
-# lines serve the commit-watcher skill. scripts/ci/hermes-secret-scope-test.py guards the wiring.
+# lines serve the commit-watcher skill.
 secrets:
   command:
     enabled: true
@@ -188,7 +188,7 @@ platform_toolsets:
 # Discord: ONE dedicated channel in ONE server. allowed_channels is a whitelist (the bot ignores everywhere
 # else), free_response_channels answers there without an @mention, and only DISCORD_ALLOWED_USERS may
 # command it. The default profile answers for now; a `gateway.profile_routes` entry (platform discord, chat_id
-# below) moves the channel to another profile later. Server 1507870874752127226. Skill hermes-agent discord.md.
+# below) moves the channel to another profile later. Server 1507870874752127226.
 discord:
   allowed_channels: "1564049687051370687"
   free_response_channels: "1564049687051370687"
@@ -199,8 +199,8 @@ telegram:
 # state.db retention (bounds /opt/data/state.db growth)
 #
 # Upstream's own supported settings (hermes_cli/config_defaults.py `sessions:`).
-# Every key not listed deep-merges to upstream's default. Rationale for each:
-# skill `hermes-agent`, references/state-db.md.
+# Every key not listed deep-merges to upstream's default. Each key's rationale
+# is on its line below.
 sessions:
   # Upstream default is already true; pinned because both call sites read
   # `.get("auto_prune", False)`, so an upstream flip would silently stop pruning.
@@ -214,7 +214,7 @@ sessions:
   # LOAD-BEARING, and deliberately the OPPOSITE of upstream's `true` default: VACUUM
   # rewrites every page through the WAL and cannot succeed on this claim, yet would
   # be attempted on every prune that deletes rows and write until ENOSPC. The file
-  # plateaus instead of shrinking; that is intended (state-db.md).
+  # plateaus instead of shrinking; that is intended.
   vacuum_after_prune: false
 
 # Approval gating for flagged commands. Declared explicitly so it is durable: the
@@ -234,7 +234,7 @@ approvals:
 
 # Deterministic seatbelt in front of the terminal tool (hooks/guard-terminal.py, mounted at
 # /etc/hermes-hooks). It blocks the catastrophic, escalates "ask first" commands to the approval gate and
-# allows the rest; scripts/ci/hermes-hooks-test.py pins it. Skill hermes-agent.
+# allows the rest.
 # hooks_auto_accept: a gateway has no TTY for the first-use consent prompt, so without it the hook would
 # silently stay unregistered. fail_closed: a crashed or timed-out guard refuses the command. The interpreter
 # is absolute because the hook's PATH is not the shell's.
