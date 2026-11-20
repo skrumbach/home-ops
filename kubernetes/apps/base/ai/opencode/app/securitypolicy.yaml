@@ -35,5 +35,14 @@ spec:
     # inline (refreshToken defaults to true). Without it the session dies when the access token expires,
     # and the UI's /api fetches get a cross-origin 302 to id.sklab.dev that the browser blocks.
     scopes: ["openid", "offline_access"]
+    # The UI's fetch() and EventSource calls (Sec-Fetch-Mode: cors) get a 401 instead of a 302 when the session
+    # is missing. Every redirect starts a new flow with its own nonce and code-verifier cookies; the UI retries
+    # /api/event several times a second, so the browser piled up cookies until the next request exceeded
+    # Envoy's 100-header limit (http2/http3.too_many_headers, ERR_HTTP2_PROTOCOL_ERROR on /oauth2/callback).
+    # Only a page navigation (Sec-Fetch-Mode: navigate) starts the sign-in.
+    denyRedirect:
+      headers:
+        - name: Sec-Fetch-Mode
+          value: cors
     redirectURL: https://opencode.sklab.dev/oauth2/callback
     logoutPath: /oauth2/logout
