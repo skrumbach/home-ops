@@ -26,6 +26,7 @@
 |---|---|
 | **Pocket ID at Envoy, password inside** | With `forwardAccessToken` off, Envoy Gateway keeps the client's `Authorization` header, so `OPENCODE_PASSWORD` basic auth still works as the second layer. Do not turn `forwardAccessToken` on. |
 | **Second route `opencode-api.sklab.dev`, no OIDC** | The desktop app and `opencode attach` cannot follow the Pocket ID redirect, so they showed the server as down on `opencode.sklab.dev`. HTTPRoute `opencode-api` (internal only) skips OIDC; `OPENCODE_PASSWORD` basic auth (user `opencode`) is its only guard. |
+| **`offline_access` and a self-unregistering `/sw.js`** | The UI is a PWA whose service worker serves the cached page on every reload, so a reload never redoes the Pocket ID sign-in. Without a refresh token the Envoy session expired and every `/api` fetch got a 302 the browser blocks: the UI hung on "Loading". `offline_access` lets Envoy renew the session inline, and HTTPRoute `opencode-sw` (no OIDC) retires the worker so a reload signs in again. |
 | **Service named `opencode-app`** | In namespace `ai` the DNS search path turns the provider host `opencode.ai` into `opencode.ai.svc.cluster.local`. A Service named `opencode` would take that name and black-hole every OpenCode Go call from LiteLLM. |
 | **Token read from the environment, never written** | The credential helper reads `GITHUB_TOKEN` on each use, so it never reaches the home PVC and its kopia snapshots. The entrypoint deletes the `~/.git-credentials` file that older revisions wrote. |
 | **Ingress fence, open egress** | The pod serves an agent with model-directed bash and a GitHub write token on `0.0.0.0:4096`. CiliumNetworkPolicy `opencode` admits Envoy, the kubelet probes and replies. Egress stays open for GitHub, npm, LiteLLM and ToolHive. |
@@ -106,6 +107,7 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 - `OPENCODE_PASSWORD` is 1Password item `opencode` (vault `Homelab`), the server password (user `opencode`). Without it each start makes a random one and logs it; rotating it signs out every session.
 - The gate is `app/securitypolicy.yaml` with its Pocket ID client `app/pocketidoidcclient.yaml`. A new hostname needs its own callback URL there and a real login after merge before treating the route as covered. The basic-auth API route `opencode-api` is the only OIDC-free door; keep `OPENCODE_PASSWORD` set.
 - Keep `forwardAccessToken` off in `opencode-auth`.
+- Keep `offline_access` in `opencode-auth` and HTTPRoute `opencode-sw` outside it: together they keep the PWA from hanging on an expired session.
 - Do not name the Service `opencode`.
 
 Upstream: [OpenCode docs](https://opencode.ai/docs/) •

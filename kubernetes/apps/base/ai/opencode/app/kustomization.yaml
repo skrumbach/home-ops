@@ -9,6 +9,7 @@ resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./httproute-api.yaml
+  - ./httproute-sw.yaml
   - ./ocirepository.yaml
   - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml

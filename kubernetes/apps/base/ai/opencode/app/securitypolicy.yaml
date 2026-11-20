@@ -31,5 +31,9 @@ spec:
       name: opencode-oidc-credentials
     clientSecret:
       name: opencode-oidc-credentials
+    # offline_access makes Pocket ID issue a refresh token (30 days), which Envoy uses to renew the session
+    # inline (refreshToken defaults to true). Without it the session dies when the access token expires,
+    # and the UI's /api fetches get a cross-origin 302 to id.sklab.dev that the browser blocks.
+    scopes: ["openid", "offline_access"]
     redirectURL: https://opencode.sklab.dev/oauth2/callback
     logoutPath: /oauth2/logout
