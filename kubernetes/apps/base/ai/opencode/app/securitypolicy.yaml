@@ -1,7 +1,8 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Gates the opencode UI route with Pocket ID at Envoy (native OIDC). No second, unauthenticated API
-# route: nothing here needs programmatic access. OPENCODE_PASSWORD (basic auth) stays the inner
+# Gates the opencode UI route with Pocket ID at Envoy (native OIDC). The desktop app and `opencode attach`
+# use the separate route in httproute-api.yaml, which skips OIDC and relies on basic auth alone.
+# OPENCODE_PASSWORD (basic auth) stays the inner
 # layer: with forwardAccessToken off, Envoy Gateway keeps the client's Authorization header
 # (preserve_authorization_header), so do not turn it on. See this app's README.md.
 # A policy that fails to translate (e.g. the operator has not written opencode-oidc-credentials yet)

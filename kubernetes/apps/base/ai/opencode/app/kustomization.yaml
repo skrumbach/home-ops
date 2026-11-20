@@ -8,6 +8,7 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./httproute-api.yaml
   - ./ocirepository.yaml
   - ./pocketidoidcclient.yaml
   - ./securitypolicy.yaml
