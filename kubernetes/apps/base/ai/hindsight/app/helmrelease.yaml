@@ -1,0 +1,180 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+#
+# Long-term memory for the agents. State lives in the `hindsight` database on postgres-18 (CNPG backs it
+# up), so there is no PVC and no kopiur claim. The API runs the worker in-process on one replica.
+#
+# LLM (fact extraction, consolidation): chat-local through LiteLLM, so memory content never leaves the
+# cluster. Embeddings: embedding-cpu through LiteLLM (1024 dims, fixed once a memory is stored; changing it
+# needs `hindsight-admin reembed`). Reranker: local cross-encoder on CPU, bundled in the full image.
+# Use the full image (no -slim): the slim one has no local reranker. Do NOT mount a volume at
+# /home/hindsight/.cache: it shadows the models baked into the image.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app hindsight
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: *app
+  values:
+    controllers:
+      api:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/vectorize-io/hindsight-api
+              tag: 1.2.3@sha256:2f318da3489f6493a5ec78f3d7019cd70835383fe4f4ffd1af9e080babd91d6c
+            env:
+              HINDSIGHT_API_HOST: 0.0.0.0
+              HINDSIGHT_API_PORT: &apiPort 8888
+              # Stable id for the in-process worker's task claims.
+              HINDSIGHT_API_WORKER_ID: hindsight
+              # Auth: one bearer key (HINDSIGHT_API_TENANT_API_KEY from the Secret).
+              HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
+              # LLM through LiteLLM. Provider `openai` + base URL + the key from the Secret.
+              HINDSIGHT_API_LLM_PROVIDER: openai
+              HINDSIGHT_API_LLM_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
+              HINDSIGHT_API_LLM_MODEL: chat-local
+              # No startup test call: it would couple boot to LiteLLM and the B70.
+              HINDSIGHT_API_SKIP_LLM_VERIFICATION: "true"
+              # chat-local shares the B70 with Hermes chat: keep the background load small and slow-tolerant.
+              HINDSIGHT_API_LLM_MAX_CONCURRENT: "2"
+              HINDSIGHT_API_LLM_TIMEOUT: "600"
+              # Embeddings through LiteLLM. Dimensions are set so no billable startup probe runs.
+              HINDSIGHT_API_EMBEDDINGS_PROVIDER: openai
+              HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
+              HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: embedding-cpu
+              HINDSIGHT_API_EMBEDDINGS_OPENAI_DIMENSIONS: "1024"
+              # Default pool max is 100 against the shared postgres-18; one pod needs far fewer.
+              HINDSIGHT_API_DB_POOL_MIN_SIZE: "2"
+              HINDSIGHT_API_DB_POOL_MAX_SIZE: "12"
+            envFrom:
+              - secretRef:
+                  name: hindsight-secret
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: {path: /health/live, port: *apiPort}
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  # Loads the local reranker and runs migrations on first boot.
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: {path: /health/live, port: *apiPort}
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: {path: /health, port: *apiPort}
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 200m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+      controlplane:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/vectorize-io/hindsight-control-plane
+              tag: 1.2.3@sha256:29c8fd38a6408b76f08219badc1e506b1b3bb77264d8e1cdfc327e4f955d99f8
+            env:
+              NODE_ENV: production
+              HINDSIGHT_CP_HOSTNAME: 0.0.0.0
+              HINDSIGHT_CP_PORT: &uiPort "3000"
+              HINDSIGHT_CP_DATAPLANE_API_URL: http://hindsight-api:8888
+            # HINDSIGHT_CP_DATAPLANE_API_KEY. No HINDSIGHT_CP_ACCESS_KEY: Pocket ID gates the route at Envoy.
+            envFrom:
+              - secretRef:
+                  name: hindsight-secret
+            probes:
+              liveness: &uiProbe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 3000
+                  initialDelaySeconds: 20
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *uiProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: {type: RuntimeDefault}
+    service:
+      api:
+        controller: api
+        ports:
+          http:
+            port: *apiPort
+      controlplane:
+        controller: controlplane
+        ports:
+          http:
+            port: 3000
+    route:
+      # Control plane only. The API (/v1, /mcp) has no route: agents call Service hindsight-api in-cluster.
+      # The control plane has no auth of its own here; securitypolicy.yaml adds Pocket ID.
+      ui:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            url: https://hindsight.sklab.dev/
+            conditions:
+              # Envoy 302s an unauthenticated request to Pocket ID.
+              - "[STATUS] == any(200, 302)"
+            group: ai
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: Hindsight
+          gethomepage.dev/icon: "mdi-brain-#22D8F0"
+          gethomepage.dev/description: Agent memory
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=hindsight
+        hostnames:
+          - hindsight.sklab.dev
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: controlplane
+                port: http

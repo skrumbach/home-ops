@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Envoy Gateway's OIDC client for the hindsight route (securitypolicy.yaml). The operator writes the
+# client ID and secret to Secret `hindsight-oidc-credentials`. Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: hindsight
+spec:
+  name: Hindsight
+  launchUrl: https://hindsight.sklab.dev
+  callbackUrls: ["https://hindsight.sklab.dev/oauth2/callback"]
+  logoutCallbackUrls: ["https://hindsight.sklab.dev/"]
+  pkceEnabled: true
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    keys:
+      clientID: client-id
+      clientSecret: client-secret

@@ -35,6 +35,7 @@ resources:
   - ./deepseek-v4-flash.yaml
   - ./deepseek-v4-pro-0813.yaml
   - ./deepseek-v4-pro.yaml
+  - ./embedding-cpu.yaml
   - ./embedding-local.yaml
   - ./gemini-3.1-flash-image.yaml
   - ./gemini-3.1-pro.yaml
