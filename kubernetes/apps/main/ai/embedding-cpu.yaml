@@ -20,4 +20,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  timeout: 15m
+  # Short on purpose: a crash-looping deployment holds the health check open for this long and
+  # blocks the next revision (the first rollout lost 15 minutes to it).
+  timeout: 5m
