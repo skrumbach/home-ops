@@ -31,6 +31,13 @@
             "context": 140000,
             "output": 16384
           }
+        },
+        "chat-local": {
+          "name": "Local B70 (chat-local)",
+          "limit": {
+            "context": 140000,
+            "output": 16384
+          }
         }
       }
     },
