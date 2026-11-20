@@ -12,6 +12,8 @@ metadata:
   name: opencode-api
   annotations:
     gatus.home-operations.com/endpoint: |-
+      # `/` serves the static web app unauthenticated; the API under /api answers 401 without the password.
+      url: https://opencode-api.sklab.dev/api/health
       conditions: ["[STATUS] == 401"]
 spec:
   hostnames:
