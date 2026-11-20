@@ -32,9 +32,10 @@ spec:
               - --auto-truncate
               - --max-client-batch-size
               - "16"
-              # The default 16384-token warmup batch OOM-killed the pod at 3Gi. Memory scales with this.
+              # Attention memory grows with the square of this: the default 16384 OOM-killed the pod at 3Gi
+              # and 4096 still did at 6Gi. Longer input is cut by --auto-truncate.
               - --max-batch-tokens
-              - "4096"
+              - "1024"
             env:
               HUGGINGFACE_HUB_CACHE: /data
             probes:
