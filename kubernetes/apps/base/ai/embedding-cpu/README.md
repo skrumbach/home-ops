@@ -53,7 +53,8 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml).
 |---|---|---|
 | `--model-id` | `Qwen/Qwen3-Embedding-0.6B` | The same model as `embedding-gpu`, so the vectors are in one space. |
 | `--max-client-batch-size` | `16` | Bounds one request's CPU time. |
-| Memory request, limit | `1Gi`, `3Gi` | The weights are about 1.2GB and a batch adds activations. |
+| `--max-batch-tokens` | `4096` | The default 16384-token warmup batch OOM-killed the pod at a 3Gi limit. Memory scales with this. |
+| Memory request, limit | `3Gi`, `6Gi` | The CPU backend loads the weights as float32 (about 2.4GB) before any batch. |
 | LiteLLM `max_parallel_requests`, `timeout` | `4`, `20` | A burst queues at LiteLLM instead of on the CPU. |
 
 ## Operate it
