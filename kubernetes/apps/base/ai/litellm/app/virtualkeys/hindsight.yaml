@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
+# ai/hindsight's one key. INVARIANT: exactly the two models its memory comes from. chat-local does the fact
+# extraction (zero-priced, terminal, no cloud fallback); embedding-cpu is the vector space of every stored
+# memory, so never add another embedder (its vectors would rank silently wrong). maxBudget is inert at $0
+# but kept as the widening guard; rpm/tpm bound the shared B70.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: hindsight
+spec:
+  proxyRef: litellm
+  keyAlias: hindsight
+  secretName: litellm-key-hindsight
+  secretKey: key
+  models:
+    - chat-local
+    - embedding-cpu
+  maxBudget: "1.00"
+  budgetDuration: 30d
+  rpmLimit: 120
+  tpmLimit: 600000
+  metadata:
+    purpose: fact extraction and embeddings for the ai/hindsight agent memory
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: litellm-key-hindsight
+spec:
+  refreshInterval: 5m
+  secretStoreRefs:
+    - name: onepassword-automation
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: litellm-key-hindsight
+  data:
+    - match:
+        secretKey: key
+        remoteRef:
+          remoteKey: litellm-consumer-hindsight
+          property: key

@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+# GET /metrics is on the API's port 8888 with no auth. The control plane exposes none, so only the
+# hindsight-api Service is selected. app-template labels a Service app.kubernetes.io/service:
+# <release>-<key>; there is no controller or component label on it.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hindsight
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: hindsight
+      app.kubernetes.io/service: hindsight-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
