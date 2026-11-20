@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+# Retires OpenCode's PWA service worker on opencode.sklab.dev. Upstream's /sw.js serves the cached index.html
+# for every navigation, so a reload never reaches Envoy and never redoes the Pocket ID sign-in: once the
+# session expired, the UI sat on "Loading" forever. This route answers /sw.js with a worker that unregisters
+# itself. It is a separate route on purpose: the SecurityPolicy targets only HTTPRoute `opencode`, and the
+# browser's update check for /sw.js must not be redirected to id.sklab.dev. The app registers /sw.js on
+# every load, so this runs (and unregisters) each time; it serves nothing else.
+# No `${` and no `%` in the body: Flux substitution and Envoy command operators would rewrite them.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: opencode-sw
+spec:
+  hostnames:
+    - "opencode.sklab.dev"
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /sw.js
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: opencode-sw-unregister
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: opencode-sw-unregister
+spec:
+  directResponse:
+    statusCode: 200
+    contentType: application/javascript
+    body:
+      type: Inline
+      inline: |
+        self.addEventListener("install", () => self.skipWaiting());
+        self.addEventListener("activate", (event) => {
+          event.waitUntil(
+            caches.keys()
+              .then((keys) => Promise.all(keys.filter((key) => key.startsWith("workbox-")).map((key) => caches.delete(key))))
+              .then(() => self.registration.unregister()),
+          );
+        });
