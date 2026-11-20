@@ -100,6 +100,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Prowlarr
+          gethomepage.dev/href: "https://prowlarr.sklab.dev"
           gethomepage.dev/icon: prowlarr.svg
           gethomepage.dev/description: Indexer manager
           gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
