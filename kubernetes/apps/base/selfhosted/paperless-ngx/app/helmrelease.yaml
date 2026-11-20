@@ -110,6 +110,8 @@ spec:
               limits:
                 cpu: 2000m
                 memory: 4Gi
+            # Since 3.5.0, PAPERLESS_URL limits ALLOWED_HOSTS to its hostname plus localhost, so a probe
+            # carrying the pod IP as Host gets a 400 (DisallowedHost) and the pod never starts.
             probes:
               liveness: &probes
                 enabled: true
@@ -118,6 +120,9 @@ spec:
                   httpGet:
                     path: /
                     port: *port
+                    httpHeaders: &probe-host
+                      - name: Host
+                        value: localhost
                   initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -130,6 +135,7 @@ spec:
                   httpGet:
                     path: /
                     port: *port
+                    httpHeaders: *probe-host
                   initialDelaySeconds: 0
                   periodSeconds: 5
                   timeoutSeconds: 3
