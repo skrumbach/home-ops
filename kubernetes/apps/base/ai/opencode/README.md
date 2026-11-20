@@ -108,6 +108,7 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 - The gate is `app/securitypolicy.yaml` with its Pocket ID client `app/pocketidoidcclient.yaml`. A new hostname needs its own callback URL there and a real login after merge before treating the route as covered. The basic-auth API route `opencode-api` is the only OIDC-free door; keep `OPENCODE_PASSWORD` set.
 - Keep `forwardAccessToken` off in `opencode-auth`.
 - Keep `offline_access` in `opencode-auth` and HTTPRoute `opencode-sw` outside it: together they keep the PWA from hanging on an expired session.
+- Keep `denyRedirect` on `Sec-Fetch-Mode: cors` in `opencode-auth`: without it the UI's retrying fetches start a sign-in each, and the pile of flow cookies breaks the callback with `ERR_HTTP2_PROTOCOL_ERROR`.
 - Do not name the Service `opencode`.
 
 Upstream: [OpenCode docs](https://opencode.ai/docs/) •
