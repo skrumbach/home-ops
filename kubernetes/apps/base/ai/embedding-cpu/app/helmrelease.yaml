@@ -32,6 +32,9 @@ spec:
               - --auto-truncate
               - --max-client-batch-size
               - "16"
+              # The default 16384-token warmup batch OOM-killed the pod at 3Gi. Memory scales with this.
+              - --max-batch-tokens
+              - "4096"
             env:
               HUGGINGFACE_HUB_CACHE: /data
             probes:
@@ -65,9 +68,10 @@ spec:
             resources:
               requests:
                 cpu: 500m
-                memory: 1Gi
-              limits:
+                # CPU candle loads the 0.6B weights as float32 (about 2.4GB) before any batch.
                 memory: 3Gi
+              limits:
+                memory: 6Gi
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
