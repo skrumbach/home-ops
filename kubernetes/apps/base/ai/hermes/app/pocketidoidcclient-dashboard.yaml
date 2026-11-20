@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# The dashboard's own OIDC client (HERMES_DASHBOARD_OIDC_* in helmrelease.yaml, no SecurityPolicy). The operator
+# generates the client ID and secret and writes them to Secret `hermes-dashboard-oidc-credentials`
+# in this namespace. Deleting this CR deletes the client in Pocket ID.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: hermes-dashboard
+spec:
+  name: Hermes Dashboard
+  launchUrl: https://hermes.sklab.dev
+  callbackUrls: ["https://hermes.sklab.dev/auth/callback"]
+  # The dashboard always sends an S256 challenge; this makes Pocket ID require it.
+  pkceEnabled: true
+  # Pocket ID refuses the authorization for anyone outside the group.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    # Read by the hermes container env (secretKeyRef).
+    keys:
+      clientID: client-id
+      clientSecret: client-secret
