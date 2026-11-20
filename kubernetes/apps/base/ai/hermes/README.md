@@ -8,10 +8,13 @@
 
 ## What it does
 
-- **Serves a dashboard** at `https://hermes.sklab.dev` (container `app`, port `9119`, its own basic auth) on
+- **Serves a dashboard** at `https://hermes.sklab.dev` (container `app`, port `9119`, native Pocket ID OIDC login) on
   `envoy-internal` only. An OpenAI-compatible API listens on `8642` of Service `hermes`, with no route.
 - **Serves code-server** at `https://hermes-code.sklab.dev` (container `codeserver`, port `12321`) over the state
   volume. It has no auth of its own: SecurityPolicy `hermes-code-auth` puts Pocket ID in front at Envoy.
+- **Serves the community WebUI** (nesquena/hermes-webui) at `https://hermes-webui.sklab.dev` (container `webui`, port
+  `8787`) over the same state volume. It has no OIDC and no password: SecurityPolicy `hermes-webui-auth` puts Pocket ID
+  in front at Envoy. Init container `webui-agent-src` copies `/opt/hermes` from the agent image so it can import the agent.
 - **Talks to every model through LiteLLM** with its own virtual key. The default model is the role alias `chat-local`.
   Failover and the background tasks use cloud models, set in `config.yaml`.
 - **Operates the cluster** as ServiceAccount `hermes`: it can read most of the cluster, delete a wedged pod, and
@@ -31,7 +34,7 @@
 | **Egress fenced in Cilium** | Hermes has a terminal, `execute_code`, a browser, cluster-wide read RBAC and `pods/exec` in `ai`. CiliumNetworkPolicy `hermes` cuts the LAN, nodes and other private ranges out of egress, so a hijacked session cannot reach them. |
 | **A guard hook in front of the terminal** | `hooks/guard-terminal.py` blocks the catastrophic, sends "ask first" commands to the approval gate and allows the rest. It is a backstop, not a sandbox: it reads the command string. `fail_closed` makes a crashed guard refuse the command. |
 | **Cloud models for background chores** | `web_extract` fires one call per page in parallel, and the local server's slots queue and time out past their count. |
-| **Pocket ID at Envoy for code-server only** | code-server runs with `--auth none`. The dashboard keeps its own basic auth and is not gated by the SecurityPolicy. |
+| **Pocket ID at Envoy for code-server and the WebUI, native OIDC for the dashboard** | code-server and the WebUI have no OIDC, so Envoy gates them. The dashboard has its own OIDC (`HERMES_DASHBOARD_OIDC_*`), and without any auth it refuses a non-loopback bind, so it is not behind a SecurityPolicy. Its login needs egress to `envoy-external` (id.sklab.dev). |
 | **Two GitHub tokens** | Hermes renders the read-only token. The write token belongs to OpenCode, so an agent terminal that can see the variable cannot write to home-ops. |
 
 ## How it works
@@ -118,8 +121,6 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 
 | Field | What it is |
 | --- | --- |
-| `HERMES_DASHBOARD_USER`, `HERMES_DASHBOARD_PASSWORD` | Dashboard basic auth |
-| `HERMES_DASHBOARD_SECRET` | `openssl rand -hex 32` |
 | `GITHUB_LLM_WIKI_TOKEN` | Fine-grained PAT, one repo, Contents read and write. Not a classic PAT |
 | `API_SERVER_KEY` | `openssl rand -hex 32` for the `:8642` API |
 | `HOMELAB_GH_READ_TOKEN` | Fine-grained PAT, **read-only** (issue and file writes answer 403). Hermes' `HOMELAB_GH_TOKEN` env (commit-watcher) and the GitHub MCP render from it. Distinct from the wiki token |
@@ -153,7 +154,7 @@ flux -n ai get hr hermes
 kubectl -n ai get pods -l app.kubernetes.io/name=hermes -o wide
 kubectl -n ai logs deploy/hermes -c app --tail=100
 kubectl -n ai get snapshotpolicy,restore,pvc
-kubectl -n ai get securitypolicy/hermes-code-auth pocketidoidcclient/hermes-codeserver
+kubectl -n ai get securitypolicy/hermes-code-auth securitypolicy/hermes-webui-auth pocketidoidcclient/hermes-codeserver pocketidoidcclient/hermes-webui pocketidoidcclient/hermes-dashboard
 kubectl get clusterrole hermes-read-all hermes-pod-delete; kubectl -n ai get role hermes-exec-deploy
 ```
 

@@ -17,7 +17,8 @@ spec:
     # kubelet tcpSocket probes on :9119 come from the local host.
     - fromEntities:
         - host
-    # Dashboard (hermes route, :9119) and code-server (hermes-code route, :12321), envoy-internal only.
+    # Dashboard (hermes route, :9119), code-server (hermes-code route, :12321) and the WebUI
+    # (hermes-webui route, :8787), envoy-internal only.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
@@ -27,6 +28,8 @@ spec:
             - port: "9119"
               protocol: TCP
             - port: "12321"
+              protocol: TCP
+            - port: "8787"
               protocol: TCP
     # Gatus "Hermes Gateway" check on hermes.ai.svc:8642/health (static entry, not through Envoy).
     - fromEndpoints:
@@ -55,6 +58,10 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
             gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+        # Pocket ID (id.sklab.dev) is served by envoy-external; the dashboard's OIDC login calls it.
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-external
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEntities:
         - kube-apiserver
@@ -101,6 +108,16 @@ spec:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
             gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "10443"
+              protocol: TCP
+    # Dashboard OIDC login: id.sklab.dev resolves to the envoy-external LoadBalancer (LAN IP), which the
+    # CIDR rule below cuts out. Same backend port as above.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-external
       toPorts:
         - ports:
             - port: "10443"

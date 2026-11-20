@@ -62,6 +62,16 @@ spec:
             securityContext:
               runAsUser: 0
               runAsGroup: 0
+          # The WebUI imports the agent's Python modules, so it needs the agent source tree. It looks
+          # for a pyproject.toml under /opt/hermes. Same image as `app` (keep the two pins equal).
+          webui-agent-src:
+            image:
+              repository: docker.io/nousresearch/hermes-agent
+              tag: v2026.9.24-desktop@sha256:45379eb3eb2d11c38df9b0e529dc734775b42c40b57cfb1cae0448f0cb7bf647
+            command:
+              - sh
+              - -c
+              - cp -a /opt/hermes/. /agent-src/
         containers:
           app:
             # Keep the -desktop suffix. The plain tag has no Chromium or Bot Desktop, and neither
@@ -76,6 +86,22 @@ spec:
               HERMES_DASHBOARD: "1"
               HERMES_DASHBOARD_HOST: 0.0.0.0
               HERMES_DASHBOARD_PORT: "9119"
+              # Pocket ID login (replaces basic auth; with no auth configured the dashboard refuses a
+              # non-loopback bind). Callback https://hermes.sklab.dev/auth/callback. The pod must reach
+              # id.sklab.dev (egress rule in ciliumnetworkpolicy.yaml), or no provider registers and the
+              # dashboard fails to start.
+              HERMES_DASHBOARD_PUBLIC_URL: https://hermes.sklab.dev
+              HERMES_DASHBOARD_OIDC_ISSUER: https://id.sklab.dev
+              HERMES_DASHBOARD_OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-dashboard-oidc-credentials
+                    key: client-id
+              HERMES_DASHBOARD_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-dashboard-oidc-credentials
+                    key: client-secret
               # OpenAI-compatible API server on :8642; API_SERVER_KEY comes via envFrom.
               API_SERVER_ENABLED: "true"
               API_SERVER_HOST: 0.0.0.0
@@ -112,7 +138,7 @@ spec:
               GIT_CONFIG_KEY_2: user.email
               GIT_CONFIG_VALUE_2: hermes@users.noreply.github.com
             envFrom:
-              # Dashboard basic-auth credentials (HERMES_DASHBOARD_BASIC_AUTH_*).
+              # API key, bot tokens and the rest of the hermes ExternalSecret.
               - secretRef:
                   name: *app
             probes:
@@ -195,6 +221,67 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 1Gi
+          # Community chat UI (nesquena/hermes-webui, not a Nous product). Same pod as `app`, so it
+          # shares the RWO /opt/data mount and runs the agent in-process against that HERMES_HOME.
+          # It has no OIDC of its own: HERMES_WEBUI_PASSWORD stays unset and Pocket ID gates the
+          # route at Envoy (securitypolicy-webui.yaml). The Service port is open to in-cluster callers.
+          # The image starts as root, aligns its user to WANTED_UID/GID, then drops to it, so no
+          # runAsUser here. First boot pip-installs the agent deps into /app (egress 443 is open).
+          webui:
+            image:
+              repository: ghcr.io/nesquena/hermes-webui
+              tag: 0.52.702@sha256:8d77949736523e4b72db7dd57f85ee2020fa9d4609d91abdda6f161aad0c60b1
+            env:
+              TZ: ${CONFIG_TIMEZONE}
+              WANTED_UID: "10000"
+              WANTED_GID: "10000"
+              HERMES_HOME: /opt/data
+              HERMES_WEBUI_HOST: 0.0.0.0
+              HERMES_WEBUI_PORT: &webui 8787
+              HERMES_WEBUI_STATE_DIR: /opt/data/webui
+              HERMES_WEBUI_DEFAULT_WORKSPACE: /opt/files
+              # Behind Envoy: accept the proxied origin and scheme.
+              HERMES_WEBUI_ALLOWED_ORIGINS: https://hermes-webui.sklab.dev
+              HERMES_WEBUI_SECURE: "1"
+              HERMES_WEBUI_TRUST_FORWARDED_HOST: "1"
+              HERMES_WEBUI_TRUST_FORWARDED_PROTO: "1"
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *webui
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *webui
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *webui
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  # First boot installs the agent's Python deps.
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
     defaultPodOptions:
       # Hermes operates the cluster via kubectl, so its SA token must be mounted.
       # app-template v5 defaults automountServiceAccountToken to false.
@@ -215,6 +302,8 @@ spec:
             port: 8642
           codeserver:
             port: 12321
+          webui:
+            port: *webui
     route:
       app:
         annotations:
@@ -254,6 +343,18 @@ spec:
           - backendRefs:
               - name: *app
                 port: 12321
+      # Community WebUI. No auth of its own; securitypolicy-webui.yaml adds Pocket ID.
+      webui:
+        hostnames:
+          - "hermes-webui.sklab.dev"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *webui
     persistence:
       # Agent state PVC, mounted at /opt/data by every container that needs it.
       data:
@@ -268,6 +369,18 @@ spec:
               - path: /opt/data
             codeserver:
               - path: /opt/data
+            webui:
+              - path: /opt/data
+      # Agent source for the WebUI: filled by webui-agent-src, read by webui.
+      webui-agent-src:
+        type: emptyDir
+        advancedMounts:
+          hermes:
+            webui-agent-src:
+              - path: /agent-src
+            webui:
+              - path: /opt/hermes
+                readOnly: true
       # Two-way XML share. App container only. smbd forces 10000:10000.
       xml:
         existingClaim: shared-xml
@@ -281,6 +394,8 @@ spec:
         advancedMounts:
           hermes:
             app:
+              - path: /opt/files
+            webui:
               - path: /opt/files
       # Single private-repo git token, rendered as `.git-credentials` by the
       # hermes-git ExternalSecret and read by the git `store` helper (see
