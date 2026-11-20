@@ -13,7 +13,8 @@
 - **Signs people in at Envoy.** SecurityPolicy `opencode-auth` runs native OIDC against Pocket ID, with client
   `opencode` and the group `admins`. The server password stays as an inner layer.
 - **Sends every model call to LiteLLM** (`litellm.ai.svc.cluster.local:4000`) through two providers: `litellm` for the
-  default model `litellm/auto`, and `litellm-projects` for the Anthropic and OpenAI chat models.
+  default model `litellm/auto` and the B70 model `litellm/chat-local` (zero-priced, no cloud fallback), and
+  `litellm-projects` for the Anthropic and OpenAI chat models.
 - **Reaches ToolHive tools** through the MCP gateway at `https://mcp.sklab.dev/mcp`.
 - **Works on home-ops.** On start the entrypoint clones the public repository into `~/projects/home-ops` on the
   home volume, and a credential helper supplies `GITHUB_TOKEN` for pushes.
