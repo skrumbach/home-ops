@@ -18,6 +18,7 @@ resources:
   - ./claude-haiku-4-5-20251001.yaml
   - ./claude-haiku-4-5-20251001-metered.yaml
   - ./claude-haiku-5-5.yaml
+  - ./claude-haiku-5-5-metered.yaml
   - ./claude-opus-4-5-20251101.yaml
   - ./claude-opus-4-6.yaml
   - ./claude-opus-4-7.yaml
