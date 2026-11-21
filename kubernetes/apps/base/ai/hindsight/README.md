@@ -21,7 +21,7 @@
 
 | Choice | Why |
 |---|---|
-| **`chat-local` for extraction** | Free, and memory content never leaves the cluster. It shares the B70 with Hermes chat, so LLM concurrency is `2`. |
+| **`chat-local` for extraction** | Free, and memory content never leaves the cluster. It shares the B70 with Hermes chat, so LLM concurrency is `2`. Thinking is off per request (`HINDSIGHT_API_LLM_EXTRA_BODY`): with it on, one extraction took minutes and page refreshes timed out in the queue. |
 | **`embedding-cpu`, not `embedding-local`** | `embedding-local` is capped at 1 request per second for every key. A retain burst would hit 429s. |
 | **Full image, not `-slim`** | The slim image has no local reranker. |
 | **No volume under `~/.cache`** | The image bakes its models there and a mount shadows them. |

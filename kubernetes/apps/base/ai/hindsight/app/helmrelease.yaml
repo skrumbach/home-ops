@@ -46,6 +46,13 @@ spec:
               # chat-local shares the B70 with Hermes chat: keep the background load small and slow-tolerant.
               HINDSIGHT_API_LLM_MAX_CONCURRENT: "2"
               HINDSIGHT_API_LLM_TIMEOUT: "600"
+              # Thinking off. With it on, llama.cpp wrote 1-4k tokens per fact extraction at ~18 t/s (1-4 min a
+              # call), and the 2-slot queue starved the page refreshes during the first seed of a bank. Same
+              # switch as chat-local-classifier, sent per request so chat-local stays one alias for everyone.
+              HINDSIGHT_API_LLM_EXTRA_BODY: '{"chat_template_kwargs": {"enable_thinking": false}}'
+              # Bounds a whole mental-model refresh, queue time included (default 300s). A failed refresh
+              # pauses that page's automatic refreshes until one succeeds.
+              HINDSIGHT_API_REFLECT_WALL_TIMEOUT: "1200"
               # Embeddings through LiteLLM. Dimensions are set so no billable startup probe runs.
               HINDSIGHT_API_EMBEDDINGS_PROVIDER: openai
               HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
