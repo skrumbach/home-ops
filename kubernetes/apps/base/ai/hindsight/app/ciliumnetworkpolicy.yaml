@@ -1,0 +1,63 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight
+spec:
+  # Ingress fence for the memory API. Its /metrics and /docs take no key and the tenant key is
+  # admin-equivalent, so only the named consumers may reach :8888. Egress stays open (LiteLLM, postgres-18).
+  # A new in-cluster consumer needs its own rule here, and its own policy (if it has one) needs a
+  # toPorts-free reply rule for this pod.
+  # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight
+      app.kubernetes.io/controller: api
+  ingress:
+    # kubelet httpGet probes on :8888 come from the local host.
+    - fromEntities:
+        - host
+    # Consumers: the control plane, Hermes, OpenCode, the hindsight-api route (envoy-internal only) and
+    # the Prometheus scrape of /metrics (ServiceMonitor hindsight).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: hindsight
+            app.kubernetes.io/controller: controlplane
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: hermes
+            app.kubernetes.io/controller: hermes
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: opencode
+            app.kubernetes.io/controller: opencode
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "8888"
+              protocol: TCP
+    # Replies from the in-cluster Services the API calls: LiteLLM :4000 (chat-local, embedding-cpu) and
+    # postgres-18 :5432. No toPorts: a same-node Service reply arrives with the ClusterIP as source after
+    # reverse NAT and is re-checked here.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: litellm
+            app.kubernetes.io/instance: litellm
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: database
+            cnpg.io/cluster: postgres-18
+    # DNS replies from CoreDNS. No toPorts on purpose: a reply lands on an ephemeral port, never 53.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns

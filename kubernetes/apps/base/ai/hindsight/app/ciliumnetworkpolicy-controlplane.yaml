@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight-controlplane
+spec:
+  # The control plane has no login of its own (Pocket ID sits in front at Envoy) and holds the tenant key,
+  # so a pod that reaches :3000 directly browses and edits every bank. Only envoy-internal may.
+  # This file is not a configMapGenerator payload; applying or editing it does not restart the pod.
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight
+      app.kubernetes.io/controller: controlplane
+  ingress:
+    # kubelet tcpSocket probes on :3000 come from the local host.
+    - fromEntities:
+        - host
+    # The hindsight route (envoy-internal only, Pocket ID OIDC at Envoy). Gatus probes through it too.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: network
+            gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # Replies from the API it proxies to (HINDSIGHT_CP_DATAPLANE_API_URL, Service hindsight-api :8888).
+    # No toPorts: a same-node Service reply arrives with the ClusterIP as source after reverse NAT.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: hindsight
+            app.kubernetes.io/controller: api
+    # DNS replies from CoreDNS. No toPorts on purpose: a reply lands on an ephemeral port, never 53.
+    # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns

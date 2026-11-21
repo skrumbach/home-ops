@@ -8,8 +8,9 @@
 
 ## What it does
 
-- **Serves the memory API** on Service `hindsight-api:8888` (`/v1` and the MCP endpoint at `/mcp/<bank>/`). It has no route:
-  agents call the Service in-cluster with the tenant key.
+- **Serves the memory API** on Service `hindsight-api:8888` (`/v1` and the MCP endpoint at `/mcp/<bank>/`). In-cluster
+  agents call the Service; LAN and VPN devices use `https://hindsight-api.sklab.dev` (`envoy-internal` only). Both need
+  the tenant key as a bearer token.
 - **Serves the control plane** at `https://hindsight.sklab.dev` (container `controlplane`, port `3000`), with Pocket ID in
   front at Envoy (SecurityPolicy `hindsight-auth`). It is an admin UI for browsing banks and memories.
 - **Extracts and consolidates facts** with `chat-local` through LiteLLM, under its own virtual key (`hindsight`).
@@ -26,6 +27,9 @@
 | **No volume under `~/.cache`** | The image bakes its models there and a mount shadows them. |
 | **No PVC, no kopiur** | Everything is in the database, which CNPG backs up. |
 | **Envoy OIDC, no control-plane access key** | One Pocket ID login instead of two. |
+| **API route on `envoy-internal`, no OIDC** | Claude Code, Obsidian and MCP clients send a bearer token and cannot follow a login redirect. Only `/v1`, `/mcp`, `/health` and `/version` are routed, so `/metrics` and `/docs` stay in the cluster. |
+| **Its own HTTPRoute manifest** | A second app-template route would rename the first to `hindsight-ui`, and SecurityPolicy `hindsight-auth` would stop matching it. |
+| **Ingress fences on both pods** | The API's `/metrics` takes no key, and the control plane has no login of its own. CiliumNetworkPolicy `hindsight` and `hindsight-controlplane` admit only the named consumers. |
 | **One replica, Recreate** | The worker runs in-process. A restart is a short outage for recall, and agents must tolerate a failed call. |
 
 ## How it works
@@ -39,6 +43,7 @@
 %%{init: {'theme':'base','themeVariables':{'primaryColor':'#0D102C','primaryTextColor':'#E9ECF7','primaryBorderColor':'#22D8F0','lineColor':'#8B55F5','secondaryColor':'#151941','tertiaryColor':'#090C22','edgeLabelBackground':'#151941'}}}%%
 flowchart LR
   agent(["Agents"]) -->|"hindsight-api :8888"| api{{"Deployment<br/>hindsight-api"}}
+  dev(["LAN clients"]) -->|"hindsight-api.sklab.dev"| api
   user(["Browser"]) -->|"hindsight.sklab.dev"| pol["SecurityPolicy<br/>hindsight-auth"] --> cp["Deployment<br/>controlplane"]
   cp --> api
   api -->|"chat-local, embedding-cpu"| llm["LiteLLM"]
@@ -47,14 +52,28 @@ flowchart LR
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class api accent
-  class agent,user ext
+  class agent,user,dev ext
 ```
 
 </details>
 
+## Clients
+
+One bank per source, so coding noise stays out of the assistant's recall.
+
+| Client | How | Bank |
+|---|---|---|
+| OpenCode (`ai/opencode`) | Plugin `@vectorize-io/hindsight-coding-agents`, Service URL | `coding-agent::<repo>` |
+| Claude Code on a laptop | `npx @vectorize-io/hindsight-coding-agents install claude-code --server self-hosted --api-url https://hindsight-api.sklab.dev`, token in `~/.hindsight/coding-agent.json` (`apiToken`) | `coding-agent::<repo>`, shared with OpenCode |
+| Any MCP client | `https://hindsight-api.sklab.dev/mcp/<bank>/`, header `Authorization: Bearer <tenant key>` | the one in the URL |
+| Obsidian | Plugin `vectorize-io/hindsight-obsidian` (beta, through BRAT), API URL and key in its settings | `obsidian` |
+
+A first Obsidian sync sends every note through `chat-local` two at a time, so it shares the B70 with Hermes chat for
+as long as the vault takes.
+
 ## Secrets
 
-1Password item `hindsight` (vault read by External Secrets):
+1Password item `hindsight` (vault `Automation`):
 
 | Field | Note |
 |---|---|
@@ -76,12 +95,16 @@ kubectl -n ai get litellmvirtualkey hindsight
 
 - **The tenant key is admin-equivalent.** There is no per-consumer isolation: banks are a naming convention, not a boundary.
   Recalled memories are injected into agent prompts, so anyone holding the key can plant a memory that a future session
-  trusts. Rotate it on that footing, and never expose the API outside the cluster.
+  trusts. Rotate it on that footing: every client above holds it. The API route stays on `envoy-internal`, never
+  `envoy-external`.
+- **A new in-cluster consumer needs a rule in CiliumNetworkPolicy `hindsight`**, and a reply rule for the API pod in its
+  own policy if it has one.
 - **Embedding dimensions are fixed at `1024` once a memory is stored.** Changing the model or `embedding-cpu` needs
   `hindsight-admin reembed`. Never point the key at a second embedder.
 - **Recall injects stale facts as trusted context.** Hindsight has no fact-validity windows, so review what agents retain.
 - **Snapshots are not selective:** CNPG PITR restores the whole `postgres-18` cluster, not the `hindsight` database alone.
-- **Hermes is not wired yet.** Its plugin installs from the plugin catalog at runtime (`hermes plugins install hindsight`,
-  then `memory.provider: hindsight`); set `retain_every_n_turns` first because it defaults to `1`.
+- **Hermes is not wired yet.** The pinned image does not bundle the plugin. `hermes plugins install hindsight` puts
+  the code on the PVC but its Python dependencies in the image's venv, which a pod restart discards, so it needs a
+  startup step. Set `retain_every_n_turns` first because it defaults to `1`.
 
 Upstream: [Hindsight](https://hindsight.vectorize.io/)
