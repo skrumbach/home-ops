@@ -177,8 +177,14 @@ mcp_servers:
 # and has no flush on shutdown, so with 10 a session shorter than 10 turns was never stored (a one-shot
 # CLI turn sent nothing). Each retain is one async extraction on chat-local, two at a time at most.
 # The previous provider, `holographic` (bundled local SQLite), keeps its facts on the PVC, unused.
+#
+# memory_enabled: false turns off the built-in flat-file store (MEMORY.md), as the Hindsight integration
+# page recommends: with both active the model may prefer the built-in one. Its content was copied into
+# bank `hermes` (document builtin-memory-md) first. user_profile_enabled stays on: the page marks that one
+# optional, and USER.md is a small profile that is injected every turn. Writes to it are mirrored to Hindsight.
 memory:
   provider: hindsight
+  memory_enabled: false
   auto_migrate: true
 
 # Messaging platforms. The gateway-default profile starts the Telegram platform
