@@ -34,15 +34,17 @@ spec:
               # Break-glass password form beside the Pocket ID button. Can go ("false") once the
               # owner has signed in through Pocket ID and the account is linked.
               NEXT_PUBLIC_CREDENTIALS_ENABLED: "true"
-              # Linkwarden's own sign-in with Pocket ID (pocketidoidcclient-app.yaml), a second client
-              # next to the Envoy gate's. The callback and sign-in start are under /api, the ungated
-              # rule. First sign-in links an existing local account only when the email matches
+              # Linkwarden's own sign-in with Pocket ID (pocketidoidcclient-app.yaml). First sign-in links an existing local account only when the email matches
               # exactly and Pocket ID sends email_verified=true (ssoEmailVerified.ts); an account
               # whose email is not yet verified in Linkwarden also loses its password then, while a
               # verified one keeps it. An email with no local account creates a new empty account.
               # DISABLE_NEW_SSO_USERS stays unset on purpose: it refuses any identity with no
               # linked Account row, which includes that first sign-in of the existing account (the
               # check runs before the link). It can be set once the owner is linked.
+              # A local account with no e-mail cannot be linked on first Pocket ID sign-in: next-auth
+              # then tries to create a new user whose username collides (`Unique constraint failed on
+              # the fields: (username)`). The local account's `email` must equal the Pocket ID e-mail
+              # first, and with mail disabled Linkwarden has no UI or API to set it, only the database.
               NEXT_PUBLIC_OIDC_ENABLED: "true"
               OIDC_CUSTOM_NAME: Pocket ID
               OIDC_WELLKNOWN_URL: https://id.sklab.dev/.well-known/openid-configuration
@@ -150,9 +152,8 @@ spec:
           gethomepage.dev/href: "https://links.sklab.dev"
           gethomepage.dev/icon: sh-linkwarden.svg
           gethomepage.dev/description: Bookmarks and page archives
-          # Goes through the ungated `api` rule: /api/v1/logins answers unauthenticated with a
-          # Linkwarden body field the Pocket ID sign-in page cannot match, and proves /api still
-          # bypasses the Envoy OIDC gate.
+          # /api/v1/logins answers unauthenticated with a body field (credentialsEnabled) that
+          # proves Linkwarden itself is up, not just a sign-in page.
           gatus.home-operations.com/endpoint: |-
             url: https://links.sklab.dev/api/v1/logins
             conditions:
@@ -165,19 +166,8 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        # Rule names are load-bearing: securitypolicy.yaml gates rule `app` only.
         rules:
-          - name: api
-            matches:
-              - path:
-                  type: PathPrefix
-                  value: /api
-            backendRefs:
-              - name: linkwarden
-                namespace: selfhosted
-                port: *port
-          - name: app
-            backendRefs:
+          - backendRefs:
               - name: linkwarden
                 namespace: selfhosted
                 port: *port
