@@ -104,7 +104,7 @@ kubectl -n ai get litellmvirtualkey hindsight
 - **Recall injects stale facts as trusted context.** Hindsight has no fact-validity windows, so review what agents retain.
 - **Snapshots are not selective:** CNPG PITR restores the whole `postgres-18` cluster, not the `hindsight` database alone.
 - **Hermes is not wired yet.** The pinned image does not bundle the plugin. `hermes plugins install hindsight` puts
-  the code on the PVC but its Python dependencies in the image's venv, which a pod restart discards, so it needs a
-  startup step. Set `retain_every_n_turns` first because it defaults to `1`.
+  the code in `/opt/data/plugins` and its Python dependencies in `/opt/data/lazy-packages` (the image sets
+  `HERMES_LAZY_INSTALL_TARGET`), both on the PVC. Set `retain_every_n_turns` first because it defaults to `1`.
 
 Upstream: [Hindsight](https://hindsight.vectorize.io/)
