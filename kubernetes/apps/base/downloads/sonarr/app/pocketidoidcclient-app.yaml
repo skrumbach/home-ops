@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Sonarr's own sign-in (SONARR__AUTH__OIDC* in helmrelease.yaml), behind the Envoy gate. The
+# gateway's client is `sonarr` (pocketidoidcclient.yaml). The operator generates the client ID and
+# secret and writes them to Secret `sonarr-app-oidc-credentials`, which the HelmRelease reads
+# directly (reloader restarts the pod when it changes). Deleting this CR deletes the client in
+# Pocket ID; a re-created client has a new secret.
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: sonarr-app
+spec:
+  name: Sonarr (app)
+  launchUrl: https://sonarr.sklab.dev
+  # Paths are ASP.NET's OpenIdConnectOptions defaults (CallbackPath, SignedOutCallbackPath); Sonarr
+  # v5.0.0.2997 (AuthenticationBuilderExtensions.cs) sets neither. They fall in route rule `app`.
+  callbackUrls: ["https://sonarr.sklab.dev/signin-oidc"]
+  # Sign-out sends post_logout_redirect_uri=<scheme>://<host>/signout-callback-oidc. Scheme and host
+  # come from X-Forwarded-*, honoured only with SONARR__SERVER__TRUSTEDNETWORKS.
+  logoutCallbackUrls: ["https://sonarr.sklab.dev/signout-callback-oidc"]
+  # OpenIdConnectOptions.UsePkce defaults to true (Sonarr never sets it) and the code flow sends S256.
+  pkceEnabled: true
+  # Sonarr admits one configured user (its verified e-mail, externalsecret.yaml); Pocket ID refuses
+  # the authorization for anyone outside the group.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    keys:
+      clientID: client-id
+      clientSecret: client-secret

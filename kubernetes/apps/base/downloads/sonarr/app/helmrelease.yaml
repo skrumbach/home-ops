@@ -38,11 +38,42 @@ spec:
             env:
               SONARR__APP__INSTANCENAME: Sonarr
               SONARR__APP__THEME: dark
-              SONARR__AUTH__METHOD: External
-              SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              # Native OIDC (Sonarr v5.0.0.2997, AuthenticationType.Oidc = 4) behind the Envoy gate
+              # (securitypolicy.yaml), which stays: it is the fallback if this login misbehaves.
+              # Back out: set METHOD to External (then OIDC* and TRUSTEDNETWORKS do nothing; drop them
+              # and pocketidoidcclient-app.yaml in a follow-up). Names come from AuthOptions.cs, bound
+              # from config section Sonarr:Auth / Sonarr:Server (Bootstrap.cs), `__` = `:`.
+              SONARR__AUTH__METHOD: Oidc
+              # Enabled, not DisabledForLocalAddresses: with TRUSTEDNETWORKS below Sonarr rewrites the
+              # remote IP from X-Forwarded-For (a LAN address, or one the client spoofs), and
+              # DisabledForLocalAddresses (UiAuthorizationHandler.cs) would skip the login for it.
+              # API consumers send X-Api-Key (scheme "API"), which this setting does not affect.
+              SONARR__AUTH__REQUIRED: Enabled
+              SONARR__AUTH__OIDCAUTHORITY: https://id.sklab.dev
+              # Without all of authority, client id, client secret, user and `openid` in the scopes
+              # (IsOidcConfigured, AuthenticationConfigurationExtensions.cs) Sonarr falls back to Forms.
+              SONARR__AUTH__OIDCCLIENTID:
+                valueFrom:
+                  secretKeyRef:
+                    name: sonarr-app-oidc-credentials
+                    key: client-id
+              SONARR__AUTH__OIDCCLIENTSECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: sonarr-app-oidc-credentials
+                    key: client-secret
+              # SONARR__AUTH__OIDCUSERIDENTIFIER (the one allowed user) is not here: it is the owner's
+              # e-mail, so it comes from 1Password through sonarr-secret (externalsecret.yaml). Sonarr
+              # accepts the e-mail only when Pocket ID sends email_verified=true, which needs the
+              # email scope.
+              SONARR__AUTH__OIDCSCOPES: openid email
               SONARR__LOG__DBENABLED: "False"
               SONARR__LOG__LEVEL: info
               SONARR__SERVER__PORT: &port 8989
+              # Trust X-Forwarded-Proto/Host from the pod network (Envoy): without it Sonarr builds
+              # redirect_uri as http://sonarr.sklab.dev/signin-oidc, which Pocket ID rejects.
+              # Must change together with the pod CIDR (10.42.0.0/16) and the client's callbackUrls.
+              SONARR__SERVER__TRUSTEDNETWORKS: 10.42.0.0/16
               SONARR__UPDATE__BRANCH: develop
             envFrom:
               - secretRef:
