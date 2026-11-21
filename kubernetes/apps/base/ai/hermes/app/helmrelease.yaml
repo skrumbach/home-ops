@@ -63,7 +63,8 @@ spec:
                   echo "hindsight plugin already installed"
                   exit 0
                 fi
-                /opt/hermes/.venv/bin/hermes plugins install hindsight --force --enable \
+                # timeout: a hung clone or resolver must not hold the pod in Init.
+                timeout 900 /opt/hermes/.venv/bin/hermes plugins install hindsight --force --enable \
                   || echo "WARN: hindsight plugin install failed; Hermes starts without long-term memory"
             env:
               HOME: /opt/data
