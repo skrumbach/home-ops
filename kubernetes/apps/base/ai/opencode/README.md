@@ -16,6 +16,8 @@
   default model `litellm/auto` and the B70 model `litellm/chat-local` (zero-priced, no cloud fallback), and
   `litellm-projects` for the Anthropic and OpenAI chat models.
 - **Reaches ToolHive tools** through the MCP gateway at `https://mcp.sklab.dev/mcp`.
+- **Remembers across sessions** through the Hindsight plugin (`@vectorize-io/hindsight-coding-agents`), against Service
+  `hindsight-api:8888`. One bank per git repository (`coding-agent::<repo>`).
 - **Works on home-ops.** On start the entrypoint clones the public repository into `~/projects/home-ops` on the
   home volume, and a credential helper supplies `GITHUB_TOKEN` for pushes.
 - **Keeps its home directory** on PVC `opencode`, backed up by kopiur to the in-cluster `ceph` and offsite `r2`
@@ -83,6 +85,9 @@ flowchart LR
 | `GITHUB_TOKEN` | 1Password item `hermes`, field `HOMELAB_GH_TOKEN` | `public_repo`, read and write. No new item. |
 | `LITELLM_API_KEY` | 1Password item `litellm-consumer-opencode`, field `key` | Not a prerequisite: the LiteLLM virtual key `opencode` writes it. |
 | `MCP_GATEWAY_TOKEN` | 1Password item `mcp-gateway` | Written by `ai/toolhive`, not by hand. |
+| `HINDSIGHT_API_TOKEN` | 1Password item `hindsight`, field `HINDSIGHT_TENANT_API_KEY` | The Hindsight tenant key, admin-equivalent on every bank. |
+| Hindsight plugin version | `plugin_version` and `plugin_sha512` in [`entrypoint.sh`](app/resources/entrypoint.sh) | The image has no npm, so the entrypoint unpacks the pinned tarball onto the home PVC. Renovate does not bump it. |
+| `HINDSIGHT_AUTO_INJECT`, `HINDSIGHT_PAGE_TRIGGER_CRON` | `recall`, `H 8 * * *` | Keeps the plugin's own LLM work off `chat-local` during a session: retrieval-only injection, nightly page refresh. |
 | Tolerations | none | `PreferNoSchedule` keeps it off talos-3. A hostname deny-list fails open. |
 | `KOPIUR_CAPACITY`, `KOPIUR_CACHE_CAPACITY`, `KOPIUR_SCHEDULE_R2` ([overlay](../../../main/ai/opencode.yaml)) | `20Gi`, `5Gi`, `H 19 * * *` | Claim size; the offsite copy runs daily in hour 19. |
 

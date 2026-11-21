@@ -45,6 +45,8 @@ metadata:
 spec:
   targetNamespace: database
   interval: 1h
+  # Without this a failed health check (the 1Password item missing on first deploy) waits out the 1h interval.
+  retryInterval: 2m
   timeout: 5m
   path: ./kubernetes/apps/base/ai/hindsight/db
   prune: true

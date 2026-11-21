@@ -36,6 +36,21 @@ spec:
               HOME: &homepath /home/opencode
               OPENCODE_CONFIG: /etc/opencode/opencode.json
               TZ: America/New_York
+              # Hindsight memory plugin (resources/entrypoint.sh unpacks it, opencode.json loads it). The plugin
+              # reads these as fallbacks for ~/.hindsight/coding-agent.json, which is not written here.
+              # HINDSIGHT_API_TOKEN (the tenant key) comes from the Secret. One bank per git repository
+              # (`coding-agent::<repo>`), shared with Claude Code on a laptop that uses the same package.
+              HINDSIGHT_SERVER_MODE: self-hosted
+              HINDSIGHT_API_URL: http://hindsight-api.ai.svc.cluster.local:8888
+              # The copy on the PVC is pinned by checksum in entrypoint.sh; no self-update from npm.
+              HINDSIGHT_AUTO_UPDATE: "false"
+              # First-prompt injection by retrieval only. The default (`reflect`) is an LLM synthesis with
+              # a 20 s timeout, on the chat-local that the session itself is using.
+              HINDSIGHT_AUTO_INJECT: recall
+              # Page refresh is one chat-local synthesis per page: nightly (UTC), not the hourly default.
+              HINDSIGHT_PAGE_TRIGGER_CRON: "H 8 * * *"
+              # Hindsight runs 2 LLM calls at a time (HINDSIGHT_API_LLM_MAX_CONCURRENT); do not queue 10.
+              HINDSIGHT_MAX_PARALLEL_RETAINS: "2"
             envFrom:
               - secretRef:
                   name: opencode

@@ -152,7 +152,8 @@ spec:
           http:
             port: 3000
     route:
-      # Control plane only. The API (/v1, /mcp) has no route: agents call Service hindsight-api in-cluster.
+      # Control plane only. The API (/v1, /mcp) has its own manifest, httproute-api.yaml: a second route
+      # here would rename this one to hindsight-ui and detach the SecurityPolicy.
       # The control plane has no auth of its own here; securitypolicy.yaml adds Pocket ID.
       ui:
         annotations:

@@ -1,6 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "litellm/auto",
+  "plugin": [
+    "/home/opencode/.local/share/hindsight-coding-agents"
+  ],
   "compaction": {
     "auto": true,
     "prune": true,
