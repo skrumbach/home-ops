@@ -67,6 +67,12 @@ spec:
               HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
               HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: embedding-cpu
               HINDSIGHT_API_EMBEDDINGS_OPENAI_DIMENSIONS: "1024"
+              # LiteLLM caps embedding-cpu at 4 in flight and 429s the rest at once. The default is 8 in flight
+              # per encode() and 15s of retries, so 4 concurrent tasks failed retains and page refreshes.
+              # One request per encode (each is a batch of up to 100 texts) and a longer retry window.
+              HINDSIGHT_API_EMBEDDINGS_MAX_CONCURRENT_REQUESTS: "1"
+              HINDSIGHT_API_EMBEDDINGS_MAX_RETRIES: "10"
+              HINDSIGHT_API_EMBEDDINGS_RETRY_BUDGET: "45"
               # Default pool max is 100 against the shared postgres-18; one pod needs far fewer.
               HINDSIGHT_API_DB_POOL_MIN_SIZE: "2"
               HINDSIGHT_API_DB_POOL_MAX_SIZE: "12"
