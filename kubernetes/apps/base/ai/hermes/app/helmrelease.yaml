@@ -375,6 +375,14 @@ spec:
                 port: 12321
       # Community WebUI. No auth of its own; securitypolicy-webui.yaml adds Pocket ID.
       webui:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: Hermes WebUI
+          gethomepage.dev/icon: "mdi-chat-processing-outline-#22D8F0"
+          gethomepage.dev/description: Hermes chat UI
+          # Same pod as the dashboard route; the route name (hermes-webui) matches no pod label.
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
         hostnames:
           - "hermes-webui.sklab.dev"
         parentRefs:

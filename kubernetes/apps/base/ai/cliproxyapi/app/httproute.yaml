@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/group: AI
     gethomepage.dev/name: CLIProxyAPI
     gethomepage.dev/description: Subscription OAuth API proxy
+    gethomepage.dev/href: https://cliproxyapi.sklab.dev/management.html#
     gethomepage.dev/pod-selector: app.kubernetes.io/name=cliproxyapi
     gethomepage.dev/icon: "mdi-api-#22D8F0"
     gatus.home-operations.com/endpoint: |-
