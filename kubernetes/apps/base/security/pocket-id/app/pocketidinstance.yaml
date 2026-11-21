@@ -29,6 +29,18 @@ spec:
     # with email_verified=false whatever this says; Coder ignores the claim (its helmrelease.yaml).
     emailsVerified: true
     allowUserSignups: disabled
+  # The look of the sign-in page, after the GitHub profile (skrumbach/skrumbach). The logo, favicon
+  # and background are not CRD fields: ../branding uploads them through the API.
+  ui:
+    # Shown as "Sign in to SKLAB" and as the passkey prompt's display name. The passkeys are bound
+    # to the hostname in appUrl, not to this.
+    appName: SKLAB
+    # Any CSS colour. Pocket ID sets the button text from its luminance: 0.55 and up gets near-black
+    # text, below that near-white. #22D8F0 is 0.557, so the button reads at 12:1 in both themes and a
+    # slightly darker cyan flips it to white on cyan. The cost: in light mode accent-coloured text
+    # (the active entry in the settings sidebar) is faint, 1.7:1 on white. #1683A8 is the even
+    # alternative, about 4:1 everywhere including the button.
+    accentColor: "#22D8F0"
   # The route is ours (httproute.yaml), so the operator's default trust does not apply.
   # The Envoy pods sit in the pod CIDR.
   trustedProxies:

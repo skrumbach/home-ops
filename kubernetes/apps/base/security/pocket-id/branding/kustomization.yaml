@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./job.yaml
+configMapGenerator:
+  # Hash suffix kept ON purpose: an edited image renames the ConfigMap, which changes the
+  # Job's spec, so Flux recreates the Job and uploads again (see job.yaml).
+  # SVG only: flate, the CI render, does not load a .png here ("file does not exist"), and
+  # Pocket ID takes an SVG in all four slots.
+  - name: pocket-id-branding-configmap
+    files:
+      - ./resources/background.svg
+      - ./resources/favicon.svg
+      - ./resources/logo-dark.svg
+      - ./resources/logo-light.svg

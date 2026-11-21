@@ -70,3 +70,27 @@ spec:
       APP: pocket-id
       CNPG_ROLE: pocket_id
       CNPG_DATABASE: pocket_id
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Uploads the logo, favicon and sign-in background through the Pocket ID API (the CRD has no
+# image fields). Removing this keeps the images: they live in the database.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: pocket-id-branding
+spec:
+  targetNamespace: security
+  dependsOn:
+    - name: pocket-id
+      namespace: security
+  # Ready only once the upload Job has completed, so a failed upload shows here.
+  wait: true
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/base/security/pocket-id/branding
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system

@@ -24,6 +24,7 @@
 | **Stateless pod, data in Postgres** | The data volume is an `emptyDir`; no PVC, no kopiur claim here. |
 | **Config in the instance, not the UI** | Any `userManagement` field also sets `UI_CONFIG_DISABLED`, so settings live in `pocketidinstance.yaml`. |
 | **Username and email from the Secret** | `pocketiduser.yaml` reads `OWNER_USERNAME` and `OWNER_EMAIL` from `pocket-id-secret`, so neither is in Git. |
+| **Branding by settings and an upload Job, no CSS** | Pocket ID has no custom CSS. The name and accent colour are `spec.ui` fields; the logo, favicon and sign-in background are not in the CRD, so Job `pocket-id-branding` uploads the files in [`branding/resources/`](branding/resources/) through the admin API. The look follows the GitHub profile `skrumbach/skrumbach`. |
 
 ## How it works
 
@@ -47,6 +48,7 @@ flowchart LR
   flt["HTTPRouteFilter<br/>pocket-id-setup-block"] -->|404 on /setup| route
   gw["Gateway<br/>envoy-external"] --> route
   cli["PocketIDOIDCClient<br/>in app directories"] --> oper
+  brand["Job<br/>pocket-id-branding"] -->|PUT logo, favicon, background| dep
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class dep accent
@@ -61,6 +63,7 @@ flowchart LR
 4. The operator creates `owner` through its API key. The first reconcile writes a one-hour login link to `status.oneTimeLoginURL` of the `PocketIDUser`; the owner registers a passkey there.
 5. Apps declare a `PocketIDOIDCClient`. Envoy `SecurityPolicy` objects and apps with their own OIDC login point at `https://id.sklab.dev/...`. `allowedUserGroups` usually names `admins`, so Pocket ID refuses anyone outside the group.
 6. Pocket ID trusts the forwarded headers from the pod CIDR (`trustedProxies.cidrs: 10.42.0.0/16`), where the Envoy pods run.
+7. Kustomization `pocket-id-branding` depends on `pocket-id`. Its Job sends each image with `PUT /api/application-images/...` and the operator's key from Secret `pocket-id-static-api-key`. The images sit in a hashed ConfigMap, so an edited file gives the Job a new spec and Flux runs it again (`force: enabled`).
 
 ## Settings that matter
 
@@ -73,6 +76,8 @@ Values are in [`app/pocketidinstance.yaml`](app/pocketidinstance.yaml) and [`app
 | `userManagement.allowUserSignups` | `disabled` | Accounts come from `PocketIDUser` objects only. |
 | `userManagement.emailsVerified` | `true` | Covers self sign-ups only, which are off. The admin API creates a `PocketIDUser` with `email_verified=false` regardless; Coder ignores the claim. |
 | `fileBackend` | `database` | Uploads live in Postgres, so the pod needs no volume. |
+| `ui.appName` | `SKLAB` | The name on the sign-in page and in the passkey prompt. Passkeys are bound to the hostname, not to this. |
+| `ui.accentColor` | `#22D8F0` | The profile's cyan. Pocket ID puts near-black text on it; the trade-off against `#1683A8` is a comment on the line. |
 | `trustedProxies` | enabled, `10.42.0.0/16` | The route is ours, so the operator's default trust does not apply. |
 | `ENCRYPTION_KEY` (in `pocket-id-secret`) | from 1Password item `pocket-id` | Encrypts data at rest. Never rotate or lose it: the database is unreadable without it. |
 | `DB_CONNECTION_STRING` | role `pocket_id`, `postgres-18-rw.database`, database `pocket_id` | The password sits in the URL unescaped. `pocket-id-db` reads the same field `POSTGRES_DB_USER_PASSWORD`. |
@@ -80,8 +85,10 @@ Values are in [`app/pocketidinstance.yaml`](app/pocketidinstance.yaml) and [`app
 ## Operate it
 
 ```bash
-flux -n security get ks pocket-id pocket-id-db pocket-id-operator
+flux -n security get ks pocket-id pocket-id-branding pocket-id-db pocket-id-operator
 kubectl -n security get pocketidinstance,pocketiduser,pocketidusergroup
+kubectl -n security get job pocket-id-branding                             # Complete = images uploaded
+kubectl -n security logs job/pocket-id-branding                            # one "uploaded ..." line per image
 kubectl -n security get deploy,pods -l app.kubernetes.io/name=pocket-id -o wide
 kubectl -n security get httproute/pocket-id httproutefilter/pocket-id-setup-block
 kubectl -n database get databaserole,database

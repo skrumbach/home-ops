@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/job_v1.json
+# Uploads the logo, favicon and sign-in background to Pocket ID. The PocketIDInstance CRD has
+# no image fields and Pocket ID has no custom CSS, so the admin API is the only way in.
+# It runs once per content: an edited image renames the hashed ConfigMap and Flux recreates the
+# Job. The images live in Postgres (fileBackend: database). A database that lost them does not
+# bring the Job back: delete the Job and Flux runs it again.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pocket-id-branding
+  annotations:
+    # `enabled` is the only value Flux honours (recreates the immutable Job).
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: upload
+          image: docker.io/curlimages/curl:8.23.0@sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93
+          command: ["/bin/sh", "-ec"]
+          # Read from Pocket ID v2.19.2 (app_images_controller.go, authenticator.go):
+          # - PUT /api/application-images/{logo,favicon,background}, multipart field `file`;
+          #   `light=true` is the logo for light mode, `light=false` the one for dark mode.
+          # - The static API key goes in `X-API-Key` and acts as an admin. UI_CONFIG_DISABLED
+          #   blocks the settings endpoints only, not these.
+          # - The file extension decides the type. The favicon takes svg, png or ico only; Safari
+          #   draws an SVG favicon from version 26 on.
+          # - Browsers cache the images (max-age 15 min, stale-while-revalidate 1 day), so a new
+          #   image can take a reload or two to show.
+          # The retries cover the gap while the pocket-id pod restarts (strategy Recreate).
+          args:
+            - |
+              api=http://pocket-id.security.svc.cluster.local:1411/api/application-images
+              put() {
+                printf 'X-API-Key: %s\n' "$POCKET_ID_API_KEY" |
+                  curl --fail-with-body --silent --show-error --max-time 60 \
+                    --retry 8 --retry-delay 5 --retry-connrefused \
+                    --request PUT --header @- --form "file=@/branding/$2" "$api/$1"
+                echo "uploaded $2 to $1"
+              }
+              put 'logo?light=true' logo-light.svg
+              put 'logo?light=false' logo-dark.svg
+              put favicon favicon.svg
+              put background background.svg
+          env:
+            - name: POCKET_ID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  # Created by the operator, the same key the pocket-id pod gets as STATIC_API_KEY.
+                  name: pocket-id-static-api-key
+                  key: token
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - name: branding
+              mountPath: /branding
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: branding
+          configMap:
+            name: pocket-id-branding-configmap
