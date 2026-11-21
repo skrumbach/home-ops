@@ -53,6 +53,12 @@ def route_rules(app_dir: Path) -> dict[str, set[str]]:
                     )
                     rules = route.get("rules") or []
                     routes[name] = {r.get("name") for r in rules if r.get("name")}
+                # kube-prometheus-stack renders its Prometheus route as <release>-prometheus
+                # from values.prometheus.route.<key> (matched against the live cluster).
+                prom = (values.get("prometheus") or {}).get("route") or {}
+                for route in prom.values():
+                    if isinstance(route, dict) and route.get("enabled"):
+                        routes[f"{release}-prometheus"] = set()
     return routes
 
 

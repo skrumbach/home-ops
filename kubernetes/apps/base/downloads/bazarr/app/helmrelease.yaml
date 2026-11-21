@@ -142,8 +142,10 @@ spec:
           gethomepage.dev/icon: bazarr.svg
           gethomepage.dev/description: Subtitles
           gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the unauthenticated ping on the in-cluster Service.
           gatus.home-operations.com/endpoint: |-
-            url: https://bazarr.sklab.dev/api/system/ping
+            url: http://bazarr.downloads.svc.cluster.local:6767/api/system/ping
             conditions:
               - "[STATUS] == 200"
             group: downloads

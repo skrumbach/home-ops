@@ -282,8 +282,11 @@ spec:
           gethomepage.dev/icon: tdarr.svg
           gethomepage.dev/description: Library transcoding to AV1
           gethomepage.dev/pod-selector: app.kubernetes.io/name=tdarr
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the Service in-cluster (ciliumnetworkpolicy.yaml
+          # admits Gatus on :8265).
           gatus.home-operations.com/endpoint: |-
-            url: https://tdarr.sklab.dev/api/v2/status
+            url: http://tdarr.media.svc.cluster.local:8265/api/v2/status
             conditions:
               - "[STATUS] == 200"
               - "[BODY].status == good"

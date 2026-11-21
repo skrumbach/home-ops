@@ -7,4 +7,5 @@ resources:
   - ./ocirepository.yaml
   - ./externalsecret.yaml
   - ./pocketidoidcclient.yaml
+  - ./pocketidoidcclient-app.yaml
   - ./securitypolicy.yaml

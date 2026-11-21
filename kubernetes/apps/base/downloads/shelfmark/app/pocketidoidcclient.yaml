@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Shelfmark's own sign-in (AUTH_METHOD=oidc and OIDC_* in helmrelease.yaml). The operator generates
+# the client ID and secret and writes them to Secret `shelfmark-oidc-credentials`, which the
+# HelmRelease reads directly. Deleting this CR deletes the client in Pocket ID; a re-created client
+# has a new secret and Shelfmark only picks it up on its next restart (reloader does that).
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: shelfmark
+spec:
+  name: Shelfmark
+  launchUrl: https://books.sklab.dev
+  # Path fixed by Shelfmark: <request origin>/api/auth/oidc/callback (docs/oidc.md, oidc_routes.py).
+  # The origin comes from the Host header and X-Forwarded-Proto, which envoy-internal sets.
+  callbackUrls: ["https://books.sklab.dev/api/auth/oidc/callback"]
+  # No logoutCallbackUrls: Shelfmark's sign-out ends only its own session.
+  # The client is registered with code_challenge_method S256 (oidc_routes.py).
+  pkceEnabled: true
+  # OIDC_ADMIN_GROUP makes group members admin but does not keep anyone else out: with auto-provision
+  # on, any identity Pocket ID releases gets an account. This is the fence.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    keys:
+      clientID: client-id
+      clientSecret: client-secret

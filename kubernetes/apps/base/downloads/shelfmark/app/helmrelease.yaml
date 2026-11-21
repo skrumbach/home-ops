@@ -97,6 +97,37 @@ spec:
                 value: rename
               - name: TEMPLATE_RENAME
                 value: "{Author} - {Title} ({Year})"
+              # Sign-in with Pocket ID (pocketidoidcclient.yaml). Environment wins over the settings
+              # UI (config.py: ENV > config file > default), so nothing is clicked. Without it
+              # AUTH_METHOD is "none" and every LAN visitor is an admin. Only /api/health answers
+              # without a session, which is why the probes and Gatus use it.
+              - name: AUTH_METHOD
+                value: oidc
+              - name: OIDC_DISCOVERY_URL
+                value: https://id.sklab.dev/.well-known/openid-configuration
+              - name: OIDC_BUTTON_LABEL
+                value: Pocket ID
+              # Members of this group become admin on every sign-in (role is synced from the claim).
+              # Shelfmark adds the group claim's scope (`groups`, which Pocket ID needs to release
+              # it) by itself while an admin group is set; OIDC_SCOPES keeps its default.
+              - name: OIDC_ADMIN_GROUP
+                value: admins
+              # The Secret the operator writes; the pod waits for it. The state under /config is an
+              # emptyDir (users.db, session key), so every pod start signs everyone out and the
+              # next sign-in auto-provisions the account again. There is no local admin: env
+              # settings skip the UI's "local admin required" check, and AUTH_METHOD=oidc stays
+              # closed (never anonymous) when Pocket ID is down. Reverting this block restores
+              # open access; DISABLE_LOCAL_AUTH is deliberately not set.
+              - name: OIDC_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: shelfmark-oidc-credentials
+                    key: client-id
+              - name: OIDC_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: shelfmark-oidc-credentials
+                    key: client-secret
             envFrom:
               - secretRef:
                   name: shelfmark-secret
@@ -105,6 +136,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
+                  # /api/health needs no session (system_routes.py); the other /api paths do.
                   httpGet:
                     path: /api/health
                     port: 8084
@@ -149,6 +181,7 @@ spec:
           gethomepage.dev/name: Shelfmark
           gethomepage.dev/group: Downloads
           gethomepage.dev/description: Book search and download
+          # /api/health is the one path that answers without a session.
           gatus.home-operations.com/endpoint: |-
             url: https://books.sklab.dev/api/health
             conditions:

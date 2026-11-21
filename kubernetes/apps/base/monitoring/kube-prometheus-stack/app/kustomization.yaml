@@ -6,3 +6,5 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./alerts
+  - ./pocketidoidcclient.yaml
+  - ./securitypolicy.yaml
