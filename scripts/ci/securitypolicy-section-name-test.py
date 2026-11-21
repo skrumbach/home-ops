@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Every SecurityPolicy HTTPRoute target exists, and every `sectionName` names a rule of it.
 
-Prevents: a sign-in gate (Envoy OIDC) that silently attaches to nothing. paperless-ngx and
-linkwarden gate one named route rule (`app`) and leave `api` open. If a rule is renamed
+Prevents: a sign-in gate (Envoy OIDC) that silently attaches to nothing. paperless-ngx
+gates one named route rule (`app`) and leaves `api` open. If a rule is renamed
 or loses its `name`, the policy targets no rule and the UI it was meant to gate is
 served without sign-in. A whole-route policy (esphome, syncthing, zigbee2mqtt) fails the
 same way if its target name drifts from the rendered route name. flate renders both as
