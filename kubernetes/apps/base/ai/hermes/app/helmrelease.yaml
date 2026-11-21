@@ -38,9 +38,38 @@ spec:
                 cp /run/config/config.yaml /opt/data/config.yaml
                 chown 10000:10000 /opt/data/config.yaml
                 chmod 0644 /opt/data/config.yaml
+                # Hindsight memory provider settings (no key in it: HINDSIGHT_API_KEY comes from the Secret).
+                mkdir -p /opt/data/hindsight
+                cp /run/config/hindsight-config.json /opt/data/hindsight/config.json
+                chown -R 10000:10000 /opt/data/hindsight
+                chmod 0644 /opt/data/hindsight/config.json
             securityContext:
               runAsUser: 0
               runAsGroup: 0
+          # Installs the Hindsight memory provider (config.yaml memory.provider) from the Hermes plugin
+          # catalog. The image does not bundle it. The code lands in /opt/data/plugins and its Python
+          # dependencies in /opt/data/lazy-packages (HERMES_LAZY_INSTALL_TARGET, set by the image), both on
+          # the PVC, so this is a no-op after the first start. A failed install only warns: Hermes then
+          # starts without long-term memory instead of not starting. Same image as `app`.
+          install-hindsight:
+            image:
+              repository: docker.io/nousresearch/hermes-agent
+              tag: v2026.9.24-desktop@sha256:45379eb3eb2d11c38df9b0e529dc734775b42c40b57cfb1cae0448f0cb7bf647
+            command:
+              - sh
+              - -c
+              - |
+                if [ -d /opt/data/plugins/hindsight ] && [ -d /opt/data/lazy-packages/hindsight_client ]; then
+                  echo "hindsight plugin already installed"
+                  exit 0
+                fi
+                /opt/hermes/.venv/bin/hermes plugins install hindsight --force --enable \
+                  || echo "WARN: hindsight plugin install failed; Hermes starts without long-term memory"
+            env:
+              HOME: /opt/data
+            securityContext:
+              runAsUser: 10000
+              runAsGroup: 10000
           # Copy GitOps-managed skills into /opt/data/skills on every start (the
           # repo is the source of truth; overwrites any stale copy). Runs as root
           # to chown to the dropped 10000 user. Add future skills here.
@@ -363,6 +392,8 @@ spec:
           hermes:
             copy-config:
               - path: /opt/data
+            install-hindsight:
+              - path: /opt/data
             seed-skills:
               - path: /opt/data
             app:
@@ -437,6 +468,9 @@ spec:
               - path: /secrets/mcp/DISCORD_WEBHOOK
                 subPath: DISCORD_WEBHOOK
                 readOnly: true
+              - path: /secrets/mcp/HINDSIGHT_API_KEY
+                subPath: HINDSIGHT_API_KEY
+                readOnly: true
       # Terminal guard hook script (hooks: in config.yaml runs it). Read-only; a byte change rolls
       # the pod via reloader like config.yaml.
       hooks:
@@ -458,6 +492,9 @@ spec:
             copy-config:
               - path: /run/config/config.yaml
                 subPath: config.yaml
+                readOnly: true
+              - path: /run/config/hindsight-config.json
+                subPath: hindsight-config.json
                 readOnly: true
       # Skill sources, mounted into the seed-skills init which copies them onto
       # the PVC at /opt/data/skills (see initContainers above).

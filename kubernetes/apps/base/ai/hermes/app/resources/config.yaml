@@ -157,7 +157,7 @@ secrets:
   command:
     enabled: true
     command: |-
-      for k in MCP_GATEWAY_URL MCP_GATEWAY_TOKEN LITELLM_HERMES_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
+      for k in MCP_GATEWAY_URL MCP_GATEWAY_TOKEN LITELLM_HERMES_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
       printf 'SUMMARY_LLM_API_KEY=%s\n' "$(cat /secrets/mcp/LITELLM_HERMES_API_KEY)"
       printf 'SUMMARY_LLM_URL=%s\nSUMMARY_LLM_MODEL=%s\n' http://litellm.ai.svc.cluster.local:4000/v1 go-glm-5.1
 
@@ -169,10 +169,14 @@ mcp_servers:
     enabled: true
 
 # Persistent cross-session memory. `memory.provider` ACTIVATES a provider (without
-# it Hermes shows `provider: none` and captures nothing). `holographic` is Hermes'
-# bundled local SQLite fact store: in-process only, no shared service.
+# it Hermes shows `provider: none` and captures nothing). `hindsight` is the shared memory service
+# in ns ai (Service hindsight-api:8888, bank `hermes`). It is a catalog plugin, not bundled: the
+# `install-hindsight` initContainer installs it, and its settings are resources/hindsight-config.json
+# (copied to /opt/data/hindsight/config.json). The key is HINDSIGHT_API_KEY, hydrated by `secrets` above.
+# retain_every_n_turns is 10 there, not the default 1: every retain is an extraction on chat-local.
+# The previous provider, `holographic` (bundled local SQLite), keeps its facts on the PVC, unused.
 memory:
-  provider: holographic
+  provider: hindsight
   auto_migrate: true
 
 # Messaging platforms. The gateway-default profile starts the Telegram platform
