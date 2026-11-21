@@ -173,7 +173,9 @@ mcp_servers:
 # in ns ai (Service hindsight-api:8888, bank `hermes`). It is a catalog plugin, not bundled: the
 # `install-hindsight` initContainer installs it, and its settings are resources/hindsight-config.json
 # (copied to /opt/data/hindsight/config.json). The key is HINDSIGHT_API_KEY, hydrated by `secrets` above.
-# retain_every_n_turns is 10 there, not the default 1: every retain is an extraction on chat-local.
+# retain_every_n_turns stays 1 there: the catalog-pinned plugin (1.0.1) buffers the other turns in memory
+# and has no flush on shutdown, so with 10 a session shorter than 10 turns was never stored (a one-shot
+# CLI turn sent nothing). Each retain is one async extraction on chat-local, two at a time at most.
 # The previous provider, `holographic` (bundled local SQLite), keeps its facts on the PVC, unused.
 memory:
   provider: hindsight
