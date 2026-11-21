@@ -13,7 +13,8 @@
   the tenant key as a bearer token.
 - **Serves the control plane** at `https://hindsight.sklab.dev` (container `controlplane`, port `3000`), with Pocket ID in
   front at Envoy (SecurityPolicy `hindsight-auth`). It is an admin UI for browsing banks and memories.
-- **Extracts and consolidates facts** with `chat-local` through LiteLLM, under its own virtual key (`hindsight`).
+- **Extracts and consolidates facts** with `claude-haiku-5-5-metered` through LiteLLM, under its own virtual key
+  (`hindsight`), and fails over to `chat-local` when Anthropic errors.
 - **Embeds with `embedding-cpu`** through LiteLLM (1024 dimensions) and reranks with the bundled local cross-encoder.
 - **Keeps its state in Postgres.** Database `hindsight` on `postgres-18`, with the `vector` extension.
 
@@ -21,7 +22,7 @@
 
 | Choice | Why |
 |---|---|
-| **`chat-local` for extraction** | Free, and memory content never leaves the cluster. It shares the B70 with Hermes chat, so LLM concurrency is `2`. Thinking is off per request (`HINDSIGHT_API_LLM_EXTRA_BODY`): with it on, one extraction took minutes and page refreshes timed out in the queue. |
+| **Haiku 5.5 on the metered key, `chat-local` as failover** | On `chat-local` one extraction took 1-4 minutes on the shared B70, and page refreshes timed out in the queue during a bank seed. Haiku answers in seconds for a few dollars a month (key `maxBudget` is the cap). Memory content, Hermes included, now goes to Anthropic. The failover member runs with thinking off. The subscription route (`claude-haiku-5-5`) is not used: Hindsight documents its Claude subscription provider as personal-use only. |
 | **`embedding-cpu`, not `embedding-local`** | `embedding-local` is capped at 1 request per second for every key. A retain burst would hit 429s. |
 | **Full image, not `-slim`** | The slim image has no local reranker. |
 | **No volume under `~/.cache`** | The image bakes its models there and a mount shadows them. |
@@ -46,7 +47,7 @@ flowchart LR
   dev(["LAN clients"]) -->|"hindsight-api.sklab.dev"| api
   user(["Browser"]) -->|"hindsight.sklab.dev"| pol["SecurityPolicy<br/>hindsight-auth"] --> cp["Deployment<br/>controlplane"]
   cp --> api
-  api -->|"chat-local, embedding-cpu"| llm["LiteLLM"]
+  api -->|"claude-haiku-5-5-metered, chat-local, embedding-cpu"| llm["LiteLLM"]
   api --> db[("postgres-18<br/>hindsight + vector")]
   key["LiteLLMVirtualKey<br/>hindsight"] -.-> llm
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
@@ -69,8 +70,8 @@ One bank per source, so coding noise stays out of the assistant's recall.
 | Any MCP client | `https://hindsight-api.sklab.dev/mcp/<bank>/`, header `Authorization: Bearer <tenant key>` | the one in the URL |
 | Obsidian | Plugin `vectorize-io/hindsight-obsidian` (beta, through BRAT), API URL and key in its settings | `obsidian` |
 
-A first Obsidian sync sends every note through `chat-local` two at a time, so it shares the B70 with Hermes chat for
-as long as the vault takes.
+A first Obsidian sync sends every note through Haiku four at a time, so it spends from the key's `maxBudget` for as
+long as the vault takes.
 
 ## Secrets
 

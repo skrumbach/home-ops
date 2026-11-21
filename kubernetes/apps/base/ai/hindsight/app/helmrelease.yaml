@@ -4,8 +4,8 @@
 # Long-term memory for the agents. State lives in the `hindsight` database on postgres-18 (CNPG backs it
 # up), so there is no PVC and no kopiur claim. The API runs the worker in-process on one replica.
 #
-# LLM (fact extraction, consolidation): chat-local through LiteLLM, so memory content never leaves the
-# cluster. Embeddings: embedding-cpu through LiteLLM (1024 dims, fixed once a memory is stored; changing it
+# LLM (fact extraction, consolidation, reflect): claude-haiku-5-5-metered through LiteLLM, chat-local as the
+# failover, so memory content goes to Anthropic (owner decision 2026-11-21, Hermes bank included). Embeddings: embedding-cpu through LiteLLM (1024 dims, fixed once a memory is stored; changing it
 # needs `hindsight-admin reembed`). Reranker: local cross-encoder on CPU, bundled in the full image.
 # Use the full image (no -slim): the slim one has no local reranker. Do NOT mount a volume at
 # /home/hindsight/.cache: it shadows the models baked into the image.
@@ -37,19 +37,28 @@ spec:
               HINDSIGHT_API_WORKER_ID: hindsight
               # Auth: one bearer key (HINDSIGHT_API_TENANT_API_KEY from the Secret).
               HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
-              # LLM through LiteLLM. Provider `openai` + base URL + the key from the Secret.
+              # LLM through LiteLLM, provider `openai` + base URL + the key from the Secret. Primary: Haiku 5.5
+              # on the metered key (`anthropic` native has no reasoning-effort control, so not that provider).
+              # chat-local on the B70 took 1-4 min a call and starved page refreshes during a bank seed.
               HINDSIGHT_API_LLM_PROVIDER: openai
               HINDSIGHT_API_LLM_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
-              HINDSIGHT_API_LLM_MODEL: chat-local
-              # No startup test call: it would couple boot to LiteLLM and the B70.
+              HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5-metered # gitleaks:allow (model name, not a key)
+              HINDSIGHT_API_LLM_REASONING_EFFORT: low
+              # Haiku 5.5 rejects a non-default temperature; `none` omits it on every operation.
+              HINDSIGHT_API_LLM_TEMPERATURE: none
+              # Failover member 1: chat-local, thinking off (the chat-local-classifier switch, sent per request
+              # so chat-local stays one alias). A member that fails sits out 60s (cooldown_seconds default).
+              HINDSIGHT_API_LLM_STRATEGY: '{"mode": "failover"}'
+              HINDSIGHT_API_LLM_1_PROVIDER: openai
+              HINDSIGHT_API_LLM_1_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
+              HINDSIGHT_API_LLM_1_MODEL: chat-local
+              HINDSIGHT_API_LLM_1_EXTRA_BODY: '{"chat_template_kwargs": {"enable_thinking": false}}'
+              # No startup test call: it would couple boot to LiteLLM and Anthropic.
               HINDSIGHT_API_SKIP_LLM_VERIFICATION: "true"
-              # chat-local shares the B70 with Hermes chat: keep the background load small and slow-tolerant.
-              HINDSIGHT_API_LLM_MAX_CONCURRENT: "2"
+              # One cap for every member: under failover all of it lands on the B70, shared with Hermes chat.
+              HINDSIGHT_API_LLM_MAX_CONCURRENT: "4"
+              # Sized for the chat-local member; Haiku answers in seconds.
               HINDSIGHT_API_LLM_TIMEOUT: "600"
-              # Thinking off. With it on, llama.cpp wrote 1-4k tokens per fact extraction at ~18 t/s (1-4 min a
-              # call), and the 2-slot queue starved the page refreshes during the first seed of a bank. Same
-              # switch as chat-local-classifier, sent per request so chat-local stays one alias for everyone.
-              HINDSIGHT_API_LLM_EXTRA_BODY: '{"chat_template_kwargs": {"enable_thinking": false}}'
               # Bounds a whole mental-model refresh, queue time included (default 300s). A failed refresh
               # pauses that page's automatic refreshes until one succeeds.
               HINDSIGHT_API_REFLECT_WALL_TIMEOUT: "1200"
