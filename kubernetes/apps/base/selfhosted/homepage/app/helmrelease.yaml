@@ -13,7 +13,7 @@ spec:
     controllers:
       homepage:
         annotations:
-          secret.reloader.stakater.com/reload: &secret homepage-secret
+          secret.reloader.stakater.com/reload: homepage-secret,homepage-auth-secret,homepage-oidc-credentials
           configmap.reloader.stakater.com/reload: homepage-config,homepage-theme
         strategy: RollingUpdate
         serviceAccount:
@@ -28,13 +28,44 @@ spec:
                 value: homepage.sklab.dev
               - name: TZ
                 value: ${CONFIG_TIMEZONE}
+              # Sign-in with Pocket ID (pocketidoidcclient.yaml). With auth on, every page and API
+              # route needs a session except /api/healthcheck and /api/config/custom.css (src/proxy.js,
+              # v2.8.0), which is why the probes and Gatus use the first. The app has no group
+              # check: the client's allowedUserGroups (admins) is the fence. A client ID without
+              # its secret, or any OIDC variable without the rest, makes the app throw at start.
+              - name: HOMEPAGE_AUTH_ENABLED
+                value: "true"
+              # Used for the cookie `Secure` flag and the callback URL (becomes NEXTAUTH_URL).
+              - name: HOMEPAGE_EXTERNAL_URL
+                value: https://homepage.sklab.dev
+              - name: HOMEPAGE_OIDC_ISSUER
+                value: https://id.sklab.dev
+              - name: HOMEPAGE_OIDC_NAME
+                value: Pocket ID
+              # Pocket ID's email scope releases email; the default is "openid email profile".
+              - name: HOMEPAGE_OIDC_SCOPE
+                value: openid email profile
+              # The Secret the operator writes; the pod waits for it. HOMEPAGE_AUTH_SECRET comes
+              # from externalsecret-auth.yaml through envFrom.
+              - name: HOMEPAGE_OIDC_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: homepage-oidc-credentials
+                    key: client-id
+              - name: HOMEPAGE_OIDC_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: homepage-oidc-credentials
+                    key: client-secret
             ports:
               - name: http
                 containerPort: 3000
                 protocol: TCP
             envFrom:
               - secretRef:
-                  name: *secret
+                  name: homepage-secret
+              - secretRef:
+                  name: homepage-auth-secret
             securityContext:
               allowPrivilegeEscalation: false
               # Next.js writes its cache under the root filesystem.
@@ -58,7 +89,8 @@ spec:
                   httpGet:
                     port: 3000
                     path: /api/healthcheck
-                    # Must match HOMEPAGE_ALLOWED_HOSTS or the probes are rejected.
+                    # Must match HOMEPAGE_ALLOWED_HOSTS or the probes are rejected. /api/healthcheck
+                    # stays outside the sign-in requirement.
                     httpHeaders:
                       - name: Host
                         value: homepage.sklab.dev
@@ -86,6 +118,7 @@ spec:
           gethomepage.dev/group: Platform
           gethomepage.dev/icon: sh-homepage.svg
           gethomepage.dev/name: Homepage
+          # /api/healthcheck is one of the two paths that answer without a session.
           gatus.home-operations.com/endpoint: |-
             url: https://homepage.sklab.dev/api/healthcheck
             conditions:

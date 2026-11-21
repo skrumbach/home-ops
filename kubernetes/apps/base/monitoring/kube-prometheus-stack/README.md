@@ -18,7 +18,7 @@
   plus cluster-specific rules (GPU loss, node memory pressure, OOM kills, node network, silent-failure gaps).
 - **Sends firing alerts to Alertmanager** at `alertmanager.monitoring:9093`; see [alertmanager](../alertmanager/README.md).
   Grafana and the KEDA NFS scaler read Prometheus at `kube-prometheus-stack-prometheus.monitoring:9090`.
-- **Serves a UI** at `kube-prometheus-stack.sklab.dev` on `envoy-internal`. The route has no SecurityPolicy.
+- **Serves a UI** at `kube-prometheus-stack.sklab.dev` on `envoy-internal`. Behind Pocket ID (group `admins`): `SecurityPolicy` `kube-prometheus-stack-auth` gates the UI and `/api/v1/*`. Grafana, KEDA and Homepage use the in-cluster Service.
 
 ## Why it is built this way
 
@@ -29,6 +29,7 @@
 | **kube-state-metrics is off here** | It runs as its own app. The manifest records no reason. |
 | **`*SelectorNilUsesHelmValues: false`** | Prometheus picks up monitors and rules from every namespace and without a release label. Apps ship their own `ServiceMonitor` and `PrometheusRule` next to their manifests. |
 | **Replacement rules in `app/alerts/`** | A chart rule that misbehaves is switched off in `defaultRules.disabled` and replaced by a copy that keeps name, severity, `for` and `runbook_url` and changes one thing. |
+| **Gate at Envoy, not in Prometheus** | Prometheus has no login. The policy targets HTTPRoute `kube-prometheus-stack-prometheus` (the chart's name, not the release's); a `targetRef` that matches no route leaves the route open. Gatus probes `/-/ready` on the Service. |
 | **etcd by node IP** | Talos runs etcd as a host service with plain-http metrics on 2381. The Service has no pods, so `endpoints` lists the three node IPs. The VIP is never a target. |
 
 ## How it works
@@ -53,7 +54,9 @@ flowchart LR
   prom -->|alertingEndpoints| am["Service<br/>alertmanager :9093"]
   am -->|receivers| push(["Pushover and<br/>Healthchecks.io"])
   gf["Grafana"] -->|datasource| prom
-  route["HTTPRoute<br/>kube-prometheus-stack"] --> prom
+  route["HTTPRoute<br/>kube-prometheus-stack-prometheus"] --> prom
+  sp["SecurityPolicy<br/>kube-prometheus-stack-auth"] -->|OIDC| route
+  oidc["PocketIDOIDCClient<br/>kube-prometheus-stack"] -->|Secret kube-prometheus-stack-oidc-credentials| sp
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class prom accent

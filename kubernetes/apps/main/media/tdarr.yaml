@@ -9,6 +9,8 @@ spec:
     - ../../../../../components/kopiur
     - ../../../../../components/kopiur/pvc
   dependsOn:
+    - name: pocket-id-operator
+      namespace: security
     - name: generic-device-plugin
       namespace: system
     - name: rook-ceph-cluster

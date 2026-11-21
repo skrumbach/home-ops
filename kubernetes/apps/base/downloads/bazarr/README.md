@@ -13,7 +13,7 @@
   NFS export `/mnt/storage/Media` on `nas.sklab.dev` at `/data/nas-media`.
 - **Uses no PostgreSQL.** Its overlay has no `-db` Kustomization and its Secret holds no database settings. Its state
   is the `bazarr-config` claim, backed up by kopiur.
-- **Serves the UI** at `bazarr.sklab.dev` on `envoy-internal` only.
+- **Serves the UI** at `bazarr.sklab.dev` on `envoy-internal` only, behind Pocket ID (group `admins`).
 - **Gets a Plex token** as `PLEX_TOKEN` in Secret `bazarr-secret`, from 1Password item `plex`.
 
 ## Why it is built this way
@@ -23,6 +23,7 @@
 | **`linuxserver/bazarr`, not `home-operations/bazarr`** | The manifest comment: the linuxserver image runs upstream Bazarr on Alpine's Python 3.12, under Bazarr's 3.13 ceiling. The `home-operations` build uses Python 3.14, which upstream does not support and which hangs before binding its HTTP port. |
 | **A root init container, then a non-root app** | The manifest comment: emptyDir volumes are root-owned, and the s6-overlay preinit refuses to start unless `/run` belongs to the uid it runs as. `fix-permissions` runs `chown -R 2000:2000 /run /tmp`. |
 | **`LSIO_NON_ROOT_USER` and `LSIO_READ_ONLY_FS`** | The manifest comment: the pod already runs as the target uid on a read-only root, so the init system skips its root-only `usermod` and `chown` steps, which would fail anyway. |
+| **Gate at Envoy, whole route** | Bazarr's own auth is off and its page at `/` embeds the API key for any visitor. `SecurityPolicy` `bazarr-auth` gates every path. Nothing outside the browser calls the hostname, so there is no ungated `/api` rule. Gatus probes the unauthenticated `/api/system/ping` on the Service. |
 | **KEDA owns the replica count** | `replicas: null` keeps Helm off the Deployment. The `keda/nfs-scaler` component scales it to 0 while the NAS NFS export is unreachable. |
 
 ## How it works
@@ -43,6 +44,8 @@ flowchart LR
   nas[("NAS export<br/>/mnt/storage/Media")] --> app
   keda["ScaledObject<br/>bazarr-nfs"] -->|0 or 1 replicas| app
   gw["Gateway envoy-internal"] -->|bazarr.sklab.dev| app
+  sp["SecurityPolicy<br/>bazarr-auth"] -->|OIDC| gw
+  oidc["PocketIDOIDCClient<br/>bazarr"] -->|Secret bazarr-oidc-credentials| sp
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class app accent
@@ -71,7 +74,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | `supplementalGroups` | `65542` | The manifest comment names it `gladius:external-services`. The manifest records no more. |
 | Startup probe | `/health :6767`, `initialDelaySeconds: 10`, `failureThreshold: 90` | Covers the one-time migration (see step 4). |
 | `resources` | request 15m CPU, 256Mi; limit 512Mi memory | The manifest records no reason. |
-| Gatus endpoint | `https://bazarr.sklab.dev/api/system/ping` | The manifest records no reason. |
+| Gatus endpoint | `http://bazarr.downloads.svc.cluster.local:6767/api/system/ping` | The gated route would answer with the sign-in redirect. |
 | `KOPIUR_SCHEDULE_R2` (overlay) | `H 11 * * *` | Offsite copy daily in hour 11. The manifest records no reason. |
 
 ## Operate it
@@ -83,6 +86,11 @@ kubectl -n downloads get pods -l app.kubernetes.io/name=bazarr -o wide
 kubectl -n downloads get scaledobject bazarr-nfs
 kubectl -n downloads get snapshotpolicy,restore,pvc | grep bazarr
 kubectl -n downloads logs deploy/bazarr -c fix-permissions
+```
+
+```bash
+kubectl -n downloads get securitypolicy bazarr-auth -o jsonpath='{.status}'
+kubectl -n downloads get pocketidoidcclient bazarr
 ```
 
 Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/references/restore.md).

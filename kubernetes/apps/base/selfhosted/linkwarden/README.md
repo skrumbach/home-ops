@@ -2,7 +2,7 @@
 <!-- concept: From a saved link to a tagged page archive | bookmark Save | archive Archive | tags Tag | search Find -->
 <p align="center"><img src="header.svg" width="100%" alt="linkwarden"></p>
 
-> Bookmark manager that archives saved pages and tags them with the local model, behind Pocket ID sign-in.
+> Bookmark manager that archives saved pages and tags them with the local model, behind Pocket ID sign-in (Envoy gate and its own login).
 
 **Live facts:** <https://skrumbach.github.io/home-ops/apps/selfhosted/linkwarden/> (workloads, routes, storage, backups, secrets and alerts, generated on every merge)
 
@@ -14,6 +14,8 @@
   `litellm-consumer-linkwarden`. The model is the role alias `chat-local`.
 - **Gates the browser UI with Pocket ID** at Envoy (`SecurityPolicy` `linkwarden-auth`). Only group `admins` passes.
   `/api` stays outside the gate, so the browser extension and mobile app keep working.
+- **Signs people in with Pocket ID** in Linkwarden itself too (generic provider `oidc`, client `linkwarden-app`). The login page
+  shows a Pocket ID button beside the password form; the sign-in start and callback are under `/api`, the ungated rule.
 - **Stores its data** in the shared `postgres-18` Cluster (role and database `linkwarden`), with the claim backed
   up by kopiur to `ceph` and `r2`.
 
@@ -22,7 +24,10 @@
 | Choice | Why |
 |---|---|
 | **Gate rule `app`, leave rule `api` open** | The extension and mobile app cannot follow an SSO redirect. `/api` answers to Linkwarden's own access-token and session auth. |
-| **Envoy signs people in, Linkwarden does not** | The manifests set no SSO provider in Linkwarden. `NEXT_PUBLIC_CREDENTIALS_ENABLED` stays `"true"`, so after the Envoy gate people use Linkwarden's own login. |
+| **Two clients, as for Paperless** | Client `linkwarden` is Envoy's gate for the UI; client `linkwarden-app` is Linkwarden's own login. They have different callbacks (`/oauth2/callback` and `/api/v1/auth/callback/oidc`) and different Secrets. Linkwarden's login has no group check, so `allowedUserGroups` (`admins`) on its client is the fence. |
+| **Password form kept for now** | `NEXT_PUBLIC_CREDENTIALS_ENABLED` stays `"true"` as break-glass. It can go once the owner has signed in through Pocket ID and the account is linked. |
+| **`NEXTAUTH_URL` ends in `/api/v1/auth`** | next-auth builds the OIDC `redirect_uri` from it, and a bare origin gives `/api/auth/callback/oidc`, which Linkwarden does not serve. Password sign-in never used it, so it worked before. |
+| **`DISABLE_NEW_SSO_USERS` unset** | The check refuses any identity with no linked account row, which includes the first sign-in of the existing local account, before it can link. Set it after the owner is linked. |
 | **`chat-local` with no cloud fallback** | `chat-local` is the local B70 llama.cpp and a terminal alias. When the B70 is down, tagging fails and nothing else does. |
 | **No `affinity` away from talos-3** | The `PreferNoSchedule` taint on talos-3 (no toleration here) keeps the pod off it through the scheduler score. |
 
@@ -41,6 +46,8 @@ flowchart LR
   gw -->|"rule api, /api"| pod
   cl["PocketIDOIDCClient<br/>linkwarden"] -->|"Secret linkwarden-oidc-credentials"| pol
   cl --> pid(["Pocket ID<br/>id.sklab.dev"])
+  cla["PocketIDOIDCClient<br/>linkwarden-app"] -->|"Secret linkwarden-app-oidc-credentials"| pod
+  cla --> pid
   op[("1Password<br/>item linkwarden")] -->|ExternalSecret| sec["Secret<br/>linkwarden-secret"]
   lkey[("1Password<br/>item litellm-consumer-linkwarden")] --> sec
   sec -->|envFrom| pod
@@ -63,9 +70,14 @@ flowchart LR
 3. A person opens `https://links.sklab.dev`. Envoy sends them to Pocket ID, which refuses anyone outside `admins`.
    Callbacks `/oauth2/callback` and `/oauth2/logout` fall in rule `app` (`PathPrefix /`), so the round trip works
    on a rule-level policy.
-4. When a link is saved, Linkwarden archives the page (Monolith, `MONOLITH_MAX_BUFFER`) and asks
+4. On the login page the person presses the Pocket ID button. next-auth sends them to `id.sklab.dev` (PKCE and state, scopes
+   `openid email profile`) and Pocket ID returns them to `/api/v1/auth/callback/oidc`. The first time, an existing local account
+   is linked by exact email match, and only when Pocket ID sends `email_verified: true`; otherwise the sign-in is refused. A
+   linked account keeps its password when its email was already verified in Linkwarden, and loses it when it was not. An email
+   with no local account creates a new, empty account.
+5. When a link is saved, Linkwarden archives the page (Monolith, `MONOLITH_MAX_BUFFER`) and asks
    `chat-local` for tags.
-5. Gatus calls `/api/v1/logins` and expects `credentialsEnabled` in the body. That proves the pod answers and that
+6. Gatus calls `/api/v1/logins` and expects `credentialsEnabled` in the body. That proves the pod answers and that
    `/api` still bypasses the gate.
 
 ## Settings that matter
@@ -74,6 +86,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 
 | Setting | Value | Why |
 |---|---|---|
+| `NEXT_PUBLIC_OIDC_ENABLED`, `OIDC_*` | `"true"`, `OIDC_WELLKNOWN_URL` on `id.sklab.dev` | Linkwarden's own Pocket ID login. Client ID and secret come from Secret `linkwarden-app-oidc-credentials`; the pod waits for it. |
 | `MONOLITH_MAX_BUFFER` | `"256"` | One image-heavy page overflowed the 100MB default, which gave a partial archive. |
 | `NEXT_PUBLIC_DISABLE_REGISTRATION` | `"true"` | The manifest records no reason. |
 | `OPENAI_MODEL` | `chat-local` | Role alias only, never a real model name ([`ai/AGENTS.md`](../../ai/AGENTS.md)). The key is limited to `chat-local` and rate-limited. |
@@ -89,7 +102,7 @@ flux -n selfhosted get hr linkwarden
 kubectl -n selfhosted get pods -l app.kubernetes.io/name=linkwarden -o wide
 kubectl -n selfhosted logs deploy/linkwarden --tail=50
 kubectl -n selfhosted get snapshotpolicy,snapshotschedule,restore,pvc
-kubectl -n selfhosted get securitypolicy/linkwarden-auth pocketidoidcclient/linkwarden
+kubectl -n selfhosted get securitypolicy/linkwarden-auth pocketidoidcclient/linkwarden pocketidoidcclient/linkwarden-app
 ```
 
 Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/references/restore.md).
@@ -98,6 +111,7 @@ Restores: [`restore.md`](../../../../../.agents/skills/incident-runbooks/referen
 
 - Only rule `app` is gated, and the SecurityPolicy targets it by `sectionName`. Renaming a rule leaves the gate
   attached to nothing and the UI open (`scripts/ci/securitypolicy-section-name-test.py`).
+- The OIDC callback and sign-in start stay under `/api` (rule `api`). Moving either under the gated rule breaks Linkwarden's login.
 - A SecurityPolicy that fails to translate makes the route answer 500 instead of passing traffic through, for
   example until the operator has written `linkwarden-oidc-credentials`.
 - The Kustomization that owns the kopiur claim never sets `wait: true`.

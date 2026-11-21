@@ -5,8 +5,10 @@ kind: Kustomization
 resources:
   - ./configmap.yaml
   - ./externalsecret.yaml
+  - ./externalsecret-auth.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./pocketidoidcclient.yaml
   - ./rbac.yaml
 configMapGenerator:
   - name: homepage-theme

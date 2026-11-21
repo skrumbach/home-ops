@@ -14,7 +14,9 @@
 - **Adds a few fixed tiles** in `services.yaml` for things that have no route in the cluster: UniFi and TrueNAS, each
   with a widget.
 - **Shows cluster widgets**: CPU and memory, search, weather and the date, from `widgets.yaml`.
-- **Serves itself** at `homepage.sklab.dev` on `envoy-internal`, with no SecurityPolicy.
+- **Serves itself** at `homepage.sklab.dev` on `envoy-internal`, with no SecurityPolicy. The app signs people in itself
+  with Pocket ID (client `homepage`): only group `admins` passes, and only `/api/healthcheck` and `/api/config/custom.css`
+  answer without a session.
 - **Takes its look from the GitHub profile card.** [`app/resources/custom.css`](app/resources/custom.css) restyles
   the page with the card's palette and type families.
 
@@ -22,6 +24,8 @@
 
 | Choice | Why |
 |---|---|
+| **Native OIDC, not an Envoy gate** | Homepage has its own sign-in (`HOMEPAGE_AUTH_ENABLED`, `HOMEPAGE_OIDC_*`), and the owner's rule is that an app with native OIDC uses it. The app has no group check, so the client's `allowedUserGroups` (`admins`) is the only fence. |
+| **Session key generated in the cluster** | `HOMEPAGE_AUTH_SECRET` comes from ExternalSecret `homepage-auth-secret` (an ESO `Password` generator, created once), not from 1Password. Deleting that Secret signs everyone out. |
 | **Annotations on routes, not a tile list** | Tiles join a group through the `gethomepage.dev/group` annotation on their HTTPRoute (the `settings.yaml` comment). Only tiles with no route are written in `services.yaml`. The manifest records no further reason. |
 | **CSS as a generated ConfigMap** | `configMapGenerator` builds `homepage-theme` from `resources/custom.css` with `disableNameSuffixHash: true`. The HelmRelease reloads on changes to `homepage-config` and `homepage-theme`. |
 | **`headerStyle: boxed`, text status** | The stylesheet restyles the boxed header and the text status badge, so `headerStyle` and `statusStyle` stay at these values. |
@@ -43,12 +47,15 @@ flowchart LR
   css["ConfigMap<br/>homepage-theme"] -->|custom.css| pod
   op[("1Password<br/>items unifi, nas")] -->|ExternalSecret| sec["Secret<br/>homepage-secret"]
   sec -->|envFrom| pod
+  gen["ExternalSecret<br/>homepage-auth-secret"] -->|"envFrom HOMEPAGE_AUTH_SECRET"| pod
+  cl["PocketIDOIDCClient<br/>homepage"] -->|"Secret homepage-oidc-credentials"| pod
+  cl --> pid(["Pocket ID<br/>id.sklab.dev"])
   gw["Gateway<br/>envoy-internal"] -->|homepage.sklab.dev| pod
   pod -.->|widgets| ext(["UniFi, TrueNAS"])
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class pod accent
-  class op,ext ext
+  class op,ext,pid ext
 ```
 
 </details>
@@ -62,15 +69,20 @@ flowchart LR
 4. The app reads every HTTPRoute with `gethomepage.dev/enabled: "true"` and builds a tile from
    `name`, `description`, `icon` and `group`. A `pod-selector` annotation adds a pod status dot. A
    `widget.type` and `widget.url` pair adds a widget.
-5. The config files are mounted from ConfigMap `homepage-config`, each by `subPath`. `custom.css` is mounted
+5. A person opens the page. Without a session Homepage redirects to `/auth/signin`, which sends them to `id.sklab.dev`
+   (PKCE S256, scopes `openid email profile`). The callback is `/api/auth/callback/homepage-oidc`. Pocket ID refuses everyone
+   outside `admins`; Homepage accepts whoever Pocket ID signs in.
+6. The config files are mounted from ConfigMap `homepage-config`, each by `subPath`. `custom.css` is mounted
    at `/app/config/custom.css`.
 
 ## Settings that matter
 
 | Setting | Value | Why |
 |---|---|---|
+| `HOMEPAGE_AUTH_ENABLED`, `HOMEPAGE_OIDC_*` | `"true"`, issuer `https://id.sklab.dev` | The sign-in. Client ID and secret come from Secret `homepage-oidc-credentials`; the app throws at start if only some `HOMEPAGE_OIDC_*` values are set. `HOMEPAGE_OIDC_AUTO_LOGIN` stays unset. |
+| `HOMEPAGE_EXTERNAL_URL` | `https://homepage.sklab.dev` | Becomes `NEXTAUTH_URL`: the callback URL and the `Secure` cookie flag. |
 | `HOMEPAGE_ALLOWED_HOSTS` | `homepage.sklab.dev` | The app rejects other `Host` headers. |
-| Probe `Host` header | `homepage.sklab.dev` on `/api/healthcheck :3000` | Must match `HOMEPAGE_ALLOWED_HOSTS` or the probes are rejected. |
+| Probe `Host` header | `homepage.sklab.dev` on `/api/healthcheck :3000` | Must match `HOMEPAGE_ALLOWED_HOSTS` or the probes are rejected. `/api/healthcheck` stays outside the sign-in requirement, so Gatus uses it too. |
 | `resources.limits.memory` | `512Mi` | The app idles near 110Mi but was OOM-killed 7 times at 256Mi on 2026-11-12, on page loads that query every tile at once. |
 | `readOnlyRootFilesystem` | `false` | Next.js writes its cache under the root filesystem. |
 | `automountServiceAccountToken` | `true` | app-template v5 defaults it to false; the Kubernetes integration (cluster widgets, pod-selector status) needs the token. |
@@ -83,6 +95,7 @@ flux -n selfhosted get ks homepage
 flux -n selfhosted get hr homepage
 kubectl -n selfhosted get pods -l app.kubernetes.io/name=homepage -o wide
 kubectl -n selfhosted logs deploy/homepage --tail=50
+kubectl -n selfhosted get pocketidoidcclient homepage
 kubectl get httproute -A -o json | jq -r '.items[] | select(.metadata.annotations["gethomepage.dev/enabled"]=="true") | "\(.metadata.namespace)/\(.metadata.name)"'
 kubectl auth can-i list httproutes --as=system:serviceaccount:selfhosted:homepage
 ```

@@ -25,9 +25,41 @@ spec:
               tag: v2.17.0@sha256:7c11fde57d1a0c819b6de0079966eba3a33584d718464af7dacde22bd470ae46
             env:
               NEXT_SHARP_PATH: /data/node_modules/sharp
-              NEXTAUTH_URL: "https://links.sklab.dev"
+              # Must end in /api/v1/auth, where Linkwarden mounts next-auth (its .env.sample and the
+              # SessionProvider basePath). next-auth builds the OIDC redirect_uri from this value, and
+              # a bare origin gives /api/auth/callback/oidc, which Linkwarden does not serve. Password
+              # sign-in never used the server-side URL, so it kept working with the bare origin.
+              NEXTAUTH_URL: "https://links.sklab.dev/api/v1/auth"
               NEXT_PUBLIC_DISABLE_REGISTRATION: "true"
+              # Break-glass password form beside the Pocket ID button. Can go ("false") once the
+              # owner has signed in through Pocket ID and the account is linked.
               NEXT_PUBLIC_CREDENTIALS_ENABLED: "true"
+              # Linkwarden's own sign-in with Pocket ID (pocketidoidcclient-app.yaml), a second client
+              # next to the Envoy gate's. The callback and sign-in start are under /api, the ungated
+              # rule. First sign-in links an existing local account only when the email matches
+              # exactly and Pocket ID sends email_verified=true (ssoEmailVerified.ts); an account
+              # whose email is not yet verified in Linkwarden also loses its password then, while a
+              # verified one keeps it. An email with no local account creates a new empty account.
+              # DISABLE_NEW_SSO_USERS stays unset on purpose: it refuses any identity with no
+              # linked Account row, which includes that first sign-in of the existing account (the
+              # check runs before the link). It can be set once the owner is linked.
+              NEXT_PUBLIC_OIDC_ENABLED: "true"
+              OIDC_CUSTOM_NAME: Pocket ID
+              OIDC_WELLKNOWN_URL: https://id.sklab.dev/.well-known/openid-configuration
+              # Pocket ID releases email and email_verified with the email scope, so the default
+              # "openid email profile" is enough; no groups claim is read.
+              OIDC_SCOPES: openid email profile
+              # Both from the Secret pocketidoidcclient-app.yaml generates (the pod waits for it).
+              OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: linkwarden-app-oidc-credentials
+                    key: client-id
+              OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: linkwarden-app-oidc-credentials
+                    key: client-secret
               # Full-page Monolith archive: raise output buffer above the 100MB
               # default (one image-heavy page overflowed it -> partial archive).
               MONOLITH_MAX_BUFFER: "256"

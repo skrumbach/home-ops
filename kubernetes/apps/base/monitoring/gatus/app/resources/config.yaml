@@ -95,7 +95,7 @@ endpoints:
       - "[STATUS] == 200"
       - "[BODY].related_applications[0].id == io.homeassistant.companion.android"
 
-  # In-cluster health bodies, not the ext_authz route. The (in-cluster)
+  # In-cluster health bodies, not the gated route (Envoy OIDC). The (in-cluster)
   # suffix avoids colliding with auto-discovered external/echo and
   # external/kromgo, which panics Gatus at startup.
   - name: Echo (in-cluster)

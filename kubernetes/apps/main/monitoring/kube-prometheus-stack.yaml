@@ -7,6 +7,8 @@ metadata:
 spec:
   targetNamespace: monitoring
   dependsOn:
+    - name: pocket-id-operator
+      namespace: security
     - name: prometheus-operator-crds
       namespace: monitoring
   interval: 1h

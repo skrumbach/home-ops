@@ -245,8 +245,10 @@ spec:
             gethomepage.dev/description: Metrics
             gethomepage.dev/widget.type: prometheus
             gethomepage.dev/widget.url: http://kube-prometheus-stack-prometheus.monitoring:9090
+            # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+            # sign-in page it redirects to. Probe readiness on the in-cluster Service instead.
             gatus.home-operations.com/endpoint: |-
-              url: https://kube-prometheus-stack.sklab.dev/-/ready
+              url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/-/ready
               conditions: ["[STATUS] == 200"]
           hostnames: ["{{ .Release.Name }}.sklab.dev"]
           parentRefs:

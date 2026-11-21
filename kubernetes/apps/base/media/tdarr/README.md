@@ -8,7 +8,7 @@
 
 ## What it does
 
-- **Queues work** on the `tdarr` server: web UI at `tdarr.sklab.dev` on `envoy-internal` (port 8265) and the node
+- **Queues work** on the `tdarr` server: web UI at `tdarr.sklab.dev` on `envoy-internal` (port 8265, behind Pocket ID, group `admins`) and the node
   protocol on port 8266. The server runs no transcodes itself (`internalNode: "false"`).
 - **Transcodes on the B70** in the `tdarr-node` worker: two GPU workers (AV1 via QSV) and one CPU worker.
 - **Reads and writes the library** on the NFS export `nas.sklab.dev:/mnt/storage/Media`, mounted at `/media`.
@@ -21,7 +21,7 @@
 | **One worker, not a DaemonSet** | The server runs no internal node, so one worker is enough. A DaemonSet would strand Pending pods on any node without the B70. |
 | **`devic.es/b70-vaapi`, not `devic.es/b70`** | Same card, mounted under its kernel names (`card1`, `renderD129`). VA-API needs them; the renamed `b70` group cannot provide them. |
 | **A CPU transcode worker beside the GPU ones** | A GPU-only node turns any VA-API regression into a silent, total outage: every job fails with `transcodeError` and nothing else can take it. The cost is speed, not correctness. |
-| **`auth: "false"` on the server** | Tdarr 3.x defaults to auth and 401s every node without an API key. The only node is the in-cluster worker and the server is internal-only, so the 2.x open behaviour stays. The network policy is the only gate. |
+| **`auth: "false"` on the server** | Tdarr 3.x defaults to auth and 401s every node without an API key. The only node is the in-cluster worker and the server is internal-only, so the 2.x open behaviour stays. The network policy fences the Service, and `SecurityPolicy` `tdarr-auth` puts Pocket ID in front of the browser route. The node uses the Service and bypasses it. |
 | **Worker CPU capped at 4** | Unbounded, the CPU worker held about 15 of talos-3's 20 cores and starved the control plane. See the CPU row below. |
 
 ## How it works
@@ -43,6 +43,8 @@ flowchart LR
   gp["Device plugin<br/>devic.es/b70-vaapi"] -->|renderD129| node
   gw["Gateway<br/>envoy-internal"] -->|"tdarr.sklab.dev :8265"| srv
   cnp["CiliumNetworkPolicy<br/>tdarr"] -.->|fences ingress| srv
+  secpol["SecurityPolicy<br/>tdarr-auth"] -->|OIDC| gw
+  oidc["PocketIDOIDCClient<br/>tdarr"] -->|Secret tdarr-oidc-credentials| secpol
   cfg --> sp["SnapshotPolicy<br/>tdarr-ceph + tdarr-r2"]
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
@@ -77,6 +79,7 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | worker `limits.cpu` | `4` | Chat decode fell 64 to 40 t/s at 12 CPUs. At 6, prefill was 1853 t/s against 2079 with tdarr stopped; at 4 it was 1951 (+5%). |
 | worker `limits.memory`, `requests` | `12Gi`; `2` CPU, `2Gi` | The requests keep the node from reserving the whole limit. |
 | server `limits.memory` | `2Gi` | The manifest records no reason. |
+| Gatus endpoint (route annotation) | `http://tdarr.media.svc.cluster.local:8265/api/v2/status` | The gated route would answer with the sign-in redirect; the CiliumNetworkPolicy admits Gatus on `8265`. |
 | `spec.timeout` | `15m` | The worker's startup probe allows up to 5 minutes for the server heartbeat; the 5m default rolled the 3.x upgrade back mid-start. |
 | `persistence.configs` | emptyDir at `/app/configs` | Not persisted on purpose; see step 4. |
 | PVC `tdarr-temp` ([`app/pvc.yaml`](app/pvc.yaml)) | `ceph-filesystem-rwx`, `200Gi`, RWX | Disposable scratch shared by both pods. The default `csi` subvolumegroup is broken by Ceph Tentacle v20.2.1 subvolume corruption, so the claim stays on this class until a fixed release lands. |

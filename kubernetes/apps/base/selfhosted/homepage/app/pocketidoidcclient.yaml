@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/pocketid.internal/pocketidoidcclient_v1alpha1.json
+# Homepage's own sign-in (HOMEPAGE_OIDC_* in helmrelease.yaml). The operator generates the client ID
+# and secret and writes them to Secret `homepage-oidc-credentials`, which the HelmRelease reads
+# directly. Deleting this CR deletes the client in Pocket ID; a re-created client has a new secret
+# and Homepage only picks it up on its next restart (reloader does that).
+apiVersion: pocketid.internal/v1alpha1
+kind: PocketIDOIDCClient
+metadata:
+  name: homepage
+spec:
+  name: Homepage
+  launchUrl: https://homepage.sklab.dev
+  # next-auth path fixed by Homepage: <HOMEPAGE_EXTERNAL_URL>/api/auth/callback/<provider id>, and
+  # the provider id is `homepage-oidc` (src/pages/api/auth/[...nextauth].js).
+  callbackUrls: ["https://homepage.sklab.dev/api/auth/callback/homepage-oidc"]
+  # No logoutCallbackUrls: Homepage's sign-out ends only its own session.
+  # The provider sets checks: ["pkce", "state", "nonce"], so next-auth sends an S256 challenge.
+  pkceEnabled: true
+  # Homepage has no group check, so this is the only fence: Pocket ID refuses everyone outside admins.
+  allowedUserGroups:
+    - name: admins
+      namespace: security
+  logo:
+    autoGenerate: false
+  secret:
+    keys:
+      clientID: client-id
+      clientSecret: client-secret
