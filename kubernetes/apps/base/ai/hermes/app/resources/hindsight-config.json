@@ -2,6 +2,6 @@
   "mode": "local_external",
   "api_url": "http://hindsight-api.ai.svc.cluster.local:8888",
   "bank_id": "hermes",
-  "retain_every_n_turns": 10,
+  "retain_every_n_turns": 1,
   "retain_source": "hermes"
 }
