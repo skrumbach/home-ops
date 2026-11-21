@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="SKLAB">
+  <!-- Dark-mode logo: Pocket ID shows it on a dark tile (logo?light=false). Neon outline with a soft glow. -->
+  <defs>
+    <linearGradient id="n" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D8F0"/>
+      <stop offset=".5" stop-color="#6C5CFF"/>
+      <stop offset="1" stop-color="#D946E6"/>
+    </linearGradient>
+    <filter id="g" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.6"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="url(#n)" stroke-linejoin="round">
+    <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" stroke-width="12" opacity=".4" filter="url(#g)"/>
+    <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" stroke-width="9"/>
+  </g>
+  <path transform="translate(64 64) scale(1.15) translate(-64 -64)" fill="#22D8F0" d="M64 41a13 13 0 0 1 7.6 23.55L75.5 84a3 3 0 0 1-2.94 3.6H55.44a3 3 0 0 1-2.94-3.6l3.9-19.45A13 13 0 0 1 64 41Z"/>
+</svg>

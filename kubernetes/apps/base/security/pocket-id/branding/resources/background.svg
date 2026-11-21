@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 2000" width="2000" height="2000" role="img" aria-label="SKLAB sign-in background">
+  <!-- Sign-in background in the GitHub profile palette (skrumbach/skrumbach). Pocket ID crops it with
+       object-fit: cover to anything from a tall strip to a wide panel, and below 1024 px it puts the
+       sign-in card over the middle. So the mark, the nodes and the text stay within 375 units of the
+       centre: fully visible on a desktop, fully behind the card on a phone. No filter on a large area and no web font: it is drawn as an <img>. -->
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#090C22"/>
+      <stop offset="1" stop-color="#060818"/>
+    </linearGradient>
+    <radialGradient id="violet" cx="88%" cy="0%" r="70%">
+      <stop offset="0" stop-color="#8B55F5" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#8B55F5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyan" cx="6%" cy="98%" r="58%">
+      <stop offset="0" stop-color="#22D8F0" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#22D8F0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="magenta" cx="100%" cy="92%" r="42%">
+      <stop offset="0" stop-color="#D946E6" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#D946E6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#22D8F0" stop-opacity=".20"/>
+      <stop offset=".55" stop-color="#6C5CFF" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#6C5CFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fade" cx="50%" cy="50%" r="72%">
+      <stop offset="0" stop-color="#fff" stop-opacity=".55"/>
+      <stop offset=".45" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D8F0"/>
+      <stop offset=".5" stop-color="#6C5CFF"/>
+      <stop offset="1" stop-color="#D946E6"/>
+    </linearGradient>
+    <linearGradient id="neonv" gradientUnits="userSpaceOnUse" x1="1000" y1="640" x2="1000" y2="1200">
+      <stop offset="0" stop-color="#22D8F0"/>
+      <stop offset=".5" stop-color="#6C5CFF"/>
+      <stop offset="1" stop-color="#D946E6"/>
+    </linearGradient>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M100 0H0V100" fill="none" stroke="#1683A8" stroke-opacity=".30" stroke-width="1.5"/>
+    </pattern>
+    <mask id="gridfade">
+      <rect width="2000" height="2000" fill="url(#fade)"/>
+    </mask>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <path id="node" d="M0-44 38.1-22V22L0 44-38.1 22V-22Z"/>
+  </defs>
+
+  <!-- Navy base and the three corner glows -->
+  <rect width="2000" height="2000" fill="url(#base)"/>
+  <rect width="2000" height="2000" fill="url(#violet)"/>
+  <rect width="2000" height="2000" fill="url(#cyan)"/>
+  <rect width="2000" height="2000" fill="url(#magenta)"/>
+
+  <!-- Grid, fading out towards the corners -->
+  <rect width="2000" height="2000" fill="url(#grid)" mask="url(#gridfade)"/>
+
+  <!-- A few lit grid crossings -->
+  <g>
+    <circle cx="300" cy="400" r="4" fill="#22D8F0" opacity=".55"/>
+    <circle cx="500" cy="1500" r="4" fill="#A57BFF" opacity=".55"/>
+    <circle cx="1600" cy="300" r="4" fill="#C4B0FF" opacity=".60"/>
+    <circle cx="1700" cy="1200" r="4" fill="#D946E6" opacity=".45"/>
+    <circle cx="200" cy="1100" r="3" fill="#22D8F0" opacity=".40"/>
+    <circle cx="1400" cy="1700" r="3" fill="#22D8F0" opacity=".40"/>
+    <circle cx="800" cy="200" r="3" fill="#A57BFF" opacity=".45"/>
+    <circle cx="1800" cy="700" r="3" fill="#22D8F0" opacity=".35"/>
+    <circle cx="100" cy="1800" r="3" fill="#D946E6" opacity=".35"/>
+    <circle cx="1200" cy="100" r="3" fill="#22D8F0" opacity=".35"/>
+  </g>
+
+  <!-- Rings around the identity provider -->
+  <circle cx="1000" cy="1000" r="560" fill="url(#halo)"/>
+  <g fill="none" stroke="#22D8F0">
+    <circle cx="1000" cy="1000" r="215" stroke-opacity=".16" stroke-width="2"/>
+    <circle cx="1000" cy="1000" r="470" stroke-opacity=".12" stroke-width="2" stroke-dasharray="3 14" stroke-linecap="round"/>
+    <circle cx="1000" cy="1000" r="640" stroke-opacity=".07" stroke-width="2"/>
+  </g>
+
+  <!-- Apps on the outer ring -->
+  <g>
+    <circle cx="1452.5" cy="547.5" r="6" fill="#A57BFF" opacity=".75"/>
+    <circle cx="1618.2" cy="1165.6" r="6" fill="#22D8F0" opacity=".65"/>
+    <circle cx="1165.6" cy="1618.2" r="6" fill="#D946E6" opacity=".60"/>
+    <circle cx="547.5" cy="1452.5" r="6" fill="#22D8F0" opacity=".65"/>
+    <circle cx="381.8" cy="834.4" r="6" fill="#A57BFF" opacity=".75"/>
+    <circle cx="834.4" cy="381.8" r="6" fill="#22D8F0" opacity=".65"/>
+  </g>
+
+  <!-- Dotted links from the centre to the three nodes -->
+  <g fill="none" stroke="url(#neonv)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 13" opacity=".85">
+    <path d="M1000 822V726"/>
+    <path d="M1154.1 1089 1237.3 1137"/>
+    <path d="M845.9 1089 762.7 1137"/>
+  </g>
+
+  <!-- The three cluster nodes, each with a green Ready dot -->
+  <g fill="#0D102C" stroke="#1683A8" stroke-width="3" stroke-linejoin="round">
+    <use href="#node" x="1000" y="670"/>
+    <use href="#node" x="1285.8" y="1165"/>
+    <use href="#node" x="714.2" y="1165"/>
+  </g>
+  <g fill="#2EE08A">
+    <circle cx="1000" cy="670" r="16" opacity=".18"/>
+    <circle cx="1285.8" cy="1165" r="16" opacity=".18"/>
+    <circle cx="714.2" cy="1165" r="16" opacity=".18"/>
+    <circle cx="1000" cy="670" r="7"/>
+    <circle cx="1285.8" cy="1165" r="7"/>
+    <circle cx="714.2" cy="1165" r="7"/>
+  </g>
+
+  <!-- The mark: the logo hexagon with its keyhole -->
+  <g transform="translate(1000 1000) scale(2.6) translate(-64 -64)">
+    <path d="M64 12 109 38V90L64 116 19 90V38Z" fill="#0D102C"/>
+    <g fill="none" stroke="url(#neon)" stroke-linejoin="round">
+      <path d="M64 12 109 38V90L64 116 19 90V38Z" stroke-width="11" opacity=".5" filter="url(#glow)"/>
+      <path d="M64 12 109 38V90L64 116 19 90V38Z" stroke-width="5"/>
+    </g>
+    <path fill="#22D8F0" d="M64 41a13 13 0 0 1 7.6 23.55L75.5 84a3 3 0 0 1-2.94 3.6H55.44a3 3 0 0 1-2.94-3.6l3.9-19.45A13 13 0 0 1 64 41Z"/>
+  </g>
+
+  <!-- Eyebrow lines. System monospace only: an image cannot load a web font. -->
+  <g text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-weight="600">
+    <text x="1000" y="1275" font-size="36" letter-spacing="14" fill="#22D8F0">ID.SKLAB.DEV</text>
+    <text x="1000" y="1322" font-size="22" letter-spacing="6" fill="#7C83A5">ONE PASSKEY • EVERY APP</text>
+  </g>
+</svg>

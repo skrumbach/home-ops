@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="SKLAB">
+  <!-- Favicon: a filled badge, so it reads on a light and on a dark tab strip at 16 px. -->
+  <defs>
+    <linearGradient id="n" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D8F0"/>
+      <stop offset=".5" stop-color="#6C5CFF"/>
+      <stop offset="1" stop-color="#D946E6"/>
+    </linearGradient>
+  </defs>
+  <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" fill="#090C22" stroke="url(#n)" stroke-width="10" stroke-linejoin="round"/>
+  <path fill="#22D8F0" transform="translate(64 64) scale(1.22) translate(-64 -64)" d="M64 41a13 13 0 0 1 7.6 23.55L75.5 84a3 3 0 0 1-2.94 3.6H55.44a3 3 0 0 1-2.94-3.6l3.9-19.45A13 13 0 0 1 64 41Z"/>
+</svg>
