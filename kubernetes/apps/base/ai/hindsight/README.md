@@ -63,6 +63,7 @@ One bank per source, so coding noise stays out of the assistant's recall.
 
 | Client | How | Bank |
 |---|---|---|
+| Hermes (`ai/hermes`) | Catalog plugin `hindsight`, installed by an initContainer; `memory.provider: hindsight` | `hermes` |
 | OpenCode (`ai/opencode`) | Plugin `@vectorize-io/hindsight-coding-agents`, Service URL | `coding-agent::<repo>` |
 | Claude Code on a laptop | `npx @vectorize-io/hindsight-coding-agents install claude-code --server self-hosted --api-url https://hindsight-api.sklab.dev`, token in `~/.hindsight/coding-agent.json` (`apiToken`) | `coding-agent::<repo>`, shared with OpenCode |
 | Any MCP client | `https://hindsight-api.sklab.dev/mcp/<bank>/`, header `Authorization: Bearer <tenant key>` | the one in the URL |
@@ -103,8 +104,5 @@ kubectl -n ai get litellmvirtualkey hindsight
   `hindsight-admin reembed`. Never point the key at a second embedder.
 - **Recall injects stale facts as trusted context.** Hindsight has no fact-validity windows, so review what agents retain.
 - **Snapshots are not selective:** CNPG PITR restores the whole `postgres-18` cluster, not the `hindsight` database alone.
-- **Hermes is not wired yet.** The pinned image does not bundle the plugin. `hermes plugins install hindsight` puts
-  the code in `/opt/data/plugins` and its Python dependencies in `/opt/data/lazy-packages` (the image sets
-  `HERMES_LAZY_INSTALL_TARGET`), both on the PVC. Set `retain_every_n_turns` first because it defaults to `1`.
 
 Upstream: [Hindsight](https://hindsight.vectorize.io/)

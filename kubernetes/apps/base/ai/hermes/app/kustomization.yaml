@@ -22,6 +22,8 @@ configMapGenerator:
   - name: hermes-configmap
     files:
       - config.yaml=./resources/config.yaml
+      # Hindsight memory provider settings, copied to /opt/data/hindsight/config.json by `copy-config`.
+      - hindsight-config.json=./resources/hindsight-config.json
   # GitOps-managed agent skill, copied into /opt/data/skills by `seed-skills`.
   # Add future skills as another generator + another skills/<name>/ dir.
   - name: hermes-skill-homelab-commit-watcher

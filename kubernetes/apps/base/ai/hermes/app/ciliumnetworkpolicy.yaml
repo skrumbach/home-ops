@@ -55,6 +55,11 @@ spec:
             k8s:io.kubernetes.pod.namespace: ai
             app.kubernetes.io/name: searxng
             app.kubernetes.io/controller: searxng
+        # Hindsight API :8888 (memory.provider in config.yaml).
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: hindsight
+            app.kubernetes.io/controller: api
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
             gateway.envoyproxy.io/owning-gateway-name: envoy-internal
@@ -101,6 +106,16 @@ spec:
       toPorts:
         - ports:
             - port: "8080"
+              protocol: TCP
+    # Long-term memory (memory.provider hindsight): recall before a turn, retain after.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: hindsight
+            app.kubernetes.io/controller: api
+      toPorts:
+        - ports:
+            - port: "8888"
               protocol: TCP
     # MCP gateway via the LAN route (MCP_GATEWAY_URL https://mcp...), which resolves to the
     # envoy-internal LoadBalancer. Policy sees the backend port after service translation: 10443.
