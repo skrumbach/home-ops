@@ -16,7 +16,7 @@ The namespace document, [`renovate/README.md`](../README.md), holds the rollback
   `renovate-github-app`, which the `renovate-jobs` Kustomization builds from 1Password item `renovate` (vault `Homelab`).
 - **Serves a UI** at `renovate.sklab.dev` on `envoy-internal` only. People sign in through Pocket ID client
   `renovate-operator`, restricted to the `admins` group.
-- **Exports metrics.** A ServiceMonitor, a Grafana dashboard (folder `Operators`) and the PrometheusRule
+- **Exports metrics.** A ServiceMonitor, a Grafana dashboard (folder `Platform`) and the PrometheusRule
   `renovate-rules` come from this app.
 
 ## Why it is built this way

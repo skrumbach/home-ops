@@ -10,5 +10,23 @@ resources:
   - ./networkpolicy-image-renderer-dns.yaml
   - ./pocketidoidcclient.yaml
   - ./dashboards/ceph
+  - ./dashboards/home
   - ./dashboards/litellm
-  # The landing dashboard is dashboards.default.home-dashboard in the HelmRelease.
+# The SKLAB look: Grafana OSS has no white-label setting, so the HelmRelease puts these files over
+# Grafana's own (logo, favicon, touch icon, sign-in background). Every file keeps the name Grafana
+# gives it; sklab-header.svg is the header of the landing board.
+#
+# The two PNGs are stored as .bin: Flux's GitRepository leaves *.png (and *.jpg, *.gif) out of the
+# artifact by default, and the build would fail on the missing file. The key gives them their name back.
+configMapGenerator:
+  - name: grafana-brand
+    files:
+      - apple-touch-icon.png=resources/apple-touch-icon.bin
+      - fav32.png=resources/fav32.bin
+      - resources/g8_login_dark.svg
+      - resources/grafana_icon.svg
+      - resources/sklab-header.svg
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

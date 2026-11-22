@@ -64,7 +64,7 @@ spec:
     dashboards:
       enabled: true
       annotations:
-        grafana_folder: Cilium
+        grafana_folder: Network
     devices: bond+
     enableIPv4BIGTCP: true
     endpointRoutes:
@@ -104,7 +104,7 @@ spec:
         dashboards:
           enabled: true
           annotations:
-            grafana_folder: Cilium
+            grafana_folder: Network
       relay:
         enabled: true
         rollOutPods: true

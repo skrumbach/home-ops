@@ -18,6 +18,8 @@ spec:
       enabled: true
     grafanaDashboard:
       enabled: true
+      annotations:
+        grafana_folder: Platform
     resources:
       requests:
         cpu: 10m

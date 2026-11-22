@@ -19,7 +19,7 @@ set that this controller manages is [`gha-runner-scale-set`](../gha-runner-scale
 - **Exports metrics.** PodMonitor `action-runner-controller` scrapes the controller pods (`app.kubernetes.io/part-of:
   gha-rs-controller`) on port `metrics`. The listener metrics come from the scale set's own PodMonitor.
 - **Ships the alerts and the dashboard.** PrometheusRule `github-actions-runner-alerts` and ConfigMap `arc-dashboard`
-  (Grafana folder `CI`) cover every scale set in the namespace.
+  (Grafana folder `Platform`) cover every scale set in the namespace.
 
 ## How it works
 
@@ -39,7 +39,7 @@ flowchart LR
   pdb["PDB<br/>gha-runner-scale-set-controller"] --> ctl
   pm["PodMonitor<br/>action-runner-controller"] -->|"/metrics"| ctl
   rule["PrometheusRule<br/>github-actions-runner-alerts"] -.->|reads metrics| pm
-  cm["ConfigMap<br/>arc-dashboard"] --> gf(["Grafana<br/>folder CI"])
+  cm["ConfigMap<br/>arc-dashboard"] --> gf(["Grafana<br/>folder Platform"])
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
   class ctl accent

@@ -15,7 +15,8 @@ spec:
       existingSecret: grafana-admin-secret
 
     annotations:
-      configmap.reloader.stakater.com/reload: grafana
+      # grafana-brand is mounted by subPath, which never updates in place.
+      configmap.reloader.stakater.com/reload: grafana,grafana-brand
       secret.reloader.stakater.com/reload: grafana-admin-secret,grafana-oidc-client
 
     # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET (externalsecret-oidc.yaml, generated in the cluster;
@@ -39,70 +40,114 @@ spec:
     extraEmptyDirMounts:
       - name: tmp
         mountPath: /tmp
+      # Grafana's static image directory, copied and branded by the `brand` init container.
+      - name: brand-static
+        mountPath: /usr/share/grafana/public/build/static/img
+
+    # The SKLAB look (app/resources/). Grafana OSS has no white-label setting and no custom theme,
+    # so the brand files go over Grafana's own. Two places hold them:
+    # - public/img/ has fixed names (loading mark, favicon, touch icon): three subPath mounts. The
+    #   chart names each volume after its entry, so every mount needs its own entry.
+    # - public/build/static/img/ is what the UI loads (menu logo, sign-in logo and background), under
+    #   names with a build hash that changes with every Grafana release. The init container copies
+    #   that directory into an emptyDir and overwrites the files by pattern, so a Grafana bump keeps
+    #   the brand; a file upstream renames falls back to Grafana's own picture.
+    extraConfigmapMounts:
+      - name: brand-icon
+        configMap: grafana-brand
+        mountPath: /usr/share/grafana/public/img/grafana_icon.svg
+        subPath: grafana_icon.svg
+        readOnly: true
+      - name: brand-favicon
+        configMap: grafana-brand
+        mountPath: /usr/share/grafana/public/img/fav32.png
+        subPath: fav32.png
+        readOnly: true
+      - name: brand-touch-icon
+        configMap: grafana-brand
+        mountPath: /usr/share/grafana/public/img/apple-touch-icon.png
+        subPath: apple-touch-icon.png
+        readOnly: true
+
+    extraInitContainers:
+      - name: brand
+        # The Grafana image itself: the directory it copies must match the running version.
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        # $f and $t have no braces, so Flux leaves them alone.
+        command:
+          - /bin/sh
+          - -ec
+          - |
+            cp -R /usr/share/grafana/public/build/static/img/. /static/
+            for f in grafana_icon g8_login_dark; do
+              for t in /static/$f.*.svg; do
+                if [ -e "$t" ]; then cp "/brand/$f.svg" "$t"; fi
+              done
+            done
+            cp /brand/sklab-header.svg /static/
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        volumeMounts:
+          - name: brand-static
+            mountPath: /static
+          - name: brand-icon
+            mountPath: /brand
+            readOnly: true
+
+    # The landing board (app/dashboards/home/), mounted as the directory of the `home` provider.
+    dashboardsConfigMaps:
+      home: grafana-home-dashboard
 
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
         providers:
-          - name: default
-            disableDeletion: false
-            editable: true
+          # One provider per folder, eight folders. A board that an app ships as a ConfigMap joins
+          # a folder by naming its title in the grafana_folder annotation. The landing board is
+          # alone in General.
+          - name: home
+            orgId: 1
             folder: ""
-            options:
-              path: /var/lib/grafana/dashboards/default
-            orgId: 1
             type: file
-          - name: infrastructure
+            disableDeletion: false
+            editable: false
+            options:
+              path: /var/lib/grafana/dashboards/home
+          - name: kubernetes
             orgId: 1
-            folder: Infrastructure
+            folder: Kubernetes
             type: file
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/infrastructure
-          - name: databases
+              path: /var/lib/grafana/dashboards/kubernetes
+          - name: platform
             orgId: 1
-            # 'Database' (singular) matches the folder used by sidecar-loaded
-            # dashboards (CNPG, Dragonfly operator). Single folder for all
-            # database-related dashboards instead of split Database/Databases.
-            folder: Database
+            folder: Platform
             type: file
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/databases
-          - name: ai-ml
+              path: /var/lib/grafana/dashboards/platform
+          - name: network
             orgId: 1
-            folder: AI/ML
+            folder: Network
             type: file
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/ai-ml
-          - name: media
-            orgId: 1
-            folder: Media
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/media
-          - name: networking
-            orgId: 1
-            folder: Networking
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/networking
-          - name: monitoring
-            orgId: 1
-            folder: Monitoring
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/monitoring
+              path: /var/lib/grafana/dashboards/network
           - name: storage
             orgId: 1
             folder: Storage
@@ -111,170 +156,50 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/storage
+          - name: databases
+            orgId: 1
+            folder: Databases
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/databases
+          - name: ai
+            orgId: 1
+            folder: AI
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/ai
+          - name: apps
+            orgId: 1
+            folder: Apps
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/apps
+          - name: observability
+            orgId: 1
+            folder: Observability
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/observability
 
+    # Every board here had live series behind most of its panels on 2026-11-22. Before adding one,
+    # check that this Prometheus publishes what it queries: Ollama, Qdrant and SMARTctl boards sat
+    # here with no such workload in the cluster.
     dashboards:
-      default:
-        external-dns:
-          # renovate: depName="External-DNS"
-          gnetId: 15038
-          revision: 3
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
+      kubernetes:
+        # The API server, CoreDNS, etcd, kubelet and compute-resource boards come from
+        # kube-prometheus-stack as ConfigMaps, also into this folder.
         node-exporter-full:
           # renovate: depName="Node Exporter Full"
           gnetId: 1860
           revision: 46
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
-        smartctl-exporter:
-          # renovate: depName="SMARTctl Exporter Dashboard"
-          gnetId: 22604
-          revision: 4
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
-        home-dashboard:
-          json: |
-            {
-              "annotations": {
-                "list": []
-              },
-              "description": "Homelab Dashboard - Organized by Function",
-              "editable": false,
-              "fiscalYearStartMonth": 0,
-              "graphTooltip": 0,
-              "links": [],
-              "liveNow": false,
-              "panels": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "$${datasource}"
-                  },
-                  "gridPos": {"h": 3, "w": 24, "x": 0, "y": 0},
-                  "id": 1,
-                  "options": {
-                    "code": {"language": "plaintext", "showLineNumbers": false, "showMiniMap": false},
-                    "content": "# 🏠 Homelab Dashboard\n\nWelcome to your reorganized Grafana! Dashboards are now organized by function.",
-                    "mode": "markdown"
-                  },
-                  "pluginVersion": "10.3.1",
-                  "targets": [],
-                  "title": "",
-                  "transparent": true,
-                  "type": "text"
-                },
-                {
-                  "datasource": {"type": "prometheus", "uid": "$${datasource}"},
-                  "gridPos": {"h": 8, "w": 8, "x": 0, "y": 3},
-                  "id": 2,
-                  "options": {
-                    "code": {"language": "plaintext", "showLineNumbers": false, "showMiniMap": false},
-                    "content": "## 🖥️ Infrastructure\n- [Cilium](/d/vtuWtdumz)\n- [Kubernetes](/d/k8s_views_global)\n- [Cert-manager](/d/cdhrcds8aosg0c)\n- [Ceph Cluster](/d/tbO9LAiZK)\n- [Ceph Usage](/d/ceph-usage)\n- [Ceph Hosts](/d/ceph-hosts-overview)\n\n## 🗄️ Databases\n- [CloudNativePG](/d/cloudnative-pg)\n- [Dragonfly](/d/xDLNRKUWl)\n- [EMQX](/d/overview)",
-                    "mode": "markdown"
-                  },
-                  "title": "Infrastructure & Databases",
-                  "type": "text"
-                },
-                {
-                  "datasource": {"type": "prometheus", "uid": "$${datasource}"},
-                  "gridPos": {"h": 8, "w": 8, "x": 8, "y": 3},
-                  "id": 3,
-                  "options": {
-                    "code": {"language": "plaintext", "showLineNumbers": false, "showMiniMap": false},
-                    "content": "## 🤖 AI/ML\n- [LiteLLM](/d/litellm)\n- [LiteLLM Routing](/d/llm-routing)\n- [Qdrant](/d/qdrant-overview)\n- [Ollama](/d/ollama-inference-v1)\n\n## 🎬 Media\n- [Plex](/d/TPZ6-zT4z)",
-                    "mode": "markdown"
-                  },
-                  "title": "AI/ML & Media",
-                  "type": "text"
-                },
-                {
-                  "datasource": {"type": "prometheus", "uid": "$${datasource}"},
-                  "gridPos": {"h": 8, "w": 8, "x": 16, "y": 3},
-                  "id": 4,
-                  "options": {
-                    "code": {"language": "plaintext", "showLineNumbers": false, "showMiniMap": false},
-                    "content": "## 📊 Monitoring\n- [Gatus](/d/KPI7Qj1Wk)\n- [UniFi Sites](/d/9WaGWZaZk)\n- [UniFi Clients](/d/jMfvAjxWz)",
-                    "mode": "markdown"
-                  },
-                  "title": "Monitoring",
-                  "type": "text"
-                }
-              ],
-              "refresh": "",
-              "schemaVersion": 38,
-              "tags": ["home", "overview"],
-              "templating": {
-                "list": [
-                  {
-                    "current": {"selected": false, "text": "Prometheus", "value": "prometheus"},
-                    "hide": 0,
-                    "includeAll": false,
-                    "label": "Datasource",
-                    "multi": false,
-                    "name": "datasource",
-                    "options": [],
-                    "query": "prometheus",
-                    "refresh": 1,
-                    "regex": "",
-                    "skipUrlSync": false,
-                    "type": "datasource"
-                  }
-                ]
-              },
-              "time": {"from": "now-6h", "to": "now"},
-              "timepicker": {},
-              "timezone": "browser",
-              "title": "Home - Homelab Overview",
-              "uid": "home-dashboard",
-              "version": 1,
-              "weekStart": ""
-            }
-
-      infrastructure:
-        # The Cilium dashboard comes from the cilium HelmRelease (kube-system/cilium-dashboard).
-        # Do not re-add gnetId 16611: same UID as the operator's and it locks sidecarProvider
-        # out of writes.
-
-        kube-state-metrics:
-          # renovate: depName="Kube-State-Metrics"
-          gnetId: 13332
-          revision: 12
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-            - name: VAR_DATASOURCE
-              value: Prometheus
-
-        flux-cluster:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/cluster.json
-          datasource: Prometheus
-
-        flux-control-plane:
-          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
-          datasource: Prometheus
-
-        # Replaces Flux's Loki-only logs.json. Flux controllers: Namespace flux-system, Container
-        # manager, then the Filter variable kubernetes.pod_labels.app = <controller>. Its Level
-        # panels read `log.level`; zap-logging controllers (Flux) write `level`, so they show
-        # "unknown" there.
-        victoria-logs-explorer:
-          # renovate: depName="VictoriaLogs - Explorer for Kubernetes logs"
-          gnetId: 25747
-          revision: 1
-          datasource:
-            - name: DS_VICTORIALOGS
-              value: VictoriaLogs
-
-        k8s-system-api-server:
-          # renovate: depName="Kubernetes / System / API Server"
-          gnetId: 15761
-          revision: 21
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
@@ -319,74 +244,42 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
 
+      platform:
+        # Flux Operator's own boards read flux_resource_info, which the operator exports. The
+        # flux2-monitoring-example cluster.json was dropped: it reads gotk_resource_info, a
+        # kube-state-metrics custom-resource metric this cluster does not configure.
+        flux-performance:
+          url: https://raw.githubusercontent.com/controlplaneio-fluxcd/flux-operator/cb3cc0de38df84c359d24f6a6663d515c42b3f57/config/monitoring/dashboards/flux-performance.json
+          datasource: Prometheus
+
+        flux-k8s-api-performance:
+          url: https://raw.githubusercontent.com/controlplaneio-fluxcd/flux-operator/cb3cc0de38df84c359d24f6a6663d515c42b3f57/config/monitoring/dashboards/flux-k8s-api-performance.json
+          datasource: Prometheus
+
+        flux-control-plane:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
+          datasource: Prometheus
+
         cert-manager:
           url: https://grafana.com/api/dashboards/20842/revisions/3/download
           datasource: Prometheus
 
-      databases:
-        # CloudNativePG (cloudnative-pg-dashboard chart) and the Dragonfly operator install their
-        # own dashboards; gnetIds 15944/15945/21053/21054 are the unrelated Dragonfly P2P project.
-        # Do not duplicate them here (UID collision).
-
-        emqx-authentication:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authentication.json
+        keda:
+          url: https://raw.githubusercontent.com/kedacore/keda/48cd1105b579723c637d6ee6e0f245634541bedc/config/grafana/keda-dashboard.json
           datasource: Prometheus
 
-        emqx-authorization:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authorization.json
-          datasource: Prometheus
-
-        emqx-client-events:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/client-events.json
-          datasource: Prometheus
-
-        emqx-messages:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/messages.json
-          datasource: Prometheus
-
-        emqx-overview:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/overview.json
-          datasource: Prometheus
-
-        emqx-rule-engine-count:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/rule-engine-count.json
-          datasource: Prometheus
-
-        emqx-rule-engine-rate:
-          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/rule-engine-rate.json
-          datasource: Prometheus
-
-        qdrant-observatory:
-          # renovate: depName="Qdrant Observatory"
-          gnetId: 25152
-          revision: 1
+      network:
+        # The Cilium and Hubble boards come from the cilium HelmRelease (kube-system/cilium-dashboard).
+        # Do not re-add gnetId 16611: same UID as the chart's and it locks sidecarProvider out of
+        # writes.
+        external-dns:
+          # renovate: depName="External-DNS"
+          gnetId: 15038
+          revision: 3
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
 
-        ollama-llm-inference:
-          # renovate: depName="Ollama LLM Inference"
-          gnetId: 25086
-          revision: 1
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
-      ai-ml:
-        toolhive-mcp-gateway:
-          url: https://raw.githubusercontent.com/stacklok/toolhive/42cd9b7e497bfc77dc67a1e73037675247d405b1/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
-          datasource: Prometheus
-
-      media:
-        plex-media-server-exporter:
-          # renovate: depName="plex-media-server-exporter"
-          gnetId: 17891
-          revision: 1
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-
-      networking:
         cloudflare-tunnels:
           url: https://grafana.com/api/dashboards/17457/revisions/6/download
           datasource:
@@ -400,15 +293,6 @@ spec:
         envoy-proxy:
           url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.10.0/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
           datasource: Prometheus
-
-      monitoring:
-        gatus:
-          # renovate: depName="Gatus"
-          gnetId: 24379
-          revision: 1
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
 
         # PDU Insights (grafana.com 23027) is not imported: this Prometheus
         # has no unpoller_device_outlet_* series, so every panel would be empty.
@@ -432,28 +316,27 @@ spec:
               value: Prometheus
             - name: DS_UNIFI_POLLER
               value: Prometheus
-
         unifi-usw:
           # renovate: depName="UniFi-Poller: USW Insights - Prometheus"
           gnetId: 11312
           revision: 9
           datasource:
-            - name: "DS_PROMETHEUS"
+            - name: DS_PROMETHEUS
               value: Prometheus
             - name: DS_UNIFI_POLLER
               value: Prometheus
-
         unifi-uap:
           # renovate: depName="UniFi-Poller: UAP Insights - Prometheus"
           gnetId: 11314
           revision: 10
           datasource:
-            - name: "DS_PROMETHEUS"
+            - name: DS_PROMETHEUS
               value: Prometheus
             - name: DS_UNIFI_POLLER
               value: Prometheus
-
       storage:
+        # Ceph Usage and Ceph Hosts Overview are ConfigMaps (app/dashboards/ceph/); the kopiur board
+        # comes from its chart.
         ceph-cluster:
           # renovate: depName="Ceph Cluster"
           gnetId: 2842
@@ -477,6 +360,85 @@ spec:
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
+
+      databases:
+        # CloudNativePG (cloudnative-pg-dashboard chart) and the Dragonfly operator install their
+        # own dashboards; gnetIds 15944/15945/21053/21054 are the unrelated Dragonfly P2P project.
+        # Do not duplicate them here (UID collision).
+        #
+        # EMQX: the two rule-engine boards are left out, no rule exists and their series are absent.
+        emqx-overview:
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/overview.json
+          datasource: Prometheus
+
+        emqx-authentication:
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authentication.json
+          datasource: Prometheus
+
+        emqx-authorization:
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authorization.json
+          datasource: Prometheus
+
+        emqx-client-events:
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/client-events.json
+          datasource: Prometheus
+
+        emqx-messages:
+          url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/messages.json
+          datasource: Prometheus
+
+      ai:
+        # LiteLLM (app/dashboards/litellm/) and the GPU node board (ai/gpu-node-dashboard) are ConfigMaps.
+        toolhive-mcp-gateway:
+          url: https://raw.githubusercontent.com/stacklok/toolhive/42cd9b7e497bfc77dc67a1e73037675247d405b1/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
+          datasource: Prometheus
+
+      apps:
+        plex-media-server-exporter:
+          # renovate: depName="plex-media-server-exporter"
+          gnetId: 17891
+          revision: 1
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+
+        n8n:
+          # renovate: depName="n8n System Health Overview"
+          gnetId: 24474
+          revision: 1
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+
+      observability:
+        gatus:
+          # renovate: depName="Gatus"
+          gnetId: 24379
+          revision: 1
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+
+        # Alertmanager / Overview is a ConfigMap of the alertmanager app.
+        victoria-logs:
+          # renovate: depName="VictoriaLogs - single-node"
+          gnetId: 22084
+          revision: 12
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+
+        # Replaces Flux's Loki-only logs.json. Flux controllers: Namespace flux-system, Container
+        # manager, then the Filter variable kubernetes.pod_labels.app = <controller>. Its Level
+        # panels read `log.level`; zap-logging controllers (Flux) write `level`, so they show
+        # "unknown" there.
+        victoria-logs-explorer:
+          # renovate: depName="VictoriaLogs - Explorer for Kubernetes logs"
+          gnetId: 25747
+          revision: 1
+          datasource:
+            - name: DS_VICTORIALOGS
+              value: VictoriaLogs
 
     datasources:
       datasources.yaml:
@@ -523,8 +485,8 @@ spec:
       # Do not set GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH. It overrides
       # grafana.ini dashboards.default_home_dashboard_path, and the sidecar
       # directory (/tmp/dashboards) has no home.json, so every visit to
-      # /api/dashboards/home returns 500. The chart writes the landing
-      # dashboard to the path grafana.ini already names.
+      # /api/dashboards/home returns 500. dashboardsConfigMaps mounts the
+      # landing board at the path grafana.ini already names.
       GF_EXPLORE_ENABLED: true
       GF_FEATURE_TOGGLES_ENABLE: publicDashboards
       GF_LOG_MODE: console
@@ -560,12 +522,16 @@ spec:
         check_for_plugin_updates: false
         reporting_enabled: false
       dashboards:
-        default_home_dashboard_path: /var/lib/grafana/dashboards/default/home-dashboard.json
+        default_home_dashboard_path: /var/lib/grafana/dashboards/home/home.json
       news:
         news_feed_enabled: false
       # Core-plugin auto-update writes outside the plugins dir and fails on a read-only rootfs.
       plugins:
         preinstall_auto_update: false
+      # Tron is the built-in theme closest to the SKLAB palette (near-black navy, cyan accent).
+      # Each user can still pick another one in their profile.
+      users:
+        default_theme: tron
     imageRenderer:
       enabled: true
       # Pinned to the digest the chart's floating `latest` was running on 2026-11-13. Idles at

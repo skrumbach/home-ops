@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="SKLAB Grafana">
+  <!-- The SKLAB hexagon (security/pocket-id/branding) with three rising bars for the keyhole. Grafana draws
+       it as an <img> in the menu, on the sign-in card and as the loading mark, so no web font and no script. -->
+  <defs>
+    <linearGradient id="n" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D8F0"/>
+      <stop offset=".5" stop-color="#6C5CFF"/>
+      <stop offset="1" stop-color="#D946E6"/>
+    </linearGradient>
+    <filter id="g" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.6"/>
+    </filter>
+  </defs>
+  <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" fill="#090C22"/>
+  <g fill="none" stroke="url(#n)" stroke-linejoin="round">
+    <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" stroke-width="12" opacity=".4" filter="url(#g)"/>
+    <path d="M64 9 111.6 36.5V91.5L64 119 16.4 91.5V36.5Z" stroke-width="9"/>
+  </g>
+  <g fill="#22D8F0">
+    <rect x="40" y="66" width="12" height="22" rx="3"/>
+    <rect x="58" y="52" width="12" height="36" rx="3"/>
+    <rect x="76" y="38" width="12" height="50" rx="3"/>
+  </g>
+</svg>

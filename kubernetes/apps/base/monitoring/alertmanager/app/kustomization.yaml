@@ -13,6 +13,20 @@ configMapGenerator:
   - name: alertmanager
     files:
       - resources/alertmanager.yml
+  # The alertmanager-mixin board (prometheus/alertmanager doc/alertmanager-mixin, generated JSON from
+  # monitoring-mixins/website at 4a8f73ea, assets/alertmanager/dashboards/alertmanager-overview.json).
+  # kube-prometheus-stack ships it only with its own Alertmanager, which is off here. Vendored, not a
+  # download in the Grafana HelmRelease: that repository's branch is master and the Renovate manager
+  # for url: boards follows main.
+  - name: alertmanager-dashboard
+    files:
+      - resources/alertmanager-overview.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "true"
+      annotations:
+        grafana_folder: Observability
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

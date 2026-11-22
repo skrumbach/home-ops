@@ -18,7 +18,7 @@
 - **Firewalls the hosts.** `ceph-lan-isolation` ([`app/ciliumclusterwidenetworkpolicy.yaml`](app/ciliumclusterwidenetworkpolicy.yaml))
   denies LAN (`world`) access to host-network Ceph ports and to unauthenticated metrics ports on the node IPs.
 - **Shows the flows.** Hubble relay and UI are on. The UI is `hubble.sklab.dev` on `envoy-internal`, behind
-  Pocket ID. Flow metrics and dashboards go to Prometheus and the Grafana `Cilium` folder.
+  Pocket ID. Flow metrics and dashboards go to Prometheus and the Grafana `Network` folder.
 
 ## Why it is built this way
 

@@ -16,7 +16,7 @@ configMapGenerator:
       labels:
         grafana_dashboard: "true"
       annotations:
-        grafana_folder: "Coder"
+        grafana_folder: Apps
         kustomize.toolkit.fluxcd.io/substitute: disabled
     files:
       - ./dashboards/coderd.json

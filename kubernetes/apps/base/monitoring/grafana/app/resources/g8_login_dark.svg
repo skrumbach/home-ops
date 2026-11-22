@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" width="2400" height="1350" preserveAspectRatio="xMidYMid slice" role="img" aria-label="SKLAB sign-in background">
+  <!-- Sign-in background in the GitHub profile palette (skrumbach/skrumbach), after the Pocket ID one.
+       Grafana draws it with background-size: cover from 900 px up and at its own size, top centre, below
+       that, and puts the sign-in card over the middle: the middle stays empty, the detail sits in the
+       corners. No filter on a large area and no web font: it is drawn as a CSS background. -->
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#090C22"/>
+      <stop offset="1" stop-color="#060818"/>
+    </linearGradient>
+    <radialGradient id="violet" cx="88%" cy="0%" r="70%">
+      <stop offset="0" stop-color="#8B55F5" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#8B55F5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyan" cx="4%" cy="100%" r="55%">
+      <stop offset="0" stop-color="#22D8F0" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#22D8F0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="magenta" cx="100%" cy="96%" r="40%">
+      <stop offset="0" stop-color="#D946E6" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#D946E6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fade" cx="50%" cy="50%" r="72%">
+      <stop offset="0" stop-color="#fff" stop-opacity=".25"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hair" x1="0" x2="1">
+      <stop offset="0" stop-color="#22D8F0" stop-opacity=".8"/>
+      <stop offset=".5" stop-color="#A57BFF" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#D946E6" stop-opacity=".8"/>
+    </linearGradient>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M100 0H0V100" fill="none" stroke="#1683A8" stroke-opacity=".30" stroke-width="1.5"/>
+    </pattern>
+    <mask id="gridfade">
+      <rect width="2400" height="1350" fill="url(#fade)"/>
+    </mask>
+  </defs>
+
+  <!-- Navy base and the three corner glows -->
+  <rect width="2400" height="1350" fill="url(#base)"/>
+  <rect width="2400" height="1350" fill="url(#violet)"/>
+  <rect width="2400" height="1350" fill="url(#cyan)"/>
+  <rect width="2400" height="1350" fill="url(#magenta)"/>
+
+  <!-- Grid, faint behind the card and fading out towards the corners -->
+  <rect width="2400" height="1350" fill="url(#grid)" mask="url(#gridfade)"/>
+
+  <!-- Circuit traces in from the left and the right edge, each ending in a lit node -->
+  <g fill="none" stroke="#1683A8" stroke-opacity=".55" stroke-width="2" stroke-linejoin="round">
+    <path d="M0 300H400V500H600"/>
+    <path d="M0 800H300V1000H700"/>
+    <path d="M0 1100H500V1200"/>
+    <path d="M2400 400H2000V200H1800"/>
+    <path d="M2400 900H2100V700H1700"/>
+    <path d="M2400 1200H1900V1100"/>
+  </g>
+  <g>
+    <circle cx="600" cy="500" r="6" fill="#22D8F0" opacity=".75"/>
+    <circle cx="700" cy="1000" r="6" fill="#A57BFF" opacity=".75"/>
+    <circle cx="500" cy="1200" r="5" fill="#D946E6" opacity=".60"/>
+    <circle cx="1800" cy="200" r="6" fill="#C4B0FF" opacity=".70"/>
+    <circle cx="1700" cy="700" r="6" fill="#22D8F0" opacity=".65"/>
+    <circle cx="1900" cy="1100" r="5" fill="#D946E6" opacity=".60"/>
+    <circle cx="300" cy="100" r="3" fill="#22D8F0" opacity=".40"/>
+    <circle cx="1100" cy="100" r="3" fill="#A57BFF" opacity=".45"/>
+    <circle cx="1300" cy="1300" r="3" fill="#22D8F0" opacity=".35"/>
+    <circle cx="2200" cy="600" r="3" fill="#22D8F0" opacity=".35"/>
+  </g>
+
+  <!-- The neon hairline of every brand card, along the bottom edge -->
+  <rect y="1346" width="2400" height="4" fill="url(#hair)"/>
+</svg>

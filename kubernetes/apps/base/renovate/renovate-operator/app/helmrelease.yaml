@@ -61,7 +61,7 @@ spec:
         labels:
           grafana_dashboard: "true"
         annotations:
-          grafana_folder: Operators
+          grafana_folder: Platform
     resources:
       requests:
         cpu: 10m
