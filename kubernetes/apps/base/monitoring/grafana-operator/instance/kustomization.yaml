@@ -6,3 +6,5 @@ resources:
   - ./grafana.yaml
   - ./grafanadatasource.yaml
   - ./grafanafolder.yaml
+  - ./grafanaserviceaccount.yaml
+  - ./servicemonitor.yaml

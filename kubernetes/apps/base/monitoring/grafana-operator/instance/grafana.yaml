@@ -48,6 +48,10 @@ spec:
     # Core-plugin auto-update writes outside the plugins dir and fails on a read-only rootfs.
     plugins:
       preinstall_auto_update: "false"
+    # The renderer of this instance (renderer/). It calls back to load the panel it renders.
+    rendering:
+      server_url: http://grafana-renderer.monitoring.svc.cluster.local:8081/render
+      callback_url: http://grafana-service.monitoring.svc.cluster.local:3000/
     security:
       cookie_samesite: lax
     server:

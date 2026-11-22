@@ -1,0 +1,262 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: arc
+  namespace: actions-runner-system
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: platform
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  configMapRef:
+    name: arc-dashboard
+    key: arc-dashboard.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: gpu-node
+  namespace: ai
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: ai
+  configMapRef:
+    name: gpu-node-dashboard
+    key: gpu-node.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: coder-coderd
+  namespace: coder
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: apps
+  configMapRef:
+    name: coder-dashboards
+    key: coderd.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: coder-provisionerd
+  namespace: coder
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: apps
+  configMapRef:
+    name: coder-dashboards
+    key: provisionerd.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: coder-status
+  namespace: coder
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: apps
+  configMapRef:
+    name: coder-dashboards
+    key: status.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: coder-workspace-detail
+  namespace: coder
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: apps
+  configMapRef:
+    name: coder-dashboards
+    key: workspace_detail.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: coder-workspaces
+  namespace: coder
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: apps
+  configMapRef:
+    name: coder-dashboards
+    key: workspaces.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudnative-pg
+  namespace: database
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: databases
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_EXPRESSION
+      datasourceName: __expr__
+  configMapRef:
+    name: cnpg-grafana-dashboard
+    key: cnp.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: dragonfly
+  namespace: database
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: databases
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_EXPRESSION
+      datasourceName: __expr__
+  configMapRef:
+    name: dashboard-dragonfly-operator-grafana-dashboard
+    key: grafana-dashboard.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  configMapRef:
+    name: cilium-dashboard
+    key: cilium-dashboard.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble
+  namespace: kube-system
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  configMapRef:
+    name: hubble-dashboard
+    key: hubble-dashboard.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: hubble-network-overview-namespace
+  namespace: kube-system
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  configMapRef:
+    name: hubble-network-overview-namespace
+    key: hubble-network-overview-namespace.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: renovate-operator
+  namespace: renovate
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: platform
+  configMapRef:
+    name: renovate-operator-dashboard
+    key: renovate-operator.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: external-secrets
+  namespace: security
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: platform
+  configMapRef:
+    name: external-secrets-dashboard
+    key: external-secrets.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: tuppr
+  namespace: system-upgrade
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: platform
+  configMapRef:
+    name: tuppr-dashboard
+    key: tuppr.json
