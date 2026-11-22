@@ -96,7 +96,7 @@ flowchart LR
 
 ```bash
 flux -n monitoring get ks grafana-operator grafana-operator-instance grafana-operator-boards
-kubectl -n monitoring get grafana grafana
+kubectl -n monitoring get grafanas.grafana.integreatly.org grafana   # `get grafana` is External Secrets' generator kind
 kubectl -n monitoring get grafanadatasource,grafanafolder
 kubectl -n monitoring get grafanadashboard                    # one row per board
 kubectl -n monitoring describe grafanadashboard keda          # why one board failed
@@ -117,11 +117,15 @@ kubectl -n monitoring logs deploy/grafana-deployment -c brand
 - **Merge after the brand change.** ConfigMaps `grafana-brand` and `grafana-home-dashboard` come from
   [`monitoring/grafana`](../grafana/README.md); without them the pod waits on a missing volume.
 - **Deleting a `GrafanaDashboard`, `GrafanaFolder` or `GrafanaDatasource` deletes it in Grafana.**
+- **Name the Grafana kind in full.** `kubectl get grafana` resolves to `grafanas.generators.external-secrets.io`
+  in this cluster; the instance is `grafanas.grafana.integreatly.org`.
 
 ## Known gaps
 
-- **Not tested on a cluster.** The manifests pass `flate` and a strict check against the chart's CRD
-  schemas; the first reconcile is the first real run.
+- **A fresh instance needs about a quarter of an hour.** On the first run (2026-11-22) the operator restarted
+  Grafana once to install the VictoriaLogs plugin. Folders and boards that tried during that restart report
+  `NoMatchingInstance` and are applied at their next sync, ten minutes later. All 8 folders and 63 boards
+  were in within 15 minutes, with no manual step.
 - **Boards from other namespaces are missing:** cilium and Hubble, coder, the ARC controller, the GPU node,
   CloudNativePG, Dragonfly, Renovate, External Secrets and tuppr.
 - **No image renderer, no ServiceMonitor for this Grafana, no service account for `ai/grafana-mcp`.** They
