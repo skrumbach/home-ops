@@ -14,4 +14,4 @@ spec:
     grafanaDashboard:
       namespace: database
       annotations:
-        grafana_folder: Database
+        grafana_folder: Databases

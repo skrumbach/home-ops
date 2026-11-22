@@ -9,6 +9,6 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
-    grafana_folder: AI/ML
+    grafana_folder: AI
   labels:
     grafana_dashboard: "true"

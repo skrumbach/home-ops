@@ -22,6 +22,6 @@ spec:
           memory: 128Mi
     grafanaDashboard:
       enabled: true
-      folder: Database
+      folder: Databases
       annotations:
-        grafana_folder: Database
+        grafana_folder: Databases

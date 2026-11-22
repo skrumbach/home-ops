@@ -22,7 +22,7 @@
 - **Mirrors the archive off site.** CronJob `postgres-offsite-mirror` copies that archive to Cloudflare R2 every
   hour. It is documented in [`offsite-mirror/README.md`](offsite-mirror/README.md).
 - **Offers a web UI and a dashboard.** pgAdmin is `pgadmin.sklab.dev` and `pg.sklab.dev` on `envoy-internal`, behind
-  Pocket ID. The `cloudnative-pg-dashboard` chart adds the Grafana dashboard to the `Database` folder.
+  Pocket ID. The `cloudnative-pg-dashboard` chart adds the Grafana dashboard to the `Databases` folder.
 
 ## Why it is built this way
 

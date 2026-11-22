@@ -16,7 +16,7 @@
   Four consumers do so: `ai/litellm`, `ai/searxng`, `selfhosted/paperless-ngx` and `selfhosted/rsshub`.
 - **Runs two replicas per instance**, one master and one replica, on different nodes.
 - **Exports metrics** with a `PodMonitor` per instance, and ships the operator's Grafana dashboard into the
-  `Database` folder.
+  `Databases` folder.
 
 ## Why it is built this way
 

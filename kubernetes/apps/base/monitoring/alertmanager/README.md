@@ -17,7 +17,8 @@
 - **Sends the Watchdog heartbeat** to Healthchecks.io every 5 minutes, so silence there means the alert chain is
   down.
 - **Serves a UI** at `alertmanager.sklab.dev` on `envoy-internal`, behind Pocket ID (group `admins`).
-- **Feeds Grafana** as a datasource, over the in-cluster Service.
+- **Feeds Grafana** as a datasource, over the in-cluster Service, and ships the board `Alertmanager / Overview`
+  as ConfigMap `alertmanager-dashboard` (Grafana folder `Observability`).
 
 The same `alerts` component also adds Flux `Provider` and `Alert` `github-status`, which posts Kustomization
 errors to GitHub commit status. That path does not go through Alertmanager.

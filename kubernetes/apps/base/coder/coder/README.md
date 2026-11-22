@@ -63,7 +63,7 @@ flowchart LR
 3. The chart's Deployment loads Secret `coder` with `envFrom` and reads the OIDC client from `coder-oidc-credentials`.
    The annotation `reloader.stakater.com/auto` restarts it when either Secret changes.
 4. A post-render patch adds Service port `prom-http` (`2112`) so ServiceMonitor `coder` can scrape it every 10s.
-5. `dashboards/` become ConfigMap `coder-dashboards` for Grafana (folder `Coder`). `rules/` hold the PrometheusRules for
+5. `dashboards/` become ConfigMap `coder-dashboards` for Grafana (folder `Apps`). `rules/` hold the PrometheusRules for
    coderd and provisionerd. `runbooks/` become ConfigMap `coder-runbooks`; alert `runbook_url` values point at the same files in Git.
 
 ## Settings that matter
