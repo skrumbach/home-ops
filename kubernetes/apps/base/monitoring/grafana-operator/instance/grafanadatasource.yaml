@@ -1,0 +1,61 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  # Boards name a datasource by uid or by name; boards/grafanadashboard.yaml maps inputs to the uid.
+  uid: prometheus
+  datasource:
+    name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+    isDefault: true
+    jsonData:
+      prometheusType: Prometheus
+      # Must match scrapeInterval in kube-prometheus-stack. Unset, Grafana assumes 15s and
+      # $__rate_interval resolves to 1m, one scrape, so rate() panels are empty.
+      timeInterval: 1m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: victoria-logs
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  uid: victoria-logs
+  # The operator adds the plugin to GF_INSTALL_PLUGINS of the instance.
+  plugins:
+    - name: victoriametrics-logs-datasource
+      version: 0.34.0
+  datasource:
+    name: VictoriaLogs
+    type: victoriametrics-logs-datasource
+    access: proxy
+    url: http://victoria-logs.monitoring.svc.cluster.local:9428
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: alertmanager
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  uid: alertmanager
+  datasource:
+    name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager.monitoring.svc.cluster.local:9093
+    jsonData:
+      implementation: prometheus

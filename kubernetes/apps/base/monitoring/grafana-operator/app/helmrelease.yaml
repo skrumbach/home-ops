@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: grafana-operator
+  interval: 1h
+  # The chart keeps its CRDs in a crds/ subchart, which Helm installs once and never updates.
+  # CreateReplace applies the new schemas on every chart bump, and on the first install it
+  # replaces the ten grafana.integreatly.org CRDs left in the cluster since 2025-10 (#1484).
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values:
+    # Its own board, as ConfigMap grafana-operator-dashboard (boards/grafanadashboard.yaml loads it).
+    dashboard:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 96Mi
+      limits:
+        memory: 256Mi

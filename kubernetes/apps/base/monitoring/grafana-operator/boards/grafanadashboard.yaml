@@ -1,0 +1,888 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: home
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  # General is Grafana's root. Without a folder the operator files a board under the namespace's name.
+  folder: General
+  configMapRef:
+    name: grafana-home-dashboard
+    key: home.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: node-exporter-full
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/1860/revisions/46/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-views-global
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/15757/revisions/43/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-views-namespaces
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/15758/revisions/46/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-views-nodes
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/15759/revisions/40/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-views-pods
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/15760/revisions/41/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: k8s-volumes
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  datasources:
+    - inputName: DS_OPENSHIFT_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/11454/revisions/14/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: flux-performance
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: platform
+  url: https://raw.githubusercontent.com/controlplaneio-fluxcd/flux-operator/cb3cc0de38df84c359d24f6a6663d515c42b3f57/config/monitoring/dashboards/flux-performance.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: flux-k8s-api-performance
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: platform
+  url: https://raw.githubusercontent.com/controlplaneio-fluxcd/flux-operator/cb3cc0de38df84c359d24f6a6663d515c42b3f57/config/monitoring/dashboards/flux-k8s-api-performance.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: flux-control-plane
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: platform
+  url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/7ab65dc8b90f7a6751d88f18bbb4e1bee33bf334/monitoring/configs/dashboards/control-plane.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cert-manager
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: platform
+  url: https://grafana.com/api/dashboards/20842/revisions/3/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: keda
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: platform
+  url: https://raw.githubusercontent.com/kedacore/keda/48cd1105b579723c637d6ee6e0f245634541bedc/config/grafana/keda-dashboard.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: external-dns
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/15038/revisions/3/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudflare-tunnels
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/17457/revisions/6/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: envoy-gateway
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.10.0/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: envoy-proxy
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  url: https://raw.githubusercontent.com/envoyproxy/gateway/v1.10.0/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unifi-insights
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_UNIFI_POLLER
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/11315/revisions/9/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unifi-network-sites
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_UNIFI_POLLER
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/11311/revisions/5/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unifi-usw
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_UNIFI_POLLER
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/11312/revisions/9/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unifi-uap
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: network
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+    - inputName: DS_UNIFI_POLLER
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/11314/revisions/10/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: ceph-cluster
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/2842/revisions/18/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: ceph-osd
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/5336/revisions/9/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: ceph-pools
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/5342/revisions/9/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: emqx-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: databases
+  url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/overview.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: emqx-authentication
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: databases
+  url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authentication.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: emqx-authorization
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: databases
+  url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/authorization.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: emqx-client-events
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: databases
+  url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/client-events.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: emqx-messages
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: databases
+  url: https://raw.githubusercontent.com/emqx/emqx-exporter/dc299c941cbd80f9e02b6e9f2abed9a220479a3a/grafana-dashboard/template/emqx-5/messages.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: toolhive-mcp-gateway
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: ai
+  url: https://raw.githubusercontent.com/stacklok/toolhive/42cd9b7e497bfc77dc67a1e73037675247d405b1/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: plex-media-server-exporter
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: apps
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/17891/revisions/1/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: n8n
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: apps
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/24474/revisions/1/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: gatus
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/24379/revisions/1/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: victoria-logs
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: prometheus
+  url: https://grafana.com/api/dashboards/22084/revisions/12/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: victoria-logs-explorer
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  datasources:
+    - inputName: DS_VICTORIALOGS
+      datasourceName: victoria-logs
+  url: https://grafana.com/api/dashboards/25747/revisions/1/download
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: ceph-usage
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  configMapRef:
+    name: ceph-usage-dashboard
+    key: ceph-usage.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: ceph-hosts-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  configMapRef:
+    name: ceph-hosts-overview-dashboard
+    key: ceph-hosts-overview.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kopiur
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: storage
+  configMapRef:
+    name: kopiur-dashboard
+    key: kopiur.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: litellm
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: ai
+  configMapRef:
+    name: litellm-dashboard
+    key: litellm.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: litellm-routing
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: ai
+  configMapRef:
+    name: litellm-routing-dashboard
+    key: litellm-routing.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: alertmanager
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  configMapRef:
+    name: alertmanager-dashboard
+    key: alertmanager-overview.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: grafana-operator
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  configMapRef:
+    name: grafana-operator-dashboard
+    key: grafana-operator.json
+# kube-prometheus-stack ships 23 boards as ConfigMaps. One is left out: k8s-resources-multicluster (one cluster).
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-apiserver
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-apiserver
+    key: apiserver.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-cluster-total
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-cluster-total
+    key: cluster-total.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-etcd
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-etcd
+    key: etcd.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-coredns
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-coredns
+    key: k8s-coredns.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-cluster
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-cluster
+    key: k8s-resources-cluster.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-namespace
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-namespace
+    key: k8s-resources-namespace.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-node
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-node
+    key: k8s-resources-node.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-nodes-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-nodes-overview
+    key: k8s-resources-nodes-overview.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-pod
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-pod
+    key: k8s-resources-pod.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-workload
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-workload
+    key: k8s-resources-workload.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-k8s-resources-workloads-namespace
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-k8s-resources-workloads-namespace
+    key: k8s-resources-workloads-namespace.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-kubelet
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-kubelet
+    key: kubelet.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-namespace-by-pod
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-namespace-by-pod
+    key: namespace-by-pod.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-namespace-by-workload
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-namespace-by-workload
+    key: namespace-by-workload.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-node-cluster-rsrc-use
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-node-cluster-rsrc-use
+    key: node-cluster-rsrc-use.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-node-rsrc-use
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-node-rsrc-use
+    key: node-rsrc-use.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-nodes
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-nodes
+    key: nodes.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-persistentvolumesusage
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-persistentvolumesusage
+    key: persistentvolumesusage.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-pod-total
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-pod-total
+    key: pod-total.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-workload-total
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: kubernetes
+  configMapRef:
+    name: kube-prometheus-stack-workload-total
+    key: workload-total.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-grafana-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  configMapRef:
+    name: kube-prometheus-stack-grafana-overview
+    key: grafana-overview.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kube-prometheus-stack-prometheus
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderRef: observability
+  configMapRef:
+    name: kube-prometheus-stack-prometheus
+    key: prometheus.json

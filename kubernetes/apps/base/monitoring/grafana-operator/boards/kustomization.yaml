@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# One GrafanaDashboard per board, 63 of them, in folder order. The file is named grafanadashboard.yaml
+# because the home-operations Renovate preset for grafana.com revisions reads only files with that
+# name. The preset is not switched on yet: until this instance takes over, Renovate bumps the same
+# boards in the grafana HelmRelease and the revisions here are copied from it.
+#
+# A board from grafana.com or GitHub is fetched by the operator. A board that an app ships as a
+# ConfigMap is read through configMapRef, which only sees ConfigMaps in this namespace: the boards of
+# cilium, coder, the ARC controller, the GPU node, CloudNativePG, Dragonfly, Renovate, External Secrets
+# and tuppr are not here yet.
+#
+# datasources maps a board's input to a datasource uid (instance/grafanadatasource.yaml): the
+# operator replaces the literal ${INPUT} in the board's JSON with that value.
+#
+# grafana.com boards are url: entries, not grafanaCom: ones. The operator caches fetched content by
+# URL, and a grafanaCom board is looked up before its URL is known, so it is downloaded again on
+# every sync.
+resources:
+  - ./grafanadashboard.yaml

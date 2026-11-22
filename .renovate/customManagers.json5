@@ -25,5 +25,29 @@
       datasourceTemplate: "github-releases",
       extractVersionTemplate: "^v(?<version>.+)$",
     },
+    {
+      // The Grafana CR names the image twice: spec.version (a bare tag, no image: key) and the `brand` init container, which copies
+      // files out of that same image. One dep for both lines keeps them in one PR; on different versions the brand files no longer fit.
+      description: "Grafana image of the grafana-operator instance: spec.version and the brand init container",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)monitoring/grafana-operator/instance/grafana\\.yaml$/"],
+      matchStrings: [
+        "\\n  version: (?<currentValue>\\d[^\\s]*)",
+        "image: docker\\.io/grafana/grafana:(?<currentValue>\\d[^\\s@]*)",
+      ],
+      depNameTemplate: "docker.io/grafana/grafana",
+      datasourceTemplate: "docker",
+    },
+    {
+      description: "Grafana VictoriaLogs datasource plugin pin in the grafana-operator GrafanaDatasource",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)monitoring/grafana-operator/instance/grafanadatasource\\.yaml$/"],
+      matchStrings: [
+        "name: victoriametrics-logs-datasource\\n\\s+version: (?<currentValue>\\d[^\\s]*)",
+      ],
+      depNameTemplate: "VictoriaMetrics/victorialogs-datasource",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
   ],
 }

@@ -21,7 +21,11 @@ spec:
   clientSecretOverlap: 1h
   launchUrl: https://grafana.sklab.dev
   # <root_url>/login/generic_oauth; root_url is GF_SERVER_ROOT_URL.
-  callbackUrls: ["https://grafana.sklab.dev/login/generic_oauth"]
+  # The second URL is the grafana-operator instance (monitoring/grafana-operator), which signs in
+  # with this client until it takes over grafana.sklab.dev.
+  callbackUrls:
+    - https://grafana.sklab.dev/login/generic_oauth
+    - https://grafana-next.sklab.dev/login/generic_oauth
   # No logoutCallbackUrls: no signout_redirect_url is set, so Grafana's logout is local only.
   # use_pkce: true sends an S256 challenge.
   pkceEnabled: true
