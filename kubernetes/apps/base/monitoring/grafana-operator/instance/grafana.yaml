@@ -1,0 +1,189 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafana_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  labels:
+    # Every GrafanaDashboard, GrafanaFolder and GrafanaDatasource selects the instance by this label.
+    dashboards: grafana
+spec:
+  # Pinned to the version the grafana chart runs; the operator's own default is newer. The `brand`
+  # init container below must name the same image: one Renovate manager (.renovate/customManagers.json5)
+  # reads both lines, so they move in one PR.
+  version: 12.3.1
+  # The operator signs in to Grafana with these two env values over basic auth. They come from the
+  # Secret the grafana chart already uses (ExternalSecret grafana, 1Password item grafana), so the
+  # break-glass login is the same on both instances.
+  disableDefaultAdminSecret: true
+  config:
+    analytics:
+      check_for_updates: "false"
+      check_for_plugin_updates: "false"
+      reporting_enabled: "false"
+    # Pocket ID SSO, the client the grafana chart registers (monitoring/grafana pocketidoidcclient.yaml).
+    # The client secret arrives as GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET from Secret grafana-oidc-client.
+    auth.generic_oauth:
+      enabled: "true"
+      name: Pocket ID
+      icon: signin
+      client_id: grafana
+      scopes: openid email profile groups offline_access
+      auth_url: https://id.sklab.dev/authorize
+      token_url: https://id.sklab.dev/api/oidc/token
+      api_url: https://id.sklab.dev/api/oidc/userinfo
+      use_pkce: "true"
+      use_refresh_token: "true"
+      allow_sign_up: "true"
+      # Only the Pocket ID admins group signs in, as server admins.
+      role_attribute_path: contains(groups[*], 'admins') && 'GrafanaAdmin' || ''
+      role_attribute_strict: "true"
+      allow_assign_grafana_admin: "true"
+    date_formats:
+      use_browser_locale: "true"
+    log:
+      mode: console
+    news:
+      news_feed_enabled: "false"
+    # Core-plugin auto-update writes outside the plugins dir and fails on a read-only rootfs.
+    plugins:
+      preinstall_auto_update: "false"
+    security:
+      cookie_samesite: lax
+    server:
+      root_url: https://grafana-next.sklab.dev
+    users:
+      default_theme: tron
+  preferences:
+    # boards/grafanadashboard.yaml `home`, uid from app/dashboards/home/home.json of the grafana app.
+    homeDashboardUid: home-dashboard
+  # No Reloader annotations: the operator rewrites the Deployment on every reconcile and would strip
+  # what Reloader injects, two rollouts for one change. It restarts Grafana itself when the data of a
+  # referenced Secret or ConfigMap changes. A change to the two PNGs alone (binaryData) is not seen:
+  # restart the Deployment by hand then.
+  deployment:
+    spec:
+      # The data volume is ReadWriteOnce.
+      strategy:
+        type: Recreate
+      template:
+        spec:
+          # The SKLAB look, the same mechanism as in the grafana chart (monitoring/grafana README):
+          # copy Grafana's static image directory into an emptyDir and overwrite the hashed logo and
+          # sign-in background by pattern. $f and $t have no braces, so Flux leaves them alone.
+          initContainers:
+            - name: brand
+              # The image of spec.version above, bumped with it.
+              image: docker.io/grafana/grafana:12.3.1
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  cp -R /usr/share/grafana/public/build/static/img/. /static/
+                  for f in grafana_icon g8_login_dark; do
+                    for t in /static/$f.*.svg; do
+                      if [ -e "$t" ]; then cp "/brand/$f.svg" "$t"; fi
+                    done
+                  done
+                  cp /brand/sklab-header.svg /static/
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 10001
+                runAsGroup: 10001
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi
+              volumeMounts:
+                - name: brand-static
+                  mountPath: /static
+                - name: brand
+                  mountPath: /brand
+                  readOnly: true
+          containers:
+            - name: grafana
+              env:
+                - name: GF_SECURITY_ADMIN_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-secret
+                      key: admin-user
+                - name: GF_SECURITY_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-secret
+                      key: admin-password
+              envFrom:
+                - secretRef:
+                    name: grafana-oidc-client
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: brand-static
+                  mountPath: /usr/share/grafana/public/build/static/img
+                - name: brand
+                  mountPath: /usr/share/grafana/public/img/grafana_icon.svg
+                  subPath: grafana_icon.svg
+                  readOnly: true
+                - name: brand
+                  mountPath: /usr/share/grafana/public/img/fav32.png
+                  subPath: fav32.png
+                  readOnly: true
+                - name: brand
+                  mountPath: /usr/share/grafana/public/img/apple-touch-icon.png
+                  subPath: apple-touch-icon.png
+                  readOnly: true
+          # The operator runs Grafana as 10001:10001 on a read-only root; fsGroup lets it write the PVC.
+          securityContext:
+            fsGroup: 10001
+            fsGroupChangePolicy: OnRootMismatch
+          volumes:
+            # Replaces the operator's emptyDir of the same name with the claim below.
+            - name: grafana-data
+              persistentVolumeClaim:
+                claimName: grafana-pvc
+            - name: brand
+              configMap:
+                name: grafana-brand
+            - name: brand-static
+              emptyDir: {}
+  # Holds grafana.db and the installed plugin. Everything in it is declared in Git, so it has no
+  # backup: it only saves the operator from re-creating every board after a restart.
+  persistentVolumeClaim:
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: ceph-block
+      resources:
+        requests:
+          storage: 2Gi
+  httpRoute:
+    metadata:
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/icon: grafana.svg
+        gethomepage.dev/name: Grafana (operator)
+        gethomepage.dev/group: Observability
+        gethomepage.dev/description: Dashboards, the grafana-operator instance
+        gethomepage.dev/pod-selector: app=grafana
+        gatus.home-operations.com/endpoint: |-
+          url: https://grafana-next.sklab.dev/api/health
+          conditions:
+            - "[STATUS] == 200"
+            - "[BODY].database == ok"
+          group: monitoring
+    spec:
+      hostnames: ["grafana-next.sklab.dev"]
+      parentRefs:
+        - name: envoy-internal
+          namespace: network
+          sectionName: https
