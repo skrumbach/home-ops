@@ -74,7 +74,7 @@ spec:
           initContainers:
             - name: brand
               # The image of spec.version above, bumped with it.
-              image: docker.io/grafana/grafana:12.3.1
+              image: docker.io/grafana/grafana:12.3.1@sha256:2175aaa91c96733d86d31cf270d5310b278654b03f5718c59de12a865380a31f
               command:
                 - /bin/sh
                 - -ec
