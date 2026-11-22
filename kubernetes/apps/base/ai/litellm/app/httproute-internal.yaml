@@ -13,6 +13,8 @@ metadata:
     gethomepage.dev/name: LiteLLM
     gethomepage.dev/description: "LLM gateway, keys and budgets"
     gethomepage.dev/icon: sh-litellm.svg
+    # / is the Swagger page; the admin UI is /ui/.
+    gethomepage.dev/href: https://litellm.sklab.dev/ui/
     gethomepage.dev/pod-selector: app.kubernetes.io/name=litellm
     # /health/readiness also covers the Postgres dependency.
     gatus.home-operations.com/endpoint: |-

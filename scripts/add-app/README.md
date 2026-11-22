@@ -32,6 +32,8 @@ placeholders (image/tag, ports, uid/gid, 1Password keys), not a finished app. Af
 - Does not generate the `parameterized instance` shape's parent-directory wiring (one live
   precedent in this repo, its own `resources:` list is hand-maintained - the script writes the
   instance's own files and tells you the one line to add by hand).
-- Does not wire kopiur (VolSync is removed; never add it back), ingress auth, Gatus endpoints, or
-  Homepage annotations - these are per-app judgment calls, not structural boilerplate.
+- Does not wire kopiur (VolSync is removed; never add it back), ingress auth or Gatus endpoints -
+  these are per-app judgment calls, not structural boilerplate. The route does get Homepage
+  annotations with `TODO` values: every app with a browser UI has a tile (`CLAUDE.md` conventions),
+  so delete them only for an API-only route.
 - Does not touch any existing app. It refuses to overwrite a file that already exists.

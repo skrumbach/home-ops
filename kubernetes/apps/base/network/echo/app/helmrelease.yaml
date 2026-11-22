@@ -67,13 +67,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/parent: Applications
-          gethomepage.dev/group: Platform
-          gethomepage.dev/name: Echo
-          gethomepage.dev/icon: "mdi-swap-horizontal-#22D8F0"
-          gethomepage.dev/description: HTTP echo test endpoint
-          gethomepage.dev/href: "https://echo.sklab.dev"
+          # No Homepage tile: a test endpoint that echoes the request, not a web UI.
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
         hostnames: ["{{ .Release.Name }}.sklab.dev"]

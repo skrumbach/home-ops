@@ -191,7 +191,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: AI
           gethomepage.dev/name: Hindsight
-          gethomepage.dev/icon: "mdi-brain-#22D8F0"
+          gethomepage.dev/icon: sh-hindsight.svg
           gethomepage.dev/description: Agent memory
           gethomepage.dev/pod-selector: app.kubernetes.io/name=hindsight
         hostnames:

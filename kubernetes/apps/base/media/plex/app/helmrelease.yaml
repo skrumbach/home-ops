@@ -115,6 +115,8 @@ spec:
           gethomepage.dev/name: Plex
           gethomepage.dev/icon: plex.svg
           gethomepage.dev/description: "Movies, shows and music"
+          # / answers 401 to a browser; the web app is /web.
+          gethomepage.dev/href: https://plex.sklab.dev/web
           gethomepage.dev/pod-selector: app.kubernetes.io/name=plex
           gatus.home-operations.com/endpoint: |-
             url: https://plex.sklab.dev/identity

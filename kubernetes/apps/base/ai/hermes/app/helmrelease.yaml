@@ -346,7 +346,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: AI
           gethomepage.dev/name: Hermes
-          gethomepage.dev/icon: "mdi-robot-outline-#22D8F0"
+          gethomepage.dev/icon: sh-hermes-agent-light.svg
           gethomepage.dev/description: Agent workspace
           # The route is named hermes-app, so homepage's default selector would match no pod.
           gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
@@ -363,6 +363,13 @@ spec:
                 port: *dash
       # Browser VS Code. code-server has no auth of its own; securitypolicy.yaml adds SSO.
       codeserver:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/name: Hermes Code Server
+          gethomepage.dev/icon: vscode.svg
+          gethomepage.dev/description: Edit the Hermes workspace
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
         hostnames:
           - "hermes-code.sklab.dev"
         parentRefs:
@@ -379,7 +386,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: AI
           gethomepage.dev/name: Hermes WebUI
-          gethomepage.dev/icon: "mdi-chat-processing-outline-#22D8F0"
+          gethomepage.dev/icon: hermes-webui.svg
           gethomepage.dev/description: Hermes chat UI
           # Same pod as the dashboard route; the route name (hermes-webui) matches no pod label.
           gethomepage.dev/pod-selector: app.kubernetes.io/name=hermes
