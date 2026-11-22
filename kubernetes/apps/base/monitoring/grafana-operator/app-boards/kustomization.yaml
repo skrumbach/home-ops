@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Boards that other apps ship as ConfigMaps in their own namespace. configMapRef reads the namespace
+# of the GrafanaDashboard, so each object here carries its namespace, and the Flux Kustomization that
+# applies this directory sets no targetNamespace.
+#
+# They are here and not next to each app on purpose: a GrafanaDashboard in the cilium or
+# external-secrets Kustomization would make that Kustomization fail whenever the operator's CRDs are
+# missing, which is the state of a cluster rebuild.
+#
+# allowCrossNamespaceImport lets the object reach the Grafana in monitoring. folderUID is the uid of
+# a GrafanaFolder (instance/grafanafolder.yaml); folderRef only resolves in the same namespace.
+# DS_EXPRESSION maps to __expr__, the uid of Grafana's built-in expression datasource.
+#
+# Left out, mostly empty: hubble-dns-namespace and hubble-l7-http-metrics-by-workload (their series
+# need L7 visibility on a pod).
+resources:
+  - ./grafanadashboard.yaml

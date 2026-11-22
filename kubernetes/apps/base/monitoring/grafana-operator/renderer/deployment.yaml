@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/apps/deployment_v1.json
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-renderer
+  labels:
+    app: grafana-renderer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-renderer
+  template:
+    metadata:
+      labels:
+        app: grafana-renderer
+    spec:
+      # It renders pages; it has no Kubernetes client.
+      automountServiceAccountToken: false
+      containers:
+        - name: renderer
+          # The image and settings the grafana chart's imageRenderer runs (monitoring/grafana).
+          image: docker.io/grafana/grafana-image-renderer:v5.12.11@sha256:cfa6c8f63e6d626f90208f2880f15bd5facc279daec1b9bb642af07aa850d95e
+          env:
+            - name: HTTP_PORT
+              value: "8081"
+            - name: HTTP_HOST
+              value: "0.0.0.0"
+            # Chromium writes its profile and cache under /tmp, the only writable path.
+            - name: XDG_CACHE_HOME
+              value: /tmp/.chromium
+            - name: XDG_CONFIG_HOME
+              value: /tmp/.chromium
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          # Idles at about 6Mi; Chromium spikes while it renders a panel.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

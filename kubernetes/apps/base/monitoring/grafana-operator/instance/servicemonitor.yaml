@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+# The operator creates no ServiceMonitor for the Grafana it runs. The job is the Service name,
+# grafana-service: the chart-based Grafana still reports as job grafana, and the two must not mix.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana-service
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: grafana-operator
+      dashboards: grafana
+  endpoints:
+    - port: grafana
+      path: /metrics
+      interval: 1m
+      scrapeTimeout: 10s

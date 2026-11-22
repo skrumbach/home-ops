@@ -44,6 +44,39 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: grafana-operator-renderer
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/base/monitoring/grafana-operator/renderer
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: monitoring
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-operator-app-boards
+spec:
+  # No targetNamespace: every GrafanaDashboard in app-boards/ names the namespace of the ConfigMap it
+  # reads. The folders it names by uid are part of the instance.
+  dependsOn:
+    - name: grafana-operator-instance
+  interval: 1h
+  path: ./kubernetes/apps/base/monitoring/grafana-operator/app-boards
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: grafana-operator-boards
 spec:
   # The folders a board names in folderRef are part of the instance.

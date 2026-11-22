@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/service_v1.json
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-renderer
+  labels:
+    app: grafana-renderer
+spec:
+  type: ClusterIP
+  selector:
+    app: grafana-renderer
+  ports:
+    - name: http
+      port: 8081
+      protocol: TCP
+      targetPort: http

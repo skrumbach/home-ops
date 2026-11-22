@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/networking.k8s.io/networkpolicy_v1.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-renderer
+spec:
+  # The renderer is a headless browser that fetches what it is told to. Only the operator-run
+  # Grafana may call it.
+  podSelector:
+    matchLabels:
+      app: grafana-renderer
+  policyTypes:
+    - Ingress
+  ingress:
+    # Grafana asks for a render on 8081, and the renderer then loads the panel from Grafana. No
+    # ports on purpose: `ports` matches the destination port, and the reply to the renderer's own
+    # request arrives on an ephemeral one (cilium/cilium#47913).
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grafana
+    # DNS replies from CoreDNS, for the same reason without ports.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
