@@ -27,5 +27,8 @@ rules:
       - tuppr.home-operations.com
       - deviceplugin.intel.com
       - keda.sh
+      # Board, folder and datasource status of the grafana-operator instance. Their credentials are
+      # secretKeyRef, never inline.
+      - grafana.integreatly.org
     resources: ["*"]
     verbs: ["get", "list", "watch"]
