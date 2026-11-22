@@ -226,6 +226,15 @@ spec:
             port: *port
     route:
       app:
+        # Homepage tile (CLAUDE.md conventions). Delete the annotations block if
+        # the route is API-only; add gethomepage.dev/href if / is not the web UI.
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: $app # TODO: display name
+          gethomepage.dev/group: Apps # TODO: a layout group in selfhosted/homepage/app/configmap.yaml
+          gethomepage.dev/icon: $app.svg # TODO: verify on dashboard-icons, or sh-<name>.svg
+          gethomepage.dev/description: TODO
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=$app
         hostnames:
           - "{{ .Release.Name }}.sklab.dev"
         parentRefs:

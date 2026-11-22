@@ -93,6 +93,8 @@ spec:
           gethomepage.dev/name: Obsidian LiveSync
           gethomepage.dev/icon: obsidian.svg
           gethomepage.dev/description: Vault sync
+          # / is CouchDB's JSON welcome; Fauxton, its admin UI, is /_utils/.
+          gethomepage.dev/href: https://sync.sklab.dev/_utils/
           gatus.home-operations.com/endpoint: |-
             url: https://sync.sklab.dev/
             conditions:

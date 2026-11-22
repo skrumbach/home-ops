@@ -5,12 +5,7 @@ kind: HTTPRoute
 metadata:
   name: &app surrealdb
   annotations:
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/description: Multi-model database
-    gethomepage.dev/group: Platform
-    gethomepage.dev/name: SurrealDB
-    gethomepage.dev/app: *app
-    gethomepage.dev/icon: surrealdb.svg
+    # No Homepage tile: database API only, the browser UI (Surrealist) is hosted by surrealdb.com.
     # Check /health, not `/`: bare `/` redirects to a third-party surrealdb.com
     # page that Gatus follows.
     gatus.home-operations.com/endpoint: |-
