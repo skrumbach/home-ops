@@ -1,7 +1,8 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  // Not replaced by home-operations/renovate-presets//apps/grafanaDashboards.json5: its managers read only files named
-  // grafanadashboard.yaml (grafana-operator CRs); every board here is a gnetId or url: in the grafana chart's helmrelease.yaml.
+  // Every board is a GrafanaDashboard in kubernetes/apps/base/monitoring/grafana-operator/boards/grafanadashboard.yaml. The first manager is
+  // the one of home-operations/renovate-presets//apps/grafanaDashboards.json5; the preset is not extended, because the commit-pin and Envoy
+  // managers and the merge rules below have no counterpart in it and one file should hold them all.
   customDatasources: {
     "grafana-dashboards": {
       defaultRegistryUrlTemplate: "https://grafana.com/api/dashboards/{{packageName}}",
@@ -13,19 +14,19 @@
     {
       description: "Process Grafana dashboards",
       customType: "regex",
-      managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"],
+      managerFilePatterns: ["/grafanadashboard\\.ya?ml$/"],
       matchStrings: [
-        'depName="(?<depName>.*)"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)'
+        "dashboards\\/(?<depName>\\d+)\\/revisions\\/(?<currentValue>\\d+)\\/download",
       ],
-      autoReplaceStringTemplate: 'depName="{{{depName}}}"\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}',
+      autoReplaceStringTemplate: "dashboards/{{depName}}/revisions/{{newValue}}/download",
       datasourceTemplate: "custom.grafana-dashboards",
       versioningTemplate: "regex:^(?<major>\\d+)$",
     },
     {
-      // A url: dashboard on a branch changes the board on every Grafana restart, unreviewed. Pin the commit; git-refs proposes main's HEAD.
+      // A url: dashboard on a branch changes the board whenever the operator fetches it again, unreviewed. Pin the commit; git-refs proposes main's HEAD.
       description: "Grafana url: dashboards pinned to a GitHub commit",
       customType: "regex",
-      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana/app/helmrelease\\.yaml$/"],
+      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana-operator/boards/grafanadashboard\\.yaml$/"],
       matchStrings: [
         "url: https://raw\\.githubusercontent\\.com/(?<depName>[\\w.-]+/[\\w.-]+)/(?<currentDigest>[0-9a-f]{40})/\\S+\\.json",
       ],
@@ -38,7 +39,7 @@
       // regex managers ignore: on mirror.gcr.io (no timestamps) the boards skipped the 3-day release age the chart waits out on Docker Hub, and the branch dropped the chart (#2475).
       description: "Envoy Gateway dashboards pinned to the deployed gateway-helm chart tag",
       customType: "regex",
-      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana/app/helmrelease\\.yaml$/"],
+      managerFilePatterns: ["/(^|/)kubernetes/apps/base/monitoring/grafana-operator/boards/grafanadashboard\\.yaml$/"],
       matchStrings: [
         "url: https://raw\\.githubusercontent\\.com/envoyproxy/gateway/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/\\S+\\.json",
       ],
@@ -70,7 +71,7 @@
       // toolhive's main moves daily; one grouped PR a month (America/New_York, .renovaterc.json5) instead of a digest PR per commit.
       description: "Commit-pinned Grafana url: dashboards - one grouped PR a month",
       matchDatasources: ["git-refs"],
-      matchFileNames: ["kubernetes/apps/base/monitoring/grafana/**"],
+      matchFileNames: ["kubernetes/apps/base/monitoring/grafana-operator/**"],
       groupName: "Grafana url dashboards",
       groupSlug: "grafana-url-dashboards",
       schedule: ["on the first day of the month"],

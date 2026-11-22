@@ -32,7 +32,7 @@ helmfile -f bootstrap/helmfile/apps.yaml template --dry-run
 kustomize build bootstrap/kustomize/apps | vals eval -f -    # needs op signin
 ```
 
-`default.yaml` reads `spec.url` and `spec.ref.tag` from the Flux OCIRepository. Do not pin `chart:` / `version:` here. Do not re-add a grafana-operator release or `GrafanaDashboard` CRs.
+`default.yaml` reads `spec.url` and `spec.ref.tag` from the Flux OCIRepository. Do not pin `chart:` / `version:` here. Do not add a grafana-operator release here: Flux installs it (`monitoring/grafana-operator`), and no bootstrap app carries a `GrafanaDashboard`.
 
 ## Secrets
 

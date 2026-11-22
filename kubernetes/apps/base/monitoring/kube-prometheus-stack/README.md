@@ -91,7 +91,7 @@ Values are in [`app/helmrelease.yaml`](app/helmrelease.yaml). The chart is pinne
 | `instance` relabelings (etcd, node-exporter) | node name, `talos-1`... | Alerts can say `instance="talos-1"`. |
 | `prometheus-node-exporter.service.port` | `9100` | Pinned at the chart default because Cilium's `ceph-lan-isolation` denies `world` on 9100. Keep the two in sync. |
 | `kubeControllerManager`, `kubeScheduler`, `kubeProxy` | `enabled: false` | The manifest records no reason. |
-| `prometheusSpec.scrapeInterval` | `1m` | Must match the interval in the Grafana chart. |
+| `prometheusSpec.scrapeInterval` | `1m` | Must match `timeInterval` of `GrafanaDatasource` `prometheus` in `monitoring/grafana-operator`. |
 | `prometheusSpec.retention`, `retentionSize` | `14d`, `50GB` | `storageSpec` asks for 55Gi on `ceph-block`, so the size cap stays under the volume. The manifest records no reason for the numbers. |
 | `prometheusSpec.resources.limits.memory` | `8Gi` | 3Gi OOM-killed the pod during TSDB head compaction, a self-reinforcing crash loop. 8Gi absorbs the spike. |
 | `prometheusSpec.replicas` | `1` | One replica. No Thanos Query exists. |

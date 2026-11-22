@@ -8,20 +8,20 @@ metadata:
     # Every GrafanaDashboard, GrafanaFolder and GrafanaDatasource selects the instance by this label.
     dashboards: grafana
 spec:
-  # Pinned to the version the grafana chart runs; the operator's own default is newer. The `brand`
-  # init container below must name the same image: one Renovate manager (.renovate/customManagers.json5)
-  # reads both lines, so they move in one PR.
+  # Pinned: the operator's own default moves with every operator release. The `brand` init container
+  # below must name the same image: one Renovate manager (.renovate/customManagers.json5) reads both
+  # lines, so they move in one PR.
   version: 12.3.1
-  # The operator signs in to Grafana with these two env values over basic auth. They come from the
-  # Secret the grafana chart already uses (ExternalSecret grafana, 1Password item grafana), so the
-  # break-glass login is the same on both instances.
+  # The operator signs in to Grafana with these two env values over basic auth. They come from
+  # Secret grafana-admin-secret (monitoring/grafana, ExternalSecret grafana, 1Password item grafana),
+  # which is also the break-glass login.
   disableDefaultAdminSecret: true
   config:
     analytics:
       check_for_updates: "false"
       check_for_plugin_updates: "false"
       reporting_enabled: "false"
-    # Pocket ID SSO, the client the grafana chart registers (monitoring/grafana pocketidoidcclient.yaml).
+    # Pocket ID SSO, client PocketIDOIDCClient grafana (monitoring/grafana pocketidoidcclient.yaml).
     # The client secret arrives as GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET from Secret grafana-oidc-client.
     auth.generic_oauth:
       enabled: "true"
@@ -55,7 +55,7 @@ spec:
     security:
       cookie_samesite: lax
     server:
-      root_url: https://grafana-next.sklab.dev
+      root_url: https://grafana.sklab.dev
     users:
       default_theme: tron
   preferences:
@@ -72,9 +72,10 @@ spec:
         type: Recreate
       template:
         spec:
-          # The SKLAB look, the same mechanism as in the grafana chart (monitoring/grafana README):
-          # copy Grafana's static image directory into an emptyDir and overwrite the hashed logo and
-          # sign-in background by pattern. $f and $t have no braces, so Flux leaves them alone.
+          # The SKLAB look (files: monitoring/grafana app/resources). The UI loads its logo and
+          # sign-in background under names with a build hash that changes with every Grafana
+          # release, so this copies Grafana's static image directory into an emptyDir and overwrites
+          # those files by pattern. A file upstream renames falls back to Grafana's own picture.
           initContainers:
             - name: brand
               # The image of spec.version above, bumped with it.
@@ -175,18 +176,21 @@ spec:
       annotations:
         gethomepage.dev/enabled: "true"
         gethomepage.dev/icon: grafana.svg
-        gethomepage.dev/name: Grafana (operator)
+        gethomepage.dev/name: Grafana
         gethomepage.dev/group: Observability
-        gethomepage.dev/description: Dashboards, the grafana-operator instance
+        gethomepage.dev/description: Dashboards
         gethomepage.dev/pod-selector: app=grafana
+        # name: the endpoint would otherwise take the route's name, grafana-httproute, and start a
+        # new history.
         gatus.home-operations.com/endpoint: |-
-          url: https://grafana-next.sklab.dev/api/health
+          name: grafana
+          url: https://grafana.sklab.dev/api/health
           conditions:
             - "[STATUS] == 200"
             - "[BODY].database == ok"
           group: monitoring
     spec:
-      hostnames: ["grafana-next.sklab.dev"]
+      hostnames: ["grafana.sklab.dev"]
       parentRefs:
         - name: envoy-internal
           namespace: network

@@ -7,4 +7,5 @@ resources:
   - ./grafanadatasource.yaml
   - ./grafanafolder.yaml
   - ./grafanaserviceaccount.yaml
+  - ./pushsecret.yaml
   - ./servicemonitor.yaml

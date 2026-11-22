@@ -41,7 +41,7 @@ spec:
             - --disable-write
           env:
             - name: GRAFANA_URL
-              value: http://grafana.monitoring.svc.cluster.local
+              value: http://grafana-service.monitoring.svc.cluster.local:3000
   secrets:
     - name: toolhive-grafana
       key: GRAFANA_SERVICE_ACCOUNT_TOKEN

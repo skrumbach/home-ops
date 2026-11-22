@@ -2,10 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# The landing board. It carries no grafana_dashboard label: the chart mounts this ConfigMap as the
-# directory of the `home` provider (dashboardsConfigMaps in the HelmRelease), so the file that
-# grafana.ini default_home_dashboard_path names exists before Grafana starts. A sidecar board would
-# arrive after the first request and /api/dashboards/home would return 500 until then.
+# The landing board. GrafanaDashboard `home` (monitoring/grafana-operator/boards) reads this
+# ConfigMap, and the Grafana CR names its uid in spec.preferences.homeDashboardUid.
 #
 # Its header is resources/sklab-header.svg, served from Grafana's own static directory. A text panel
 # keeps an <img> only when the src starts with "/", and drops object-fit from its style.

@@ -27,10 +27,12 @@ metadata:
   name: grafana-operator-instance
 spec:
   # grafana owns what the instance mounts and reads: ConfigMap grafana-brand, Secrets
-  # grafana-admin-secret and grafana-oidc-client.
+  # grafana-admin-secret and grafana-oidc-client. The PushSecret needs the 1Password store.
   dependsOn:
     - name: grafana-operator
     - name: grafana
+    - name: onepassword-store
+      namespace: security
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/grafana-operator/instance
   prune: true

@@ -9,8 +9,10 @@
 ## What it does
 
 - **Ships a dashboard only.** ConfigMap `gpu-node-dashboard` carries `resources/gpu-node.json`, labelled
-  `grafana_dashboard: "true"` and annotated `grafana_folder: AI`, so the Grafana sidecar loads it into folder
-  `AI` as `GPU Node (Intel Arc B70 / iGPU Fleet)` (uid `ai-gpu-node`).
+  `grafana_dashboard: "true"` and annotated `grafana_folder: AI`. `GrafanaDashboard` `gpu-node`
+  (`monitoring/grafana-operator`, `app-boards/`) loads it into folder `AI` as
+  `GPU Node (Intel Arc B70 / iGPU Fleet)` (uid `ai-gpu-node`). The label and annotation are leftovers of the
+  dashboard sidecar.
 - **Shows five groups of panels:** B70 VRAM used and held per pod, power, temperature and fan, device-plugin slot
   allocation, talos-3 CPU and memory pressure, and chat throughput per model and KV type.
 - **Runs no workload.** The Kustomization has no health check and nothing to wait for.
@@ -29,7 +31,7 @@ flowchart LR
   ne["node-exporter<br/>node_hwmon_* series"] --> prom
   ksm["kube-state-metrics<br/>devic.es/b70 requests"] --> prom
   vllm["ServiceMonitor vllm<br/>llamacpp:* series"] --> prom
-  cm{{"ConfigMap<br/>gpu-node-dashboard"}} -->|grafana_dashboard sidecar| gr["Grafana<br/>folder AI"]
+  cm{{"ConfigMap<br/>gpu-node-dashboard"}} -->|GrafanaDashboard gpu-node| gr["Grafana<br/>folder AI"]
   gr -->|queries| prom
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
@@ -41,7 +43,8 @@ flowchart LR
 
 1. Flux applies Kustomization `gpu-node-dashboard`. The configMapGenerator turns the JSON into the ConfigMap with a
    fixed name (`disableNameSuffixHash`), so an edit replaces the dashboard in place.
-2. The Grafana sidecar watches ConfigMaps with that label and loads the file.
+2. grafana-operator reads the ConfigMap through `GrafanaDashboard` `gpu-node` and writes the board into Grafana;
+   an edit shows up at its next sync, within ten minutes.
 3. The panels read Prometheus. VRAM comes from `xe-gpu-exporter`, power, temperature and fan from node-exporter hwmon
    series of talos-3, slot counts from kube-state-metrics, and token rates from the llama.cpp metrics that the
    `vllm` ServiceMonitor labels with `model` and `kv`.
