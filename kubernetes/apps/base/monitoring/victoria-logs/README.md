@@ -15,7 +15,9 @@
 - **Replaced Loki and promtail.** Loki's field names differ: `namespace` is `kubernetes.pod_namespace`,
   `pod` is `kubernetes.pod_name`, `container` is `kubernetes.container_name`, `node_name` and `hostname` are
   `kubernetes.pod_node_name`, `stream` is `output_stream`, and pod labels are `kubernetes.pod_labels.<label>`.
-- **Has no route and no backup.** Access is in cluster only, and the overlay says logs are not backed up.
+- **Serves vmui behind Pocket ID** at <https://victoria-logs.sklab.dev> (internal, `admins` group), linked from
+  Homepage. The route carries only the read side (`/select`), so nothing can write logs through it.
+- **Has no backup.** The overlay says logs are not backed up.
 
 ## Why it is built this way
 
@@ -25,7 +27,7 @@
 | **Collector runs as root, with no capabilities** | The CRI log files are root-owned `0640`. Uid 0 owns them, so every capability is dropped. |
 | **Journal, kernel and kubelet logs are not collected** | promtail never scraped them, so the collector does not either. |
 | **Disk buffer on the node** | While the server is down, `vlagent` buffers under `/var/lib/vl-collector` (hostPath), up to `2GiB` per URL, then drops the oldest. |
-| **No ingress route** | An `envoy-internal` route would need a rule admitting the `network` namespace in `victoria-logs-ingress`. Grafana, the collector and Prometheus all run in `monitoring`. |
+| **vmui route is read-only and gated** | The API has no login and the same port takes writes on `/insert`. The route sends `/` to `/select/vmui/`, routes `/select` and the OIDC callback `/oauth2`, and nothing else, so `/insert` answers 404. `securitypolicy.yaml` puts Pocket ID in front at Envoy; `victoria-logs-ingress` admits the `envoy-internal` proxies on `9428`. |
 | **No disk alert of its own** | `retentionDiskSpaceUsage` keeps the claim near 90% by design once 14 days outgrow it, so upstream's 80% alert would never clear. `KubePersistentVolumeFillingUp` already covers the claim. |
 
 ## How it works
@@ -43,6 +45,7 @@ flowchart LR
   np["NetworkPolicy<br/>victoria-logs-ingress"] -->|admits monitoring| srv
   srv --> pvc["PVC<br/>server-volume-victoria-logs-0"]
   graf["Grafana<br/>datasource VictoriaLogs"] -->|query| srv
+  rt["HTTPRoute victoria-logs<br/>SecurityPolicy victoria-logs-auth"] -->|/select only| srv
   pm["PodMonitor and ServiceMonitor"] -->|metrics| pr["PrometheusRule<br/>victoria-logs-rules"]
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
@@ -64,7 +67,11 @@ flowchart LR
 4. The server keeps data 14 days. `retentionDiskSpaceUsage: 45GiB` drops the oldest days first if 14 days ever
    outgrow the claim, instead of filling it.
 5. Grafana queries `victoria-logs.monitoring.svc.cluster.local:9428` through datasource `VictoriaLogs`. The
-   NetworkPolicy admits port `9428` from the `monitoring` namespace and DNS replies from CoreDNS.
+   NetworkPolicy admits port `9428` from the `monitoring` namespace and the `envoy-internal` proxies, and DNS
+   replies from CoreDNS.
+6. `victoria-logs.sklab.dev` goes through `envoy-internal`, where `victoria-logs-auth` sends the browser to
+   Pocket ID (client `VictoriaLogs`, written by `pocketidoidcclient.yaml` into `victoria-logs-oidc-credentials`).
+   Gatus checks `/health` on the in-cluster Service, because the gate answers 302 before the backend.
 
 ## Settings that matter
 
@@ -103,7 +110,8 @@ kubectl -n monitoring logs ds/victoria-logs-collector --tail=50
   `fullnameOverride: victoria-logs`.
 - **Do not size the collector like promtail.** At `256Mi` it is OOM-killed before it can write a checkpoint.
 - **Do not add a disk alert.** `KubePersistentVolumeFillingUp` covers the claim.
-- **The API is unauthenticated.** `victoria-logs-ingress` only narrows who can write or query. No HTTPRoute:
-  an `envoy-internal` route would need a `network` namespace rule in that policy.
+- **The API is unauthenticated.** `victoria-logs-ingress` only narrows who can write or query. The route must
+  stay targeted by `victoria-logs-auth` (a SecurityPolicy whose `targetRef` matches no route leaves it open)
+  and must never route `/insert` or `/internal`.
 
 Upstream: [VictoriaLogs docs](https://docs.victoriametrics.com/victorialogs/)

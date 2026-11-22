@@ -7,6 +7,9 @@ metadata:
   name: victoria-logs
 spec:
   dependsOn:
+    # pocketidoidcclient.yaml needs the operator's CRD.
+    - name: pocket-id-operator
+      namespace: security
     - name: prometheus-operator-crds
       namespace: monitoring
   interval: 1h

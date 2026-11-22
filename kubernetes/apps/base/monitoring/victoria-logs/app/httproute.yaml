@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+# vmui, internal only, behind Pocket ID at Envoy (./securitypolicy.yaml): the API has no login.
+# Only the read side is routed: /select carries vmui (/select/vmui/) and its LogsQL queries, so
+# /insert and /internal answer 404 here. /oauth2 is routed so the OIDC filter sees its callback and
+# logout paths. The Gatus check goes to the in-cluster Service, because the OIDC gate answers 302
+# before the backend and would stay green through an outage.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: &app victoria-logs
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/description: Container logs (vmui)
+    gethomepage.dev/group: Observability
+    gethomepage.dev/icon: victorialogs.svg
+    gethomepage.dev/name: VictoriaLogs
+    gethomepage.dev/href: https://victoria-logs.sklab.dev/select/vmui/
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=victoria-logs,app.kubernetes.io/name=victoria-logs-single
+    gatus.home-operations.com/endpoint: |-
+      url: http://victoria-logs.monitoring.svc.cluster.local:9428/health
+      conditions: ["[STATUS] == 200"]
+      ui:
+        hide-url: true
+spec:
+  hostnames:
+    - "victoria-logs.sklab.dev"
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /select/vmui/
+            statusCode: 302
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /select
+        - path:
+            type: PathPrefix
+            value: /oauth2
+      backendRefs:
+        - name: *app
+          port: 9428
