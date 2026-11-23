@@ -219,7 +219,7 @@ spec:
         retentionSize: 50GB
         ruleSelectorNilUsesHelmValues: false
         scrapeConfigSelectorNilUsesHelmValues: false
-        scrapeInterval: 1m # Must match interval in Grafana Helm chart
+        scrapeInterval: 1m # Must match timeInterval of GrafanaDatasource prometheus (monitoring/grafana-operator)
         serviceMonitorSelectorNilUsesHelmValues: false
         # Not backed up: metrics are kept only 14 days and are scraped again, so a lost claim loses only history.
         storageSpec:

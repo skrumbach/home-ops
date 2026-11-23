@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
-# The operator creates no ServiceMonitor for the Grafana it runs. The job is the Service name,
-# grafana-service: the chart-based Grafana still reports as job grafana, and the two must not mix.
+# The operator creates no ServiceMonitor for the Grafana it runs.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -16,3 +15,9 @@ spec:
       path: /metrics
       interval: 1m
       scrapeTimeout: 10s
+      relabelings:
+        # The Service is grafana-service; the series keep the job name they always had. The
+        # operator appends user relabelings after its own job assignment, so this override wins.
+        - action: replace
+          targetLabel: job
+          replacement: grafana

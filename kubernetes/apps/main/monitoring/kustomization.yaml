@@ -14,7 +14,6 @@ resources:
   - ./gatus.yaml
   - ./grafana.yaml
   - ./grafana-operator.yaml
-  - ./grafana-sa-provisioner.yaml
   - ./graphite-exporter.yaml
   - ./keda.yaml
   - ./kromgo.yaml

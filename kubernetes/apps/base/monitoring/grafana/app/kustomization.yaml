@@ -2,17 +2,17 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# What the Grafana instance needs from outside itself: the admin login, the Pocket ID client and its
+# secret, the brand files, the landing board and two sets of board JSON. Grafana runs from
+# monitoring/grafana-operator (Grafana `grafana`), which mounts and reads these by name.
 resources:
-  - ./ocirepository.yaml
-  - ./helmrelease.yaml
   - ./externalsecret.yaml
   - ./externalsecret-oidc.yaml
-  - ./networkpolicy-image-renderer-dns.yaml
   - ./pocketidoidcclient.yaml
   - ./dashboards/ceph
   - ./dashboards/home
   - ./dashboards/litellm
-# The SKLAB look: Grafana OSS has no white-label setting, so the HelmRelease puts these files over
+# The SKLAB look: Grafana OSS has no white-label setting, so the Grafana CR puts these files over
 # Grafana's own (logo, favicon, touch icon, sign-in background). Every file keeps the name Grafana
 # gives it; sklab-header.svg is the header of the landing board.
 #

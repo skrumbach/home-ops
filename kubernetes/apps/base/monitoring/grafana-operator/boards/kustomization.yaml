@@ -2,10 +2,9 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# One GrafanaDashboard per board, 63 of them, in folder order. The file is named grafanadashboard.yaml
-# because the home-operations Renovate preset for grafana.com revisions reads only files with that
-# name. The preset is not switched on yet: until this instance takes over, Renovate bumps the same
-# boards in the grafana HelmRelease and the revisions here are copied from it.
+# One GrafanaDashboard per board, 63 of them, in folder order. Renovate reads this file
+# (.renovate/grafanaDashboards.json5): the revision in a grafana.com URL, the commit in a
+# raw.githubusercontent.com URL, and the Envoy Gateway tag.
 #
 # A board from grafana.com or GitHub is fetched by the operator. A board that an app ships as a
 # ConfigMap is read through configMapRef, which only sees ConfigMaps in this namespace: the boards of
@@ -18,5 +17,13 @@ kind: Kustomization
 # grafana.com boards are url: entries, not grafanaCom: ones. The operator caches fetched content by
 # URL, and a grafanaCom board is looked up before its URL is known, so it is downloaded again on
 # every sync.
+#
+# Not here on purpose:
+# - UniFi PDU Insights (grafana.com 23027): this Prometheus has no unpoller_device_outlet_* series,
+#   so every panel would be empty.
+# - Flux Cluster Stats (flux2-monitoring-example cluster.json): it reads gotk_resource_info, a
+#   kube-state-metrics custom-resource metric this cluster does not configure. Flux Operator's
+#   boards read flux_resource_info.
+# - The two EMQX rule-engine boards: no rule exists and their series are absent.
 resources:
   - ./grafanadashboard.yaml

@@ -114,7 +114,7 @@ Access guard of each backend, as the manifests set it:
 | vmcp `/tmp` | `emptyDir` | The optimizer's FTS5 index needs a writable path; without it, it fails with "disk I/O error". |
 | `EmbeddingServer` `resources` | request 1 CPU and 1Gi; limit 4 CPU and 2Gi | 1 CPU so a saturated node still finishes inside 30s; 4 CPU is the burst. No `--max-batch-tokens`. |
 | Password `mcp-gateway-token` | 64 characters, no symbols | Alphanumeric only: it travels in an HTTP header. |
-| ExternalSecret `toolhive-grafana` `refreshInterval` | `5m` | `grafana-sa-provisioner` rotates the token on that cadence; 1h would leave it dead for up to an hour. |
+| ExternalSecret `toolhive-grafana` `refreshInterval` | `5m` | PushSecret `grafana-mcp-viewer-token` (namespace `monitoring`) publishes a re-minted token on that cadence; 1h would leave it dead for up to an hour. |
 | `grafana-mcp` pod annotation | `secret.reloader.stakater.com/reload: toolhive-grafana` | The token goes to the StatefulSet, and the CRD has no StatefulSet override hook. |
 | ExternalSecret `toolhive-seerr` `refreshInterval` | `5m` | The first sync races the PushSecret that creates the item. |
 | `kubectl` env `MCP_ALLOW_UNAUTHENTICATED` | `"true"` | Version 2.0.0 refuses a non-loopback bind without auth, and the proxy reaches the pod IP. Exposure stays a read-only ServiceAccount with no core Secrets. |

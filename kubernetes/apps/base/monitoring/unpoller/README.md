@@ -11,7 +11,7 @@
 - **Polls** the UniFi controller at the URL in Secret `unpoller-secret`, with an API key, and serves the result on
   port 80 at `/metrics`.
 - **Feeds Prometheus** through a ServiceMonitor that scrapes every 2m.
-- **Feeds four Grafana dashboards** from the UniFi-Poller family, imported by `monitoring/grafana`: Client Insights,
+- **Feeds four Grafana dashboards** from the UniFi-Poller family, fetched by `monitoring/grafana-operator`: Client Insights,
   Network Sites, USW Insights and UAP Insights.
 - **Writes nowhere else.** `UP_INFLUXDB_DISABLE` is `true`, so Prometheus is the only output.
 
@@ -48,7 +48,7 @@ flowchart LR
    `reloader.stakater.com/auto: "true"` restarts the pod when the Secret changes.
 4. The ServiceMonitor scrapes Service `unpoller` on port `http` (80). The scrape interval is 2m, with the comment
    "Unifi API only polls at 2m intervals".
-5. Grafana imports the four dashboards (`gnetId` 11315, 11311, 11312, 11314) and points their `DS_UNIFI_POLLER`
+5. grafana-operator fetches the four dashboards (grafana.com 11315, 11311, 11312, 11314) and points their `DS_UNIFI_POLLER`
    input at the `Prometheus` datasource.
 
 ## Settings that matter
@@ -77,7 +77,7 @@ errors. The same item also feeds `network/unifi-dns` and `selfhosted/homepage`.
 ## Invariants
 
 - The Grafana PDU Insights dashboard (grafana.com 23027) stays out until this Prometheus has
-  `unpoller_device_outlet_*` series. The comment in `monitoring/grafana` says every panel would be empty.
+  `unpoller_device_outlet_*` series. The comment in `monitoring/grafana-operator` (`boards/kustomization.yaml`) says every panel would be empty.
 
 Upstream: [unpoller docs](https://unpoller.com/docs/install/configuration) •
 [unpoller on GitHub](https://github.com/unpoller/unpoller)

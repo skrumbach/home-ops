@@ -97,9 +97,9 @@ spec:
         enabled: true
       dashboards:
         enabled: true
-        # Grafana here is the kube-prometheus-stack sidecar (searchNamespace:
-        # ALL, label grafana_dashboard, folderAnnotation grafana_folder), not
-        # grafana-operator - so the default sidecar ConfigMap is the right mode.
+        # The ConfigMap mode, not the chart's GrafanaDashboard: GrafanaDashboard `kopiur`
+        # (monitoring/grafana-operator/boards) reads this ConfigMap and sets the folder.
+        # The folder values below are leftovers of the dashboard sidecar and do nothing.
         namespace: monitoring
         folderAnnotation: grafana_folder
         folder: Storage
