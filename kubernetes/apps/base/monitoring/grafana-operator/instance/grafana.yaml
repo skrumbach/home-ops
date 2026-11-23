@@ -78,7 +78,8 @@ spec:
           # those files by pattern. A file upstream renames falls back to Grafana's own picture.
           initContainers:
             - name: brand
-              # The image of spec.version above, bumped with it.
+              # The image of spec.version above, bumped with it. Tag and digest must both be those of
+              # that version: a digest of another version makes this container copy the wrong files.
               image: docker.io/grafana/grafana:12.3.1@sha256:2175aaa91c96733d86d31cf270d5310b278654b03f5718c59de12a865380a31f
               command:
                 - /bin/sh

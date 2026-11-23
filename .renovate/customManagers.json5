@@ -16,12 +16,14 @@
     {
       // The Grafana CR names the image twice: spec.version (a bare tag, no image: key) and the `brand` init container, which copies
       // files out of that same image. One dep for both lines keeps them in one PR; on different versions the brand files no longer fit.
+      // The init image carries a digest (Renovate pins it): the second match string captures it, or a bump would move the tag and keep
+      // the old digest, and the init container would go on running the old image under the new tag.
       description: "Grafana image of the grafana-operator instance: spec.version and the brand init container",
       customType: "regex",
       managerFilePatterns: ["/(^|/)monitoring/grafana-operator/instance/grafana\\.yaml$/"],
       matchStrings: [
         "\\n  version: (?<currentValue>\\d[^\\s]*)",
-        "image: docker\\.io/grafana/grafana:(?<currentValue>\\d[^\\s@]*)",
+        "image: docker\\.io/grafana/grafana:(?<currentValue>\\d[^\\s@]*)(?:@(?<currentDigest>sha256:[a-f0-9]+))?",
       ],
       depNameTemplate: "docker.io/grafana/grafana",
       datasourceTemplate: "docker",
