@@ -8,10 +8,7 @@ configMapGenerator:
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled
-    grafana_folder: Platform
   disableNameSuffixHash: true
-  labels:
-    grafana_dashboard: "true"
 kind: Kustomization
 namespace: actions-runner-system
 resources:

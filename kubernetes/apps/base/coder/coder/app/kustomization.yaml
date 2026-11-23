@@ -12,11 +12,9 @@ resources:
   - ./rules
 configMapGenerator:
   - name: coder-dashboards
+    # Five GrafanaDashboard objects (monitoring/grafana-operator, app-boards/) read this ConfigMap.
     options:
-      labels:
-        grafana_dashboard: "true"
       annotations:
-        grafana_folder: Apps
         kustomize.toolkit.fluxcd.io/substitute: disabled
     files:
       - ./dashboards/coderd.json

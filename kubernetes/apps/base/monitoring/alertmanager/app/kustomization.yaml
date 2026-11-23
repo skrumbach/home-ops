@@ -23,10 +23,6 @@ configMapGenerator:
       - resources/alertmanager-overview.json
     options:
       disableNameSuffixHash: true
-      labels:
-        grafana_dashboard: "true"
-      annotations:
-        grafana_folder: Observability
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

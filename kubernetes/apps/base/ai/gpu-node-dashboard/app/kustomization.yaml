@@ -6,9 +6,7 @@ configMapGenerator:
   - name: gpu-node-dashboard
     files:
       - resources/gpu-node.json
+# GrafanaDashboard gpu-node (monitoring/grafana-operator, app-boards/) reads this ConfigMap by name
+# and key, and sets the folder.
 generatorOptions:
   disableNameSuffixHash: true
-  annotations:
-    grafana_folder: AI
-  labels:
-    grafana_dashboard: "true"

@@ -26,6 +26,3 @@ generatorOptions:
   annotations:
     # ${datasource} is a Grafana dashboard variable, not a Flux var.
     kustomize.toolkit.fluxcd.io/substitute: disabled
-    grafana_folder: AI
-  labels:
-    grafana_dashboard: "true"

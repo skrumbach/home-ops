@@ -18,5 +18,3 @@ spec:
         enabled: true
       dashboards:
         enabled: true
-        annotations:
-          grafana_folder: Platform
