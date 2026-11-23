@@ -154,6 +154,9 @@ kubectl -n monitoring logs deploy/grafana-deployment -c brand
 - **One board per uid.** The renovate-operator chart creates `GrafanaDashboard` `renovate-operator-dashboard`
   itself as soon as the CRD exists; its `instanceSelector`, `folderUID` and `allowCrossNamespaceImport` are set
   in that app's HelmRelease. A second object for the same board in `app-boards/` would fight it.
+- **`spec.version` and the image of init container `brand` are one version, tag and digest.** The init
+  container copies Grafana's static image directory; from another version, the UI asks for file names that
+  are not in the copy and every logo and icon breaks. Check both lines in a Renovate bump before merging.
 - **Changing the admin password in 1Password does not change it in Grafana.** Grafana reads
   `GF_SECURITY_ADMIN_PASSWORD` only when it creates its database, and the database is on `grafana-pvc`. After
   a change the operator signs in with the new value, gets 401, and boards, folders and the service account
