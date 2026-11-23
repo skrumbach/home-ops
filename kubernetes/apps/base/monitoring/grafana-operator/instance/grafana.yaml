@@ -11,7 +11,7 @@ spec:
   # Pinned: the operator's own default moves with every operator release. The `brand` init container
   # below must name the same image: one Renovate manager (.renovate/customManagers.json5) reads both
   # lines, so they move in one PR.
-  version: 12.3.1
+  version: 12.4.15
   # The operator signs in to Grafana with these two env values over basic auth. They come from
   # Secret grafana-admin-secret (monitoring/grafana, ExternalSecret grafana, 1Password item grafana),
   # which is also the break-glass login.
@@ -80,7 +80,7 @@ spec:
             - name: brand
               # The image of spec.version above, bumped with it. Tag and digest must both be those of
               # that version: a digest of another version makes this container copy the wrong files.
-              image: docker.io/grafana/grafana:12.3.1@sha256:2175aaa91c96733d86d31cf270d5310b278654b03f5718c59de12a865380a31f
+              image: docker.io/grafana/grafana:12.4.15@sha256:2894082f6cf7081aefdc1389265c04000812309208c190d75e8c65f7a30e4b7e
               command:
                 - /bin/sh
                 - -ec
