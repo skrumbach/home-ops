@@ -8,11 +8,9 @@
 
 ## What it does
 
-- **Ships a dashboard only.** ConfigMap `gpu-node-dashboard` carries `resources/gpu-node.json`, labelled
-  `grafana_dashboard: "true"` and annotated `grafana_folder: AI`. `GrafanaDashboard` `gpu-node`
-  (`monitoring/grafana-operator`, `app-boards/`) loads it into folder `AI` as
-  `GPU Node (Intel Arc B70 / iGPU Fleet)` (uid `ai-gpu-node`). The label and annotation are leftovers of the
-  dashboard sidecar.
+- **Ships a dashboard only.** ConfigMap `gpu-node-dashboard` carries `resources/gpu-node.json`.
+  `GrafanaDashboard` `gpu-node` (`monitoring/grafana-operator`, `app-boards/`) loads it into folder `AI` as
+  `GPU Node (Intel Arc B70 / iGPU Fleet)` (uid `ai-gpu-node`).
 - **Shows five groups of panels:** B70 VRAM used and held per pod, power, temperature and fan, device-plugin slot
   allocation, talos-3 CPU and memory pressure, and chat throughput per model and KV type.
 - **Runs no workload.** The Kustomization has no health check and nothing to wait for.

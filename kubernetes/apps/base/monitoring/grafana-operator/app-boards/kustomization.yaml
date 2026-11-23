@@ -16,5 +16,8 @@ kind: Kustomization
 #
 # Left out, mostly empty: hubble-dns-namespace and hubble-l7-http-metrics-by-workload (their series
 # need L7 visibility on a pod).
+#
+# Not here: the Renovate board. The renovate-operator chart creates its own GrafanaDashboard
+# (renovate/renovate-operator helmrelease.yaml, metrics.dashboard.grafanaDashboard).
 resources:
   - ./grafanadashboard.yaml

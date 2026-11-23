@@ -14,9 +14,9 @@
   group `admins`, the built-in `tron` theme, and the SKLAB brand files. Its login, Pocket ID client, brand
   files and landing board come from [`monitoring/grafana`](../grafana/README.md).
 - **Declares what Grafana shows.** Three `GrafanaDatasource`, eight `GrafanaFolder` and 78
-  `GrafanaDashboard` objects: 63 in [`boards/`](boards/) and 15 in [`app-boards/`](app-boards/) for boards
-  that other apps ship as ConfigMaps in their own namespace. The operator writes each one through Grafana's
-  API and reports the result in the object's status.
+  `GrafanaDashboard` objects: 63 in [`boards/`](boards/), 14 in [`app-boards/`](app-boards/) for boards that
+  other apps ship as ConfigMaps in their own namespace, and one the renovate-operator chart creates itself.
+  The operator writes each one through Grafana's API and reports the result in the object's status.
 - **Renders images** with its own renderer, Deployment `grafana-renderer`.
 - **Keeps a Viewer service account** for the Grafana MCP server: `GrafanaServiceAccount` `grafana-mcp-viewer`
   writes its token to Secret `grafana-mcp-viewer-token`, and PushSecret `grafana-mcp-viewer-token` publishes
@@ -151,6 +151,9 @@ kubectl -n monitoring logs deploy/grafana-deployment -c brand
 - **Never set `panels.disable_sanitize_html`.** The landing board needs no raw HTML, and fetched boards would
   get to run script in an admin session.
 - **The service account stays `Viewer`.** The MCP server must not be able to write.
+- **One board per uid.** The renovate-operator chart creates `GrafanaDashboard` `renovate-operator-dashboard`
+  itself as soon as the CRD exists; its `instanceSelector`, `folderUID` and `allowCrossNamespaceImport` are set
+  in that app's HelmRelease. A second object for the same board in `app-boards/` would fight it.
 - **Changing the admin password in 1Password does not change it in Grafana.** Grafana reads
   `GF_SECURITY_ADMIN_PASSWORD` only when it creates its database, and the database is on `grafana-pvc`. After
   a change the operator signs in with the new value, gets 401, and boards, folders and the service account
@@ -176,11 +179,6 @@ kubectl -n monitoring logs deploy/grafana-deployment -c brand
   Grafana once to install the VictoriaLogs plugin. Folders and boards that tried during that restart report
   `NoMatchingInstance` and are applied at their next sync, ten minutes later. All 8 folders and 63 boards
   were in within 15 minutes, with no manual step.
-- **A dashboard object matches nothing.** The renovate-operator chart creates `GrafanaDashboard`
-  `renovate-operator-dashboard` (namespace `renovate`) as soon as the CRD exists, with a selector that fits no
-  instance. It reports `NoMatchingInstance`; the board itself is `renovate-operator` in `app-boards/`.
-- **Leftover sidecar metadata.** The `grafana_dashboard` label and `grafana_folder` annotation on board
-  ConfigMaps (and the chart values that set them) do nothing now.
 - **Two Hubble boards are left out,** `hubble-dns-namespace` and `hubble-l7-http-metrics-by-workload`: mostly
   empty without L7 visibility on a pod.
 - **A changed board ConfigMap shows up after the next sync,** up to ten minutes: the operator does not watch

@@ -61,10 +61,9 @@ spec:
         limits:
           cpu: 100m
           memory: 128Mi
+    # ConfigMaps only. GrafanaDashboard objects in monitoring/grafana-operator (app-boards/) read them.
     dashboards:
       enabled: true
-      annotations:
-        grafana_folder: Network
     devices: bond+
     enableIPv4BIGTCP: true
     endpointRoutes:
@@ -103,8 +102,6 @@ spec:
           enabled: true
         dashboards:
           enabled: true
-          annotations:
-            grafana_folder: Network
       relay:
         enabled: true
         rollOutPods: true

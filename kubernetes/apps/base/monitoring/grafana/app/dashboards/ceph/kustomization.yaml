@@ -23,6 +23,3 @@ generatorOptions:
   annotations:
     # ${prometheus} and $device_class are Grafana variables, not Flux vars.
     kustomize.toolkit.fluxcd.io/substitute: disabled
-    grafana_folder: Storage
-  labels:
-    grafana_dashboard: "true"

@@ -99,7 +99,4 @@ spec:
         enabled: true
         # The ConfigMap mode, not the chart's GrafanaDashboard: GrafanaDashboard `kopiur`
         # (monitoring/grafana-operator/boards) reads this ConfigMap and sets the folder.
-        # The folder values below are leftovers of the dashboard sidecar and do nothing.
         namespace: monitoring
-        folderAnnotation: grafana_folder
-        folder: Storage

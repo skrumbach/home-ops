@@ -58,10 +58,15 @@ spec:
         enabled: true
       dashboard:
         enabled: true
-        labels:
-          grafana_dashboard: "true"
-        annotations:
-          grafana_folder: Platform
+        # The chart creates GrafanaDashboard renovate-operator-dashboard itself once the CRD exists,
+        # with these fields as its spec. Without them its selector fits no instance.
+        grafanaDashboard:
+          allowCrossNamespaceImport: true
+          # uid of GrafanaFolder platform (monitoring/grafana-operator).
+          folderUID: platform
+          instanceSelector:
+            matchLabels:
+              dashboards: grafana
     resources:
       requests:
         cpu: 10m

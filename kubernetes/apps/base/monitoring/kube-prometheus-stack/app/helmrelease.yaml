@@ -166,11 +166,9 @@ spec:
 
     grafana:
       enabled: false
+      # The chart's Grafana is off, but its board ConfigMaps are wanted: GrafanaDashboard objects in
+      # monitoring/grafana-operator (boards/) read 22 of them.
       forceDeployDashboards: true
-      sidecar:
-        dashboards:
-          annotations:
-            grafana_folder: Kubernetes
 
     prometheusOperator:
       resources:
