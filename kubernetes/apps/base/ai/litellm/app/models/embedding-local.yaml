@@ -26,4 +26,4 @@ spec:
   info:
     mode: embedding
     # Backend --ctx-size; over-length input fails loud (400). Hub metadata only.
-    maxInputTokens: 512
+    maxInputTokens: 2048

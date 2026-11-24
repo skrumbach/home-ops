@@ -57,13 +57,18 @@ spec:
               # A memory limit cannot stop that. Do not copy chat's 4096.
               - --cache-ram
               - "0"
-              # One triple. 512 leaves room for a chat restart; 2048 fits but spends that margin.
+              # One triple, 2048. The kv-unified pool is shared by both slots, so it must hold two inputs at once:
+              # at 512 any pair over 256 tokens each failed with HTTP 500 "Context size has been exceeded"
+              # (193 decode failures in the retained log). 2048 serves inputs up to ~1000 tokens in parallel.
+              # Do not go to 4096: on the iGPU twin it lost the device (UR_RESULT_ERROR_DEVICE_LOST) on a
+              # ~3400-token input. Cost on the B70: about +235 MiB of KV (56 MiB at 512) plus the compute buffer;
+              # 5000 MiB were free with chat loaded, so a chat restart keeps its room.
               - --ctx-size
-              - "512"
+              - "2048"
               - -b
-              - "512"
+              - "2048"
               - -ub
-              - "512"
+              - "2048"
               # --timeout 30 replaces the image default of 3600 but is only a socket timeout: it does not
               # bound a queued request (live: 28-31 s, all 200). Load is capped at LiteLLM on the embedding-local
               # model.

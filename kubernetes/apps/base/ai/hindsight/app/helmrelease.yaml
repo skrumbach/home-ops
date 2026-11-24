@@ -72,13 +72,14 @@ spec:
               # per encode() and 15s of retries, so 4 concurrent tasks failed retains and page refreshes.
               # One request per encode and a longer retry window.
               HINDSIGHT_API_EMBEDDINGS_MAX_CONCURRENT_REQUESTS: "1"
-              # Texts per request. 16 keeps a request near 1.3s on the B70 (the per-attempt LiteLLM timeout is 5s);
-              # the default 100 would not fit it.
-              HINDSIGHT_API_EMBEDDINGS_OPENAI_BATCH_SIZE: "16"
-              # embedding-gpu serves a 512-token context and answers 400 above it (TEI used to cut silently). Mental
-              # pages embed name + content, up to ~6000 tokens. Hindsight counts with o200k, which reads about 13%
-              # fewer tokens than Qwen, so 400 stays under 512. Measured on the longest stored pages.
-              HINDSIGHT_API_EMBEDDINGS_MAX_INPUT_TOKENS: "400"
+              # Texts per request. 8 long inputs (~330 tokens, the longest memory units) take about 3s on the B70,
+              # inside the 5s per-attempt LiteLLM timeout; the default 100 would not fit.
+              HINDSIGHT_API_EMBEDDINGS_OPENAI_BATCH_SIZE: "8"
+              # embedding-gpu has a 2048-token context shared by two slots (~1000 per input) and answers 400 above
+              # it (TEI used to cut silently). Mental pages embed name + content, up to ~6000 tokens. Hindsight
+              # counts with o200k, which reads about 13% fewer tokens than Qwen, so 800 stays under 1000. Tested
+              # on the iGPU twin: 6 pages at 800 in one request, and 4 parallel requests, all ok.
+              HINDSIGHT_API_EMBEDDINGS_MAX_INPUT_TOKENS: "800"
               HINDSIGHT_API_EMBEDDINGS_MAX_RETRIES: "10"
               HINDSIGHT_API_EMBEDDINGS_RETRY_BUDGET: "45"
               # Default pool max is 100 against the shared postgres-18; one pod needs far fewer.
