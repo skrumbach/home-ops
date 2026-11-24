@@ -113,6 +113,15 @@
       versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-[0-9a-f]+$",
     },
     {
+      // llama.cpp tags are `<variant>-b<build>` (server-intel-b10820), which docker versioning cannot order: Renovate only ever pinned the digest and proposed no bump across 1800 builds. The build number is the only part, so every update is a major one and never automerges. The same tag runs ai/vllm (chat) and ai/embedding-gpu; Renovate bumps both files in one PR (maxMajorIncrement 0, because the default cap of 500 builds skips every candidate after a few weeks), and README ai/vllm says to re-measure -ub 4096 and the embedder's 2048 context before merging. The other variants (server-vulkan-b*, light-*) do not match and are ignored.
+      description: "llama.cpp server-intel uses server-intel-b<build> tags; regex-version them so Renovate can order them",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/ggml-org/llama.cpp"],
+      versioning: "regex:^server-intel-b(?<major>\\d+)$",
+      // Builds land ~20 a day, so a quiet month is past the default cap of 500 and Renovate would skip every candidate. 0 disables it.
+      maxMajorIncrement: 0,
+    },
+    {
       // Off-range node makes `npx renovate` resolve an old release and fail the config check (#2231). Raise with Renovate's engines.node.
       description: "Keep workflow setup-node on the major Renovate's engines.node allows",
       matchManagers: ["github-actions"],
