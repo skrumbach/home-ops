@@ -1,7 +1,10 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
-# CPU embedder (ai/embedding-cpu, Qwen3-Embedding-0.6B, 1024 dims): the same vector space as embedding-local
-# but off the shared B70, so it carries no 1 req/s cap. Not a fallback for embedding-local.
+# The embedder for apps that must stay off the shared B70 (Qwen3-Embedding-0.6B, 1024 dims, the same vector space
+# as embedding-local, so no 1 req/s cap). Served by ai/embedding-igpu on the node iGPU since 2026-11-24 (cosine
+# 1.00000 against the TEI CPU server it replaced, so stored vectors stay valid). The alias keeps its name:
+# Hindsight's key and every stored vector are bound to it. Rollback is the apiBase below and ai/embedding-cpu
+# (kept deployed, idle). Not a fallback for embedding-local.
 # INVARIANT: no prices, no cloud fallback; params.model must name what the backend serves.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
@@ -12,14 +15,14 @@ spec:
   proxyRef: litellm
   params:
     model: openai/Qwen/Qwen3-Embedding-0.6B
-    apiBase: http://embedding-cpu.ai.svc.cluster.local:8080/v1
-    apiKey: "not-needed" # TEI runs with no --api-key
+    apiBase: http://embedding-igpu.ai.svc.cluster.local:8080/v1
+    apiKey: "not-needed" # llama-server runs with no --api-key
     additional:
-      # In-flight cap so a retain burst queues at LiteLLM, not on the CPU.
+      # In-flight cap so a retain burst queues at LiteLLM, not on the backend.
       max_parallel_requests: 4
       timeout: 20
       # Callers such as ai/hindsight send `dimensions`; LiteLLM rejects it for an openai/ route
-      # (UnsupportedParamsError) unless unsupported params are dropped. TEI returns the full 1024.
+      # (UnsupportedParamsError) unless unsupported params are dropped. llama-server returns the full 1024.
       drop_params: true
   info:
     mode: embedding

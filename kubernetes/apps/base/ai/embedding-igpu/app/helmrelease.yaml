@@ -1,0 +1,155 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+#
+# iGPU twin of ai/embedding-gpu: the same Qwen3-Embedding-0.6B f16 GGUF and llama.cpp tag, on the node's
+# Raptor Lake iGPU (gpu.intel.com/xe) instead of the shared B70. Measured 2026-11-24 against TEI on CPU:
+# cosine 1.00000 on every vector, so it serves the `embedding-cpu` LiteLLM alias without a re-embed.
+# Do not append <|endoftext|>. Cosine vs the CPU endpoint is not the NaN probe.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app embedding-igpu
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: embedding-igpu
+  values:
+    controllers:
+      embedding-igpu:
+        replicas: 1
+        # Recreate: the weights cache is a RWO claim.
+        strategy: Recreate
+        pod:
+          terminationGracePeriodSeconds: 30
+          # Never talos-3: there the B70 is a second Level Zero device and `level_zero:0` may be the B70
+          # instead of the iGPU, which would take it from chat. talos-1 and talos-2 have the iGPU only.
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: NotIn
+                        values: [talos-3]
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ggml-org/llama.cpp
+              # Same tag as ai/vllm. Re-measure both workloads before the next bump.
+              tag: server-intel-b10820@sha256:35037559d99a90963d479b6e6e79764b138c76dc657341292aac6ad41d627c9f
+            args:
+              - -hf
+              - Qwen/Qwen3-Embedding-0.6B-GGUF:f16
+              - --embedding
+              # Last-token pooling. Mean pooling is a different vector space.
+              - --pooling
+              - last
+              - --host
+              - "0.0.0.0"
+              - --port
+              - "8080"
+              - -ngl
+              - "99"
+              # Must pin 2. There is a 56 MiB F16 KV pool; the 0.00 MiB line is only the reserve pass.
+              # The chat "do not pin --parallel" rule does not transfer.
+              - --parallel
+              - "2"
+              # Required with --parallel. Without it n_ctx_slot halves to 256.
+              - --kv-unified
+              # 0. The embedding cache is write-only, and absence restores the silent 8192 MiB default.
+              # A memory limit cannot stop that. Do not copy chat's 4096.
+              - --cache-ram
+              - "0"
+              # One triple. 512 leaves room for a chat restart; 2048 fits but spends that margin.
+              - --ctx-size
+              - "512"
+              - -b
+              - "512"
+              - -ub
+              - "512"
+              # --timeout 30 replaces the image default of 3600 but is only a socket timeout: it does not
+              # bound a queued request (live: 28-31 s, all 200). Load is capped at LiteLLM on the embedding-local
+              # model.
+              - --no-cont-batching
+              - --timeout
+              - "30"
+            env:
+              LLAMA_CACHE: /models
+              # The only Level Zero device on talos-1 and talos-2 is the iGPU.
+              ONEAPI_DEVICE_SELECTOR: level_zero:0
+              UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS: "1"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+                # Shared iGPU pool (sharedDevNum 99), also used by Plex and rsshub's playwright.
+                gpu.intel.com/xe: 1
+              limits:
+                cpu: "2"
+                # Headroom, not a bound. --cache-ram 0 is what stops the OOM (about 1.4Gi in use).
+                memory: 4Gi
+                gpu.intel.com/xe: 1
+            probes:
+              # /health cannot see NaN. Startup only. Readiness and liveness assert finite values.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: {path: /health, port: 8080}
+                  periodSeconds: 15
+                  timeoutSeconds: 5
+                  failureThreshold: 40
+              # nlohmann renders NaN as bare null, so grep -q null is the detector. No $ in this
+              # script: Flux envsubst eats it.
+              readiness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - |
+                        curl -sf --max-time 10 -X POST http://127.0.0.1:8080/v1/embeddings -H 'Content-Type: application/json' -d '{"model":"probe","input":"embedding health probe"}' -o /tmp/probe-readiness.json || exit 1
+                        grep -q 'null' /tmp/probe-readiness.json && exit 1
+                        grep -qE '"embedding"[[:space:]]*:[[:space:]]*\[[^]]*[1-9]' /tmp/probe-readiness.json
+                  periodSeconds: 30
+                  timeoutSeconds: 15
+                  failureThreshold: 5
+              liveness:
+                !!merge <<: *probe
+                spec:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - |
+                        curl -sf --max-time 10 -X POST http://127.0.0.1:8080/v1/embeddings -H 'Content-Type: application/json' -d '{"model":"probe","input":"embedding health probe"}' -o /tmp/probe-liveness.json || exit 1
+                        grep -q 'null' /tmp/probe-liveness.json && exit 1
+                        grep -qE '"embedding"[[:space:]]*:[[:space:]]*\[[^]]*[1-9]' /tmp/probe-liveness.json
+                  periodSeconds: 60
+                  timeoutSeconds: 15
+                  failureThreshold: 10
+
+    service:
+      app:
+        controller: embedding-igpu
+        ports:
+          http:
+            port: 8080
+
+    persistence:
+      # Re-downloadable GGUF. Not backed up. Without the claim every start re-fetches it.
+      models:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        storageClass: ceph-block
+        size: 5Gi
+        advancedMounts:
+          embedding-igpu:
+            app:
+              - path: /models

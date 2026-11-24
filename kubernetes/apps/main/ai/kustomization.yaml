@@ -21,6 +21,7 @@ resources:
   - ./cliproxyapi.yaml
   - ./embedding-cpu.yaml
   - ./embedding-gpu.yaml
+  - ./embedding-igpu.yaml
   - ./gpu-node-dashboard.yaml
   - ./hermes.yaml
   - ./hindsight.yaml

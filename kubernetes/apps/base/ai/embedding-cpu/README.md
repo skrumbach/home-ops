@@ -9,7 +9,9 @@
 ## What it does
 
 - **Serves `/v1/embeddings`** on Service `embedding-cpu:8080`, from Text Embeddings Inference (CPU build).
-- **Backs one LiteLLM model.** `LiteLLMModel` `embedding-cpu` points its `apiBase` here.
+- **Idle since 2026-11-24.** `LiteLLMModel` `embedding-cpu` now points at [`ai/embedding-igpu`](../embedding-igpu/README.md), which
+  is far faster than this server was under a Hindsight retain burst. This stays deployed as the rollback: set the
+  model's `apiBase` back to `embedding-cpu:8080`.
 - **Matches `embedding-local`'s vector space:** the same Qwen3-Embedding-0.6B at 1024 dimensions, so the two are
   interchangeable by design. They are still separate aliases: a store must keep using one.
 - **Leaves the B70 alone.** There is no GPU request and no shared-GPU rate cap.
