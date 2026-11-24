@@ -23,6 +23,10 @@ spec:
       max_parallel_requests: 8
       # Per attempt; the openai client retries twice, so a wedged backend holds a caller for ~3x + 1.5s.
       timeout: 5
+      # ai/hindsight sends `dimensions`; LiteLLM rejects it for an openai/ route (UnsupportedParamsError, HTTP 400)
+      # unless unsupported params are dropped. llama-server returns the full 1024 either way. embedding-cpu
+      # carried this and was retired without it.
+      drop_params: true
   info:
     mode: embedding
     # Backend --ctx-size; over-length input fails loud (400). Hub metadata only.
