@@ -15,7 +15,7 @@
   front at Envoy (SecurityPolicy `hindsight-auth`). It is an admin UI for browsing banks and memories.
 - **Extracts and consolidates facts** with `claude-haiku-5-5-metered` through LiteLLM, under its own virtual key
   (`hindsight`), and fails over to `chat-local` when Anthropic errors.
-- **Embeds with `embedding-cpu`** through LiteLLM (1024 dimensions) and reranks with the bundled local cross-encoder.
+- **Embeds with `embedding-local`** (the B70) through LiteLLM (1024 dimensions) and reranks with the bundled local cross-encoder.
 - **Keeps its state in Postgres.** Database `hindsight` on `postgres-18`, with the `vector` extension.
 
 ## Why it is built this way
@@ -23,7 +23,8 @@
 | Choice | Why |
 |---|---|
 | **Haiku 5.5 on the metered key, `chat-local` as failover** | On `chat-local` one extraction took 1-4 minutes on the shared B70, and page refreshes timed out in the queue during a bank seed. Haiku answers in seconds for a few dollars a month (key `maxBudget` is the cap). Memory content, Hermes included, now goes to Anthropic. The failover member runs with thinking off. The subscription route (`claude-haiku-5-5`) is not used: Hindsight documents its Claude subscription provider as personal-use only. |
-| **`embedding-cpu`, not `embedding-local`** | `embedding-local` is capped at 1 request per second for every key. A retain burst would hit 429s. |
+| **`embedding-local` on the B70, not a CPU or iGPU embedder** | A burst of 16-text batches peaks near 15 requests a minute and one request in flight, well under the 60-a-minute cap. The CPU server was 20 times slower under that load (8-17s a call, timeouts) and the iGPU about 9 times slower. All three produce the same vectors (cosine 1.00000), so nothing was re-embedded. |
+| **Input capped at 400 tokens** | The B70 server answers 400 above its 512-token context; TEI used to cut silently. Mental pages embed `name + content` (up to about 6000 tokens), so `HINDSIGHT_API_EMBEDDINGS_MAX_INPUT_TOKENS` cuts them first. |
 | **Full image, not `-slim`** | The slim image has no local reranker. |
 | **No volume under `~/.cache`** | The image bakes its models there and a mount shadows them. |
 | **No PVC, no kopiur** | Everything is in the database, which CNPG backs up. |
@@ -47,7 +48,7 @@ flowchart LR
   dev(["LAN clients"]) -->|"hindsight-api.sklab.dev"| api
   user(["Browser"]) -->|"hindsight.sklab.dev"| pol["SecurityPolicy<br/>hindsight-auth"] --> cp["Deployment<br/>controlplane"]
   cp --> api
-  api -->|"claude-haiku-5-5-metered, chat-local, embedding-cpu"| llm["LiteLLM"]
+  api -->|"claude-haiku-5-5-metered, chat-local, embedding-local"| llm["LiteLLM"]
   api --> db[("postgres-18<br/>hindsight + vector")]
   key["LiteLLMVirtualKey<br/>hindsight"] -.-> llm
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
@@ -101,7 +102,7 @@ kubectl -n ai get litellmvirtualkey hindsight
   `envoy-external`.
 - **A new in-cluster consumer needs a rule in CiliumNetworkPolicy `hindsight`**, and a reply rule for the API pod in its
   own policy if it has one.
-- **Embedding dimensions are fixed at `1024` once a memory is stored.** Changing the model or `embedding-cpu` needs
+- **Embedding dimensions are fixed at `1024` once a memory is stored.** Changing the model or `embedding-local` needs
   `hindsight-admin reembed`. Never point the key at a second embedder.
 - **Recall injects stale facts as trusted context.** Hindsight has no fact-validity windows, so review what agents retain.
 - **Snapshots are not selective:** CNPG PITR restores the whole `postgres-18` cluster, not the `hindsight` database alone.

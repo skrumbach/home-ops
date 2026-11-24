@@ -5,7 +5,7 @@
 # up), so there is no PVC and no kopiur claim. The API runs the worker in-process on one replica.
 #
 # LLM (fact extraction, consolidation, reflect): claude-haiku-5-5-metered through LiteLLM, chat-local as the
-# failover, so memory content goes to Anthropic (owner decision 2026-11-21, Hermes bank included). Embeddings: embedding-cpu through LiteLLM (1024 dims, fixed once a memory is stored; changing it
+# failover, so memory content goes to Anthropic (owner decision 2026-11-21, Hermes bank included). Embeddings: embedding-local (the B70) through LiteLLM (1024 dims, fixed once a memory is stored; changing it
 # needs `hindsight-admin reembed`). Reranker: local cross-encoder on CPU, bundled in the full image.
 # Use the full image (no -slim): the slim one has no local reranker. Do NOT mount a volume at
 # /home/hindsight/.cache: it shadows the models baked into the image.
@@ -65,15 +65,20 @@ spec:
               # Embeddings through LiteLLM. Dimensions are set so no billable startup probe runs.
               HINDSIGHT_API_EMBEDDINGS_PROVIDER: openai
               HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
-              HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: embedding-cpu
+              HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: embedding-local
               HINDSIGHT_API_EMBEDDINGS_OPENAI_DIMENSIONS: "1024"
-              # LiteLLM caps embedding-cpu at 4 in flight and 429s the rest at once. The default is 8 in flight
+              # LiteLLM caps embedding-local at 8 in flight and 60 requests a minute for every key together, and
+              # 429s the rest at once. The default is 8 in flight
               # per encode() and 15s of retries, so 4 concurrent tasks failed retains and page refreshes.
               # One request per encode and a longer retry window.
               HINDSIGHT_API_EMBEDDINGS_MAX_CONCURRENT_REQUESTS: "1"
-              # Texts per request. embedding-cpu (TEI) runs --max-client-batch-size 16 and returns 422 above it;
-              # the default 100 failed every retain with more than 16 facts. Keep the two equal.
+              # Texts per request. 16 keeps a request near 1.3s on the B70 (the per-attempt LiteLLM timeout is 5s);
+              # the default 100 would not fit it.
               HINDSIGHT_API_EMBEDDINGS_OPENAI_BATCH_SIZE: "16"
+              # embedding-gpu serves a 512-token context and answers 400 above it (TEI used to cut silently). Mental
+              # pages embed name + content, up to ~6000 tokens. Hindsight counts with o200k, which reads about 13%
+              # fewer tokens than Qwen, so 400 stays under 512. Measured on the longest stored pages.
+              HINDSIGHT_API_EMBEDDINGS_MAX_INPUT_TOKENS: "400"
               HINDSIGHT_API_EMBEDDINGS_MAX_RETRIES: "10"
               HINDSIGHT_API_EMBEDDINGS_RETRY_BUDGET: "45"
               # Default pool max is 100 against the shared postgres-18; one pod needs far fewer.

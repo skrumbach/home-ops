@@ -19,11 +19,11 @@ spec:
       namespace: security
     - name: cloudnative-pg
       namespace: database
-    # litellm owns the key CR and the PushSecret that writes litellm-consumer-hindsight; embedding-cpu
-    # serves the embeddings model.
+    # litellm owns the key CRs and the PushSecrets that write litellm-consumer-hindsight*; embedding-gpu
+    # serves the embeddings model (alias embedding-local).
     - name: litellm
       namespace: ai
-    - name: embedding-cpu
+    - name: embedding-gpu
       namespace: ai
   interval: 1h
   path: ./kubernetes/apps/base/ai/hindsight/app
