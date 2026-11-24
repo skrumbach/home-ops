@@ -1,9 +1,8 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
-# ai/hindsight's one key. INVARIANT: exactly the three models its memory comes from. claude-haiku-5-5-metered
-# does the LLM work (household-metered ANTHROPIC_API_KEY, so maxBudget is the real cap); chat-local is
-# Hindsight's own failover member, chosen in Hindsight and not by a LiteLLM fallback. embedding-cpu is the vector
-# space of every stored memory, so never add another embedder (its vectors would rank silently wrong).
+# ai/hindsight's metered key. INVARIANT: only claude-haiku-5-5-metered (household-metered ANTHROPIC_API_KEY, so
+# maxBudget is the real cap). LiteLLM checks a key's budget at auth, before the model is picked, so an exhausted
+# key rejects every model on it: the free models live on the budgetless hindsight-local key instead.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -14,16 +13,14 @@ spec:
   secretName: litellm-key-hindsight
   secretKey: key
   models:
-    - chat-local
     - claude-haiku-5-5-metered
-    - embedding-cpu
   # The busiest 6 h of a bank seed (2026-11-21, ~320k in / 215k out on the B70) is ~$0.15 at Haiku 5.5 prices.
   maxBudget: "15.00"
   budgetDuration: 30d
   rpmLimit: 120
   tpmLimit: 600000
   metadata:
-    purpose: memory LLM calls and embeddings for the ai/hindsight agent memory
+    purpose: metered memory LLM calls for the ai/hindsight agent memory
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
 apiVersion: external-secrets.io/v1alpha1
@@ -43,4 +40,45 @@ spec:
         secretKey: key
         remoteRef:
           remoteKey: litellm-consumer-hindsight
+          property: key
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
+# ai/hindsight's free key, budgetless on purpose (billing guard: free models only). chat-local is Hindsight's own
+# failover member, chosen in Hindsight and not by a LiteLLM fallback. embedding-cpu is the vector space of every
+# stored memory, so never add another embedder (its vectors would rank silently wrong).
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: hindsight-local
+spec:
+  proxyRef: litellm
+  keyAlias: hindsight-local
+  secretName: litellm-key-hindsight-local
+  secretKey: key
+  models:
+    - chat-local
+    - embedding-cpu
+  rpmLimit: 120
+  tpmLimit: 600000
+  metadata:
+    purpose: free local memory failover and embeddings for the ai/hindsight agent memory
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: litellm-key-hindsight-local
+spec:
+  refreshInterval: 5m
+  secretStoreRefs:
+    - name: onepassword-automation
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: litellm-key-hindsight-local
+  data:
+    - match:
+        secretKey: key
+        remoteRef:
+          remoteKey: litellm-consumer-hindsight-local
           property: key
