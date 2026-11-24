@@ -44,8 +44,9 @@ spec:
           app:
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              # Re-measure the next tag with -ub 4096 before bumping. The two compound.
-              tag: server-intel-b10820@sha256:35037559d99a90963d479b6e6e79764b138c76dc657341292aac6ad41d627c9f
+              # b12648 (2026-11-24, from b10820). b12648 dropped --no-mmap, now --load-mode none; no other flag here was
+              # removed. Bumped without a before/after benchmark: re-measure -ub 4096 on the next tag, and the two compound.
+              tag: server-intel-b12648@sha256:e82613e68bde198f51c696afb88b4eaa097cca22e0a4e96038865a5eafac1f31
             args:
               - -hf
               # Q3_K_M of the official distill, not the IQ3_XXS APEX build: same quality on the
@@ -84,9 +85,10 @@ spec:
               - "256"
               - --cache-ram
               # Absence restores the silent 8192 MiB default. A memory limit cannot stop that leak
-              # (kernel SIGKILL at page fault). 4096, not 0. Pairs with GLIBC_TUNABLES. --no-mmap is not this fix.
+              # (kernel SIGKILL at page fault). 4096, not 0. Pairs with GLIBC_TUNABLES. --load-mode none is not this fix.
               - "4096"
-              - --no-mmap
+              - --load-mode
+              - none
               # -ub 4096 with -b 8192: prefill +14% at 16K and +11% at 64K, decode unchanged, and
               # 4 concurrent 16K requests finished 6% sooner with per-request decode 10.4 vs 6.7 t/s.
               # The earlier rejection did not reproduce.
