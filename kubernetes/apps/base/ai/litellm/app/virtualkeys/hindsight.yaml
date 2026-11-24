@@ -44,7 +44,7 @@ spec:
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # ai/hindsight's free key, budgetless on purpose (billing guard: free models only). chat-local is Hindsight's own
-# failover member, chosen in Hindsight and not by a LiteLLM fallback. embedding-cpu is the vector space of every
+# failover member, chosen in Hindsight and not by a LiteLLM fallback. embedding-local is the vector space of every
 # stored memory, so never add another embedder (its vectors would rank silently wrong).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
@@ -57,7 +57,7 @@ spec:
   secretKey: key
   models:
     - chat-local
-    - embedding-cpu
+    - embedding-local
   rpmLimit: 120
   tpmLimit: 600000
   metadata:

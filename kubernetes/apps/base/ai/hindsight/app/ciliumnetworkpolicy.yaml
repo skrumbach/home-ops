@@ -43,7 +43,7 @@ spec:
         - ports:
             - port: "8888"
               protocol: TCP
-    # Replies from the in-cluster Services the API calls: LiteLLM :4000 (chat-local, embedding-cpu) and
+    # Replies from the in-cluster Services the API calls: LiteLLM :4000 (chat-local, embedding-local) and
     # postgres-18 :5432. No toPorts: a same-node Service reply arrives with the ClusterIP as source after
     # reverse NAT and is re-checked here.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed

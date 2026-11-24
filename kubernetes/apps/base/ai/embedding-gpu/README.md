@@ -55,7 +55,7 @@ flowchart LR
 2. On first start llama.cpp downloads the GGUF into `/models`. The startup probe polls `/health` for up to 10 minutes
    (40 failures at 15 s). The claim is re-downloadable and not backed up; without it every start fetches the model
    again.
-3. The server runs with last-token pooling, two parallel slots and one shared context of 512 tokens.
+3. The server runs with last-token pooling, two parallel slots and one shared context of 2048 tokens (about 1000 per input when both slots are busy).
 4. LiteLLM forwards `embedding-local` calls here. It caps the rate (60 requests per minute for every key together),
    the in-flight count (8) and the per-attempt timeout (5 s), and returns 429 at once instead of queueing.
 5. Every 30 s (readiness) and 60 s (liveness) the pod posts its own embedding request. The probe fails on a non-200
@@ -68,9 +68,9 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml).
 | Setting | Value | Why |
 |---|---|---|
 | `--pooling` | `last` | Mean pooling is a different vector space. |
-| `--parallel`, `--kv-unified` | `2`, set | The pin is required: the KV pool is 56 MiB and the `0.00 MiB` log line is only the reserve pass. The chat rule "do not pin `--parallel`" does not transfer. `--kv-unified` is required with it, or the slot context halves to 256. |
+| `--parallel`, `--kv-unified` | `2`, set | The pin is required: the KV pool is 224 MiB at 2048 (56 MiB at 512) and the `0.00 MiB` log line is only the reserve pass. The chat rule "do not pin `--parallel`" does not transfer. `--kv-unified` is required with it, or the slot context halves to 256. |
 | `--cache-ram` | `"0"` | The embedding cache is write-only. Absence restores the silent 8192 MiB default, and a memory limit cannot stop that. Do not copy chat's `4096`. |
-| `--ctx-size`, `-b`, `-ub` | `512` each | One triple. 512 leaves room for a chat restart; 2048 fits but spends that margin. |
+| `--ctx-size`, `-b`, `-ub` | `2048` each | One triple. The unified KV pool is shared by both slots and must hold two inputs at once: at 512 any pair over 256 tokens failed with HTTP 500. 4096 lost the device on the iGPU twin, so it is the ceiling. The B70 had about 5000 MiB free, so a chat restart keeps its room. |
 | `--no-cont-batching`, `--timeout` | set, `"30"` | `--timeout` replaces the image default of 3600 but only bounds the socket (see above). |
 | `ONEAPI_DEVICE_SELECTOR` | `level_zero:0` | Per the manifest comment, `/dev/dri/card0` here is the B70 while `/sys/class/drm/card0` is the iGPU; use PCI `0000:03:00.0` to name the B70. |
 | Memory request, limit | `1024Mi`, `4Gi` | The request is low on purpose: this pod is evicted before chat. Do not raise it without redoing the talos-3 arithmetic. The limit is headroom; `--cache-ram 0` is what stops the OOM. |
