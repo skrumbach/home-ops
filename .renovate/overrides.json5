@@ -120,6 +120,8 @@
       versioning: "regex:^server-intel-b(?<major>\\d+)$",
       // Builds land ~20 a day, so a quiet month is past the default cap of 500 and Renovate would skip every candidate. 0 disables it.
       maxMajorIncrement: 0,
+      // Builds land daily and Renovate rewrites an open PR to the newest one, so the tag under measurement would keep moving, and a green but unmeasured PR invites a merge. Approve it on the dashboard after measuring: it then takes the newest build at that moment. Check the PR tag equals the build you measured.
+      dependencyDashboardApproval: true,
     },
     {
       // Off-range node makes `npx renovate` resolve an old release and fail the config check (#2231). Raise with Renovate's engines.node.
