@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # ai/hindsight's metered key. INVARIANT: only the three claude-*-5-5-metered routes (household-metered
-# ANTHROPIC_API_KEY, so maxBudget is the real cap): Haiku for retain, Sonnet for consolidation and the page
+# ANTHROPIC_API_KEY, so maxBudget is the real cap): Haiku for retain and consolidation, Sonnet for the page
 # refresh, Opus for interactive reflect (per-operation models in hindsight/app/helmrelease.yaml). LiteLLM checks a key's budget at auth, before the model is picked, so an exhausted
 # key rejects every model on it: the free models live on the budgetless hindsight-local key instead.
 apiVersion: litellm.home-operations.com/v1alpha1

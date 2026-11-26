@@ -5,8 +5,8 @@
 # up), so there is no PVC and no kopiur claim. The API runs the worker in-process on one replica.
 #
 # LLM through LiteLLM, chat-local as the failover on every operation, so memory content goes to Anthropic (owner
-# decision 2026-11-21, Hermes bank included). Per operation: retain (fact extraction) Haiku 5.5, consolidation
-# (observations) and the page refresh Sonnet 5.5, interactive reflect Opus 5.5 (all -metered).
+# decision 2026-11-21, Hermes bank included). Per operation: retain (fact extraction) and consolidation
+# (observations) Haiku 5.5, the page refresh Sonnet 5.5, interactive reflect Opus 5.5 (all -metered).
 # Embeddings: embedding-local (the B70) through LiteLLM (1024 dims, fixed once a memory is stored; changing it
 # needs `hindsight-admin reembed`). Reranker: local cross-encoder on CPU, bundled in the full image.
 # Use the full image (no -slim): the slim one has no local reranker. Do NOT mount a volume at
@@ -48,7 +48,7 @@ spec:
               HINDSIGHT_API_LLM_REASONING_EFFORT: low
               # Per-operation models replace only the primary; provider, base URL, key and the chat-local failover
               # member below are inherited (_build_llm in hindsight's memory_engine.py).
-              HINDSIGHT_API_CONSOLIDATION_LLM_MODEL: claude-sonnet-5-5-metered # gitleaks:allow (model name, not a key)
+              # Consolidation runs after every retain, so it is the token volume: it stays on the primary (Haiku).
               HINDSIGHT_API_REFLECT_LLM_MODEL: claude-opus-5-5-metered # gitleaks:allow (model name, not a key)
               # Set explicitly: the background page refresh inherits REFLECT_*, so it would run on Opus.
               HINDSIGHT_API_MENTAL_MODEL_REFRESH_LLM_MODEL: claude-sonnet-5-5-metered # gitleaks:allow (model name, not a key)
