@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# GENERATED payload, never edited by hand: scripts/litellm-models/generate.py writes one file per provider and
+# .github/workflows/litellm-models.yaml opens the refresh PR. One multi-document file per provider (not one file
+# per model) because the operator takes one CR per model and a catalog is hundreds of them; the hand-curated
+# models stay in ../models. A provider is enabled by listing its file here AND in the workflow's provider list.
+resources:
+  - ./litellmmodel-venice.yaml

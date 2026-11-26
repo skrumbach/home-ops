@@ -12,6 +12,7 @@ resources:
   - ./litellmproxy.yaml
   - ./httproute-internal.yaml
   - ./models
+  - ./models-generated
   - ./virtualkeys
   - ./servicemonitor.yaml
   - ./prometheusrule.yaml
