@@ -20,7 +20,7 @@ def docs(pattern, kind):
 
 
 models = {}  # modelName -> params of every CR with that name (LiteLLM load-balances them)
-for d in docs("models/*.yaml", "LiteLLMModel"):
+for d in docs("models/*.yaml", "LiteLLMModel") + docs("models-generated/*.yaml", "LiteLLMModel"):
     models.setdefault(d["spec"]["modelName"], []).append(d["spec"]["params"])
 keys = {d["metadata"]["name"]: d["spec"] for d in docs("virtualkeys/*.yaml", "LiteLLMVirtualKey")}
 (proxy,) = docs("litellmproxy.yaml", "LiteLLMProxy")
