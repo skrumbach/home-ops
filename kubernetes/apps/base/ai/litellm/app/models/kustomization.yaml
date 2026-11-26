@@ -25,11 +25,13 @@ resources:
   - ./claude-opus-4-7.yaml
   - ./claude-opus-4-8.yaml
   - ./claude-opus-5-5.yaml
+  - ./claude-opus-5-5-metered.yaml
   - ./claude-opus-5-metered.yaml
   - ./claude-opus-5.yaml
   - ./claude-sonnet-4-5-20250929.yaml
   - ./claude-sonnet-4-6.yaml
   - ./claude-sonnet-5-5.yaml
+  - ./claude-sonnet-5-5-metered.yaml
   - ./claude-sonnet-5-metered.yaml
   - ./claude-sonnet-5.yaml
   - ./demo-priced-local.yaml
