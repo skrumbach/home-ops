@@ -7,4 +7,5 @@ kind: Kustomization
 # per model) because the operator takes one CR per model and a catalog is hundreds of them; the hand-curated
 # models stay in ../models. A provider is enabled by listing its file here AND in the workflow's provider list.
 resources:
+  - ./litellmmodel-openrouter.yaml
   - ./litellmmodel-venice.yaml

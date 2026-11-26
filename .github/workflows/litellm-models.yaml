@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 15
     env:
       # A provider is enabled by listing it here AND its file in models-generated/kustomization.yaml.
-      PROVIDERS: venice
+      PROVIDERS: venice openrouter
       BRANCH: automation/litellm-models
       PATHSPEC: kubernetes/apps/base/ai/litellm/app/models-generated
     steps:
