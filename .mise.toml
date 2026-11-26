@@ -41,7 +41,7 @@ MISE_LIST_ALL_VERSIONS = "false"
 "aqua:kubernetes-sigs/kustomize" = "5.6.0"
 "kubectl" = "1.37.2"
 "aqua:mikefarah/yq" = "4.54.3"
-"opentofu" = "1.13.9"
+"opentofu" = "1.13.10"
 "aqua:siderolabs/talos" = "1.14.5"
 "aqua:yannh/kubeconform" = "0.8.0"
 # Standard linters: pre-commit hooks and the ci.yaml `lint` job. CI installs them via
