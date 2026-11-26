@@ -38,7 +38,17 @@ SCHEMA = "https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litel
 ID_RE = re.compile(r"^[A-Za-z0-9._:/@+-]+$")
 PLAIN_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 # A catalog this small means a broken response, not a real catalog.
-MIN_MODELS = {"venice": 50, "openrouter": 100}
+MIN_MODELS = {
+    "venice": 50,
+    "venice-embed": 3,
+    "venice-image": 10,
+    "venice-tts": 3,
+    "venice-stt": 2,
+    "openrouter": 100,
+    "openrouter-embed": 10,
+}
+VENICE_BASE = "https://api.venice.ai/api/v1"
+PER_M = Decimal(1_000_000)
 
 
 def fetch(url: str) -> Any:
@@ -150,9 +160,112 @@ def openrouter_models(today: datetime.date) -> list[dict[str, Any]]:
     return out
 
 
+def max_usd(node: Any) -> Decimal | None:
+    """Highest `usd` leaf under a Venice pricing node (flat, per-resolution or per-quality trees)."""
+    if isinstance(node, dict):
+        if "usd" in node:
+            return dec(node["usd"])
+        leaves = [v for v in (max_usd(child) for child in node.values()) if v is not None]
+        return max(leaves) if leaves else None
+    return None
+
+
+# Venice media: LiteLLM's built-in `veniceai/` provider serves chat only, so these go through the generic
+# `openai/<id>` route with Venice's base URL (docs: OpenAI-compatible embeddings, images/generations, audio/speech,
+# audio/transcriptions). `supported_endpoints` + `enforce_supported_endpoints` make the router refuse a chat call to
+# a model that can only do one of these. Retries are off: a retried media call is billed twice.
+VENICE_MEDIA = {
+    # target: (catalog type, LiteLLM mode, endpoint, price extractor, extra litellm_params)
+    "venice-embed": ("embedding", "embedding", "/v1/embeddings", None, {}),
+    "venice-image": ("image", "image_generation", "/v1/images/generations", None,
+                     {"drop_params": "true", "max_retries": "0", "timeout": "300"}),
+    "venice-tts": ("tts", "audio_speech", "/v1/audio/speech", None, {"max_retries": "0", "timeout": "300"}),
+    # LiteLLM adds response_format=verbose_json when the client omits it, and Venice answers 400 to it.
+    "venice-stt": ("asr", "audio_transcription", "/v1/audio/transcriptions", None,
+                   {"response_format": "json", "max_retries": "0", "timeout": "300"}),
+}
+
+
+def venice_media_price(target: str, pricing: dict[str, Any]) -> dict[str, Decimal] | None:
+    if target == "venice-embed":
+        pin = dec((pricing.get("input") or {}).get("usd"))
+        return {"input_cost_per_token": pin / PER_M, "output_cost_per_token": Decimal(0)} if pin and pin > 0 else None
+    if target == "venice-tts":
+        pin = dec((pricing.get("input") or {}).get("usd"))  # USD per 1M characters
+        return {"input_cost_per_character": pin / PER_M} if pin and pin > 0 else None
+    if target == "venice-stt":
+        sec = dec((pricing.get("per_audio_second") or {}).get("usd"))
+        return {"input_cost_per_second": sec} if sec and sec > 0 else None
+    # venice-image: the OpenAI-shaped route bills the default tier and has no resolution field, so price at the
+    # dearest tier (over-counting is the safe direction); `upscale` is a separate endpoint and is excluded.
+    tiers = [max_usd(pricing[k]) for k in ("generation", "resolutions", "quality") if k in pricing]
+    top = max((t for t in tiers if t is not None), default=None)
+    return {"output_cost_per_image": top} if top and top > 0 else None
+
+
+def venice_media_models(target: str):
+    kind, mode, endpoint, _, additional = VENICE_MEDIA[target]
+
+    def run(today: datetime.date) -> list[dict[str, Any]]:
+        out = []
+        for m in fetch(f"{VENICE_BASE}/models?type={kind}")["data"]:
+            spec = m.get("model_spec") or {}
+            price = venice_media_price(target, spec.get("pricing") or {})
+            if not ID_RE.match(m.get("id", "")) or m.get("type") != kind or spec.get("offline") or price is None:
+                continue  # never register an unpriced model
+            if past((spec.get("deprecation") or {}).get("removesAt"), today):
+                continue
+            out.append(
+                {
+                    "id": m["id"],
+                    "model": f"openai/{m['id']}",
+                    "api_base": VENICE_BASE,
+                    "api_key": "os.environ/VENICE_API_KEY",
+                    "mode": mode,
+                    "additional": additional,
+                    "endpoints": [endpoint],
+                    "extra": price,
+                }
+            )
+        return out
+
+    return run
+
+
+def openrouter_embed_models(today: datetime.date) -> list[dict[str, Any]]:
+    out = []
+    for m in fetch("https://openrouter.ai/api/v1/models?output_modalities=all")["data"]:
+        pricing = m.get("pricing") or {}
+        pin = dec(pricing.get("prompt"))
+        if not ID_RE.match(m.get("id", "")) or "/api/v1/embeddings" not in (m.get("endpoints") or []):
+            continue
+        if pin is None or pin <= 0 or past(m.get("expiration_date"), today):
+            continue
+        out.append(
+            {
+                "id": m["id"],
+                "model": f"openrouter/{m['id']}",
+                "api_key": "os.environ/OPENROUTER_API_KEY",
+                "mode": "embedding",
+                "context": m.get("context_length"),
+                "endpoints": ["/v1/embeddings"],
+                "extra": {"input_cost_per_token": pin, "output_cost_per_token": Decimal(0)},
+            }
+        )
+    return out
+
+
+VENICE_DOC = "https://docs.venice.ai/api-reference/endpoint/models/list"
+OPENROUTER_DOC = "https://openrouter.ai/docs/api-reference/list-available-models"
+# target -> (fetch, modelName prefix, metadata.name prefix, source doc, what one entry is)
 PROVIDERS = {
-    "venice": (venice_models, "venice", "https://docs.venice.ai/api-reference/endpoint/models/list"),
-    "openrouter": (openrouter_models, "openrouter", "https://openrouter.ai/docs/api-reference/list-available-models"),
+    "venice": (venice_models, "venice", "venice", VENICE_DOC, "text model"),
+    "venice-embed": (venice_media_models("venice-embed"), "venice-embed", "venice-embed", VENICE_DOC, "embedding model"),
+    "venice-image": (venice_media_models("venice-image"), "venice-image", "venice-image", VENICE_DOC, "image generation model"),
+    "venice-tts": (venice_media_models("venice-tts"), "venice-tts", "venice-tts", VENICE_DOC, "text-to-speech model"),
+    "venice-stt": (venice_media_models("venice-stt"), "venice-stt", "venice-stt", VENICE_DOC, "speech-to-text model"),
+    "openrouter": (openrouter_models, "openrouter", "openrouter", OPENROUTER_DOC, "text model"),
+    "openrouter-embed": (openrouter_embed_models, "openrouter", "openrouter-embed", OPENROUTER_DOC, "embedding model"),
 }
 
 
@@ -178,15 +291,15 @@ def names(models: list[dict[str, Any]], prefix: str) -> dict[str, str]:
 
 
 def render(provider: str, models: list[dict[str, Any]]) -> str:
-    _, prefix, source = PROVIDERS[provider]
+    _, prefix, name_prefix, source, label = PROVIDERS[provider]
     ordered = sorted(models, key=lambda m: m["id"])
-    named = names(ordered, prefix)
+    named = names(ordered, name_prefix)
     lines = [
         "---",
         f"# yaml-language-server: $schema={SCHEMA}",
         f"# GENERATED by scripts/litellm-models/generate.py --provider {provider} from {source}.",
         "# Never edit by hand: .github/workflows/litellm-models.yaml regenerates it and opens a PR.",
-        "# One LiteLLMModel per text model, named `" + prefix + "/<upstream id>`, priced in USD so a key's maxBudget",
+        f"# One LiteLLMModel per {label}, named `" + prefix + "/<upstream id>`, priced in USD so a key's maxBudget",
         "# bounds it. Registration only: a key must allow-list a model to call it (nothing here grants access).",
     ]
     for i, m in enumerate(ordered):
@@ -202,22 +315,30 @@ def render(provider: str, models: list[dict[str, Any]]) -> str:
             "  proxyRef: litellm",
             "  params:",
             f"    model: {scalar(m['model'])}",
-            f"    apiKey: {m['api_key']}",
-            "  info:",
-            "    mode: chat",
         ]
-        if m["context"]:
+        if m.get("api_base"):
+            lines.append(f"    apiBase: {m['api_base']}")
+        lines.append(f"    apiKey: {m['api_key']}")
+        if m.get("additional"):
+            lines.append("    additional:")
+            lines += [f"      {k}: {v}" for k, v in m["additional"].items()]
+        lines += ["  info:", f"    mode: {m.get('mode', 'chat')}"]
+        if m.get("context"):
             lines.append(f"    maxInputTokens: {int(m['context'])}")
-        if m["max_output"]:
+        if m.get("max_output"):
             lines.append(f"    maxOutputTokens: {int(m['max_output'])}")
-        if m["tools"]:
+        if m.get("tools"):
             lines.append("    supportsFunctionCalling: true")
-        if m["vision"]:
+        if m.get("vision"):
             lines.append("    supportsVision: true")
         lines.append("    extra:")
         lines += [f"      {k}: {num(v)}" for k, v in m["extra"].items()]
-        if m["reasoning"]:
+        if m.get("reasoning"):
             lines.append("      supports_reasoning: true")
+        if m.get("endpoints"):
+            lines.append("      supported_endpoints:")
+            lines += [f"        - {e}" for e in m["endpoints"]]
+            lines.append("      enforce_supported_endpoints: true")
     return "\n".join(lines) + "\n"
 
 
