@@ -728,9 +728,9 @@ spec:
     maxOutputTokens: 8192
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.000000182
-      output_cost_per_token: 0.000000373
-      cache_read_input_token_cost: 0.000000038
+      input_cost_per_token: 0.0000003
+      output_cost_per_token: 0.0000012
+      cache_read_input_token_cost: 0.000000006
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
