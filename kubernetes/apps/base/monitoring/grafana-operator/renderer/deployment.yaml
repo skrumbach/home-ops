@@ -21,7 +21,7 @@ spec:
       containers:
         - name: renderer
           # The image and settings the grafana chart's imageRenderer runs (monitoring/grafana).
-          image: docker.io/grafana/grafana-image-renderer:v5.12.11@sha256:cfa6c8f63e6d626f90208f2880f15bd5facc279daec1b9bb642af07aa850d95e
+          image: docker.io/grafana/grafana-image-renderer:v5.12.12@sha256:7ec15ea713a82d0cc16aaf1575b5416a6f8b178f475f4d1685e3322a5ce3fae3
           env:
             - name: HTTP_PORT
               value: "8081"
