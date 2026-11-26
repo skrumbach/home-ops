@@ -59,7 +59,8 @@ spec:
       value: openid email profile
     - name: GENERIC_USER_ROLE_ATTRIBUTE
       value: litellm_role
-    # Master-key browser login moves to /fallback/login.
+    # Sends the browser straight to Pocket ID. The master-key form at /fallback/login no longer signs anyone in
+    # (disable_env_credential_login below).
     - name: AUTO_REDIRECT_UI_LOGIN_TO_SSO
       value: "true"
     # The UI sends no id_token_hint, so Pocket ID redirects to its /logout
@@ -76,6 +77,13 @@ spec:
   generalSettings:
     # Git stays the only source of truth for models and keys (never UI edits).
     store_model_in_db: false
+
+    # No shared static secret signs in to the Admin UI: with UI_PASSWORD unset, the master key doubles as the UI
+    # password, so anyone holding it was a proxy admin. Pocket ID SSO is the only UI sign-in; the master key still
+    # authenticates API calls (the operator's Authorization: Bearer). LOCKOUT RECOVERY if Pocket ID is down or the
+    # `litellm_role` claim stops arriving: administer over the API with the master key (e.g. POST /user/update to
+    # grant a user `proxy_admin`), or unset this line and restart the proxy.
+    disable_env_credential_login: true
 
     # Full prompt/response capture into the Postgres spend log; the prompt lands
     # in proxy_server_request, not messages. 30d matches the postgres-18 Barman
