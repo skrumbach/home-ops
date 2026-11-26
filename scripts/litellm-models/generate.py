@@ -120,6 +120,10 @@ def openrouter_models(today: datetime.date) -> list[dict[str, Any]]:
         pin, pout = dec(pricing.get("prompt")), dec(pricing.get("completion"))
         if not ID_RE.match(m.get("id", "")) or m["id"].endswith(":free"):
             continue
+        # Each model lists the endpoints it serves. The `<id>:batch` variants serve only /api/v1/batches, so
+        # registering them as chat models would be a deployment that can never answer; no field means unknown.
+        if "/api/v1/chat/completions" not in (m.get("endpoints") or []):
+            continue
         if arch.get("output_modalities") != ["text"] or "text" not in (arch.get("input_modalities") or []):
             continue
         if pin is None or pout is None or pin <= 0 or pout <= 0 or past(m.get("expiration_date"), today):
