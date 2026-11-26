@@ -13,7 +13,7 @@
   the tenant key as a bearer token.
 - **Serves the control plane** at `https://hindsight.sklab.dev` (container `controlplane`, port `3000`), with Pocket ID in
   front at Envoy (SecurityPolicy `hindsight-auth`). It is an admin UI for browsing banks and memories.
-- **Extracts facts** with `claude-haiku-5-5-metered`, **consolidates observations and refreshes pages** with `claude-sonnet-5-5-metered`, and **answers interactive reflect** with `claude-opus-5-5-metered`, all through LiteLLM under its own virtual key
+- **Extracts facts and consolidates observations** with `claude-haiku-5-5-metered`, **refreshes pages** with `claude-sonnet-5-5-metered`, and **answers interactive reflect** with `claude-opus-5-5-metered`, all through LiteLLM under its own virtual key
   (`hindsight`), and fails over to `chat-local` when Anthropic errors.
 - **Embeds with `embedding-local`** (the B70) through LiteLLM (1024 dimensions) and reranks with the bundled local cross-encoder.
 - **Keeps its state in Postgres.** Database `hindsight` on `postgres-18`, with the `vector` extension.
@@ -22,7 +22,7 @@
 
 | Choice | Why |
 |---|---|
-| **Haiku 5.5 for retain, Sonnet 5.5 for consolidation and pages, Opus 5.5 for reflect, all on the metered key, `chat-local` as failover** | On `chat-local` one extraction took 1-4 minutes on the shared B70, and page refreshes timed out in the queue during a bank seed. The Claude models answer in seconds. Haiku does the high-volume extraction cheaply; observations, pages and reflect are where a stronger model pays off, at 20x (Sonnet) and 40x (Opus) Haiku's price (key `maxBudget` of $40 per 30 days is the cap; when it is spent every operation fails over to `chat-local`). Memory content, Hermes included, now goes to Anthropic. The failover member runs with thinking off. The subscription route (`claude-haiku-5-5`) is not used: Hindsight documents its Claude subscription provider as personal-use only. |
+| **Haiku 5.5 for retain and consolidation, Sonnet 5.5 for pages, Opus 5.5 for reflect, all on the metered key, `chat-local` as failover** | On `chat-local` one extraction took 1-4 minutes on the shared B70, and page refreshes timed out in the queue during a bank seed. The Claude models answer in seconds. Haiku does the high-volume extraction and consolidation cheaply (consolidation on Sonnet burned too many tokens); pages and reflect are where a stronger model pays off, at 20x (Sonnet) and 40x (Opus) Haiku's price (key `maxBudget` of $40 per 30 days is the cap; when it is spent every operation fails over to `chat-local`). Memory content, Hermes included, now goes to Anthropic. The failover member runs with thinking off. The subscription route (`claude-haiku-5-5`) is not used: Hindsight documents its Claude subscription provider as personal-use only. |
 | **`embedding-local` on the B70, not a CPU or iGPU embedder** | A burst of 16-text batches peaks near 15 requests a minute and one request in flight, well under the 60-a-minute cap. The CPU server was 20 times slower under that load (8-17s a call, timeouts) and the iGPU about 9 times slower. All three produce the same vectors (cosine 1.00000), so nothing was re-embedded. |
 | **Input capped at 800 tokens, 8 texts a request** | The B70 server has a 2048-token context shared by two slots and answers 400 above it; TEI used to cut silently. Mental pages embed `name + content` (up to about 6000 tokens), so `HINDSIGHT_API_EMBEDDINGS_MAX_INPUT_TOKENS` cuts them first. Eight of the longest memory units took 27s on the iGPU twin, about 3s on the B70 by the measured 9x ratio (verify after rollout), inside the 5s LiteLLM timeout. |
 | **Full image, not `-slim`** | The slim image has no local reranker. |
@@ -71,7 +71,7 @@ One bank per source, so coding noise stays out of the assistant's recall.
 | Any MCP client | `https://hindsight-api.sklab.dev/mcp/<bank>/`, header `Authorization: Bearer <tenant key>` | the one in the URL |
 | Obsidian | Plugin `vectorize-io/hindsight-obsidian` (beta, through BRAT), API URL and key in its settings | `obsidian` |
 
-A first Obsidian sync sends every note through Haiku four at a time, and each retain triggers a Sonnet consolidation, so it spends from the key's `maxBudget` for as
+A first Obsidian sync sends every note through Haiku four at a time, and each retain triggers a Haiku consolidation, so it spends from the key's `maxBudget` for as
 long as the vault takes.
 
 ## Secrets
