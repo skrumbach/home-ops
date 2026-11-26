@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
+# Venice AI (OpenAI-compatible, https://api.venice.ai/api/v1) as ONE wildcard registration: every Venice model
+# is callable as `venice/<model-id>` with no per-model CR. LiteLLM's native `veniceai` provider supplies the base
+# URL; its default key env is VENICE_AI_API_KEY, so the key is named explicitly.
+# Registration only: a key must allow-list `venice/*` (hermes, opencode today).
+# INVARIANT: the cost map has no Venice prices, so spend logs $0 and a key's maxBudget does NOT bound Venice usage;
+# only rpm/tpm do. Pin a model with a priced `info.extra` CR before handing it to a budget-bound consumer.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: venice
+spec:
+  modelName: venice/*
+  proxyRef: litellm
+  params:
+    model: veniceai/*
+    apiKey: os.environ/VENICE_API_KEY

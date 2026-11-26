@@ -67,3 +67,4 @@ resources:
   - ./qwen3-embedding-8b.yaml
   - ./qwen3.8-2.4t-a95b.yaml
   - ./qwen3.8-27b.yaml
+  - ./venice.yaml

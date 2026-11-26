@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # ai/opencode's workspace key: auto, plus chat-local so the B70 model can be picked directly (zero-priced,
 # terminal, no cloud fallback). Budget = cloud-tier USD only (auto's COMPLEX/REASONING tiers); local volume
-# is bounded by rpm/tpm. tpmLimit must clear one full agent turn at opencode.json's limits.
+# is bounded by rpm/tpm. venice/* (every Venice model) is unpriced in the cost map: it logs $0, so only rpm/tpm bound it. tpmLimit must clear one full agent turn at opencode.json's limits.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -16,6 +16,7 @@ spec:
     - auto
     - chat-local
     - embedding-local
+    - venice/*
   maxBudget: "10.00"
   budgetDuration: 30d
   rpmLimit: 8

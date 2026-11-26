@@ -135,7 +135,7 @@ the only item created by hand:
 | `POSTGRES_DB_USER_PASSWORD` | `openssl rand -hex 24` |
 
 Already existing and reused: `ai-keys` (`ANTHROPIC_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`, `OPENROUTER_API_KEY`,
-`OPENCODE_GO_API_KEY`). The UI's SSO client secret is generated in the cluster (`app/externalsecret-oidc.yaml`), not
+`OPENCODE_GO_API_KEY`, `VENICE_API_KEY`). The UI's SSO client secret is generated in the cluster (`app/externalsecret-oidc.yaml`), not
 kept in 1Password. Written by PushSecrets, not by hand: `litellm-pgvector` (seed command in
 `app/pushsecret-pgvector.yaml`) and every `litellm-consumer-*` item.
 
