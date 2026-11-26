@@ -7,7 +7,7 @@
 
 LiteLLM cannot list or price Venice (its cost map has no entries and `check_provider_endpoint` does not
 support it), and a key's maxBudget only bounds priced models. This reads the provider's public catalog
-(no API key) and writes `<out>/<provider>.yaml`, a multi-document file of LiteLLMModel CRs named
+(no API key) and writes `<out>/litellmmodel-<provider>.yaml`, a multi-document file of LiteLLMModel CRs named
 `<prefix>/<upstream id>` (`venice/<id>`, `openrouter/<id>`), which can never collide with a hand-curated
 alias in `app/models/`. Output is a pure function of the catalog (sorted, no timestamps) apart from
 dropping models whose retirement date has passed.
@@ -227,7 +227,7 @@ def main() -> int:
     if len(models) < MIN_MODELS[args.provider]:
         print(f"refusing to write: only {len(models)} {args.provider} models (minimum {MIN_MODELS[args.provider]})", file=sys.stderr)
         return 1
-    target = args.out / f"{args.provider}.yaml"
+    target = args.out / f"litellmmodel-{args.provider}.yaml"
     if target.exists():
         before = target.read_text().count("\nkind: LiteLLMModel")
         if len(models) * 2 < before:

@@ -47,10 +47,16 @@ jobs:
             uv run --script scripts/litellm-models/generate.py --provider "${provider}"
           done
 
+      # Compare with main (nothing to do) and with the rolling branch (the open PR already carries exactly this
+      # refresh): without the second check an unmerged PR would get a new commit and a CI rerun every day.
+      # The repository is public, so the fetch needs no credentials.
       - name: Detect changes
         id: diff
         run: |
           if git diff --quiet -- "${PATHSPEC}"; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          elif git fetch --quiet --depth=1 origin "${BRANCH}" 2>/dev/null && git diff --quiet FETCH_HEAD -- "${PATHSPEC}"; then
+            echo "::notice::${BRANCH} already carries this refresh"
             echo "changed=false" >> "${GITHUB_OUTPUT}"
           else
             echo "changed=true" >> "${GITHUB_OUTPUT}"
