@@ -95,7 +95,8 @@ All values are in [`app/litellmproxy.yaml`](app/litellmproxy.yaml) unless noted.
 | `MAX_STRING_LENGTH_PROMPT_IN_DB` | `1000000` | The default cuts stored bodies at 2048 characters. |
 | `pass_through_endpoints` | four entries | Provider pass-throughs are admin-only. Each exact path sits above its dead-loopback catch-all (`127.0.0.1:9`). The order is load-bearing. |
 | `GENERIC_SCOPE` | `openid email profile` | Pocket ID releases the `litellm_role` claim only with `profile`. Without it the first login lands as `INTERNAL_USER_VIEW_ONLY`. |
-| `AUTO_REDIRECT_UI_LOGIN_TO_SSO` | `"true"` | Master-key browser login moves to `/fallback/login`. |
+| `AUTO_REDIRECT_UI_LOGIN_TO_SSO` | `"true"` | Browser sign-in goes straight to Pocket ID. |
+| `general_settings.disable_env_credential_login` | `true` | The master key no longer signs in to the Admin UI (SSO only); API calls with the master key are unchanged. Recovery if SSO is down: administer over the API with the master key, or unset it and restart. |
 | `litellmSettings.cache` | Redis on `litellm-dragonfly`, `ttl: 300` | Exact-match response cache. |
 | `forward_client_headers_to_llm_api` | the three `go-*` groups | OpenCode Go rejects a request without `x-opencode-session` (HTTP 400). Only these groups get client headers. |
 | `public_model_groups` | explicit list | The only way a model reaches the AI Hub. A new model stays unpublished until added; it grants nothing. |
