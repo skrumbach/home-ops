@@ -107,12 +107,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    strategy:
-      matrix:
-        resource:
-          - hr
-          - ks
-      fail-fast: false
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
@@ -138,40 +132,41 @@ jobs:
           base: ""
 
       # --strip-attr is omitted on purpose: passing any value REPLACES flate's default set.
+      # One comment, and only when the rendered diff says more than the Files changed tab:
+      # a direct edit renders as the same lines at ks (HelmRelease) and hr (Deployment) level.
       - name: Run flate diff
         env:
-          RESOURCE: ${{ matrix.resource }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          flate diff "${RESOURCE}" \
-            --path kubernetes/clusters/main \
-            --base "origin/${DEFAULT_BRANCH}" \
-            --no-progress \
-            --output diff > diff.patch
-
-      # 60000 bytes stays under GitHub's 65536-character comment limit.
-      - name: Truncate Diff
-        id: diff
         run: |-
-          if [ "$(wc -c < diff.patch)" -gt 60000 ]; then
-            head -c 60000 diff.patch > diff.patch.tmp
-            mv diff.patch.tmp diff.patch
-          fi
-          if [ -s diff.patch ]; then
-            echo 'has-diff=true' >> "$GITHUB_OUTPUT"
-          fi
+          for r in ks hr; do
+            flate diff "${r}" \
+              --path kubernetes/clusters/main \
+              --base "origin/${DEFAULT_BRANCH}" \
+              --no-progress \
+              --output diff > "diff-${r}.patch"
+          done
+          count() { grep -E '^[+-]' "$@" | grep -cvE '^(\+\+\+|---) ' || true; }
+          rendered=$(count diff-ks.patch diff-hr.patch)
+          source=$(git diff --numstat "origin/${DEFAULT_BRANCH}...HEAD" -- kubernetes | awk '{s+=$1+$2} END {print s+0}')
+          echo "rendered=${rendered} source=${source}"
+          # Rendered changes no larger than the edit itself add nothing to review.
+          [ "${rendered}" -gt "${source}" ] || exit 0
+          {
+            for r in ks hr; do
+              [ -s "diff-${r}.patch" ] || continue
+              printf '<details><summary>%s (%s changed lines)</summary>\n\n```diff\n' "${r}" "$(count "diff-${r}.patch")"
+              head -c 28000 "diff-${r}.patch"
+              printf '\n```\n\n</details>\n\n'
+            done
+          } > comment.md
 
-      - if: ${{ steps.diff.outputs.has-diff == 'true' }}
-        name: Add Comment
+      - name: Add Comment
+        if: ${{ hashFiles('comment.md') != '' }}
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          header: ${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resource }}
-          path: diff.patch
-          message: |-
-            ```diff
-            {{{content}}}
-            ```
+          header: ${{ github.event.pull_request.number }}/kubernetes/flate
+          path: comment.md
 
   versions:
     if: ${{ needs.changes.outputs.versions != '[]' }}
