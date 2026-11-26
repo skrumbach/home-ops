@@ -158,11 +158,13 @@ spec:
       - claude-opus-4-8
       - claude-opus-5
       - claude-opus-5-5
+      - claude-opus-5-5-metered
       - claude-opus-5-metered
       - claude-sonnet-4-5-20250929
       - claude-sonnet-4-6
       - claude-sonnet-5
       - claude-sonnet-5-5
+      - claude-sonnet-5-5-metered
       - claude-sonnet-5-metered
       - cliproxy-claude
       - deepseek-v4-flash

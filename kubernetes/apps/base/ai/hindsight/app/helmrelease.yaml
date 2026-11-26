@@ -4,8 +4,10 @@
 # Long-term memory for the agents. State lives in the `hindsight` database on postgres-18 (CNPG backs it
 # up), so there is no PVC and no kopiur claim. The API runs the worker in-process on one replica.
 #
-# LLM (fact extraction, consolidation, reflect): claude-haiku-5-5-metered through LiteLLM, chat-local as the
-# failover, so memory content goes to Anthropic (owner decision 2026-11-21, Hermes bank included). Embeddings: embedding-local (the B70) through LiteLLM (1024 dims, fixed once a memory is stored; changing it
+# LLM through LiteLLM, chat-local as the failover on every operation, so memory content goes to Anthropic (owner
+# decision 2026-11-21, Hermes bank included). Per operation: retain (fact extraction) Haiku 5.5, consolidation
+# (observations) and the page refresh Sonnet 5.5, interactive reflect Opus 5.5 (all -metered).
+# Embeddings: embedding-local (the B70) through LiteLLM (1024 dims, fixed once a memory is stored; changing it
 # needs `hindsight-admin reembed`). Reranker: local cross-encoder on CPU, bundled in the full image.
 # Use the full image (no -slim): the slim one has no local reranker. Do NOT mount a volume at
 # /home/hindsight/.cache: it shadows the models baked into the image.
@@ -44,6 +46,12 @@ spec:
               HINDSIGHT_API_LLM_BASE_URL: http://litellm.ai.svc.cluster.local:4000/v1
               HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5-metered # gitleaks:allow (model name, not a key)
               HINDSIGHT_API_LLM_REASONING_EFFORT: low
+              # Per-operation models replace only the primary; provider, base URL, key and the chat-local failover
+              # member below are inherited (_build_llm in hindsight's memory_engine.py).
+              HINDSIGHT_API_CONSOLIDATION_LLM_MODEL: claude-sonnet-5-5-metered # gitleaks:allow (model name, not a key)
+              HINDSIGHT_API_REFLECT_LLM_MODEL: claude-opus-5-5-metered # gitleaks:allow (model name, not a key)
+              # Set explicitly: the background page refresh inherits REFLECT_*, so it would run on Opus.
+              HINDSIGHT_API_MENTAL_MODEL_REFRESH_LLM_MODEL: claude-sonnet-5-5-metered # gitleaks:allow (model name, not a key)
               # Haiku 5.5 rejects a non-default temperature; `none` omits it on every operation.
               HINDSIGHT_API_LLM_TEMPERATURE: none
               # Failover member 1: chat-local, thinking off (the chat-local-classifier switch, sent per request
@@ -57,7 +65,7 @@ spec:
               HINDSIGHT_API_SKIP_LLM_VERIFICATION: "true"
               # One cap for every member: under failover all of it lands on the B70, shared with Hermes chat.
               HINDSIGHT_API_LLM_MAX_CONCURRENT: "4"
-              # Sized for the chat-local member; Haiku answers in seconds.
+              # Sized for the chat-local member; the Claude models answer in seconds.
               HINDSIGHT_API_LLM_TIMEOUT: "600"
               # Bounds a whole mental-model refresh, queue time included (default 300s). A failed refresh
               # pauses that page's automatic refreshes until one succeeds.

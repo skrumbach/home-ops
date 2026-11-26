@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
+# Household-metered route, used by ai/hindsight for interactive reflect. The natural name is the Max-subscription
+# pass-through via cliproxyapi. No info.extra prices: the v1.110.4 cost map already prices this id.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: claude-opus-5-5-metered
+spec:
+  modelName: claude-opus-5-5-metered
+  proxyRef: litellm
+  params:
+    model: anthropic/claude-opus-5-5
+    apiKey: os.environ/ANTHROPIC_API_KEY

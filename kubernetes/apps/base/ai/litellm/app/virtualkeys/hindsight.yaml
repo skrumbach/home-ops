@@ -1,7 +1,8 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
-# ai/hindsight's metered key. INVARIANT: only claude-haiku-5-5-metered (household-metered ANTHROPIC_API_KEY, so
-# maxBudget is the real cap). LiteLLM checks a key's budget at auth, before the model is picked, so an exhausted
+# ai/hindsight's metered key. INVARIANT: only the three claude-*-5-5-metered routes (household-metered
+# ANTHROPIC_API_KEY, so maxBudget is the real cap): Haiku for retain, Sonnet for consolidation and the page
+# refresh, Opus for interactive reflect (per-operation models in hindsight/app/helmrelease.yaml). LiteLLM checks a key's budget at auth, before the model is picked, so an exhausted
 # key rejects every model on it: the free models live on the budgetless hindsight-local key instead.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
@@ -14,8 +15,11 @@ spec:
   secretKey: key
   models:
     - claude-haiku-5-5-metered
-  # The busiest 6 h of a bank seed (2026-11-21, ~320k in / 215k out on the B70) is ~$0.15 at Haiku 5.5 prices.
-  maxBudget: "15.00"
+    - claude-opus-5-5-metered
+    - claude-sonnet-5-5-metered
+  # The busiest 6 h of a bank seed (2026-11-21, ~320k in / 215k out) was ~$0.15 at Haiku 5.5 prices; Sonnet is 20x
+  # that and Opus 40x. Sized to share the household's $100 Anthropic allowance; re-check after a week of real use.
+  maxBudget: "40.00"
   budgetDuration: 30d
   rpmLimit: 120
   tpmLimit: 600000
