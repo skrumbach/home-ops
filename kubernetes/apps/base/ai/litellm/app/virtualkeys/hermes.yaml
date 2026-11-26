@@ -4,6 +4,7 @@
 # litellm-consume-projects with OpenCode). Explicit allow-list (never []):
 #   - chat-local: the default model, zero-priced, terminal (no cloud fallback).
 #   - go-*: the OpenCode Go flat-rate models, zero-priced (caller must send x-opencode-session).
+#   - venice/*: every Venice model. Unpriced in the cost map, so it logs $0 and maxBudget does not cap it (rpm/tpm only).
 #   - the metered Claude/GPT routes Hermes offers as selectable models. maxBudget is a real cap
 #     for these; the local and Go models are $0 so only rpm/tpm bound them.
 # No spec.metadata.
@@ -42,6 +43,7 @@ spec:
     - gpt-6-astra
     - gpt-6-astra-pro
     - gpt-oss-20b
+    - venice/*
   maxBudget: "50.00"
   budgetDuration: 30d
   rpmLimit: 120
