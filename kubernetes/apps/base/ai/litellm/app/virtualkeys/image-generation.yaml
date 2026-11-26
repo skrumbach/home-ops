@@ -1,7 +1,9 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmvirtualkey_v1alpha1.json
 # Image generation key: POST /v1/images/generations against Grok (cliproxyapi, $0), GPT Image 2 and
-# Gemini image (OpenRouter, metered).
+# Gemini image (OpenRouter, metered) and every Venice image model (`venice-image/<id>`, generated into
+# ../models-generated at the dearest tier price, so the budget below bounds it; retries are off because a
+# retried image call is billed twice).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -15,7 +17,8 @@ spec:
     - gemini-3.1-flash-image
     - gpt-image-2
     - grok-imagine-image
-  # OpenRouter-metered images; the cap stops a runaway loop.
+    - venice-image/*
+  # OpenRouter/Venice-metered images; the cap stops a runaway loop.
   maxBudget: "10.00"
   budgetDuration: 30d
   rpmLimit: 30
