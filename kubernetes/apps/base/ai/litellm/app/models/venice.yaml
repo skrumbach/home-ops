@@ -4,10 +4,13 @@
 # is callable as `venice/<model-id>` with no per-model CR. LiteLLM's native `veniceai` provider supplies the base
 # URL; its default key env is VENICE_AI_API_KEY, so the key is named explicitly.
 # Registration only: a key must allow-list `venice/*` (hermes, opencode today).
-# INVARIANT: the cost map has no Venice prices, so a model that only this wildcard matches logs $0 and a key's
-# maxBudget does NOT bound it (only rpm/tpm do). The priced `venice/<id>` CRs in ../models-generated (refreshed daily
-# by .github/workflows/litellm-models.yaml) take that role for every listed model; this wildcard is the catch-all
-# for a model Venice added since the last refresh.
+# INVARIANT: the cost map has no Venice prices, so an unpriced catch-all would log $0 and a key's maxBudget would
+# not bound it. The priced `venice/<id>` CRs in ../models-generated (refreshed daily by
+# .github/workflows/litellm-models.yaml) price every listed model; this wildcard only matches a model Venice added
+# since the last refresh, so it carries the CEILING of the catalog (the long-context tier of the dearest text model,
+# $60 in / $270 out per 1M tokens, 2026-11-26): such a model is over-counted, never free. Re-check the ceiling when
+# the generator output shows a dearer model. Text only: a media model (image, speech, ...) must never be named
+# `venice/<id>`, because hermes and opencode hold `venice/*`; give it its own prefix and its own key.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
@@ -18,3 +21,8 @@ spec:
   params:
     model: veniceai/*
     apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    extra:
+      input_cost_per_token: 0.00006
+      output_cost_per_token: 0.00027
