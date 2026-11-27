@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app solidcraft
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: solidcraft
+  values:
+    defaultPodOptions:
+      securityContext:
+        # The image runs nginx as uid 101 (image config `User: 101`).
+        runAsUser: 101
+        runAsGroup: 101
+        runAsNonRoot: true
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+    controllers:
+      solidcraft:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/mirceanton/solidcraft-web
+              tag: 0.48.0@sha256:0824d6c24fa8d54f557b37ed61e48ddd6e7cb6261292051d6e82f00c20492f84
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: &port 8080
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Maker
+          gethomepage.dev/name: SolidCraft
+          gethomepage.dev/icon: sh-solidcraft.svg
+          gethomepage.dev/description: Browser CAD
+          # securitypolicy.yaml gates this route, so a route check would measure the Pocket ID
+          # sign-in page it redirects to. Probe the Service in-cluster instead.
+          gatus.home-operations.com/endpoint: |-
+            url: http://solidcraft.maker.svc.cluster.local:8080/
+            conditions:
+              - "[STATUS] == 200"
+            group: maker
+            ui:
+              hide-url: true
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+    persistence:
+      # nginx writes its pid, temp and cache files under these with a read-only root filesystem.
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+          - path: /var/cache/nginx
+            subPath: cache
+          - path: /var/run
+            subPath: run

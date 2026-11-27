@@ -13,6 +13,7 @@ resources:
   - ./flux-system
   - ./home-automation
   - ./kube-system
+  - ./maker
   - ./media
   - ./monitoring
   - ./network

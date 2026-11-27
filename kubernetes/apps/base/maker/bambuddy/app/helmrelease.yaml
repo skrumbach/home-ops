@@ -1,0 +1,242 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app bambuddy
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: bambuddy
+  maxHistory: 3
+  values:
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        # 1000:1000 is kopiur's fleet default, so no KOPIUR_PUID/PGID override. The entrypoint's own
+        # chown-and-gosu step is a no-op as a non-root uid; fsGroup makes /app/data writable instead.
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        # The virtual printer binds 322 (RTSPS) and 990 (FTPS). A non-root uid cannot below 1024 without
+        # this namespaced safe sysctl (NET_BIND_SERVICE on a non-root process needs ambient caps).
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "0"
+    controllers:
+      bambuddy:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/maziggy/bambuddy
+              tag: 1.3.2@sha256:16be075c5517b5ceab201d0105938c1a890f5b315bf185fdfa98d47f12f6bd03
+            env:
+              TZ: America/New_York
+              PORT: &httpPort 8000
+              # Base of the OIDC redirect_uri (<APP_URL>/api/v1/auth/oidc/callback) and of the links Bambuddy writes.
+              APP_URL: https://bambuddy.sklab.dev
+              # Native Pocket ID sign-in (pocketidoidcclient.yaml); env-managed provider, read-only in the UI.
+              # Local accounts stay: the owner creates the admin, then signs in with Pocket ID once to link
+              # by email (README). Pocket ID sends email_verified=true; REQUIRE_EMAIL_VERIFIED stays on.
+              BAMBUDDY_OIDC_NAME: Pocket ID
+              BAMBUDDY_OIDC_ISSUER_URL: https://id.sklab.dev
+              BAMBUDDY_OIDC_AUTO_CREATE_USERS: "false"
+              BAMBUDDY_OIDC_AUTO_LINK_EXISTING: "true"
+              BAMBUDDY_OIDC_REQUIRE_EMAIL_VERIFIED: "true"
+              BAMBUDDY_OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: bambuddy-oidc-credentials
+                    key: client-id
+              BAMBUDDY_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: bambuddy-oidc-credentials
+                    key: client-secret
+              # Virtual printer behind the LoadBalancer Service `printer`: slicers are told this address
+              # for MQTT/upload and for FTP passive data connections.
+              VIRTUAL_PRINTER_ADVERTISE_ADDRESS: &vpIp 10.50.0.60
+              VIRTUAL_PRINTER_PASV_ADDRESS: *vpIp
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *httpPort
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *httpPort
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *httpPort
+                  periodSeconds: 10
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+    service:
+      # Two Services, so app-template suffixes both: `bambuddy-app` and `bambuddy-printer`.
+      app:
+        controller: *app
+        ports:
+          http:
+            # The live printer status runs over a websocket.
+            appProtocol: kubernetes.io/ws
+            port: *httpPort
+      # Virtual printer: what Bambu Studio and the slicers connect to, on a fixed BGP address.
+      printer:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: *vpIp
+        ports:
+          mqtt:
+            port: 8883
+          ftps:
+            port: 990
+          rtsps:
+            port: 322
+          bind-3000:
+            port: 3000
+          bind-3002:
+            port: 3002
+          tunnel:
+            port: 6000
+          # FTP passive data: 10 ports per virtual printer, 3 virtual printers (non-proxy modes).
+          pasv-50000:
+            port: 50000
+          pasv-50001:
+            port: 50001
+          pasv-50002:
+            port: 50002
+          pasv-50003:
+            port: 50003
+          pasv-50004:
+            port: 50004
+          pasv-50005:
+            port: 50005
+          pasv-50006:
+            port: 50006
+          pasv-50007:
+            port: 50007
+          pasv-50008:
+            port: 50008
+          pasv-50009:
+            port: 50009
+          pasv-50010:
+            port: 50010
+          pasv-50011:
+            port: 50011
+          pasv-50012:
+            port: 50012
+          pasv-50013:
+            port: 50013
+          pasv-50014:
+            port: 50014
+          pasv-50015:
+            port: 50015
+          pasv-50016:
+            port: 50016
+          pasv-50017:
+            port: 50017
+          pasv-50018:
+            port: 50018
+          pasv-50019:
+            port: 50019
+          pasv-50020:
+            port: 50020
+          pasv-50021:
+            port: 50021
+          pasv-50022:
+            port: 50022
+          pasv-50023:
+            port: 50023
+          pasv-50024:
+            port: 50024
+          pasv-50025:
+            port: 50025
+          pasv-50026:
+            port: 50026
+          pasv-50027:
+            port: 50027
+          pasv-50028:
+            port: 50028
+          pasv-50029:
+            port: 50029
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Maker
+          gethomepage.dev/name: Bambuddy
+          gethomepage.dev/icon: bambu-lab.svg
+          gethomepage.dev/description: Bambu H2D print archive and control
+          gatus.home-operations.com/endpoint: |-
+            url: http://bambuddy-app.maker.svc.cluster.local:8000/health
+            conditions:
+              - "[STATUS] == 200"
+            group: maker
+            ui:
+              hide-url: true
+        hostnames: ["{{ .Release.Name }}.sklab.dev"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: bambuddy-app
+                port: *httpPort
+    persistence:
+      # Chart-owned claim `bambuddy` (the only claim, so app-template names it after the release), kept on
+      # uninstall; kopiur backs it up. Moves to components/kopiur/pvc once it has snapshots.
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        retain: true
+        advancedMounts:
+          bambuddy:
+            app:
+              - path: /app/data
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          bambuddy:
+            app:
+              - path: /tmp
+                subPath: tmp
+              - path: /app/logs
+                subPath: logs
