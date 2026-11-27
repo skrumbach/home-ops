@@ -17,6 +17,6 @@ exclude:
   - "**/*.gotmpl"
   - "**/templates/**"
   - "kubernetes/**/resources/**"
-  # Broad on purpose: it also skips 14 plain manifests (toolhive, tailscale-operator config/),
+  # Broad on purpose: it also skips plain manifests (tailscale-operator config/),
   # so a future generator input under config/ is safe by default.
   - "kubernetes/**/config/**"

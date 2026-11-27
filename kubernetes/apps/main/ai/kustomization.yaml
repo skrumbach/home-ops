@@ -31,7 +31,6 @@ resources:
   - ./repo-wiki.yaml
   - ./samba.yaml
   - ./searxng.yaml
-  - ./toolhive.yaml
   - ./vllm.yaml
 
 # Pod Security: enforce baseline here (warn/audit stay restricted from components/common).

@@ -14,7 +14,7 @@
 - **Keeps its data in PostgreSQL:** role and database `lidarr` on `postgres-18-rw` in `database`, created by
   Kustomization `lidarr-db`.
 - **Serves the UI** at `lidarr.sklab.dev` on `envoy-internal` only.
-- **Answers other apps** on Service `lidarr:8080`: `queue-watchdog` and the `ai/toolhive` MCP server `arr-mcp`.
+- **Answers other apps** on Service `lidarr:8080`: `queue-watchdog` and the `ai/litellm` MCP server `arr-mcp`.
 
 ## Why it is built this way
 

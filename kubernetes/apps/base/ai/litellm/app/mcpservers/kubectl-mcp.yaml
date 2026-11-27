@@ -30,8 +30,7 @@ spec:
       - name: HOME
         value: /tmp
       # 2.0.0 refuses a non-loopback bind without auth, and LiteLLM reaches the pod IP, so loopback is
-      # no option. Exposure: any pod in the cluster can reach this Service (no ingress policy yet; the
-      # old ToolHive NetworkPolicy is gone), but the service account is read-only and core Secrets are
+      # no option. Exposure: any pod in the cluster can reach this Service (no ingress policy yet), but the service account is read-only and core Secrets are
       # not granted.
       - name: MCP_ALLOW_UNAUTHENTICATED
         value: "true"

@@ -12,7 +12,7 @@
 - **Scans Plex** libraries over `http://plex.media.svc:32400`, which the `plex` network policy admits for Seerr.
 - **Stores its data** in database `seerr` on the shared `postgres-18` cluster, through Secret `seerr-secret`.
 - **Owns one API key**, made by Password generator `seerr-api-key` and recorded in 1Password item `seerr-api`
-  (vault `Automation`). Wizarr reads it from Secret `seerr-api-key`; the `ai/toolhive` MCP server `seerr-mcp` reads
+  (vault `Automation`). Wizarr reads it from Secret `seerr-api-key`; the `ai/litellm` MCP server `seerr-mcp-server` reads
   it from the 1Password item.
 - **Keeps its settings** in PVC `seerr` (`/app/config`), backed up by kopiur to `ceph` and `r2`.
 

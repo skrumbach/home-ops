@@ -13,7 +13,7 @@
 - **Keeps its data in PostgreSQL:** role and database `prowlarr` on `postgres-18-rw` in `database`, created by
   Kustomization `prowlarr-db`.
 - **Serves the UI** at `prowlarr.sklab.dev` on `envoy-internal` only.
-- **Answers other apps** on Service `prowlarr:9696`: `shelfmark` and the `ai/toolhive` MCP server `arr-mcp`.
+- **Answers other apps** on Service `prowlarr:9696`: `shelfmark` and the `ai/litellm` MCP server `arr-mcp`.
 - **Touches no media.** It mounts no `shared-downloads` and no NAS export, only its config claim and a `/tmp` emptyDir.
 
 ## Why it is built this way

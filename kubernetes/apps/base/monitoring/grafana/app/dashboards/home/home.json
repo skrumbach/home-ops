@@ -1866,7 +1866,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "- [LiteLLM](/d/litellm)\n- [LiteLLM routing](/d/llm-routing)\n- [GPU node](/d/ai-gpu-node)\n- [ToolHive MCP](/d/toolhive-mcp-otel-scrape)",
+        "content": "- [LiteLLM](/d/litellm)\n- [LiteLLM routing](/d/llm-routing)\n- [GPU node](/d/ai-gpu-node)",
         "code": {
           "language": "plaintext",
           "showLineNumbers": false,
