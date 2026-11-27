@@ -195,14 +195,26 @@ platform_toolsets:
     - hermes-telegram
   discord:
     - hermes-discord
-# Discord: ONE dedicated channel in ONE server. allowed_channels is a whitelist (the bot ignores everywhere
-# else), free_response_channels answers there without an @mention, and only DISCORD_ALLOWED_USERS may
-# command it. The default profile answers for now; a `gateway.profile_routes` entry (platform discord, chat_id
-# below) moves the channel to another profile later. Server 1507870874752127226.
+# Discord, server sklab.dev (1507870874752127226), category Hermes. allowed_channels is a whitelist (the bot
+# ignores everywhere else), free_response_channels answers there without an @mention, and only
+# DISCORD_ALLOWED_USERS may command it. Two channels: #general (the default profile) and #ha, which
+# gateway.profile_routes hands to the `home-assistant` profile.
 discord:
-  allowed_channels: "1564049687051370687"
-  free_response_channels: "1564049687051370687"
+  allowed_channels: "1564049687051370687,1575711114375991441"
+  free_response_channels: "1564049687051370687,1575711114375991441"
   auto_thread: false
+# Multi-profile gateway. multiplex_profiles must stay here: copy-config rewrites /opt/data/config.yaml from
+# Git on every start, so a value set only at runtime is lost. The profile itself (config.yaml, .env, SOUL.md)
+# lives on the volume at /opt/data/profiles/home-assistant and is not touched by copy-config. Routes match
+# on guild_id + chat_id; everything that matches no route stays on the default profile.
+gateway:
+  multiplex_profiles: true
+  profile_routes:
+    - name: home-assistant
+      platform: discord
+      guild_id: "1507870874752127226"
+      chat_id: "1575711114375991441"
+      profile: home-assistant
 telegram:
   require_mention: false
 
