@@ -42,7 +42,7 @@ MISE_LIST_ALL_VERSIONS = "false"
 "kubectl" = "1.37.2"
 "aqua:mikefarah/yq" = "4.54.3"
 "opentofu" = "1.13.10"
-"aqua:siderolabs/talos" = "1.14.5"
+"aqua:siderolabs/talos" = "1.14.7"
 "aqua:yannh/kubeconform" = "0.8.0"
 # Standard linters: pre-commit hooks and the ci.yaml `lint` job. CI installs them via
 # unversioned mise-action install_args so these pins stay the single source of truth.
