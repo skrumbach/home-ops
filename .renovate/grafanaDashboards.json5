@@ -68,7 +68,7 @@
       semanticCommitType: "chore",
     },
     {
-      // toolhive's main moves daily; one grouped PR a month (America/New_York, .renovaterc.json5) instead of a digest PR per commit.
+      // An upstream main can move daily; one grouped PR a month (America/New_York, .renovaterc.json5) instead of a digest PR per commit.
       description: "Commit-pinned Grafana url: dashboards - one grouped PR a month",
       matchDatasources: ["git-refs"],
       matchFileNames: ["kubernetes/apps/base/monitoring/grafana-operator/**"],
