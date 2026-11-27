@@ -23,7 +23,7 @@
 |---|---|
 | **A separate identity, not the admin kubeconfig** | Admin is the default for `kubectl` here, so an agent shell with no override can write. This identity cannot. |
 | **`view` plus a short extra role** | `view` already aggregates the Flux, Flux Operator, cert-manager and External Secrets view roles and excludes Secrets. The extra role only adds cluster-scoped objects and the infra CRDs agents debug. |
-| **Credential-bearing groups stay out** | The `litellm`, `toolhive`, `tailscale` and `talos.dev` groups can carry credentials, so the role names none of them. |
+| **Credential-bearing groups stay out** | The `litellm`, `tailscale` and `talos.dev` groups can carry credentials, so the role names none of them. |
 
 ## How it works
 

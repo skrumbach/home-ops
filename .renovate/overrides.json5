@@ -85,13 +85,6 @@
       allowedVersions: "/^3\\./",
     },
     {
-      // 2.x is untested against the ToolHive vmcp gateway; lift this after a test.
-      description: "Keep github-mcp-server on major 1",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/github/github-mcp-server"],
-      allowedVersions: "<2",
-    },
-    {
       // x.0.z is dev, x.1.z is RC; registry tags surface RCs as upgrades (#1396). Not for ghcr.io/rook/ceph.
       description: "Keep quay.io/ceph/ceph on stable x.2.z tags (skip x.0.z dev and x.1.z RC)",
       matchDatasources: ["docker"],

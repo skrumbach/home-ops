@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/rbac.authorization.k8s.io/clusterrole_v1.json
 # Reads that the built-in `view` role leaves out: cluster-scoped objects and the infra
-# CRDs agents debug. Groups whose objects can carry credentials (litellm, toolhive,
+# CRDs agents debug. Groups whose objects can carry credentials (litellm,
 # tailscale, talos.dev) and Secrets stay out. Read verbs only.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

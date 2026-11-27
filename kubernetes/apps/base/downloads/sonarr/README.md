@@ -16,7 +16,7 @@
 - **Serves the UI** at `sonarr.sklab.dev` on `envoy-internal` only. Two sign-ins in a row: the Envoy SecurityPolicy
   `sonarr-auth` (Pocket ID client `sonarr`) gates the UI, then Sonarr's own Pocket ID login (client `sonarr-app`).
   `/api`, `/feed` and `/ping` skip the Envoy gate; Sonarr checks the API key itself.
-- **Answers other apps** on Service `sonarr:8989`: `recyclarr`, `queue-watchdog` and the `ai/toolhive` MCP server `arr-mcp`.
+- **Answers other apps** on Service `sonarr:8989`: `recyclarr`, `queue-watchdog` and the `ai/litellm` MCP server `arr-mcp`.
 
 ## Why it is built this way
 

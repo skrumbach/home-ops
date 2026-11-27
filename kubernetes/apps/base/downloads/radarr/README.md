@@ -14,7 +14,7 @@
 - **Keeps its data in PostgreSQL:** role and database `radarr` on `postgres-18-rw` in `database`, created by
   Kustomization `radarr-db`.
 - **Serves the UI** at `radarr.sklab.dev` on `envoy-internal` only.
-- **Answers other apps** on Service `radarr:7878`: `recyclarr`, `queue-watchdog`, the `ai/toolhive` MCP server `arr-mcp`
+- **Answers other apps** on Service `radarr:7878`: `recyclarr`, `queue-watchdog`, the `ai/litellm` MCP server `arr-mcp`
   and a Gatus check of `/api/v3/queue/status` (`monitoring/gatus`, `app/resources/config.yaml`).
 
 ## Why it is built this way

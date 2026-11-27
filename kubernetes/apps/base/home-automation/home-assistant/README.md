@@ -17,7 +17,7 @@
   SecurityPolicy `hass-code-auth`.
 - **Keeps its state** in PVC `home-assistant`, backed up by kopiur to the in-cluster `ceph` and the offsite `r2`
   repositories, and restored from the newest ceph snapshot when the claim is recreated.
-- **Answers in-cluster clients** on Service `home-assistant:8123`, such as the `ai/toolhive` MCP server `ha-mcp`.
+- **Answers in-cluster clients** on Service `home-assistant:8123`, such as the `ai/litellm` MCP server `ha-mcp-server`.
 
 ## Why it is built this way
 

@@ -6,7 +6,7 @@ GitOps for this cluster's AI stack. Flux overlays: `kubernetes/apps/main/ai/`.
 | --- | --- |
 | Agent runtime | `hermes/` |
 | LLM gateway and governance | `litellm/`, `litellm-operator/`, `litellm-pgvector/` |
-| MCP | `toolhive/` |
+| MCP | `litellm/` (`app/mcpservers/`) |
 | Local chat and embeddings | `vllm/`, `embedding-gpu/` |
 | GPU devices and telemetry | `gpu-node-dashboard/` plus the device plugins under `system/` |
 | Coding consumers | `opencode/`, `repo-wiki/` |

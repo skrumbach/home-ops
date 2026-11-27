@@ -19,7 +19,7 @@
 |---|---|
 | **Annotation opt-in, not restart-everything** | The chart default `autoReloadAll` is `false`, so only workloads that carry an annotation roll. The manifest records no further reason. |
 | **Controller-level annotation on app-template apps** | `reloader.stakater.com/auto: "true"` goes on the controller. The `hermes` and `samba` manifests say Reloader restarts the pod on a content change, since the ConfigMap has no suffix hash. |
-| **Pod-template annotation where the CRD has no controller hook** | `ai/toolhive` `grafana-mcp` and `ai/litellm` say Reloader falls back to pod-template annotations. |
+| **Pod-template annotation where the CRD has no controller hook** | `ai/litellm` (`grafana-mcp-server`) says Reloader falls back to pod-template annotations. |
 
 ## How it works
 

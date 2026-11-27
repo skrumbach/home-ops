@@ -2,7 +2,7 @@
 # Canonical commit convention, matching live history.
 # Types are a closed enum. Scopes are not: Renovate uses container, helm,
 # github-action, mise, talos, flux, deps, and github-release, and human
-# commits also use app or namespace names (toolhive, hermes, ai, ...).
+# commits also use app or namespace names (hermes, ai, ...).
 # Require a kebab-case scope instead of a closed list.
 # Bodies and footers are allowed (Renovate tables, Co-authored-by trailers).
 # subject-case is off so acronyms like imageGC in a subject are legal.
