@@ -466,6 +466,9 @@ spec:
               - path: /secrets/mcp/LITELLM_HERMES_API_KEY
                 subPath: LITELLM_HERMES_API_KEY
                 readOnly: true
+              - path: /secrets/mcp/LITELLM_HERMES_HA_API_KEY
+                subPath: LITELLM_HERMES_HA_API_KEY
+                readOnly: true
               - path: /secrets/mcp/DISCORD_BOT_TOKEN
                 subPath: DISCORD_BOT_TOKEN
                 readOnly: true

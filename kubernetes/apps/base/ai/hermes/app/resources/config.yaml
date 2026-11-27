@@ -155,7 +155,7 @@ secrets:
   command:
     enabled: true
     command: |-
-      for k in LITELLM_HERMES_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
+      for k in LITELLM_HERMES_API_KEY LITELLM_HERMES_HA_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
       printf 'SUMMARY_LLM_API_KEY=%s\n' "$(cat /secrets/mcp/LITELLM_HERMES_API_KEY)"
       printf 'SUMMARY_LLM_URL=%s\nSUMMARY_LLM_MODEL=%s\n' http://litellm.ai.svc.cluster.local:4000/v1 go-glm-5.1
 
