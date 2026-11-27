@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Hosted Exa MCP: no workload, LiteLLM calls it with the key as a bearer token.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: exa-mcp
+spec:
+  proxyRef: litellm
+  alias: exa
+  url: https://mcp.exa.ai/mcp
+  transport: http
+  authType: bearer_token
+  authTokenRef:
+    name: mcp-exa-secret
+    key: api_key
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Needs the 1Password item `exa` (vault Homelab) with an `api_key` field, created by hand.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-exa
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-exa-secret
+    template:
+      data:
+        api_key: "{{ .api_key }}"
+  dataFrom:
+    - extract:
+        key: exa

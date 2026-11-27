@@ -140,12 +140,10 @@ auxiliary:
 web:
   search_backend: searxng
 
-# Aggregated MCP tools via the ToolHive VirtualMCPServer (ns ai): the vmcp
-# "mcp-gateway-internal" federates every MCPServer in the `mcp-tools` group behind
-# one streamable-http endpoint at /mcp. Hermes reaches it through the LAN route with
-# a bearer token (MCP_GATEWAY_URL, MCP_GATEWAY_TOKEN, both from the hermes Secret);
-# a NetworkPolicy closes the vmcp Service to everything but envoy-internal. Tool
-# names are prefixed per backend ({workload}_); LiteLLM is not an MCP gateway here.
+# MCP tools through LiteLLM (ns ai): litellm-operator registers every LiteLLMMCPServer
+# (ai/litellm mcpservers/) behind LiteLLM's one /mcp endpoint. Hermes calls it in-cluster
+# with its own virtual key; the team mcp-agents (ai/litellm litellmteam.yaml) is what entitles
+# the key to the servers. Tool names are prefixed per server ({alias}-).
 #
 # The gateway runs with gateway.multiplex_profiles, so a mcp_servers ${VAR}, a provider
 # `key_env` and a skill's required env resolve only from the profile secret scope
@@ -157,15 +155,15 @@ secrets:
   command:
     enabled: true
     command: |-
-      for k in MCP_GATEWAY_URL MCP_GATEWAY_TOKEN LITELLM_HERMES_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
+      for k in LITELLM_HERMES_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
       printf 'SUMMARY_LLM_API_KEY=%s\n' "$(cat /secrets/mcp/LITELLM_HERMES_API_KEY)"
       printf 'SUMMARY_LLM_URL=%s\nSUMMARY_LLM_MODEL=%s\n' http://litellm.ai.svc.cluster.local:4000/v1 go-glm-5.1
 
 mcp_servers:
-  toolhive:
-    url: ${MCP_GATEWAY_URL}
+  litellm:
+    url: http://litellm.ai.svc.cluster.local:4000/mcp/
     headers:
-      Authorization: "Bearer ${MCP_GATEWAY_TOKEN}"
+      Authorization: "Bearer ${LITELLM_HERMES_API_KEY}"
     enabled: true
 
 # Persistent cross-session memory. `memory.provider` ACTIVATES a provider (without

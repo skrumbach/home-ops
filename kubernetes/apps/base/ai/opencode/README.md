@@ -15,7 +15,8 @@
 - **Sends every model call to LiteLLM** (`litellm.ai.svc.cluster.local:4000`) through two providers: `litellm` for the
   default model `litellm/auto` and the B70 model `litellm/chat-local` (zero-priced, no cloud fallback), and
   `litellm-projects` for the Anthropic and OpenAI chat models.
-- **Reaches ToolHive tools** through the MCP gateway at `https://mcp.sklab.dev/mcp`.
+- **Reaches MCP tools through LiteLLM** (`litellm.ai.svc.cluster.local:4000/mcp/`) with its own virtual key. Team
+  `mcp-agents` is what entitles the key to the servers.
 - **Remembers across sessions** through the Hindsight plugin (`@vectorize-io/hindsight-coding-agents`), against Service
   `hindsight-api:8888`. One bank per git repository (`coding-agent::<repo>`).
 - **Works on home-ops.** On start the entrypoint clones the public repository into `~/projects/home-ops` on the
@@ -32,7 +33,7 @@
 | **`offline_access` and a self-unregistering `/sw.js`** | The UI is a PWA whose service worker serves the cached page on every reload, so a reload never redoes the Pocket ID sign-in. Without a refresh token the Envoy session expired and every `/api` fetch got a 302 the browser blocks: the UI hung on "Loading". `offline_access` lets Envoy renew the session inline, and HTTPRoute `opencode-sw` (no OIDC) retires the worker so a reload signs in again. |
 | **Service named `opencode-app`** | In namespace `ai` the DNS search path turns the provider host `opencode.ai` into `opencode.ai.svc.cluster.local`. A Service named `opencode` would take that name and black-hole every OpenCode Go call from LiteLLM. |
 | **Token read from the environment, never written** | The credential helper reads `GITHUB_TOKEN` on each use, so it never reaches the home PVC and its kopia snapshots. The entrypoint deletes the `~/.git-credentials` file that older revisions wrote. |
-| **Ingress fence, open egress** | The pod serves an agent with model-directed bash and a GitHub write token on `0.0.0.0:4096`. CiliumNetworkPolicy `opencode` admits Envoy, the kubelet probes and replies. Egress stays open for GitHub, npm, LiteLLM and ToolHive. |
+| **Ingress fence, open egress** | The pod serves an agent with model-directed bash and a GitHub write token on `0.0.0.0:4096`. CiliumNetworkPolicy `opencode` admits Envoy, the kubelet probes and replies. Egress stays open for GitHub, npm and LiteLLM. |
 | **A write-capable GitHub token, unlike `repo-wiki`** | OpenCode is an internal-only, Pocket ID-gated interactive workspace for the owner and is meant to push to home-ops (comment in `app/externalsecret.yaml`). `repo-wiki` only reads public repositories. |
 
 ## How it works
@@ -45,7 +46,7 @@
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'primaryColor':'#0D102C','primaryTextColor':'#E9ECF7','primaryBorderColor':'#22D8F0','lineColor':'#8B55F5','secondaryColor':'#151941','tertiaryColor':'#090C22','edgeLabelBackground':'#151941'}}}%%
 flowchart LR
-  op[("1Password<br/>items opencode, hermes,<br/>mcp-gateway, litellm-consumer-*")] -->|ExternalSecret| sec["Secret<br/>opencode"]
+  op[("1Password<br/>items opencode, hermes,<br/>litellm-consumer-*")] -->|ExternalSecret| sec["Secret<br/>opencode"]
   sec -->|envFrom| pod{{"Pod opencode"}}
   cm["ConfigMap<br/>opencode-config"] -->|"/etc/opencode"| pod
   rst["Restore + PVC<br/>opencode"] -->|"/home/opencode"| pod
@@ -53,8 +54,7 @@ flowchart LR
   pol -->|":4096"| pod
   cli["PocketIDOIDCClient<br/>opencode"] -->|credentials Secret| pol
   cli --> pid(["Pocket ID<br/>id.sklab.dev"])
-  pod -->|":4000"| llm["Pod litellm"]
-  pod -->|"mcp.sklab.dev"| gw
+  pod -->|":4000, /mcp/"| llm["Pod litellm"]
   pod -.->|"clone, push"| gh(["GitHub"])
   classDef accent fill:#0D102C,stroke:#D946E6,stroke-width:2px,color:#FFFFFF
   classDef ext fill:#090C22,stroke:#A57BFF,color:#CDD2E6
@@ -72,8 +72,8 @@ flowchart LR
    `opencode serve` on `0.0.0.0:4096`. A failed clone only warns.
 4. A browser request to `opencode.sklab.dev` goes through `opencode-auth`. Envoy reads the client from Secret
    `opencode-oidc-credentials`, which the Pocket ID operator writes.
-5. `opencode.json` points both providers at LiteLLM with different keys. The tool list comes from the `toolhive` MCP
-   entry, authenticated by a bearer token.
+5. `opencode.json` points both providers at LiteLLM with different keys. The tool list comes from the `litellm` MCP
+   entry (LiteLLM's `/mcp/`), authenticated by the `opencode` virtual key.
 
 ## Settings that matter
 
@@ -83,8 +83,7 @@ flowchart LR
 | Provider `litellm-projects` | key `litellm-consumer-litellm-consume-projects` | The Anthropic and OpenAI chat models on that key's allow-list; the provider lists neither `embedding-local` nor `jev`. Its $100 per 30 days is one pool for every caller of that key. |
 | `OPENCODE_PASSWORD` | 1Password item `opencode`, vault `Homelab` | The server password (user `opencode`). Without it each start makes a random one and logs it; rotating it signs out every session. |
 | `GITHUB_TOKEN` | 1Password item `hermes`, field `HOMELAB_GH_TOKEN` | `public_repo`, read and write. No new item. |
-| `LITELLM_API_KEY` | 1Password item `litellm-consumer-opencode`, field `key` | Not a prerequisite: the LiteLLM virtual key `opencode` writes it. |
-| `MCP_GATEWAY_TOKEN` | 1Password item `mcp-gateway` | Written by `ai/toolhive`, not by hand. |
+| `LITELLM_API_KEY` | 1Password item `litellm-consumer-opencode`, field `key` | Not a prerequisite: the LiteLLM virtual key `opencode` writes it. It is also the MCP credential. |
 | `HINDSIGHT_API_TOKEN` | 1Password item `hindsight`, field `HINDSIGHT_TENANT_API_KEY` | The Hindsight tenant key, admin-equivalent on every bank. |
 | Hindsight plugin version | `plugin_version` and `plugin_sha512` in [`entrypoint.sh`](app/resources/entrypoint.sh) | The image has no npm, so the entrypoint unpacks the pinned tarball onto the home PVC. Renovate does not bump it. |
 | `HINDSIGHT_AUTO_INJECT`, `HINDSIGHT_PAGE_TRIGGER_CRON` | `recall`, `H 8 * * *` | Keeps the plugin's own LLM work off `chat-local` during a session: retrieval-only injection, nightly page refresh. |

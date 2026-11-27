@@ -1,0 +1,117 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Read-only. Hermes queues titles through Seerr (one audited path), so no add_*, no
+# search_missing/indexer-search triggers and nothing that deletes. mcp-arr-server 1.9 has radarr_delete_queue_item, so the filter is what keeps it out.
+# allowed_tools is the whole boundary: the server itself registers write tools too.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: arr-mcp
+spec:
+  proxyRef: litellm
+  alias: arr
+  transport: http
+  params:
+    allowed_tools:
+      - arr_status
+      - arr_search_all
+      - radarr_get_movies
+      - radarr_get_queue
+      - radarr_get_calendar
+      - radarr_search
+      - sonarr_get_series
+      - sonarr_get_episodes
+      - sonarr_get_queue
+      - sonarr_get_calendar
+      - sonarr_search
+      - lidarr_get_artists
+      - lidarr_get_albums
+      - lidarr_get_queue
+      - lidarr_get_calendar
+      - lidarr_search
+      - prowlarr_get_indexers
+      - prowlarr_get_stats
+  workload:
+    automountServiceAccountToken: false
+    image: docker.io/node:26-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5
+    command:
+      - npx
+    args:
+      - -y
+      - mcp-arr-server@1.9.0
+    port: 3000
+    path: /mcp
+    env:
+      - name: MCP_TRANSPORT
+        value: http
+      - name: PORT
+        value: "3000"
+      # The server binds 127.0.0.1 by default; LiteLLM reaches the pod IP.
+      - name: HOST
+        value: 0.0.0.0
+      - name: HOME
+        value: /tmp
+      - name: NPM_CONFIG_CACHE
+        value: /tmp/.npm
+      - name: SONARR_URL
+        value: http://sonarr.downloads.svc.cluster.local:8989
+      - name: RADARR_URL
+        value: http://radarr.downloads.svc.cluster.local:7878
+      - name: LIDARR_URL
+        value: http://lidarr.downloads.svc.cluster.local:8080
+      - name: PROWLARR_URL
+        value: http://prowlarr.downloads.svc.cluster.local:9696
+    envFrom:
+      - secretRef:
+          name: mcp-arr-secret
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+    volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-arr
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-arr-secret
+    template:
+      data:
+        SONARR_API_KEY: "{{ .SONARR_API_KEY }}"
+        RADARR_API_KEY: "{{ .RADARR_API_KEY }}"
+        LIDARR_API_KEY: "{{ .LIDARR_API_KEY }}"
+        PROWLARR_API_KEY: "{{ .PROWLARR_API_KEY }}"
+  dataFrom:
+    - extract:
+        key: sonarr
+    - extract:
+        key: radarr
+    - extract:
+        key: lidarr
+    - extract:
+        key: prowlarr

@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# One LiteLLMMCPServer per file. Registering a server here does not entitle anyone to it: a key
+# reaches it only through a LiteLLMTeam that lists its alias (../litellmteam.yaml).
+resources:
+  - ./arr-mcp.yaml
+  - ./exa-mcp.yaml
+  - ./flux-mcp.yaml
+  - ./github-mcp.yaml
+  - ./grafana-mcp-server.yaml
+  - ./ha-mcp-server.yaml
+  - ./kubectl-mcp.yaml
+  - ./kubesearch-mcp.yaml
+  - ./seerr-mcp-server.yaml
+  - ./tavily-mcp.yaml
+  - ./truenas-mcp.yaml

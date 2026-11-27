@@ -15,6 +15,9 @@
   subscription routes through `ai/cliproxyapi`, the Claude Code pass-through models, and the metered cloud models.
 - **Routes by complexity.** Model `auto` classifies a request with the local `chat-local-classifier` and sends it to
   `chat-local`, `claude-sonnet-5-metered` or `claude-opus-5-metered`.
+- **Serves MCP tools.** One `LiteLLMMCPServer` per server in `app/mcpservers/`: the operator runs a workload for most
+  (arr, seerr, github, flux, kubectl, grafana, ha, kubesearch, truenas) and points at the hosted endpoint for `exa` and
+  `tavily`. Agents call the one endpoint `/mcp/` with their virtual key.
 - **Fronts a vector store.** The `default` store is served by `ai/litellm-pgvector` and embeds through this proxy.
 - **Signs the UI in** through Pocket ID (client `litellm`). Only the Pocket ID group `admins` may sign in.
 - **Answers at** `https://litellm.sklab.dev` on `envoy-internal` and at `http://litellm.ai.svc.cluster.local:4000`
@@ -29,6 +32,8 @@
 | **Two CRs for one Claude model** | The natural name (`claude-sonnet-5`) is a credential-less pass-through: the caller's own OAuth token pays. The `-metered` CR carries `ANTHROPIC_API_KEY` and a priced cost map. Tiers and fallbacks name only the metered CR. |
 | **Four aliases on one local backend** | Each alias carries one property: `chat-local` (zero price, terminal), `chat-ha` (cloud fallback), `chat-local-classifier` (thinking off), `demo-priced-local` (synthetic prices for the `demo` key). Naming rule: [`../AGENTS.md`](../AGENTS.md). |
 | **Provider catalogs are generated, not hand-written** | LiteLLM cannot list or price Venice (no cost-map entries, `check_provider_endpoint` does not support it), and a key's `maxBudget` only bounds priced models. `scripts/litellm-models/generate.py` reads a provider's public model list (no key) and writes one priced `LiteLLMModel` per model into `app/models-generated/`: text as `venice/<id>` and `openrouter/<id>` (OpenRouter: chat-completions models only, from each model's `endpoints` field), and Venice media under their own prefixes so the `venice/*` grants can never reach them: `venice-embed/`, `venice-image/` (priced at the dearest tier), `venice-tts/`, `venice-stt/`, plus OpenRouter embeddings. Media goes through the generic `openai/<id>` route with Venice's base URL (the built-in `veniceai/` provider serves chat only), with retries off (a retried media call is billed twice) and `enforce_supported_endpoints` so a chat call to a media model is refused. Venice video, image edit, music and upscale use Venice's own queue endpoints, which LiteLLM cannot serve, so they are left out; `.github/workflows/litellm-models.yaml` runs it daily and opens one PR. The `venice/*` wildcard stays as the catch-all for models added since the last refresh. Only providers with a public list are covered; Z.ai, OpenCode Go, xAI and Anthropic need keys to list and stay hand-curated. |
+| **MCP access is a team, not a flag** | A server defaults to `allow_all_keys: false`, so no key sees one until its team lists the alias. `LiteLLMTeam` `mcp-agents` (`app/litellmteam.yaml`) lists every alias, and only the `hermes` and `opencode` keys set `teamID: mcp-agents`. A new server is invisible until its alias is added there. |
+| **Read-only by construction** | `flux`, `kubectl`, `github`, `grafana` and `truenas` run with their read-only flag and a read-only credential; `arr` and `seerr` also filter tools with `allowed_tools`, because the servers register write tools. `mcp-readonly` (`app/rbac-mcp.yaml`) grants no core Secrets. |
 | **Hand-written HTTPRoute, not `spec.route`** | The operator's route cannot carry annotations, and the operator deletes a route named after the proxy CR. |
 | **UI secret generated in the cluster** | `litellm-oidc-client` comes from a `Password` generator once. The proxy reads it before it starts, and `PocketIDOIDCClient` pushes the same value to Pocket ID. |
 | **Dragonfly for cache and counters** | `components/dragonfly` gives `litellm-dragonfly`. The 300s response cache and the router's rate counters live there, so limits are shared across workers. |
@@ -50,6 +55,10 @@ flowchart LR
   mod["LiteLLMModel<br/>one per model"] --> opr
   vk["LiteLLMVirtualKey<br/>one per consumer"] -->|PushSecret| op2[("1Password<br/>litellm-consumer-*")]
   vk --> opr
+  mcp["LiteLLMMCPServer<br/>one per server"] --> opr
+  tm["LiteLLMTeam<br/>mcp-agents"] --> opr
+  opr -->|renders| mw["Deployments + Services<br/>one per MCP workload"]
+  dep -->|"/mcp/"| mw
   gw["HTTPRoute<br/>litellm-internal"] --> dep
   dep --> df["Dragonfly<br/>litellm-dragonfly"]
   dep --> pg[("postgres-18<br/>database litellm")]
@@ -108,12 +117,15 @@ All values are in [`app/litellmproxy.yaml`](app/litellmproxy.yaml) unless noted.
 | `ServiceMonitor` credentials | the master key | Deliberate: Prometheus holds the full admin credential, which can read logged prompts. The manifest says to revisit it before any wider exposure. |
 | `LITELLM_SALT_KEY` ([`app/externalsecret.yaml`](app/externalsecret.yaml)) | never rotated | It encrypts every stored virtual key. |
 
+MCP servers need three 1Password items created by hand (vault `Homelab`, field `api_key`): `exa`, `tavily` and
+`truenas-mcp` (an API key of a read-only TrueNAS user). The other servers reuse existing items.
+
 ## Operate it
 
 ```bash
 flux -n ai get ks litellm litellm-db litellm-operator
 kubectl -n ai get deploy litellm
-kubectl -n ai get litellmproxy,litellmmodel,litellmvirtualkey
+kubectl -n ai get litellmproxy,litellmmodel,litellmvirtualkey,litellmteam,llmcp
 kubectl -n ai get externalsecret,pushsecret
 kubectl -n ai get dragonfly litellm-dragonfly
 kubectl -n ai logs deploy/litellm --tail=100

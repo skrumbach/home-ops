@@ -17,6 +17,8 @@ spec:
   keyAlias: hermes
   secretName: litellm-key-hermes
   secretKey: key
+  # Team mcp-agents is this key's entitlement to the MCP servers (../litellmteam.yaml).
+  teamID: mcp-agents
   models:
     - chat-local
     - claude-fable-5

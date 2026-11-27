@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Read-only on purpose: Flux applies as cluster-admin, so any write grant (RBAC or flag) lets a key
+# holder apply anything. The service account is bound to mcp-readonly (secrets excluded; rbac-mcp.yaml).
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: flux-mcp
+spec:
+  proxyRef: litellm
+  alias: flux
+  transport: http
+  workload:
+    image: ghcr.io/controlplaneio-fluxcd/flux-operator-mcp:v0.62.1@sha256:0b4181bc9ada80eedf3e9df3355153abc9c3e6d8b913bddebe0b12908309bff6
+    serviceAccountName: mcp-flux
+    args:
+      - serve
+      - --transport=http
+      - --port=8000
+      - --read-only
+    port: 8000
+    path: /mcp
+    env:
+      # In-cluster mode: no KUBECONFIG; uses the pod service account.
+      - name: RUNTIME_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+    # Idles at 1m CPU / 25Mi; the limit leaves room for large tool responses.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      runAsGroup: 65534
+      seccompProfile:
+        type: RuntimeDefault

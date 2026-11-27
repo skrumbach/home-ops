@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Search, details and request only. manage_media_requests can approve, decline and delete in one
+# tool, so it is never exposed; approving a request stays with the owner in Seerr.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: seerr-mcp-server
+spec:
+  proxyRef: litellm
+  alias: seerr
+  transport: http
+  params:
+    allowed_tools:
+      - search_media
+      - get_media_details
+      - request_media
+  workload:
+    automountServiceAccountToken: false
+    image: docker.io/node:26-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5
+    command:
+      - npx
+    args:
+      - -y
+      - "@jhomen368/overseerr-mcp@2.3.1"
+    port: 8085
+    path: /mcp
+    env:
+      - name: HTTP_MODE
+        value: "true"
+      - name: PORT
+        value: "8085"
+      - name: HOST
+        value: 0.0.0.0
+      - name: HOME
+        value: /tmp
+      - name: NPM_CONFIG_CACHE
+        value: /tmp/.npm
+      - name: SEERR_URL
+        value: http://seerr.media.svc.cluster.local:5055
+    envFrom:
+      - secretRef:
+          name: mcp-seerr-secret
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+    volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# The key is generated in media/seerr (password.yaml), adopted by Seerr through API_KEY and pushed to the 1Password
+# item `seerr-api` (vault Automation) by pushsecret-api-key.yaml. Nothing is added by hand.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-seerr
+spec:
+  # Short interval: the first sync races the PushSecret that creates the item.
+  refreshInterval: 5m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-automation
+  target:
+    name: mcp-seerr-secret
+    template:
+      data:
+        SEERR_API_KEY: "{{ .SEERR_API_KEY }}"
+  dataFrom:
+    - extract:
+        key: seerr-api

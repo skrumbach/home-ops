@@ -42,7 +42,7 @@ spec:
               protocol: TCP
     # Replies from every in-cluster Service Hermes connects to (the egress rules below). No toPorts:
     # a same-node Service reply arrives with the ClusterIP or LB IP as source after reverse NAT and
-    # is re-checked here. LiteLLM :4000, SearXNG :8080, the MCP gateway through the envoy-internal
+    # is re-checked here. LiteLLM :4000, SearXNG :8080, the envoy-internal
     # LoadBalancer IP (this rule also subsumes the envoy-internal port rule above), and the
     # kubernetes Service for kubectl.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
@@ -117,8 +117,8 @@ spec:
         - ports:
             - port: "8888"
               protocol: TCP
-    # MCP gateway via the LAN route (MCP_GATEWAY_URL https://mcp...), which resolves to the
-    # envoy-internal LoadBalancer. Policy sees the backend port after service translation: 10443.
+    # Internal LAN routes (*.sklab.dev on envoy-internal), which resolve to the envoy-internal
+    # LoadBalancer. Policy sees the backend port after service translation: 10443.
     - toEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: network
