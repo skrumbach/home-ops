@@ -47,7 +47,7 @@
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'primaryColor':'#0D102C','primaryTextColor':'#E9ECF7','primaryBorderColor':'#22D8F0','lineColor':'#8B55F5','secondaryColor':'#151941','tertiaryColor':'#090C22','edgeLabelBackground':'#151941'}}}%%
 flowchart LR
-  op[("1Password<br/>items hermes,<br/>litellm-consumer-hermes")] -->|ExternalSecret| sec["Secrets<br/>hermes, hermes-git"]
+  op[("1Password<br/>items hermes,<br/>litellm-consumer-hermes, -hermes-ha")] -->|ExternalSecret| sec["Secrets<br/>hermes, hermes-git"]
   sec --> pod{{"Pod hermes<br/>app + codeserver"}}
   cfg["ConfigMap<br/>hermes-configmap"] -->|copy-config| pvc["PVC<br/>hermes"]
   skl["ConfigMap<br/>hermes-skill-homelab-commit-watcher"] -->|seed-skills| pvc
@@ -128,6 +128,10 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | `DISCORD_WEBHOOK` | Channel webhook for the commit digest |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS` | BotFather token and numeric user ids |
 | `DISCORD_BOT_TOKEN`, `DISCORD_ALLOWED_USERS` | Discord bot token and allowed user ids. The bot is gated twice: these ids, and `discord.allowed_channels` in `config.yaml` |
+
+`LITELLM_HERMES_HA_API_KEY` (item `litellm-consumer-hermes-ha`, written by the `hermes-ha` key's PushSecret) belongs to the
+`home-assistant` profile, not to the default one. It is mounted under `/secrets/mcp` so that profile's `secrets.command` can read it;
+its LiteLLM team `mcp-home` is the only one that may call the Home Assistant MCP.
 
 `LITELLM_HERMES_API_KEY` is not a prerequisite either. It is
 1Password item `litellm-consumer-hermes`, field `key`, written by the
