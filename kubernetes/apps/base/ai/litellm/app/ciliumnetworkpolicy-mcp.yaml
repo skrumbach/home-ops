@@ -1,0 +1,58 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+# Ingress fence for the operator-run MCP workloads (flux, kubectl, ha and grafana take no credential of
+# their own). Only LiteLLM may call them; egress stays open. Selects by the operator's pod label, so a new
+# LiteLLMMCPServer workload is fenced without editing this file.
+#
+# The second rule admits replies from the Services these pods call as a client, with no toPorts: a same-node
+# Service reply arrives with the ClusterIP as source after reverse NAT and is re-checked here (cilium/cilium#47913).
+# It admits every port on the pod from those peers, not only replies, so the peers are listed narrowly:
+# the arr apps (downloads), Seerr (media), Grafana (monitoring), Home Assistant (home-automation) and the
+# kube-apiserver / host entities for kubectl, flux and the kubelet probes.
+# reply traffic: cilium/cilium#47913, remove the toPorts-free rule when fixed
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: mcp-workloads
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/component: mcp-server
+      app.kubernetes.io/managed-by: litellm-operator
+  ingress:
+    # LiteLLM calls each server on its own port (3000, 8000, 8080, 8082, 8085, 8086).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai
+            app.kubernetes.io/name: litellm
+            app.kubernetes.io/instance: litellm
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+            - port: "8082"
+              protocol: TCP
+            - port: "8085"
+              protocol: TCP
+            - port: "8086"
+              protocol: TCP
+    # Replies from the Services these pods call (see the header), and the kubelet probes.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: downloads
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: media
+            app.kubernetes.io/name: seerr
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app: grafana
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: home-automation
+    - fromEntities:
+        - host
+        - remote-node
+        - kube-apiserver

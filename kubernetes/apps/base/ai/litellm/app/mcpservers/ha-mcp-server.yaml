@@ -22,8 +22,7 @@ spec:
         value: http://home-assistant.home-automation:8123
       - name: MCP_PORT
         value: "8086"
-      # The URL path is the server's only access control. It stays the plain default, so any pod in
-      # the cluster can reach this Service (no ingress policy yet).
+      # The URL path stays the plain default; only LiteLLM may reach this pod (ciliumnetworkpolicy-mcp.yaml).
       - name: MCP_SECRET_PATH
         value: /mcp
     envFrom:
