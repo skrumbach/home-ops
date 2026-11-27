@@ -52,7 +52,7 @@ flowchart LR
 | Setting | Value | Why |
 |---|---|---|
 | `defaultPodOptions.securityContext` | uid/gid/fsGroup 101 | The image's `User` is 101 (nginx). |
-| `image.tag` | `0.48.0@sha256:...` | The upstream image is built by mirceanton/container-images; the tag is the app version. |
+| `image.tag` | `0.47.0@sha256:...` | 0.48.0 renders a white page (the wasm panics with `time not implemented on this platform`), so the tag is held back one release. |
 
 ## Operate it
 
