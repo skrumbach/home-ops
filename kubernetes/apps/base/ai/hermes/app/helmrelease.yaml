@@ -260,7 +260,7 @@ spec:
           webui:
             image:
               repository: ghcr.io/nesquena/hermes-webui
-              tag: 0.52.757@sha256:642ce16865958953add40da0048b0cd063aee789329d75dcda8eadbc75f164b9
+              tag: 0.52.758@sha256:c7db9bfaf18de54f41eb1a8a13ed01420246723550455252e43214ed0bba1dc6
             env:
               TZ: ${CONFIG_TIMEZONE}
               WANTED_UID: "10000"
