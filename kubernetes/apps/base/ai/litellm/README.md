@@ -117,8 +117,8 @@ All values are in [`app/litellmproxy.yaml`](app/litellmproxy.yaml) unless noted.
 | `ServiceMonitor` credentials | the master key | Deliberate: Prometheus holds the full admin credential, which can read logged prompts. The manifest says to revisit it before any wider exposure. |
 | `LITELLM_SALT_KEY` ([`app/externalsecret.yaml`](app/externalsecret.yaml)) | never rotated | It encrypts every stored virtual key. |
 
-MCP servers need three 1Password items created by hand (vault `Homelab`, field `api_key`): `exa`, `tavily` and
-`truenas-mcp` (an API key of a read-only TrueNAS user). The other servers reuse existing items.
+MCP servers need three 1Password items created by hand (vault `Homelab`): `exa` and `truenas-mcp` (an API key of a
+read-only TrueNAS user), each with an `api_key` field, and `tavily` with a `TAVILY_API_KEY` field. The other servers reuse existing items.
 
 ## Operate it
 
