@@ -8,7 +8,7 @@
 # Service reply arrives with the ClusterIP as source after reverse NAT and is re-checked here (cilium/cilium#47913).
 # It admits every port on the pod from those peers, not only replies, so the peers are listed narrowly:
 # the arr apps (downloads), Seerr (media), Grafana (monitoring), Home Assistant (home-automation) and the
-# kube-apiserver / host entities for kubectl, flux and the kubelet probes.
+# kube-apiserver / host entities for kubectl, flux and the kubelet probes, and CoreDNS for name resolution.
 # reply traffic: cilium/cilium#47913, remove the toPorts-free rule when fixed
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -56,3 +56,9 @@ spec:
         - host
         - remote-node
         - kube-apiserver
+    # DNS replies from CoreDNS. No toPorts on purpose: a reply lands on an ephemeral port, never 53. Without
+    # this every lookup from these pods times out ("Temporary failure in name resolution").
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
