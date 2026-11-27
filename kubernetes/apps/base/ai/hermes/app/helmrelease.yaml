@@ -140,9 +140,9 @@ spec:
               # homelab-commit-watcher: its per-repo digest LLM goes through LiteLLM with Hermes'
               # own key. The script sends x-opencode-session itself (go-* models need it).
               SUMMARY_LLM_URL: http://litellm.ai.svc.cluster.local:4000/v1
-              # go-glm-5.1, not go-kimi-k2.6: kimi thinks past the script's token budget and returns empty
+              # go-glm-5.3, not kimi: kimi-k2.6 thought past the script's token budget and returned empty (not re-measured on go-kimi-k3)
               # content (every digest "unavailable", 43 s per batch). Same value as secrets.command.
-              SUMMARY_LLM_MODEL: go-glm-5.1
+              SUMMARY_LLM_MODEL: go-glm-5.3
               SUMMARY_LLM_API_KEY:
                 valueFrom:
                   secretKeyRef:

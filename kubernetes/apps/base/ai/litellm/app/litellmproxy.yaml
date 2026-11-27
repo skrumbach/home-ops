@@ -136,9 +136,9 @@ spec:
     # providers.litellm.session_affinity_header) supplies the value.
     model_group_settings:
       forward_client_headers_to_llm_api:
-        - go-deepseek-v4-flash
-        - go-glm-5.1
-        - go-kimi-k2.6
+        - go-deepseek-v4.1-flash
+        - go-glm-5.3
+        - go-kimi-k3
     # The ONLY way a model reaches the AI Hub (UI "make public" 500s here). A new
     # model is unpublished until added; discovery only, grants nothing.
     public_model_groups:
@@ -179,9 +179,9 @@ spec:
       - gemma-4-31b
       - glm-5.2
       - glm-5.3
-      - go-deepseek-v4-flash
-      - go-glm-5.1
-      - go-kimi-k2.6
+      - go-deepseek-v4.1-flash
+      - go-glm-5.3
+      - go-kimi-k3
       - gpt-5.6-luna
       - gpt-5.6-sol
       - gpt-5.6-terra

@@ -31,11 +31,11 @@ providers:
     models:
       chat-local:
         context_length: 262144
-      go-deepseek-v4-flash:
+      go-deepseek-v4.1-flash:
         context_length: 128000
-      go-glm-5.1:
+      go-glm-5.3:
         context_length: 200000
-      go-kimi-k2.6:
+      go-kimi-k3:
         context_length: 200000
       claude-fable-5:
         context_length: 200000
@@ -96,9 +96,9 @@ model:
 # own $50/30d). This chain runs the full tool-calling loop, unlike the aux chores below.
 fallback_providers:
   - provider: custom:litellm
-    model: go-kimi-k2.6
+    model: go-kimi-k3
   - provider: custom:litellm
-    model: go-glm-5.1
+    model: go-glm-5.3
   - provider: custom:litellm
     model: claude-haiku-5-5
 
@@ -112,10 +112,10 @@ fallback_providers:
 auxiliary:
   web_extract:
     provider: custom:litellm
-    model: go-kimi-k2.6
+    model: go-kimi-k3
     fallback_chain:
       - provider: custom:litellm
-        model: go-glm-5.1
+        model: go-glm-5.3
       - provider: custom:litellm
         model: gpt-oss-20b
   # Off-Go (metered, cheap) primary, NOT a go-* model: on a provider error hermes-agent's
@@ -127,10 +127,10 @@ auxiliary:
     model: gpt-oss-20b
   session_search:
     provider: custom:litellm
-    model: go-kimi-k2.6
+    model: go-kimi-k3
   title_generation:
     provider: custom:litellm
-    model: go-kimi-k2.6
+    model: go-kimi-k3
   # Vision-capable cloud model, pinned here (not kimi) because the local 35B is text-only.
   vision:
     provider: custom:litellm
@@ -157,7 +157,7 @@ secrets:
     command: |-
       for k in LITELLM_HERMES_API_KEY LITELLM_HERMES_HA_API_KEY HOMELAB_GH_TOKEN DISCORD_WEBHOOK DISCORD_BOT_TOKEN DISCORD_ALLOWED_USERS HINDSIGHT_API_KEY; do printf '%s=%s\n' "$k" "$(cat "/secrets/mcp/$k")"; done
       printf 'SUMMARY_LLM_API_KEY=%s\n' "$(cat /secrets/mcp/LITELLM_HERMES_API_KEY)"
-      printf 'SUMMARY_LLM_URL=%s\nSUMMARY_LLM_MODEL=%s\n' http://litellm.ai.svc.cluster.local:4000/v1 go-glm-5.1
+      printf 'SUMMARY_LLM_URL=%s\nSUMMARY_LLM_MODEL=%s\n' http://litellm.ai.svc.cluster.local:4000/v1 go-glm-5.3
 
 mcp_servers:
   litellm:
@@ -270,8 +270,8 @@ hooks:
 
 # Subagents (delegate_task) run on a fast Go-subscription model through LiteLLM instead of inheriting the
 # local chat-local: each child is its own session, and fan-out above the local server's 4 slots queues.
-# go-glm-5.1 is the tool-calling tier (kimi thinks too long for a worker loop). The parent keeps
+# go-glm-5.3 is the tool-calling tier (kimi-k2.6 thought too long for a worker loop; not re-measured on go-kimi-k3). The parent keeps
 # chat-local and synthesises. Concurrency and depth stay at upstream's defaults (3 children, flat).
 delegation:
   provider: custom:litellm
-  model: go-glm-5.1
+  model: go-glm-5.3

@@ -7,12 +7,12 @@
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: go-glm-5.1
+  name: go-glm-5.3
 spec:
-  modelName: go-glm-5.1
+  modelName: go-glm-5.3
   proxyRef: litellm
   params:
-    model: openai/glm-5.1
+    model: openai/glm-5.3
     apiBase: https://opencode.ai/zen/go/v1
     apiKey: os.environ/OPENCODE_GO_API_KEY
     additional:

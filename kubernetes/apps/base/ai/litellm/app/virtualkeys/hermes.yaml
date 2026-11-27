@@ -36,9 +36,9 @@ spec:
     - claude-sonnet-5-5
     - claude-sonnet-5-metered
     - embedding-local
-    - go-deepseek-v4-flash
-    - go-glm-5.1
-    - go-kimi-k2.6
+    - go-deepseek-v4.1-flash
+    - go-glm-5.3
+    - go-kimi-k3
     - gpt-5.6-luna
     - gpt-5.6-sol
     - gpt-5.6-terra
