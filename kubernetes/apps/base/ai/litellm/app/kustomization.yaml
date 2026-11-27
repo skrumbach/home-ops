@@ -15,6 +15,7 @@ resources:
   - ./models-generated
   - ./virtualkeys
   - ./litellmteam.yaml
+  - ./litellmteam-mcp-home.yaml
   - ./mcpservers
   - ./rbac-mcp.yaml
   - ./servicemonitor.yaml

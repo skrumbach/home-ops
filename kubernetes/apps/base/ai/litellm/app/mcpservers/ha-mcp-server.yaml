@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
-# Home Assistant control from the agents. Reaches the key holders of the mcp-agents team only, but
-# ha-mcp can act on the house: if that is ever too wide, move it to its own team (LiteLLMTeam).
+# Home Assistant control, including write tools (call_service, restart, remove_*). Only team mcp-home
+# lists this alias (../litellmteam-mcp-home.yaml), held by the hermes-ha key alone.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMMCPServer
 metadata:
