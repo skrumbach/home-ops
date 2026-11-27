@@ -13,6 +13,8 @@ spec:
   keyAlias: hermes-ha
   secretName: litellm-key-hermes-ha
   secretKey: key
+  # Team mcp-home is this key's entitlement to the Home Assistant MCP (../litellmteam-mcp-home.yaml).
+  teamID: mcp-home
   models:
     - chat-local
     - embedding-local

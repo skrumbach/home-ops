@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmteam_v1alpha1.json
 # The only entitlement to MCP tools: a LiteLLM key sees an MCP server only through its team (servers
 # default to allow_all_keys: false). Members are the agent keys that set `teamID: mcp-agents`
-# (virtualkeys/hermes.yaml, virtualkeys/opencode.yaml). No `models`: the key's own allow-list still
+# (virtualkeys/hermes.yaml, virtualkeys/opencode.yaml). `ha` is deliberately not here: it has
+# ~35 write tools (ha_call_service, ha_restart, ha_remove_*), so it sits in mcp-home. No `models`: the key's own allow-list still
 # decides which models it may call. Add a server's alias here after registering it in mcpservers/.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMTeam
@@ -18,7 +19,6 @@ spec:
     - flux
     - github
     - grafana
-    - ha
     - kubectl
     - kubesearch
     - seerr

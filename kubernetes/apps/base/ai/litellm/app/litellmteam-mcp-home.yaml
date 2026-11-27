@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmteam_v1alpha1.json
+# Home Assistant only. ha-mcp exposes write tools (ha_call_service, ha_restart, ha_remove_* ...) and is
+# not filtered, so the one key that may reach it is `hermes-ha`, the home-assistant profile's key
+# (virtualkeys/hermes-ha.yaml, `teamID: mcp-home`). No other key, and not mcp-agents, gets `ha`.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMTeam
+metadata:
+  name: mcp-home
+spec:
+  proxyRef: litellm
+  teamID: mcp-home
+  alias: mcp-home
+  mcpServers:
+    - ha
