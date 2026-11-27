@@ -9,7 +9,7 @@ Home-ops GitOps repo for a 3-node Talos Linux Kubernetes cluster managed by Flux
 ```
 .
 ├── kubernetes/
-│   ├── apps/base/<ns>/<app>/   # manifests (19 namespaces)
+│   ├── apps/base/<ns>/<app>/   # manifests (20 namespaces)
 │   ├── apps/main/<ns>/         # overlay: one Flux Kustomization CR per app + kustomization.yaml
 │   ├── clusters/main/          # Flux entry point: meta.yaml + apps.yaml (cluster-meta -> cluster-apps)
 │   └── components/             # alerts, cnpg-database, common, dragonfly, keda, kopiur (+ kopiur/pvc)

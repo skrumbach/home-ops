@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+# /api/v1/metrics answers 404 until Settings -> Prometheus is switched on in Bambuddy (README); with no token
+# set it is open, which is fine on a cluster-internal Service.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bambuddy
+spec:
+  endpoints:
+    - port: http
+      path: /api/v1/metrics
+      interval: 30s
+      scrapeTimeout: 15s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bambuddy
+  namespaceSelector:
+    matchNames:
+      - maker

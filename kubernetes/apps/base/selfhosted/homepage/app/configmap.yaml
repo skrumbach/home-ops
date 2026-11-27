@@ -66,6 +66,9 @@ data:
       Home Automation:
         style: row
         columns: 4
+      Maker:
+        style: row
+        columns: 4
       Media:
         style: row
         columns: 4

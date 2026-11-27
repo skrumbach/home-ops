@@ -59,7 +59,7 @@ ICON_URL = "https://cdn.jsdelivr.net/npm/lucide-static@0.460.0/icons/{name}.svg"
 NAMESPACE_ICONS = {
     "actions-runner-system": "play", "ai": "sparkles", "cert-manager": "shield-check", "coder": "square-terminal",
     "database": "database", "downloads": "download", "flux-system": "git-branch", "home-automation": "house",
-    "kube-system": "cpu", "media": "clapperboard", "monitoring": "activity", "network": "network", "renovate": "refresh-cw",
+    "kube-system": "cpu", "maker": "printer", "media": "clapperboard", "monitoring": "activity", "network": "network", "renovate": "refresh-cw",
     "rook-ceph": "hard-drive", "security": "lock-keyhole", "selfhosted": "box", "system": "server-cog",
     "system-controller": "clock", "system-upgrade": "circle-arrow-up",
 }
