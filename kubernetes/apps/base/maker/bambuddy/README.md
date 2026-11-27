@@ -20,7 +20,7 @@
 |---|---|
 | **Native OIDC, no Envoy gate** | A SecurityPolicy would put a second login in front of Bambuddy's own and break the slicer's API calls. |
 | **Fixed LoadBalancer IP for the virtual printer** | Slicers are told one address (`VIRTUAL_PRINTER_ADVERTISE_ADDRESS`) and FTP passive replies carry it (`..._PASV_ADDRESS`). |
-| **Sysctl `net.ipv4.ip_unprivileged_port_start=0`** | The pod runs as uid 1000 and the virtual printer binds 322 and 990. |
+| **Sysctl `net.ipv4.ip_unprivileged_port_start=0` and `NET_BIND_SERVICE`** | The pod runs as uid 1000 and the virtual printer binds 322 and 990. The image also sets a file capability on python3, so dropping every capability makes `exec` fail with `Operation not permitted`. |
 | **uid/gid 1000 with `fsGroup`** | kopiur's default identity, so no `KOPIUR_PUID` override; the image's chown-and-gosu entrypoint is a no-op as non-root. |
 
 ## How it works

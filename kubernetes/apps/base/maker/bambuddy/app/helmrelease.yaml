@@ -21,8 +21,8 @@ spec:
         runAsNonRoot: true
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        # The virtual printer binds 322 (RTSPS) and 990 (FTPS). A non-root uid cannot below 1024 without
-        # this namespaced safe sysctl (NET_BIND_SERVICE on a non-root process needs ambient caps).
+        # The virtual printer binds 322 (RTSPS) and 990 (FTPS). This namespaced safe sysctl lets a non-root uid
+        # bind below 1024 regardless of the file capability on python3 (see NET_BIND_SERVICE below).
         sysctls:
           - name: net.ipv4.ip_unprivileged_port_start
             value: "0"
@@ -96,6 +96,10 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
+                # The image runs `setcap cap_net_bind_service=+ep` on python3 (Dockerfile): with the bounding set
+                # emptied by `drop: ALL`, exec fails with "uvicorn: Operation not permitted".
+                add:
+                  - NET_BIND_SERVICE
                 drop:
                   - ALL
             resources:
