@@ -18,8 +18,8 @@ spec:
   models:
     - chat-local
     - embedding-local
-    - go-glm-5.1
-    - go-kimi-k2.6
+    - go-glm-5.3
+    - go-kimi-k3
   maxBudget: "1.00"
   budgetDuration: 30d
   rpmLimit: 60

@@ -1,18 +1,18 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmodel_v1alpha1.json
 # OpenCode Go flat-rate subscription (OpenAI-compatible, /zen/go). Registration only: held by the
-# hermes key. The `go-` prefix keeps it distinct from the metered OpenRouter/Z.ai routes.
+# hermes key. Distinct from `deepseek-v4-flash`, which is the metered OpenRouter route.
 # INVARIANT: explicit $0 on every price field. The invoice is flat, so any non-zero cost-map hit
 # would be phantom spend.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: go-kimi-k2.6
+  name: go-deepseek-v4.1-flash
 spec:
-  modelName: go-kimi-k2.6
+  modelName: go-deepseek-v4.1-flash
   proxyRef: litellm
   params:
-    model: openai/kimi-k2.6
+    model: openai/deepseek-v4.1-flash
     apiBase: https://opencode.ai/zen/go/v1
     apiKey: os.environ/OPENCODE_GO_API_KEY
     additional:
