@@ -18,5 +18,6 @@ resources:
   - ./litellmteam-mcp-home.yaml
   - ./mcpservers
   - ./rbac-mcp.yaml
+  - ./ciliumnetworkpolicy-mcp.yaml
   - ./servicemonitor.yaml
   - ./prometheusrule.yaml

@@ -30,8 +30,8 @@ spec:
       - name: HOME
         value: /tmp
       # 2.0.0 refuses a non-loopback bind without auth, and LiteLLM reaches the pod IP, so loopback is
-      # no option. Exposure: any pod in the cluster can reach this Service (no ingress policy yet), but the service account is read-only and core Secrets are
-      # not granted.
+      # no option. Exposure: only LiteLLM may reach this pod (ciliumnetworkpolicy-mcp.yaml), and the service account is
+      # read-only with no core Secrets.
       - name: MCP_ALLOW_UNAUTHENTICATED
         value: "true"
       - name: PYTHONUNBUFFERED
