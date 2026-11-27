@@ -12,8 +12,7 @@
   Gateways and Services. A route's annotation `gatus.home-operations.com/endpoint` holds the YAML of its check
   (URL, conditions, and usually a `group`).
 - **Probes a fixed list** from [`app/resources/config.yaml`](app/resources/config.yaml): ICMP to `1.1.1.1`,
-  `8.8.8.8` and `9.9.9.9` (group `connectivity`), the Radarr import queue, the Hermes gateway, the ToolHive MCP
-  session, Home Assistant, in-cluster echo and kromgo, the Tdarr node port, `postgres-18` and `emqx`.
+  `8.8.8.8` and `9.9.9.9` (group `connectivity`), the Radarr import queue, the Hermes gateway, Home Assistant, in-cluster echo and kromgo, the Tdarr node port, `postgres-18` and `emqx`.
 - **Serves the status page** at `gatus.sklab.dev` and `status.sklab.dev` on `envoy-internal`.
 - **Exports results** as `gatus_results_endpoint_success` (`metrics: true`, a ServiceMonitor). The alert rules in
   `app/prometheusrule.yaml` page on that series, and the Grafana `gatus` board reads it.
@@ -27,7 +26,7 @@
 | **Annotations on routes, not a central list** | Each app declares its own check next to its route. Most checks need no edit here. The fixed list holds only what has no route. |
 | **In-cluster checks, matched on the body** | A status-only probe of a gated route can stay green through an outage, and some UIs answer 200 for any path. The config probes the in-cluster Service and matches a body field (Hermes, Home Assistant, echo, kromgo). |
 | **The `(in-cluster)` suffix** | `Echo (in-cluster)` and `Kromgo (in-cluster)` must not collide with the auto-discovered `external/echo` and `external/kromgo`. A collision panics Gatus at startup. |
-| **Secrets reach the config through env** | `gatus-secret` is mounted with `envFrom`. The ConfigMap has Flux substitution disabled, so `${RADARR_API_KEY}`, `${MCP_GATEWAY_URL}` and `${MCP_GATEWAY_TOKEN}` are left for Gatus to expand. |
+| **Secrets reach the config through env** | `gatus-secret` is mounted with `envFrom`. The ConfigMap has Flux substitution disabled, so `${RADARR_API_KEY}` is left for Gatus to expand. |
 
 ## How it works
 
@@ -43,7 +42,7 @@ flowchart LR
   sc -->|writes endpoint files| pvc["PVC<br/>storage-gatus /config"]
   cm["ConfigMap<br/>gatus-configmap"] -->|config.yaml| g{{"Pod gatus<br/>app"}}
   pvc --> g
-  op[("1Password<br/>items radarr, mcp-gateway")] -->|ExternalSecret gatus| sec["Secret<br/>gatus-secret"]
+  op[("1Password<br/>item radarr")] -->|ExternalSecret gatus| sec["Secret<br/>gatus-secret"]
   sec -->|envFrom| g
   g -->|probes| tg(["Routes, Services,<br/>ICMP targets"])
   g -->|"gatus_results_endpoint_success"| sm["ServiceMonitor<br/>gatus"]
@@ -82,7 +81,6 @@ flowchart LR
 | `app` capabilities | `NET_RAW` added, all others dropped | Needed for the ICMP checks. |
 | Check `Radarr Import Queue` | interval `15m`, `warnings` and `errors` false | Radarr shows a stuck queue item only in its own UI. This turns it into `RadarrImportQueueBlocked`. |
 | Check `Hermes Gateway` | port `8642`, `/health`, body `status == ok` | The dashboard on `9119` returns 200 for unknown paths, so it would stay green through a gateway failure. |
-| Check `ToolHive MCP Session` | POST `initialize`, timeout `25s`, interval `5m` | `/health` stays 200 while the handshake hangs. A fast embedding failure can still return 200. |
 | Check `Tdarr Server` | `tcp://...:8266`, group `media` | The UI on `8265` is already probed. The node port answers 302 to the UI and can be dead while the UI is healthy. Group `media` keeps it out of the critical `external` group. |
 
 ## Operate it

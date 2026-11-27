@@ -92,7 +92,7 @@ flowchart LR
 8. Kustomization `grafana-operator-renderer` runs the renderer. Grafana calls `rendering.server_url`, and the
    renderer loads the panel back from `rendering.callback_url`.
 9. The operator creates service account `grafana-mcp-viewer` and its token. The PushSecret copies the token
-   to 1Password every 5 minutes; ExternalSecret `toolhive-grafana` (namespace `ai`) reads it from there.
+   to 1Password every 5 minutes; ExternalSecret `mcp-grafana` (namespace `ai`) reads it from there.
 10. Gatus checks `/api/health` and the `database` field in the body, through the route annotation.
 
 ## Settings that matter
@@ -120,7 +120,7 @@ flowchart LR
 | `rendering.server_url`, `rendering.callback_url` | `grafana-renderer:8081/render`, `grafana-service:3000` | The renderer of this instance, and the address it loads panels from. |
 | `GrafanaServiceAccount` `role` | `Viewer` | The rule of the `grafana-mcp` ExternalSecret: never Editor or Admin. |
 | ServiceMonitor `grafana-service` job | relabelled to `grafana` | The Service is `grafana-service`; the series keep the job name they had under the chart. |
-| PushSecret `refreshInterval` | `5m` | A re-minted token reaches 1Password within that time. ExternalSecret `toolhive-grafana` reads it on the same cadence. |
+| PushSecret `refreshInterval` | `5m` | A re-minted token reaches 1Password within that time. ExternalSecret `mcp-grafana` reads it on the same cadence. |
 | `DS_EXPRESSION` mapping ([`app-boards/`](app-boards/)) | `__expr__` | The uid of Grafana's built-in expression datasource, which the CloudNativePG and Dragonfly boards ask for. |
 | Prometheus `timeInterval` | `1m` | Must match `scrapeInterval` in kube-prometheus-stack, or `rate()` panels are empty. |
 

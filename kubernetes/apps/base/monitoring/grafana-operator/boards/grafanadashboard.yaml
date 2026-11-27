@@ -401,18 +401,6 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: toolhive-mcp-gateway
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: grafana
-  folderRef: ai
-  url: https://raw.githubusercontent.com/stacklok/toolhive/42cd9b7e497bfc77dc67a1e73037675247d405b1/examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
   name: plex-media-server-exporter
 spec:
   instanceSelector:
