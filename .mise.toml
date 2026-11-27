@@ -47,7 +47,7 @@ MISE_LIST_ALL_VERSIONS = "false"
 # Standard linters: pre-commit hooks and the ci.yaml `lint` job. CI installs them via
 # unversioned mise-action install_args so these pins stay the single source of truth.
 "aqua:rhysd/actionlint" = "1.7.12"
-"pipx:zizmor" = "1.32.0"
+"pipx:zizmor" = "1.33.1"
 "aqua:koalaman/shellcheck" = "0.11.0"
 "aqua:gitleaks/gitleaks" = "8.30.1"
 "pipx:yamllint" = "1.38.0"
