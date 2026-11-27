@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ABBREV = {"persistentvolumeclaim": "pvc", "poddisruptionbudget": "pdb"}
 RBAC = {"serviceaccount", "role", "clusterrole", "rolebinding", "clusterrolebinding", "secret"}
 HELPERS = {"httproute": {"httproutefilter"}, "externalsecret": {"password"}}  # primary: kinds that only serve it
-COLLECTIONS = {"alerts", "models", "networks", "repos", "rules", "virtualkeys"}
+COLLECTIONS = {"alerts", "mcpservers", "models", "networks", "repos", "rules", "virtualkeys"}
 PAYLOAD_DIRS = {"resources", "dashboards", "hooks", "runbooks", "skills"}
 # Drawn by scripts/docs/pictures.py from the README they sit next to.
 README_PICTURES = {"header.svg", "concept.svg"}

@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# cedricziel/truenas-mcp: the credential is the authorization. Each call carries the TrueNAS API key
+# as `Authorization: Bearer`, which LiteLLM sends from authTokenRef; the server holds no key itself.
+# Use a key of a read-only TrueNAS user. Writes stay off (TRUENAS_MCP_ENABLE_WRITES), exec too.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: truenas-mcp
+spec:
+  proxyRef: litellm
+  alias: truenas
+  transport: http
+  authType: bearer_token
+  authTokenRef:
+    name: mcp-truenas-secret
+    key: api_key
+  workload:
+    automountServiceAccountToken: false
+    image: ghcr.io/cedricziel/truenas-mcp:0.6.0@sha256:32e2c3c029fe724411b27705a005b2de3d5184de1aff92f965912194c629fde8
+    port: 8080
+    path: /mcp
+    env:
+      - name: TRUENAS_MCP_TARGET
+        value: nas.sklab.dev:443
+      # The listener (this pod, cluster-internal behind LiteLLM) is plaintext; the connection to the NAS is TLS.
+      - name: TRUENAS_MCP_ALLOW_PLAINTEXT
+        value: "true"
+      - name: TRUENAS_MCP_ENABLE_WRITES
+        value: "false"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Needs the 1Password item `truenas-mcp` (vault Homelab) with an `api_key` field: an API key of a
+# read-only TrueNAS user, created by hand.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-truenas
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-truenas-secret
+    template:
+      data:
+        api_key: "{{ .api_key }}"
+  dataFrom:
+    - extract:
+        key: truenas-mcp

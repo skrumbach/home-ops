@@ -6,7 +6,7 @@ metadata:
   name: opencode
 spec:
   # Ingress fence only: opencode serves an agent with model-directed bash and a GitHub write token on
-  # 0.0.0.0:4096, behind OPENCODE_PASSWORD (ExternalSecret). Egress stays open (GitHub, npm, LiteLLM, toolhive).
+  # 0.0.0.0:4096, behind OPENCODE_PASSWORD (ExternalSecret). Egress stays open (GitHub, npm, LiteLLM).
   # Residual exposure: the toPorts-free reply rules below (LiteLLM, Hindsight, envoy-internal) admit every port
   # on the pod, not only replies (cilium/cilium#47913), so a compromised LiteLLM, Hindsight or envoy-internal peer can
   # reach :4096, where the server password is the remaining guard.
@@ -31,9 +31,8 @@ spec:
               protocol: TCP
     # Replies from every in-cluster peer opencode connects to as a client. No toPorts: a same-node
     # Service reply arrives with the ClusterIP or LB IP as source after reverse NAT and is re-checked
-    # here. LiteLLM :4000 (providers litellm and litellm-projects), the Hindsight API :8888 (memory
-    # plugin), the ToolHive MCP gateway through the envoy-internal LoadBalancer IP (the LAN mcp route).
-    # The envoy-internal entry here is also the reply path for the route rule above.
+    # here. LiteLLM :4000 (providers litellm and litellm-projects, and the MCP endpoint), the Hindsight
+    # API :8888 (memory plugin). The envoy-internal entry here is the reply path for the route rule above.
     # reply traffic: cilium/cilium#47913, remove toPorts-free rule when fixed
     - fromEndpoints:
         - matchLabels:

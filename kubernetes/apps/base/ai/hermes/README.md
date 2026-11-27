@@ -47,7 +47,7 @@
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'primaryColor':'#0D102C','primaryTextColor':'#E9ECF7','primaryBorderColor':'#22D8F0','lineColor':'#8B55F5','secondaryColor':'#151941','tertiaryColor':'#090C22','edgeLabelBackground':'#151941'}}}%%
 flowchart LR
-  op[("1Password<br/>items hermes, mcp-gateway,<br/>litellm-consumer-hermes")] -->|ExternalSecret| sec["Secrets<br/>hermes, hermes-git"]
+  op[("1Password<br/>items hermes,<br/>litellm-consumer-hermes")] -->|ExternalSecret| sec["Secrets<br/>hermes, hermes-git"]
   sec --> pod{{"Pod hermes<br/>app + codeserver"}}
   cfg["ConfigMap<br/>hermes-configmap"] -->|copy-config| pvc["PVC<br/>hermes"]
   skl["ConfigMap<br/>hermes-skill-homelab-commit-watcher"] -->|seed-skills| pvc
@@ -58,9 +58,8 @@ flowchart LR
   gw -->|hermes-code.sklab.dev| pol["SecurityPolicy<br/>hermes-code-auth"]
   pol -->|":12321"| pod
   cli["PocketIDOIDCClient<br/>hermes-codeserver"] -->|credentials Secret| pol
-  pod -->|":4000"| llm["Pod litellm"]
+  pod -->|":4000, /mcp/"| llm["Pod litellm"]
   pod -->|":8080"| sx["Pod searxng"]
-  pod -->|"mcp.sklab.dev"| gw
   sa["ServiceAccount hermes<br/>3 roles"] -->|kubectl| api(["kube-apiserver"])
   pod --> sa
   pod -.->|"443, 80, public only"| ext(["Telegram, Discord, GitHub"])
@@ -87,7 +86,8 @@ flowchart LR
    through `fallback_providers`: two flat-rate Go models, then one metered model that spends the `hermes` key's own
    budget. Each auxiliary task has its own `fallback_chain`; without it Hermes falls back to the main model and
    times out again.
-6. Tools come from the ToolHive MCP gateway at `https://mcp.sklab.dev/mcp` with a bearer token. Web search goes to
+6. Tools come from LiteLLM's MCP endpoint (`litellm:4000/mcp/`) with the `hermes` virtual key; team `mcp-agents` entitles
+   the key to the servers. Web search goes to
    SearXNG. Git uses one repo-scoped token read from `/secrets/git/.git-credentials`.
 7. Before a terminal command runs, `guard-terminal.py` returns allow, block or approve. Approvals use `mode: smart`;
    cron and unattended runs deny what would need a human.
@@ -123,16 +123,11 @@ All values are in [`app/helmrelease.yaml`](app/helmrelease.yaml) unless noted.
 | --- | --- |
 | `GITHUB_LLM_WIKI_TOKEN` | Fine-grained PAT, one repo, Contents read and write. Not a classic PAT |
 | `API_SERVER_KEY` | `openssl rand -hex 32` for the `:8642` API |
-| `HOMELAB_GH_READ_TOKEN` | Fine-grained PAT, **read-only** (issue and file writes answer 403). Hermes' `HOMELAB_GH_TOKEN` env (commit-watcher) and the GitHub MCP render from it. Distinct from the wiki token |
+| `HOMELAB_GH_READ_TOKEN` | Fine-grained PAT, **read-only** (issue and file writes answer 403). Hermes' `HOMELAB_GH_TOKEN` env (commit-watcher) and the GitHub MCP (ExternalSecret `mcp-github` in `ai/litellm`) render from it. Distinct from the wiki token |
 | `HOMELAB_GH_TOKEN` | Fine-grained PAT that **can write** to home-ops. OpenCode's `GITHUB_TOKEN` only. Hermes must never render from it (`scripts/ci/hermes-github-token-test.py`) |
 | `DISCORD_WEBHOOK` | Channel webhook for the commit digest |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS` | BotFather token and numeric user ids |
 | `DISCORD_BOT_TOKEN`, `DISCORD_ALLOWED_USERS` | Discord bot token and allowed user ids. The bot is gated twice: these ids, and `discord.allowed_channels` in `config.yaml` |
-
-`MCP_GATEWAY_TOKEN` (the ToolHive MCP gateway bearer token, sent to
-`https://mcp.sklab.dev/mcp`) is not a prerequisite.
-It comes from 1Password item `mcp-gateway`, which
-`ai/toolhive`'s PushSecret writes.
 
 `LITELLM_HERMES_API_KEY` is not a prerequisite either. It is
 1Password item `litellm-consumer-hermes`, field `key`, written by the

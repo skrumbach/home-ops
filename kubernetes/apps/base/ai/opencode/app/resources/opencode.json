@@ -197,11 +197,11 @@
     }
   },
   "mcp": {
-    "toolhive": {
+    "litellm": {
       "type": "remote",
-      "url": "{env:MCP_GATEWAY_URL}",
+      "url": "http://litellm.ai.svc.cluster.local:4000/mcp/",
       "headers": {
-        "Authorization": "Bearer {env:MCP_GATEWAY_TOKEN}"
+        "Authorization": "Bearer {env:LITELLM_API_KEY}"
       },
       "enabled": true
     }

@@ -463,12 +463,6 @@ spec:
         advancedMounts:
           hermes:
             app:
-              - path: /secrets/mcp/MCP_GATEWAY_URL
-                subPath: MCP_GATEWAY_URL
-                readOnly: true
-              - path: /secrets/mcp/MCP_GATEWAY_TOKEN
-                subPath: MCP_GATEWAY_TOKEN
-                readOnly: true
               - path: /secrets/mcp/LITELLM_HERMES_API_KEY
                 subPath: LITELLM_HERMES_API_KEY
                 readOnly: true

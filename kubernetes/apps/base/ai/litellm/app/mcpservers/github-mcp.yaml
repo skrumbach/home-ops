@@ -1,0 +1,71 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# github-mcp-server v2 in HTTP mode takes the GitHub token from each request's Authorization header,
+# so LiteLLM sends it (authTokenRef) and the pod holds no credential. Only the read tools are
+# registered (GITHUB_READ_ONLY); the token is read-only too. Two layers, so a future token swap
+# cannot silently turn the agents' MCP into a write path.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: github-mcp
+spec:
+  proxyRef: litellm
+  alias: github
+  transport: http
+  authType: bearer_token
+  authTokenRef:
+    name: mcp-github-secret
+    key: token
+  workload:
+    automountServiceAccountToken: false
+    image: ghcr.io/github/github-mcp-server:v2.3.0@sha256:f8ee4dedc7d5c8cb32854ab91cc92a31c55a8a5510708cf8742e9f9427588ca6
+    args:
+      - http
+    port: 8082
+    path: /mcp
+    env:
+      - name: GITHUB_API_URL
+        value: https://api.github.com
+      - name: GITHUB_READ_ONLY
+        value: "1"
+      - name: LOG_LEVEL
+        value: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      runAsGroup: 65534
+      seccompProfile:
+        type: RuntimeDefault
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Reads the `hermes` 1Password item's HOMELAB_GH_READ_TOKEN: a fine-grained, READ-ONLY PAT (verified: issue
+# and file writes answer 403). Not HOMELAB_GH_TOKEN, which can write to home-ops. Use a different read-only
+# token here if the MCP needs more read access; never a write-capable one (the agents reach this MCP).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-github
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-github-secret
+    template:
+      data:
+        token: "{{ .HOMELAB_GH_READ_TOKEN }}"
+  dataFrom:
+    - extract:
+        key: hermes

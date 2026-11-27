@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Hosted Tavily MCP: no workload, LiteLLM calls it with the key as a bearer token. The trailing
+# slash is part of Tavily's endpoint.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: tavily-mcp
+spec:
+  proxyRef: litellm
+  alias: tavily
+  url: https://mcp.tavily.com/mcp/
+  transport: http
+  authType: bearer_token
+  authTokenRef:
+    name: mcp-tavily-secret
+    key: api_key
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Needs the 1Password item `tavily` (vault Homelab) with an `api_key` field, created by hand.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-tavily
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-tavily-secret
+    template:
+      data:
+        api_key: "{{ .api_key }}"
+  dataFrom:
+    - extract:
+        key: tavily

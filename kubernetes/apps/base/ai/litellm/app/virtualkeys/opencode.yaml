@@ -12,6 +12,8 @@ spec:
   keyAlias: opencode
   secretName: litellm-key-opencode
   secretKey: key
+  # Team mcp-agents is this key's entitlement to the MCP servers (../litellmteam.yaml).
+  teamID: mcp-agents
   models:
     - auto
     - chat-local

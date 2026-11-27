@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/litellm.home-operations.com/litellmmcpserver_v1alpha1.json
+# Home Assistant control from the agents. Reaches the key holders of the mcp-agents team only, but
+# ha-mcp can act on the house: if that is ever too wide, move it to its own team (LiteLLMTeam).
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMMCPServer
+metadata:
+  name: ha-mcp-server
+spec:
+  proxyRef: litellm
+  alias: ha
+  transport: http
+  workload:
+    automountServiceAccountToken: false
+    image: ghcr.io/homeassistant-ai/ha-mcp:9.2.0@sha256:9de5bf6c4216142fdffe862900abe72dac8dfe9621dd0b2b050d132372b676ba
+    command:
+      - ha-mcp-web
+    port: 8086
+    path: /mcp
+    env:
+      - name: HOMEASSISTANT_URL
+        value: http://home-assistant.home-automation:8123
+      - name: MCP_PORT
+        value: "8086"
+      # The URL path is the server's only access control. It stays the plain default, so any pod in
+      # the cluster can reach this Service (no ingress policy yet).
+      - name: MCP_SECRET_PATH
+        value: /mcp
+    envFrom:
+      - secretRef:
+          name: mcp-ha-secret
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    volumeMounts:
+      - name: tmp
+        mountPath: /tmp
+    volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# Requires the 1Password item `home-assistant` to carry a HOMEASSISTANT_TOKEN field (a Home Assistant
+# long-lived access token).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-ha
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: mcp-ha-secret
+    template:
+      data:
+        HOMEASSISTANT_TOKEN: "{{ .HOMEASSISTANT_TOKEN }}"
+  dataFrom:
+    - extract:
+        key: home-assistant
