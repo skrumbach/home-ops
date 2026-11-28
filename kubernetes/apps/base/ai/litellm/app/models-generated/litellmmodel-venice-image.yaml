@@ -1034,7 +1034,7 @@ spec:
   info:
     mode: image_generation
     extra:
-      output_cost_per_image: 0.051
+      output_cost_per_image: 0.102
       supported_endpoints:
         - /v1/images/generations
       enforce_supported_endpoints: true

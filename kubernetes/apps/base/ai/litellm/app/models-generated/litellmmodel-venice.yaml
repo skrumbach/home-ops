@@ -757,6 +757,24 @@ spec:
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
+  name: venice-e2ee-gemma-4-26b-a4b-uncensored-p
+spec:
+  modelName: venice/e2ee-gemma-4-26b-a4b-uncensored-p
+  proxyRef: litellm
+  params:
+    model: veniceai/e2ee-gemma-4-26b-a4b-uncensored-p
+    apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 64000
+    maxOutputTokens: 4096
+    extra:
+      input_cost_per_token: 0.00000019
+      output_cost_per_token: 0.00000088
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
   name: venice-e2ee-glm-5-3-flash
 spec:
   modelName: venice/e2ee-glm-5-3-flash
@@ -775,6 +793,67 @@ spec:
       output_cost_per_token: 0.00000054
       cache_read_input_token_cost: 0.000000038
       supports_reasoning: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: venice-e2ee-glm-5-3-p
+spec:
+  modelName: venice/e2ee-glm-5-3-p
+  proxyRef: litellm
+  params:
+    model: veniceai/e2ee-glm-5-3-p
+    apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 1000000
+    maxOutputTokens: 32768
+    supportsFunctionCalling: true
+    extra:
+      input_cost_per_token: 0.00000175
+      output_cost_per_token: 0.0000055
+      cache_read_input_token_cost: 0.000000325
+      supports_reasoning: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: venice-e2ee-kimi-k3-1-pro-p
+spec:
+  modelName: venice/e2ee-kimi-k3-1-pro-p
+  proxyRef: litellm
+  params:
+    model: veniceai/e2ee-kimi-k3-1-pro-p
+    apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 1000000
+    maxOutputTokens: 131072
+    supportsFunctionCalling: true
+    supportsVision: true
+    extra:
+      input_cost_per_token: 0.0000025
+      output_cost_per_token: 0.0000125
+      cache_read_input_token_cost: 0.00000025
+      supports_reasoning: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: venice-e2ee-qwen-2-5-7b-p
+spec:
+  modelName: venice/e2ee-qwen-2-5-7b-p
+  proxyRef: litellm
+  params:
+    model: veniceai/e2ee-qwen-2-5-7b-p
+    apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 32000
+    maxOutputTokens: 4096
+    extra:
+      input_cost_per_token: 0.00000005
+      output_cost_per_token: 0.00000013
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
@@ -822,17 +901,18 @@ spec:
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: venice-e2ee-qwen3-vl-30b-a3b
+  name: venice-e2ee-qwen3-vl-30b-a3b-p
 spec:
-  modelName: venice/e2ee-qwen3-vl-30b-a3b
+  modelName: venice/e2ee-qwen3-vl-30b-a3b-p
   proxyRef: litellm
   params:
-    model: veniceai/e2ee-qwen3-vl-30b-a3b
+    model: veniceai/e2ee-qwen3-vl-30b-a3b-p
     apiKey: os.environ/VENICE_API_KEY
   info:
     mode: chat
-    maxInputTokens: 16384
+    maxInputTokens: 128000
     maxOutputTokens: 4096
+    supportsFunctionCalling: true
     supportsVision: true
     extra:
       input_cost_per_token: 0.00000025
@@ -1706,6 +1786,26 @@ spec:
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
+  name: venice-nvidia-nemotron-3-5-lightning-30b-a3b
+spec:
+  modelName: venice/nvidia-nemotron-3-5-lightning-30b-a3b
+  proxyRef: litellm
+  params:
+    model: veniceai/nvidia-nemotron-3-5-lightning-30b-a3b
+    apiKey: os.environ/VENICE_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 262144
+    maxOutputTokens: 32768
+    supportsFunctionCalling: true
+    extra:
+      input_cost_per_token: 0.000000075
+      output_cost_per_token: 0.0000003
+      supports_reasoning: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
   name: venice-nvidia-nemotron-3-5-super-vl-120b-a12b
 spec:
   modelName: venice/nvidia-nemotron-3-5-super-vl-120b-a12b
@@ -2389,27 +2489,6 @@ spec:
       input_cost_per_token: 0.00000007
       output_cost_per_token: 0.0000003
       supports_reasoning: true
----
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
-  name: venice-pareto
-spec:
-  modelName: venice/pareto
-  proxyRef: litellm
-  params:
-    model: veniceai/pareto
-    apiKey: os.environ/VENICE_API_KEY
-  info:
-    mode: chat
-    maxInputTokens: 1000000
-    maxOutputTokens: 32768
-    supportsFunctionCalling: true
-    supportsVision: true
-    extra:
-      input_cost_per_token: 0.000001
-      output_cost_per_token: 0.000004
-      cache_read_input_token_cost: 0.0000000375
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
