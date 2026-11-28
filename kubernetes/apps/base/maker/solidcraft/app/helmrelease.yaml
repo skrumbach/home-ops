@@ -26,7 +26,7 @@ spec:
               repository: ghcr.io/mirceanton/solidcraft-web
               # 0.48.0 renders a white page: the wasm panics at startup with "time not implemented on this
               # platform" (reproduced locally, WebGPU present). 0.47.0 renders. Unpin when a release fixes it.
-              tag: 0.47.0@sha256:4131ae06b21ae9bb2f7a90f82b90d08e6a11d70d4d78300af4c351a2864df5cb
+              tag: 0.49.1@sha256:6ceb493aa5adf61a4863a2c8907d6e7e3b3b51c7591a0016b73fc498d810fd76
             probes:
               liveness:
                 enabled: true
