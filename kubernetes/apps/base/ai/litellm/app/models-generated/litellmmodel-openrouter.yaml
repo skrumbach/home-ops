@@ -907,11 +907,11 @@ spec:
   info:
     mode: chat
     maxInputTokens: 163840
-    maxOutputTokens: 32000
+    maxOutputTokens: 147456
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.000000571
-      output_cost_per_token: 0.000002286
+      input_cost_per_token: 0.0000005
+      output_cost_per_token: 0.00000218
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -1013,7 +1013,7 @@ spec:
     supportsFunctionCalling: true
     extra:
       input_cost_per_token: 0.0000000456
-      output_cost_per_token: 0.0000003
+      output_cost_per_token: 0.00000027
       cache_read_input_token_cost: 0.000000035
       supports_reasoning: true
 ---
@@ -1030,13 +1030,13 @@ spec:
   info:
     mode: chat
     maxInputTokens: 1048576
-    maxOutputTokens: 393216
+    maxOutputTokens: 262144
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.00000044
-      output_cost_per_token: 0.00000132
-      cache_read_input_token_cost: 0.000000028
+      input_cost_per_token: 0.0000002156
+      output_cost_per_token: 0.0000006468
+      cache_read_input_token_cost: 0.00000000686
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -1055,8 +1055,8 @@ spec:
     maxOutputTokens: 393216
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.00000076909
-      output_cost_per_token: 0.0000015699
+      input_cost_per_token: 0.00000089
+      output_cost_per_token: 0.0000015069
       cache_read_input_token_cost: 0.0000002
       supports_reasoning: true
 ---
@@ -1073,12 +1073,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 1048576
-    maxOutputTokens: 943718
+    maxOutputTokens: 393216
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.000000111
-      output_cost_per_token: 0.00000444
-      cache_read_input_token_cost: 0.000000097
+      input_cost_per_token: 0.0000000999
+      output_cost_per_token: 0.000005
+      cache_read_input_token_cost: 0.0000000999
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -1094,13 +1094,13 @@ spec:
   info:
     mode: chat
     maxInputTokens: 1048576
-    maxOutputTokens: 393216
+    maxOutputTokens: 943718
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.0000000507
-      output_cost_per_token: 0.0000002028
-      cache_read_input_token_cost: 0.000000001014
+      input_cost_per_token: 0.000000051
+      output_cost_per_token: 0.000000567
+      cache_read_input_token_cost: 0.000000018
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -1634,13 +1634,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 131072
-    maxOutputTokens: 117964
+    maxOutputTokens: 16384
     supportsFunctionCalling: true
     supportsVision: true
     extra:
       input_cost_per_token: 0.00000008
-      output_cost_per_token: 0.00000045
-      cache_read_input_token_cost: 0.00000004
+      output_cost_per_token: 0.00000016
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
@@ -1679,9 +1678,9 @@ spec:
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.00000009
-      output_cost_per_token: 0.0000003
-      cache_read_input_token_cost: 0.00000005
+      input_cost_per_token: 0.0000000675
+      output_cost_per_token: 0.000000225
+      cache_read_input_token_cost: 0.0000000375
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -1828,6 +1827,28 @@ spec:
       input_cost_per_token: 0.000000075
       output_cost_per_token: 0.000000225
       cache_read_input_token_cost: 0.000000015
+      supports_reasoning: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: openrouter-inclusionai-ling-3.2-flash
+spec:
+  modelName: openrouter/inclusionai/ling-3.2-flash
+  proxyRef: litellm
+  params:
+    model: openrouter/inclusionai/ling-3.2-flash
+    apiKey: os.environ/OPENROUTER_API_KEY
+  info:
+    mode: chat
+    maxInputTokens: 1048576
+    maxOutputTokens: 262144
+    supportsFunctionCalling: true
+    supportsVision: true
+    extra:
+      input_cost_per_token: 0.0000003
+      output_cost_per_token: 0.0000009
+      cache_read_input_token_cost: 0.00000006
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -2042,12 +2063,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 131072
-    maxOutputTokens: 115200
+    maxOutputTokens: 32768
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.00000071
-      output_cost_per_token: 0.00000071
-      cache_read_input_token_cost: 0.00000071
+      input_cost_per_token: 0.00000059
+      output_cost_per_token: 0.00000079
+      cache_read_input_token_cost: 0.000000295
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
@@ -2145,12 +2166,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 131072
-    maxOutputTokens: 117964
+    maxOutputTokens: 16384
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.00000035
-      output_cost_per_token: 0.0000015
+      input_cost_per_token: 0.0000003
+      output_cost_per_token: 0.0000012
       cache_read_input_token_cost: 0.00000004
       supports_reasoning: true
 ---
@@ -2406,9 +2427,9 @@ spec:
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.000000075
-      output_cost_per_token: 0.0000003
-      cache_read_input_token_cost: 0.0000000075
+      input_cost_per_token: 0.00000015
+      output_cost_per_token: 0.0000006
+      cache_read_input_token_cost: 0.000000015
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -2887,13 +2908,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 262144
-    maxOutputTokens: 235929
+    maxOutputTokens: 131072
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.0000005
-      output_cost_per_token: 0.0000025
-      cache_read_input_token_cost: 0.00000015
+      input_cost_per_token: 0.0000006
+      output_cost_per_token: 0.000003
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -3224,9 +3244,9 @@ spec:
     maxOutputTokens: 235929
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.00000007
+      input_cost_per_token: 0.00000005
       output_cost_per_token: 0.0000002
-      cache_read_input_token_cost: 0.00000004
+      cache_read_input_token_cost: 0.00000001
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -3242,12 +3262,12 @@ spec:
   info:
     mode: chat
     maxInputTokens: 1048576
-    maxOutputTokens: 943718
+    maxOutputTokens: 131072
     supportsFunctionCalling: true
     supportsVision: true
     extra:
       input_cost_per_token: 0.00000015
-      output_cost_per_token: 0.00000047
+      output_cost_per_token: 0.00000045
       cache_read_input_token_cost: 0.00000002
       supports_reasoning: true
 ---
@@ -4821,26 +4841,6 @@ spec:
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: openrouter-qwen-qwen3-235b-a22b-thinking-2507
-spec:
-  modelName: openrouter/qwen/qwen3-235b-a22b-thinking-2507
-  proxyRef: litellm
-  params:
-    model: openrouter/qwen/qwen3-235b-a22b-thinking-2507
-    apiKey: os.environ/OPENROUTER_API_KEY
-  info:
-    mode: chat
-    maxInputTokens: 128000
-    maxOutputTokens: 16384
-    supportsFunctionCalling: true
-    extra:
-      input_cost_per_token: 0.00000045
-      output_cost_per_token: 0.0000035
-      supports_reasoning: true
----
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
   name: openrouter-qwen-qwen3-30b-a3b
 spec:
   modelName: openrouter/qwen/qwen3-30b-a3b
@@ -5159,12 +5159,13 @@ spec:
   info:
     mode: chat
     maxInputTokens: 262144
-    maxOutputTokens: 235929
+    maxOutputTokens: 40960
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.0000001
-      output_cost_per_token: 0.00000025
+      input_cost_per_token: 0.000000085
+      output_cost_per_token: 0.000000125
+      cache_read_input_token_cost: 0.0000000765
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -5398,8 +5399,8 @@ spec:
     apiKey: os.environ/OPENROUTER_API_KEY
   info:
     mode: chat
-    maxInputTokens: 1048576
-    maxOutputTokens: 65536
+    maxInputTokens: 1000000
+    maxOutputTokens: 900000
     supportsFunctionCalling: true
     extra:
       input_cost_per_token: 0.000002
@@ -5918,9 +5919,9 @@ spec:
     maxOutputTokens: 128000
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.0000000825
-      output_cost_per_token: 0.00000033
-      cache_read_input_token_cost: 0.000000020625
+      input_cost_per_token: 0.000000132
+      output_cost_per_token: 0.000000528
+      cache_read_input_token_cost: 0.000000033
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -5983,9 +5984,9 @@ spec:
     maxOutputTokens: 64000
     supportsFunctionCalling: true
     extra:
-      input_cost_per_token: 0.0000007506
-      output_cost_per_token: 0.0000022509
-      cache_read_input_token_cost: 0.0000000378
+      input_cost_per_token: 0.000000834
+      output_cost_per_token: 0.000002501
+      cache_read_input_token_cost: 0.000000042
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -6083,9 +6084,9 @@ spec:
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.000000075
-      output_cost_per_token: 0.0000003
-      cache_read_input_token_cost: 0.000000015
+      input_cost_per_token: 0.00000006
+      output_cost_per_token: 0.00000024
+      cache_read_input_token_cost: 0.000000012
       supports_reasoning: true
 ---
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -6105,8 +6106,8 @@ spec:
     supportsFunctionCalling: true
     supportsVision: true
     extra:
-      input_cost_per_token: 0.0000003
-      output_cost_per_token: 0.000001
+      input_cost_per_token: 0.00000015
+      output_cost_per_token: 0.0000005
       cache_read_input_token_cost: 0.00000003
       supports_reasoning: true
 ---
